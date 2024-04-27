@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "name": "x64-Debug",
+            "generator": "Ninja",
+            "configurationType": "Debug",
+            "inheritEnvironments": [
+                "msvc_x64_x64"
+            ],
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "buildCommandArgs": "-v",
+            "ctestCommandArgs": "",
+            "cmakeToolchain": "C:\\dev\\emsdk\\upstream\\emscripten\\cmake\\Modules\\Platform\\Emscripten.cmake",
+            "variables": [
+                {
+                    "name": "CMAKE_C_COMPILER",
+                    "value": "C:\\dev\\emsdk\\upstream\\emscripten\\emcc.bat",
+                    "type": "FILEPATH"
+                },
+                {
+                    "name": "CMAKE_CXX_COMPILER",
+                    "value": "C:\\dev\\emsdk\\upstream\\emscripten\\em++.bat",
+                    "type": "FILEPATH"
+                }
+            ]
+        }
+    ]
+}
