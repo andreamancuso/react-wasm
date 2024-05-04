@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
-import { ReactImgui } from "../../ReactImgui/components";
-import { useWidgetRegistrationService } from "../../../hooks/useWidgetRegistrationService";
-import { Primitive } from "../../ReactImgui/types";
+import { ReactImgui } from "../../../../../ReactImgui/components";
+import { useWidgetRegistrationService } from "../../../../../../hooks/useWidgetRegistrationService";
+import { Primitive } from "../../../../../ReactImgui/types";
 
-export const WindowPadding = () => {
+export const FramePadding = () => {
     const service = useWidgetRegistrationService();
     const [value, setValue] = useState<[number, number]>([9, 9]);
 
@@ -15,7 +15,7 @@ export const WindowPadding = () => {
     return (
         <ReactImgui.SameLine>
             <ReactImgui.MultiSlider
-                label="WindowPadding"
+                label="FramePadding"
                 onChange={handleValueChanged}
                 numValues={2}
                 min={0}

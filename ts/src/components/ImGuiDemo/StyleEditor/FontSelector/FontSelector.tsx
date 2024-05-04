@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
-import { ReactImgui } from "../../ReactImgui/components";
-import { useWidgetRegistrationService } from "../../../hooks/useWidgetRegistrationService";
+import { ReactImgui } from "../../../ReactImgui/components";
+import { useWidgetRegistrationService } from "../../../../hooks/useWidgetRegistrationService";
 
 export const FontSelector = () => {
     const service = useWidgetRegistrationService();

@@ -1,10 +1,31 @@
 import { ReactImgui } from "../../ReactImgui/components";
-import { BorderControl } from "../BorderControl/BorderControl";
-import { FontSelector } from "../FontSelector/FontSelector";
-import { FrameRounding } from "../FrameRounding/FrameRounding";
+import { BorderControl } from "./BorderControl/BorderControl";
+import { FontSelector } from "./FontSelector/FontSelector";
+import { FrameRounding } from "./Sizes/Rounding/FrameRounding/FrameRounding";
 import { HelpMarker } from "../HelpMarker/HelpMarker";
-import { StyleSelector } from "../StyleSelector/StyleSelector";
-import { WindowPadding } from "../WindowPadding/WindowPadding";
+import { StyleSelector } from "./StyleSelector/StyleSelector";
+import { GrabMinSize } from "./Sizes/Main/GrabMinSize/GrabMinSize";
+import { ItemInnerSpacing } from "./Sizes/Main/ItemInnerSpacing/ItemInnerSpacing";
+import { FramePadding } from "./Sizes/Main/FramePadding/FramePadding";
+import { IndentSpacing } from "./Sizes/Main/IndentSpacing/IndentSpacing";
+import { ItemSpacing } from "./Sizes/Main/ItemSpacing/ItemSpacing";
+import { ScrollbarSize } from "./Sizes/Main/ScrollbarSize/ScrollbarSize";
+import { TouchExtraPadding } from "./Sizes/Main/TouchExtraPadding/TouchExtraPadding";
+import { WindowPadding } from "./Sizes/Main/WindowPadding/WindowPadding";
+import { WindowBorderSize } from "./Sizes/Borders/WindowBorderSize/WindowBorderSize";
+import { ChildBorderSize } from "./Sizes/Borders/ChildBorderSize/ChildBorderSize";
+import { PopupBorderSize } from "./Sizes/Borders/PopupBorderSize/PopupBorderSize";
+import { FrameBorderSize } from "./Sizes/Borders/FrameBorderSize/FrameBorderSize";
+import { TabBorderSize } from "./Sizes/Borders/TabBorderSize/TabBorderSize";
+import { TabBarBorderSize } from "./Sizes/Borders/TabBarBorderSize/TabBarBorderSize";
+import { WindowRounding } from "./Sizes/Rounding/WindowRounding/WindowRounding";
+import { ChildRounding } from "./Sizes/Rounding/ChildRounding/ChildRounding";
+import { PopupRounding } from "./Sizes/Rounding/PopupRounding/PopupRounding";
+import { ScrollbarRounding } from "./Sizes/Rounding/ScrollbarRounding/ScrollbarRounding";
+import { GrabRounding } from "./Sizes/Rounding/GrabRounding/GrabRounding";
+import { TabRounding } from "./Sizes/Rounding/TabRounding/TabRounding";
+import { CellPadding } from "./Sizes/Tables/CellPadding/CellPadding";
+import { TableAngledHeadersAngle } from "./Sizes/Tables/TableAngledHeadersAngle/TableAngledHeadersAngle";
 
 export const StyleEditor = () => {
     return (
@@ -23,6 +44,47 @@ export const StyleEditor = () => {
                 <ReactImgui.TabItem label="Sizes">
                     <ReactImgui.SeparatorText label="Main" />
                     <WindowPadding />
+                    <FramePadding />
+                    <ItemSpacing />
+                    <ItemInnerSpacing />
+                    <TouchExtraPadding />
+                    <IndentSpacing />
+                    <ScrollbarSize />
+                    <GrabMinSize />
+                    <ReactImgui.SeparatorText label="Borders" />
+                    <WindowBorderSize />
+                    <ChildBorderSize />
+                    <PopupBorderSize />
+                    <FrameBorderSize />
+                    <TabBorderSize />
+                    <TabBarBorderSize />
+                    <ReactImgui.SeparatorText label="Rounding" />
+                    <WindowRounding />
+                    <ChildRounding />
+                    <FrameRounding />
+                    <PopupRounding />
+                    <ScrollbarRounding />
+                    <GrabRounding />
+                    <TabRounding />
+                    <ReactImgui.SeparatorText label="Tables" />
+                    <CellPadding />
+                    <TableAngledHeadersAngle />
+                    {/* 
+                    ImGui::SeparatorText("Widgets");
+                    ImGui::SliderFloat2("WindowTitleAlign", (float*)&style.WindowTitleAlign, 0.0f, 1.0f, "%.2f");
+                    int window_menu_button_position = style.WindowMenuButtonPosition + 1;
+                    if (ImGui::Combo("WindowMenuButtonPosition", (int*)&window_menu_button_position, "None\0Left\0Right\0"))
+                        style.WindowMenuButtonPosition = window_menu_button_position - 1;
+                    ImGui::Combo("ColorButtonPosition", (int*)&style.ColorButtonPosition, "Left\0Right\0");
+                    ImGui::SliderFloat2("ButtonTextAlign", (float*)&style.ButtonTextAlign, 0.0f, 1.0f, "%.2f");
+                    ImGui::SameLine(); HelpMarker("Alignment applies when a button is larger than its text content.");
+                    ImGui::SliderFloat2("SelectableTextAlign", (float*)&style.SelectableTextAlign, 0.0f, 1.0f, "%.2f");
+                    ImGui::SameLine(); HelpMarker("Alignment applies when a selectable is larger than its text content.");
+                    ImGui::SliderFloat("SeparatorTextBorderSize", &style.SeparatorTextBorderSize, 0.0f, 10.0f, "%.0f");
+                    ImGui::SliderFloat2("SeparatorTextAlign", (float*)&style.SeparatorTextAlign, 0.0f, 1.0f, "%.2f");
+                    ImGui::SliderFloat2("SeparatorTextPadding", (float*)&style.SeparatorTextPadding, 0.0f, 40.0f, "%.0f");
+                    ImGui::SliderFloat("LogSliderDeadzone", &style.LogSliderDeadzone, 0.0f, 12.0f, "%.0f");
+                     */}
                 </ReactImgui.TabItem>
                 <ReactImgui.TabItem label="Colors">
                     <ReactImgui.SeparatorText label="Main" />

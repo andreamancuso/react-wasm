@@ -8,6 +8,7 @@ type SliderProps = {
     min?: number;
     max?: number;
     onChange?: (value: number) => void;
+    valueType?: "default" | "angle";
 };
 
 export const Slider: WidgetFunctionComponent<SliderProps> = ({
@@ -16,6 +17,7 @@ export const Slider: WidgetFunctionComponent<SliderProps> = ({
     max,
     onChange,
     defaultValue,
+    valueType = "default",
 }) => {
     const [widgetId, widgetRegistrationService] = useWidgetEventManagement("numeric");
 
@@ -33,6 +35,7 @@ export const Slider: WidgetFunctionComponent<SliderProps> = ({
             defaultValue={defaultValue}
             min={min}
             max={max}
+            valueType={valueType}
         />
     );
 };

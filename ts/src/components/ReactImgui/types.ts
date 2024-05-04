@@ -55,6 +55,7 @@ export type WidgetPropsMap = {
         min?: number;
         max?: number;
         label?: string;
+        valueType: "default" | "angle";
     };
     MultiSlider: {
         defaultValues?: number[];
