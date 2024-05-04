@@ -18,6 +18,8 @@ export const WindowPadding = () => {
                 label="WindowPadding"
                 onChange={handleValueChanged}
                 numValues={2}
+                min={0}
+                max={20}
             />
             {value && <ReactImgui.UnformattedText text={`[${value[0]},${value[1]}]`} />}
         </ReactImgui.SameLine>

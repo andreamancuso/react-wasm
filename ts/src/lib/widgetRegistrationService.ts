@@ -53,11 +53,11 @@ export class WidgetRegistrationService {
     }
 
     offMultiValueChange(id: string) {
-        this.numericValueChangeEventMap.delete(id);
+        this.multiValueChangeEventMap.delete(id);
     }
 
     onMultiValueChange(id: string, fn: (...args: Primitive[]) => void) {
-        this.numericValueChangeEventMap.set(id, fn);
+        this.multiValueChangeEventMap.set(id, fn);
     }
 
     offBooleanValueChange(id: string) {

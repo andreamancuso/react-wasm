@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
 import { Primitive, WidgetFunctionComponent } from "./types";
 
-type SliderProps = {
+type MultiSliderProps = {
     label: string;
     defaultValues?: number[];
     min?: number;
@@ -11,7 +11,7 @@ type SliderProps = {
     onChange?: <T extends Primitive>(...args: T[]) => void;
 };
 
-export const MultiSlider: WidgetFunctionComponent<SliderProps> = ({
+export const MultiSlider: WidgetFunctionComponent<MultiSliderProps> = ({
     label,
     min,
     max,
@@ -19,13 +19,17 @@ export const MultiSlider: WidgetFunctionComponent<SliderProps> = ({
     defaultValues,
     numValues,
 }) => {
-    const [widgetId, widgetRegistrationService] = useWidgetEventManagement("numeric");
+    const [widgetId, widgetRegistrationService] = useWidgetEventManagement("multi");
 
     useEffect(() => {
         if (onChange) {
             widgetRegistrationService.onMultiValueChange(widgetId.current, onChange);
         }
     }, [onChange]);
+
+    if (Array.isArray(defaultValues) && defaultValues.length !== numValues) {
+        // todo: Mismatch! What to do?
+    }
 
     return (
         <widget

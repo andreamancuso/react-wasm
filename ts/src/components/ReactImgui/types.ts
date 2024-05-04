@@ -82,10 +82,10 @@ type WidgetsRequiringId =
     | "CollapsingHeader"
     | "TreeNode"
     | "Combo"
-    | "Slider"
     | "Checkbox"
     | "TabBar"
     | "TabItem"
+    | "Slider"
     | "MultiSlider";
 
 type WidgetsWithChildren =

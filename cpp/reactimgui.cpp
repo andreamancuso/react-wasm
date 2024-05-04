@@ -270,6 +270,8 @@ class ReactImgui final : public ImPlotView {
                         RenderBasicCombo(val);
                     } else if (type == "Slider") {
                         RenderSlider(val);
+                    } else if (type == "MultiSlider") {
+                        RenderMultiSlider(val);
                     } else if (type == "Checkbox") {
                         RenderCheckbox(val);
                     } else if (type == "Button") {
@@ -341,6 +343,31 @@ class ReactImgui final : public ImPlotView {
             }
         }
 
+        void RenderMultiSlider(const json& val) {
+            auto id = val["id"].template get<std::string>();
+            const char* idAsChar = id.c_str();
+
+            if (multiSliders.contains(id)) {
+                ImGui::PushID(idAsChar);
+
+                if (multiSliders[id]->numValues == 2) {
+                    if (ImGui::SliderFloat2(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, "%.0f")) {
+                        onMultiValueChange->call<void>("call", 0, id, multiSliders[id]->values[0], multiSliders[id]->values[1]);
+                    }
+                } else if (multiSliders[id]->numValues == 3) {
+                    if (ImGui::SliderFloat3(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, "%.0f")) {
+                        onMultiValueChange->call<void>("call", 0, id, multiSliders[id]->values[0], multiSliders[id]->values[1], multiSliders[id]->values[2]);
+                    }
+                } else if (multiSliders[id]->numValues == 4) {
+                    if (ImGui::SliderFloat4(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, "%.0f")) {
+                        onMultiValueChange->call<void>("call", 0, id, multiSliders[id]->values[0], multiSliders[id]->values[1], multiSliders[id]->values[2], multiSliders[id]->values[3]);
+                    }
+                }
+
+                ImGui::PopID();
+            }
+        }
+
         void RenderInputText(const json& val) {
             auto id = val["id"].template get<std::string>();
             const char* idAsChar = id.c_str();
@@ -382,9 +409,11 @@ class ReactImgui final : public ImPlotView {
                     if (type == "InputText") {
                         InitInputText(val);
                     } else if (type == "Combo") {
-                        InitCombo(val);
+                        InitBasicCombo(val);
                     } else if (type == "Slider") {
                         InitSlider(val);
+                    } else if (type == "MultiSlider") {
+                        InitMultiSlider(val);
                     } else if (type == "Checkbox") {
                         InitCheckbox(val);
                     } else if (type == "Button") {
@@ -510,7 +539,7 @@ class ReactImgui final : public ImPlotView {
                 multiSliders[id]->min = min;
                 multiSliders[id]->max = max;
 
-                if (val.contains("defaultValues") && val["defaultValues"].is_array()) {
+                if (val.contains("defaultValues") && val["defaultValues"].is_array() && val["defaultValues"].size() == numValues) {
                     for (auto& [key, item] : val["defaultValues"].items()) {
                         multiSliders[id]->values[stoi(key)] = item.template get<float>();
                     }
@@ -542,7 +571,7 @@ class ReactImgui final : public ImPlotView {
             }
         }
 
-        void InitCombo(const json& val) {
+        void InitBasicCombo(const json& val) {
             if (!val.contains("id") || !val["id"].is_string()) {
                 // throw?
             }
@@ -563,7 +592,7 @@ class ReactImgui final : public ImPlotView {
             emscripten::val onInputTextChangeFn,
             emscripten::val onComboChangeFn,
             emscripten::val onNumericValueChangeFn,
-            emscripten::val onMultiValueChange,
+            emscripten::val onMultiValueChangeFn,
             emscripten::val onBooleanValueChangeFn,
             emscripten::val onClickFn,
             const char* newWindowId, 
@@ -572,6 +601,7 @@ class ReactImgui final : public ImPlotView {
             onInputTextChange = std::make_unique<emscripten::val>(onInputTextChangeFn);
             onComboChange = std::make_unique<emscripten::val>(onComboChangeFn);
             onNumericValueChange = std::make_unique<emscripten::val>(onNumericValueChangeFn);
+            onMultiValueChange = std::make_unique<emscripten::val>(onMultiValueChangeFn);
             onBooleanValueChange = std::make_unique<emscripten::val>(onBooleanValueChangeFn);
             onClick = std::make_unique<emscripten::val>(onClickFn);
         }
