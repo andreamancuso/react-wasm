@@ -23,7 +23,7 @@ interface EmbindModule {
             _0: (id: string, value: string) => void,
             _1: (id: string, value: number) => void,
             _2: (id: string, value: number) => void,
-            _3: (id: string, ...args: Primitive[]) => void,
+            _3: (id: string, values: Primitive[]) => void,
             _4: (id: string, value: boolean) => void,
             _5: (id: string) => void,
         ): WasmRunner;

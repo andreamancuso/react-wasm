@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { HelpMarker } from "./HelpMarker/HelpMarker";
 import { ReactImgui } from "../ReactImgui/components";
 import { UserGuide } from "./UserGuide/UserGuide";
@@ -51,6 +51,15 @@ export const ImGuiDemo = () => {
                     <HelpMarker text="The same contents can be accessed in 'Tools->Style Editor' or by calling the ShowStyleEditor() function." />
                     <StyleEditor />
                 </ReactImgui.TreeNode>
+            </ReactImgui.CollapsingHeader>
+            <ReactImgui.CollapsingHeader label="Window options">
+                <ReactImgui.UnformattedText text="Coming soon!" />
+            </ReactImgui.CollapsingHeader>
+            <ReactImgui.CollapsingHeader label="Widgets">
+                <ReactImgui.UnformattedText text="Triple Slider" />
+                <ReactImgui.MultiSlider numValues={3} />
+                <ReactImgui.UnformattedText text="Quadruple Slider" />
+                <ReactImgui.MultiSlider numValues={4} />
             </ReactImgui.CollapsingHeader>
         </>
     );

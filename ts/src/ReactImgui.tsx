@@ -51,9 +51,9 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         }, 10);
     }, []);
 
-    const onMultiValueChange = useCallback((id: string, ...args: Primitive[]) => {
+    const onMultiValueChange = useCallback((id: string, values: Primitive[]) => {
         setTimeout(() => {
-            widgetRegistrationServiceRef.current.emitMultiValueChangeEvent(id, ...args);
+            widgetRegistrationServiceRef.current.emitMultiValueChangeEvent(id, values);
         }, 10);
     }, []);
 

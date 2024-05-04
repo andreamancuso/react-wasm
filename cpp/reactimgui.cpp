@@ -177,6 +177,19 @@ class ReactImgui final : public ImPlotView {
 
         ImGuiInputTextFlags inputTextFlags = ImGuiInputTextFlags_CallbackEdit | ImGuiInputTextFlags_NoUndoRedo;
 
+        template <typename T> 
+        static emscripten::val ConvertArrayPointerToJsArray(T* arr, int size) {
+            const T *end = &arr[size];
+
+            emscripten::val jsArray = emscripten::val::array();
+
+            for (T * curr = arr; curr != end; ++curr) {
+                jsArray.call<void>("push", *curr);
+            }
+
+            return jsArray;
+        }
+
         static int InputTextCb(ImGuiInputTextCallbackData* data)
         {
             if (data->EventFlag == ImGuiInputTextFlags_CallbackEdit) {
@@ -352,15 +365,15 @@ class ReactImgui final : public ImPlotView {
 
                 if (multiSliders[id]->numValues == 2) {
                     if (ImGui::SliderFloat2(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, "%.0f")) {
-                        onMultiValueChange->call<void>("call", 0, id, multiSliders[id]->values[0], multiSliders[id]->values[1]);
+                        onMultiValueChange->call<void>("call", 0, id, ReactImgui::ConvertArrayPointerToJsArray(multiSliders[id]->values.get(), multiSliders[id]->numValues));
                     }
                 } else if (multiSliders[id]->numValues == 3) {
                     if (ImGui::SliderFloat3(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, "%.0f")) {
-                        onMultiValueChange->call<void>("call", 0, id, multiSliders[id]->values[0], multiSliders[id]->values[1], multiSliders[id]->values[2]);
+                        onMultiValueChange->call<void>("call", 0, id, ReactImgui::ConvertArrayPointerToJsArray(multiSliders[id]->values.get(), multiSliders[id]->numValues));
                     }
                 } else if (multiSliders[id]->numValues == 4) {
                     if (ImGui::SliderFloat4(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, "%.0f")) {
-                        onMultiValueChange->call<void>("call", 0, id, multiSliders[id]->values[0], multiSliders[id]->values[1], multiSliders[id]->values[2], multiSliders[id]->values[3]);
+                        onMultiValueChange->call<void>("call", 0, id, ReactImgui::ConvertArrayPointerToJsArray(multiSliders[id]->values.get(), multiSliders[id]->numValues));
                     }
                 }
 

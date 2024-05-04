@@ -3347,6 +3347,8 @@ function dbg(...args) {
       }
     };
 
+  var __emval_new_array = () => Emval.toHandle([]);
+
   
   
   var __emval_run_destructors = (handle) => {
@@ -7967,6 +7969,8 @@ var wasmImports = {
   /** @export */
   _emval_incref: __emval_incref,
   /** @export */
+  _emval_new_array: __emval_new_array,
+  /** @export */
   _emval_run_destructors: __emval_run_destructors,
   /** @export */
   _emval_take_value: __emval_take_value,
@@ -8134,8 +8138,6 @@ var wasmImports = {
   invoke_viiiiii: invoke_viiiiii,
   /** @export */
   invoke_viiiiiii: invoke_viiiiiii,
-  /** @export */
-  invoke_viiiiiiii: invoke_viiiiiiii,
   /** @export */
   invoke_viiiiiiiiii: invoke_viiiiiiiiii,
   /** @export */
@@ -8488,28 +8490,6 @@ function invoke_iiiffii(index,a1,a2,a3,a4,a5,a6) {
   }
 }
 
-function invoke_viiiiiii(index,a1,a2,a3,a4,a5,a6,a7) {
-  var sp = stackSave();
-  try {
-    getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6,a7);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_viiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8) {
-  var sp = stackSave();
-  try {
-    getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6,a7,a8);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
 function invoke_dii(index,a1,a2) {
   var sp = stackSave();
   try {
@@ -8525,6 +8505,17 @@ function invoke_iidi(index,a1,a2,a3) {
   var sp = stackSave();
   try {
     return getWasmTableEntry(index)(a1,a2,a3);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_viiiiiii(index,a1,a2,a3,a4,a5,a6,a7) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6,a7);
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;

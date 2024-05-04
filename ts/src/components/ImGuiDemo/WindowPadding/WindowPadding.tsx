@@ -8,8 +8,8 @@ export const WindowPadding = () => {
     const [value, setValue] = useState<[number, number]>([9, 9]);
 
     // todo: remove casting
-    const handleValueChanged = useCallback((...args: Primitive[]) => {
-        setValue([args[0] as number, args[1] as number]);
+    const handleValueChanged = useCallback((values: Primitive[]) => {
+        setValue([values[0] as number, values[1] as number]);
     }, []);
 
     return (

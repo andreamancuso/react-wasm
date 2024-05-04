@@ -3,12 +3,12 @@ import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
 import { Primitive, WidgetFunctionComponent } from "./types";
 
 type MultiSliderProps = {
-    label: string;
+    label?: string;
     defaultValues?: number[];
     min?: number;
     max?: number;
     numValues: 2 | 3 | 4;
-    onChange?: <T extends Primitive>(...args: T[]) => void;
+    onChange?: (values: Primitive[]) => void;
 };
 
 export const MultiSlider: WidgetFunctionComponent<MultiSliderProps> = ({

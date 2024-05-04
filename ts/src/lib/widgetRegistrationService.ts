@@ -4,7 +4,7 @@ export class WidgetRegistrationService {
     private textChangeEventMap: Map<string, (value: string) => void>;
     private comboChangeEventMap: Map<string, (value: number) => void>;
     private numericValueChangeEventMap: Map<string, (value: number) => void>;
-    private multiValueChangeEventMap: Map<string, (...args: Primitive[]) => void>;
+    private multiValueChangeEventMap: Map<string, (values: Primitive[]) => void>;
     private booleanValueChangeEventMap: Map<string, (value: boolean) => void>;
     private onClickEventMap: Map<string, () => void>;
     private fonts: string[];
@@ -13,7 +13,7 @@ export class WidgetRegistrationService {
         this.textChangeEventMap = new Map<string, (value: string) => void>();
         this.comboChangeEventMap = new Map<string, (value: number) => void>();
         this.numericValueChangeEventMap = new Map<string, (value: number) => void>();
-        this.multiValueChangeEventMap = new Map<string, (...args: Primitive[]) => void>();
+        this.multiValueChangeEventMap = new Map<string, (values: Primitive[]) => void>();
         this.booleanValueChangeEventMap = new Map<string, (value: boolean) => void>();
         this.onClickEventMap = new Map<string, () => void>();
         this.fonts = [];
@@ -56,7 +56,7 @@ export class WidgetRegistrationService {
         this.multiValueChangeEventMap.delete(id);
     }
 
-    onMultiValueChange(id: string, fn: (...args: Primitive[]) => void) {
+    onMultiValueChange(id: string, fn: (values: Primitive[]) => void) {
         this.multiValueChangeEventMap.set(id, fn);
     }
 
@@ -100,11 +100,11 @@ export class WidgetRegistrationService {
         }
     }
 
-    emitMultiValueChangeEvent(id: string, ...args: Primitive[]) {
+    emitMultiValueChangeEvent(id: string, values: Primitive[]) {
         const fn = this.multiValueChangeEventMap.get(id);
 
         if (fn) {
-            fn(...args);
+            fn(values);
         }
     }
 

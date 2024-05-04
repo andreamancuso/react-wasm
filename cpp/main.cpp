@@ -117,7 +117,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::register_type<OnInputTextChangeType>("(id: string, value: string) => void");
     emscripten::register_type<OnComboChangeType>("(id: string, value: number) => void");
     emscripten::register_type<OnNumbericValueChangeType>("(id: string, value: number) => void");
-    emscripten::register_type<OnMultiValueChangeType>("(id: string, ...args: Primitive[]) => void");
+    emscripten::register_type<OnMultiValueChangeType>("(id: string, values: Primitive[]) => void");
     emscripten::register_type<OnBooleanValueChangeType>("(id: string, value: boolean) => void");
     emscripten::register_type<OnClickType>("(id: string) => void");
 }
