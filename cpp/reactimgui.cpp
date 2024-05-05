@@ -41,11 +41,6 @@ struct MultiSliderStuff {
     std::string label;
 };
 
-struct CheckboxStuff {
-    bool checked;
-    std::string label;
-};
-
 struct TabItemStuff {
     bool visible; // ImGui misleadingly refers to this as `p_open`
     std::string label;
@@ -178,6 +173,23 @@ class InputText final : public Widget {
         }
 };
 
+class Checkbox final : public Widget {
+    protected:
+        Checkbox(std::string label, bool defaultChecked) {
+            this->checked = defaultChecked;
+            this->label = label;
+        }
+
+    public:
+        bool checked;
+        std::string label;
+
+        static std::unique_ptr<Checkbox> makeCheckboxWidget(std::string label, bool defaultChecked) {
+            Checkbox instance(label, defaultChecked);
+            return std::make_unique<Checkbox>(std::move(instance));
+        }
+};
+
 class ReactImgui final : public ImPlotView {
     typedef std::function<void(const json&)> rendererFunction;
 
@@ -187,7 +199,7 @@ class ReactImgui final : public ImPlotView {
         std::unordered_map<std::string, std::unique_ptr<Combo>> combos;
         std::unordered_map<std::string, std::unique_ptr<SliderStuff>> sliders;
         std::unordered_map<std::string, std::unique_ptr<MultiSliderStuff>> multiSliders;
-        std::unordered_map<std::string, std::unique_ptr<CheckboxStuff>> checkboxes;
+        std::unordered_map<std::string, std::unique_ptr<Checkbox>> checkboxes;
         std::unordered_map<std::string, std::unique_ptr<ButtonStuff>> buttons;
         std::unordered_map<std::string, std::unique_ptr<TabItemStuff>> tabItems;
 
@@ -533,10 +545,7 @@ class ReactImgui final : public ImPlotView {
             if (checkboxes.contains(id)) {
                 checkboxes[id]->label = label;
             } else {
-                checkboxes[id] = std::make_unique<CheckboxStuff>();
-
-                checkboxes[id]->label = label;
-                checkboxes[id]->checked = defaultChecked;
+                checkboxes[id] = Checkbox::makeCheckboxWidget(label, defaultChecked);
             }
         }
 
