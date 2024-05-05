@@ -39,6 +39,7 @@ struct ComboStuff {
 };
 
 struct SliderStuff {
+    std::string type;
     float value;
     float min;
     float max;
@@ -50,6 +51,7 @@ struct MultiSliderStuff {
     float min;
     float max;
     int numValues;
+    int decimalDigits;
     std::string label;
 };
 
@@ -171,6 +173,7 @@ class ReactImgui final : public ImPlotView {
         std::unordered_map<std::string, std::unique_ptr<TabItemStuff>> tabItems;
 
         std::unordered_map<std::string, rendererFunction> rendererFunctionMap;
+        std::unordered_map<int, std::unique_ptr<char[]>> floatFormatChars;
 
         std::shared_ptr<emscripten::val> onInputTextChange;
         std::unique_ptr<emscripten::val> onComboChange;
@@ -368,8 +371,14 @@ class ReactImgui final : public ImPlotView {
 
             if (sliders.contains(id)) {
                 ImGui::PushID(idAsChar);
-                if (ImGui::SliderFloat(sliders[id].get()->label.c_str(), &sliders[id]->value, sliders[id]->min, sliders[id]->max, "%.0f")) { // min and max are not passed by reference, it's a copy every time...
-                    onNumericValueChange->call<void>("call", 0, id, sliders[id]->value);
+                if (sliders[id]->type == "angle") {
+                    if (ImGui::SliderAngle(sliders[id].get()->label.c_str(), &sliders[id]->value, sliders[id]->min, sliders[id]->max, "%.0f")) { // min and max are not passed by reference, it's a copy every time...
+                        onNumericValueChange->call<void>("call", 0, id, sliders[id]->value);
+                    }
+                } else {
+                    if (ImGui::SliderFloat(sliders[id].get()->label.c_str(), &sliders[id]->value, sliders[id]->min, sliders[id]->max, "%.0f")) { // min and max are not passed by reference, it's a copy every time...
+                        onNumericValueChange->call<void>("call", 0, id, sliders[id]->value);
+                    }
                 }
                 ImGui::PopID();
             }
@@ -383,15 +392,15 @@ class ReactImgui final : public ImPlotView {
                 ImGui::PushID(idAsChar);
 
                 if (multiSliders[id]->numValues == 2) {
-                    if (ImGui::SliderFloat2(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, "%.0f")) {
+                    if (ImGui::SliderFloat2(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, floatFormatChars[multiSliders[id]->decimalDigits].get())) {
                         onMultiValueChange->call<void>("call", 0, id, ReactImgui::ConvertArrayPointerToJsArray(multiSliders[id]->values.get(), multiSliders[id]->numValues));
                     }
                 } else if (multiSliders[id]->numValues == 3) {
-                    if (ImGui::SliderFloat3(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, "%.0f")) {
+                    if (ImGui::SliderFloat3(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, floatFormatChars[multiSliders[id]->decimalDigits].get())) {
                         onMultiValueChange->call<void>("call", 0, id, ReactImgui::ConvertArrayPointerToJsArray(multiSliders[id]->values.get(), multiSliders[id]->numValues));
                     }
                 } else if (multiSliders[id]->numValues == 4) {
-                    if (ImGui::SliderFloat4(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, "%.0f")) {
+                    if (ImGui::SliderFloat4(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, floatFormatChars[multiSliders[id]->decimalDigits].get())) {
                         onMultiValueChange->call<void>("call", 0, id, ReactImgui::ConvertArrayPointerToJsArray(multiSliders[id]->values.get(), multiSliders[id]->numValues));
                     }
                 }
@@ -522,6 +531,7 @@ class ReactImgui final : public ImPlotView {
             auto min = val.contains("min") && val["min"].is_number() ? val["min"].template get<float>() : 0.0f;
             auto max = val.contains("max") && val["max"].is_number() ? val["max"].template get<float>() : 10.0f;
             auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
+            auto sliderType = val.contains("sliderType") && val["sliderType"].is_string() ? val["sliderType"].template get<std::string>() : "default";
 
             if (sliders.contains(id)) {
                 sliders[id]->label = label;
@@ -536,6 +546,7 @@ class ReactImgui final : public ImPlotView {
             } else {
                 sliders[id] = std::make_unique<SliderStuff>();
 
+                sliders[id]->type = sliderType;
                 sliders[id]->label = label;
                 sliders[id]->value = defaultValue;
                 sliders[id]->min = min;
@@ -550,6 +561,7 @@ class ReactImgui final : public ImPlotView {
 
             auto id = val["id"].template get<std::string>();
             auto numValues = val.contains("numValues") && val["numValues"].is_number() ? val["numValues"].template get<int>() : 2;
+            auto decimalDigits = val.contains("decimalDigits") && val["decimalDigits"].is_number() ? val["decimalDigits"].template get<int>() : 0;
             
             auto min = val.contains("min") && val["min"].is_number() ? val["min"].template get<float>() : 0.0f;
             auto max = val.contains("max") && val["max"].is_number() ? val["max"].template get<float>() : 10.0f;
@@ -562,6 +574,7 @@ class ReactImgui final : public ImPlotView {
 
                 multiSliders[id]->min = min;
                 multiSliders[id]->max = max;
+                multiSliders[id]->decimalDigits = decimalDigits;
             } else {
                 multiSliders[id] = std::make_unique<MultiSliderStuff>();
 
@@ -570,6 +583,7 @@ class ReactImgui final : public ImPlotView {
                 multiSliders[id]->values = std::make_unique<float[]>(numValues);
                 multiSliders[id]->min = min;
                 multiSliders[id]->max = max;
+                multiSliders[id]->decimalDigits = decimalDigits;
 
                 if (val.contains("defaultValues") && val["defaultValues"].is_array() && val["defaultValues"].size() == numValues) {
                     for (auto& [key, item] : val["defaultValues"].items()) {
@@ -658,6 +672,28 @@ class ReactImgui final : public ImPlotView {
             rendererFunctionMap["Unindent"] = std::bind(&ReactImgui::RenderUnindent, this, std::placeholders::_1);
             rendererFunctionMap["SameLine"] = std::bind(&ReactImgui::RenderSameLine, this, std::placeholders::_1);
             rendererFunctionMap["Separator"] = std::bind(&ReactImgui::RenderSeparator, this, std::placeholders::_1);
+
+            floatFormatChars[0] = std::make_unique<char[]>(4);
+            floatFormatChars[1] = std::make_unique<char[]>(4);
+            floatFormatChars[2] = std::make_unique<char[]>(4);
+            floatFormatChars[3] = std::make_unique<char[]>(4);
+            floatFormatChars[4] = std::make_unique<char[]>(4);
+            floatFormatChars[5] = std::make_unique<char[]>(4);
+            floatFormatChars[6] = std::make_unique<char[]>(4);
+            floatFormatChars[7] = std::make_unique<char[]>(4);
+            floatFormatChars[8] = std::make_unique<char[]>(4);
+            floatFormatChars[9] = std::make_unique<char[]>(4);
+
+            strcpy(floatFormatChars[0].get(), "%.0f");
+            strcpy(floatFormatChars[1].get(), "%.1f");
+            strcpy(floatFormatChars[2].get(), "%.2f");
+            strcpy(floatFormatChars[3].get(), "%.3f");
+            strcpy(floatFormatChars[4].get(), "%.4f");
+            strcpy(floatFormatChars[5].get(), "%.5f");
+            strcpy(floatFormatChars[6].get(), "%.6f");
+            strcpy(floatFormatChars[7].get(), "%.7f");
+            strcpy(floatFormatChars[8].get(), "%.8f");
+            strcpy(floatFormatChars[9].get(), "%.9f");
         }
 
         void PrepareForRender() {

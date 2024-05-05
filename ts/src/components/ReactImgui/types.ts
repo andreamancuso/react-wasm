@@ -51,18 +51,19 @@ export type WidgetPropsMap = {
         defaultValue?: number;
     };
     Slider: {
+        sliderType: "default" | "angle";
+        label?: string;
         defaultValue?: number;
         min?: number;
         max?: number;
-        label?: string;
-        valueType: "default" | "angle";
     };
     MultiSlider: {
+        numValues: 2 | 3 | 4;
+        label?: string;
         defaultValues?: number[];
         min?: number;
         max?: number;
-        label?: string;
-        numValues: 2 | 3 | 4;
+        decimalDigits?: number;
     };
     Checkbox: {
         defaultChecked?: boolean;

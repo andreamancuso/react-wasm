@@ -7,6 +7,7 @@ type MultiSliderProps = {
     defaultValues?: number[];
     min?: number;
     max?: number;
+    decimalDigits?: number;
     numValues: 2 | 3 | 4;
     onChange?: (values: Primitive[]) => void;
 };
@@ -18,6 +19,7 @@ export const MultiSlider: WidgetFunctionComponent<MultiSliderProps> = ({
     onChange,
     defaultValues,
     numValues,
+    decimalDigits,
 }) => {
     const [widgetId, widgetRegistrationService] = useWidgetEventManagement("multi");
 
@@ -39,6 +41,7 @@ export const MultiSlider: WidgetFunctionComponent<MultiSliderProps> = ({
             defaultValues={defaultValues}
             min={min}
             max={max}
+            decimalDigits={decimalDigits}
             numValues={numValues}
         />
     );

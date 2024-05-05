@@ -26,6 +26,15 @@ import { GrabRounding } from "src/components/ImGuiDemo/StyleEditor/Sizes/Roundin
 import { TabRounding } from "src/components/ImGuiDemo/StyleEditor/Sizes/Rounding/TabRounding/TabRounding";
 import { CellPadding } from "src/components/ImGuiDemo/StyleEditor/Sizes/Tables/CellPadding/CellPadding";
 import { TableAngledHeadersAngle } from "src/components/ImGuiDemo/StyleEditor/Sizes/Tables/TableAngledHeadersAngle/TableAngledHeadersAngle";
+import { WindowTitleAlign } from "src/components/ImGuiDemo/StyleEditor/Sizes/Widgets/WindowTitleAlign/WindowTitleAlign";
+import { WindowMenuButtonPosition } from "src/components/ImGuiDemo/StyleEditor/Sizes/Widgets/WindowMenuButtonPosition/WindowMenuButtonPosition";
+import { ColorButtonPosition } from "src/components/ImGuiDemo/StyleEditor/Sizes/Widgets/ColorButtonPosition/ColorButtonPosition";
+import { ButtonTextAlign } from "src/components/ImGuiDemo/StyleEditor/Sizes/Widgets/ButtonTextAlign/ButtonTextAlign";
+import { SelectableTextAlign } from "src/components/ImGuiDemo/StyleEditor/Sizes/Widgets/SelectableTextAlign/SelectableTextAlign";
+import { SeparatorTextBorderSize } from "src/components/ImGuiDemo/StyleEditor/Sizes/Widgets/SeparatorTextBorderSize/SeparatorTextBorderSize";
+import { SeparatorTextAlign } from "src/components/ImGuiDemo/StyleEditor/Sizes/Widgets/SeparatorTextAlign/SeparatorTextAlign";
+import { SeparatorTextPadding } from "src/components/ImGuiDemo/StyleEditor/Sizes/Widgets/SeparatorTextPadding/SeparatorTextPadding";
+import { LogSliderDeadzone } from "src/components/ImGuiDemo/StyleEditor/Sizes/Widgets/LogSliderDeadzone/LogSliderDeadzone";
 
 export const StyleEditor = () => {
     return (
@@ -69,22 +78,22 @@ export const StyleEditor = () => {
                     <ReactImgui.SeparatorText label="Tables" />
                     <CellPadding />
                     <TableAngledHeadersAngle />
-                    {/* 
-                    ImGui::SeparatorText("Widgets");
-                    ImGui::SliderFloat2("WindowTitleAlign", (float*)&style.WindowTitleAlign, 0.0f, 1.0f, "%.2f");
-                    int window_menu_button_position = style.WindowMenuButtonPosition + 1;
-                    if (ImGui::Combo("WindowMenuButtonPosition", (int*)&window_menu_button_position, "None\0Left\0Right\0"))
-                        style.WindowMenuButtonPosition = window_menu_button_position - 1;
-                    ImGui::Combo("ColorButtonPosition", (int*)&style.ColorButtonPosition, "Left\0Right\0");
-                    ImGui::SliderFloat2("ButtonTextAlign", (float*)&style.ButtonTextAlign, 0.0f, 1.0f, "%.2f");
-                    ImGui::SameLine(); HelpMarker("Alignment applies when a button is larger than its text content.");
-                    ImGui::SliderFloat2("SelectableTextAlign", (float*)&style.SelectableTextAlign, 0.0f, 1.0f, "%.2f");
-                    ImGui::SameLine(); HelpMarker("Alignment applies when a selectable is larger than its text content.");
-                    ImGui::SliderFloat("SeparatorTextBorderSize", &style.SeparatorTextBorderSize, 0.0f, 10.0f, "%.0f");
-                    ImGui::SliderFloat2("SeparatorTextAlign", (float*)&style.SeparatorTextAlign, 0.0f, 1.0f, "%.2f");
-                    ImGui::SliderFloat2("SeparatorTextPadding", (float*)&style.SeparatorTextPadding, 0.0f, 40.0f, "%.0f");
-                    ImGui::SliderFloat("LogSliderDeadzone", &style.LogSliderDeadzone, 0.0f, 12.0f, "%.0f");
-                     */}
+                    <ReactImgui.SeparatorText label="Widgets" />
+                    <WindowTitleAlign />
+                    <WindowMenuButtonPosition />
+                    <ColorButtonPosition />
+                    <ReactImgui.SameLine>
+                        <ButtonTextAlign />
+                        <HelpMarker text="Alignment applies when a button is larger than its text content." />
+                    </ReactImgui.SameLine>
+                    <ReactImgui.SameLine>
+                        <SelectableTextAlign />
+                        <HelpMarker text="Alignment applies when a selectable is larger than its text content." />
+                    </ReactImgui.SameLine>
+                    <SeparatorTextBorderSize />
+                    <SeparatorTextAlign />
+                    <SeparatorTextPadding />
+                    <LogSliderDeadzone />
                 </ReactImgui.TabItem>
                 <ReactImgui.TabItem label="Colors">
                     <ReactImgui.SeparatorText label="Main" />
