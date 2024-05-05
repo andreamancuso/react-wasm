@@ -158,6 +158,8 @@ class Combo {
 };
 
 class ReactImgui final : public ImPlotView {
+    typedef std::function<void(const json&)> rendererFunction;
+
     private:
         json widgets;
         std::unordered_map<std::string, std::unique_ptr<InputTextStuff>> inputTexts;
@@ -167,6 +169,8 @@ class ReactImgui final : public ImPlotView {
         std::unordered_map<std::string, std::unique_ptr<CheckboxStuff>> checkboxes;
         std::unordered_map<std::string, std::unique_ptr<ButtonStuff>> buttons;
         std::unordered_map<std::string, std::unique_ptr<TabItemStuff>> tabItems;
+
+        std::unordered_map<std::string, rendererFunction> rendererFunctionMap;
 
         std::shared_ptr<emscripten::val> onInputTextChange;
         std::unique_ptr<emscripten::val> onComboChange;
@@ -212,85 +216,100 @@ class ReactImgui final : public ImPlotView {
                 } else if (is_object) {
                     auto type = val["type"].template get<std::string>();
 
-                    if (type == "Fragment") {
-                        if (val.contains("children")) {
-                            RenderWidgets(val["children"]);
-                        }
-                    } else if (type == "TabBar") {
-                        ImGui::PushID(val["id"].template get<std::string>().c_str());
-                        if (ImGui::BeginTabBar(val["id"].template get<std::string>().c_str(), ImGuiTabBarFlags_None)) {
-                            if (val.contains("children")) {
-                                RenderWidgets(val["children"]);
-                            }
-                            ImGui::EndTabBar();
-                        }
-                        ImGui::PopID();
-                    } else if (type == "TabItem") {
-                        RenderTabItem(val);
-                    } else if (type == "TreeNode") {
-                        ImGui::PushID(val["id"].template get<std::string>().c_str());
-                        if (ImGui::TreeNode(val["label"].template get<std::string>().c_str())) {
-                            if (val.contains("children")) {
-                                RenderWidgets(val["children"]);
-                            }
-
-                            ImGui::TreePop();
-                            ImGui::Spacing();
-                        }
-                        ImGui::PopID();
-                    } else if (type == "ItemTooltip") {
-                        if (ImGui::BeginItemTooltip()) {
-                            if (val.contains("children")) {
-                                RenderWidgets(val["children"]);
-                            }
-
-                            ImGui::EndTooltip();
-                        }
-                    } else if (type == "TextWrap") {
-                        ImGui::PushTextWrapPos(val["width"].template get<double>());
-                        if (val.contains("children")) {
-                            RenderWidgets(val["children"]);
-                        }
-                        ImGui::PopTextWrapPos();
-                    } else if (type == "CollapsingHeader") {
-                        ImGui::PushID(val["id"].template get<std::string>().c_str());
-                        if (ImGui::CollapsingHeader(val["label"].template get<std::string>().c_str())) {
-                            if (val.contains("children")) {
-                                RenderWidgets(val["children"]);
-                            }
-                        }
-                        ImGui::PopID();
-                    } else if (type == "Indent") {
-                        ImGui::Indent();
-                    } else if (type == "Unindent") {
-                        ImGui::Unindent();
-                    } else if (type == "SameLine") {
-                        ImGui::SameLine();
-                    } else if (type == "TextDisabled") {
-                        ImGui::TextDisabled(val["text"].template get<std::string>().c_str());
-                    } else if (type == "UnformattedText") {
-                        ImGui::TextUnformatted(val["text"].template get<std::string>().c_str());
-                    } else if (type == "BulletText") {
-                        ImGui::BulletText(val["text"].template get<std::string>().c_str());
-                    } else if (type == "SeparatorText") {
-                        ImGui::SeparatorText(val["label"].template get<std::string>().c_str());
-                    } else if (type == "Separator") {
-                        ImGui::Separator();
-                    } else if (type == "InputText") {
-                        RenderInputText(val);
-                    } else if (type == "Combo") {
-                        // todo: add support for 'regular' combo
-                        RenderBasicCombo(val);
-                    } else if (type == "Slider") {
-                        RenderSlider(val);
-                    } else if (type == "MultiSlider") {
-                        RenderMultiSlider(val);
-                    } else if (type == "Checkbox") {
-                        RenderCheckbox(val);
-                    } else if (type == "Button") {
-                        RenderButton(val);
+                    if (rendererFunctionMap.contains(type)) {
+                        rendererFunctionMap[type](val);
                     }
                 }
+            }
+        }
+
+        void RenderSeparator(const json& val) {
+            ImGui::Separator();
+        }
+
+        void RenderSameLine(const json& val) {
+            ImGui::SameLine();
+        }
+
+        void RenderUnindent(const json& val) {
+            ImGui::Unindent();
+        }
+
+        void RenderIndent(const json& val) {
+            ImGui::Indent();
+        }
+
+        void RenderSeparatorText(const json& val) {
+            ImGui::SeparatorText(val["label"].template get<std::string>().c_str());
+        }
+
+        void RenderBulletText(const json& val) {
+            ImGui::BulletText(val["text"].template get<std::string>().c_str());
+        }
+
+        void RenderUnformattedText(const json& val) {
+            ImGui::TextUnformatted(val["text"].template get<std::string>().c_str());
+        }
+
+        void RenderTextDisabled(const json& val) {
+            ImGui::TextDisabled(val["text"].template get<std::string>().c_str());
+        }
+
+        void RenderCollapsingHeader(const json& val) {
+            ImGui::PushID(val["id"].template get<std::string>().c_str());
+            if (ImGui::CollapsingHeader(val["label"].template get<std::string>().c_str())) {
+                if (val.contains("children")) {
+                    RenderWidgets(val["children"]);
+                }
+            }
+            ImGui::PopID();
+        }
+
+        void RenderTextWrap(const json& val) {
+            ImGui::PushTextWrapPos(val["width"].template get<double>());
+            if (val.contains("children")) {
+                RenderWidgets(val["children"]);
+            }
+            ImGui::PopTextWrapPos();
+        }
+
+        void RenderItemTooltip(const json& val) {
+            if (ImGui::BeginItemTooltip()) {
+                if (val.contains("children")) {
+                    RenderWidgets(val["children"]);
+                }
+
+                ImGui::EndTooltip();
+            }
+        }
+
+        void RenderTreeNode(const json& val) {
+            ImGui::PushID(val["id"].template get<std::string>().c_str());
+            if (ImGui::TreeNode(val["label"].template get<std::string>().c_str())) {
+                if (val.contains("children")) {
+                    RenderWidgets(val["children"]);
+                }
+
+                ImGui::TreePop();
+                ImGui::Spacing();
+            }
+            ImGui::PopID();
+        }
+
+        void RenderTabBar(const json& val) {
+            ImGui::PushID(val["id"].template get<std::string>().c_str());
+            if (ImGui::BeginTabBar(val["id"].template get<std::string>().c_str(), ImGuiTabBarFlags_None)) {
+                if (val.contains("children")) {
+                    RenderWidgets(val["children"]);
+                }
+                ImGui::EndTabBar();
+            }
+            ImGui::PopID();
+        }
+
+        void RenderFragment(const json& val) {
+            if (val.contains("children")) {
+                RenderWidgets(val["children"]);
             }
         }
 
@@ -617,6 +636,28 @@ class ReactImgui final : public ImPlotView {
             onMultiValueChange = std::make_unique<emscripten::val>(onMultiValueChangeFn);
             onBooleanValueChange = std::make_unique<emscripten::val>(onBooleanValueChangeFn);
             onClick = std::make_unique<emscripten::val>(onClickFn);
+
+            rendererFunctionMap["Button"] = std::bind(&ReactImgui::RenderButton, this, std::placeholders::_1);
+            rendererFunctionMap["Checkbox"] = std::bind(&ReactImgui::RenderCheckbox, this, std::placeholders::_1);
+            rendererFunctionMap["MultiSlider"] = std::bind(&ReactImgui::RenderMultiSlider, this, std::placeholders::_1);
+            rendererFunctionMap["Slider"] = std::bind(&ReactImgui::RenderSlider, this, std::placeholders::_1);
+            rendererFunctionMap["Combo"] = std::bind(&ReactImgui::RenderBasicCombo, this, std::placeholders::_1);
+            rendererFunctionMap["InputText"] = std::bind(&ReactImgui::RenderInputText, this, std::placeholders::_1);
+            rendererFunctionMap["Fragment"] = std::bind(&ReactImgui::RenderFragment, this, std::placeholders::_1);
+            rendererFunctionMap["TabBar"] = std::bind(&ReactImgui::RenderTabBar, this, std::placeholders::_1);
+            rendererFunctionMap["TabItem"] = std::bind(&ReactImgui::RenderTabItem, this, std::placeholders::_1);
+            rendererFunctionMap["TreeNode"] = std::bind(&ReactImgui::RenderTreeNode, this, std::placeholders::_1);
+            rendererFunctionMap["ItemTooltip"] = std::bind(&ReactImgui::RenderItemTooltip, this, std::placeholders::_1);
+            rendererFunctionMap["TextWrap"] = std::bind(&ReactImgui::RenderTextWrap, this, std::placeholders::_1);
+            rendererFunctionMap["CollapsingHeader"] = std::bind(&ReactImgui::RenderCollapsingHeader, this, std::placeholders::_1);
+            rendererFunctionMap["TextDisabled"] = std::bind(&ReactImgui::RenderTextDisabled, this, std::placeholders::_1);
+            rendererFunctionMap["UnformattedText"] = std::bind(&ReactImgui::RenderUnformattedText, this, std::placeholders::_1);
+            rendererFunctionMap["BulletText"] = std::bind(&ReactImgui::RenderBulletText, this, std::placeholders::_1);
+            rendererFunctionMap["SeparatorText"] = std::bind(&ReactImgui::RenderSeparatorText, this, std::placeholders::_1);
+            rendererFunctionMap["Indent"] = std::bind(&ReactImgui::RenderIndent, this, std::placeholders::_1);
+            rendererFunctionMap["Unindent"] = std::bind(&ReactImgui::RenderUnindent, this, std::placeholders::_1);
+            rendererFunctionMap["SameLine"] = std::bind(&ReactImgui::RenderSameLine, this, std::placeholders::_1);
+            rendererFunctionMap["Separator"] = std::bind(&ReactImgui::RenderSeparator, this, std::placeholders::_1);
         }
 
         void PrepareForRender() {

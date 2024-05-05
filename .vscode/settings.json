@@ -112,7 +112,9 @@
         "csignal": "cpp",
         "memory_resource": "cpp",
         "strstream": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "*.inc": "cpp",
+        "__config": "cpp"
     },
     "prettier.prettierPath": "./ts/node_modules/prettier",
     "prettier.configPath": "./ts/.prettierrc.json",
