@@ -8163,6 +8163,10 @@ var wasmImports = {
   /** @export */
   invoke_iifffi: invoke_iifffi,
   /** @export */
+  invoke_iiffii: invoke_iiffii,
+  /** @export */
+  invoke_iiffiii: invoke_iiffiii,
+  /** @export */
   invoke_iii: invoke_iii,
   /** @export */
   invoke_iiifffi: invoke_iiifffi,
@@ -8576,6 +8580,28 @@ function invoke_fi(index,a1) {
 }
 
 function invoke_iifffi(index,a1,a2,a3,a4,a5) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)(a1,a2,a3,a4,a5);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_iiffiii(index,a1,a2,a3,a4,a5,a6) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_iiffii(index,a1,a2,a3,a4,a5) {
   var sp = stackSave();
   try {
     return getWasmTableEntry(index)(a1,a2,a3,a4,a5);

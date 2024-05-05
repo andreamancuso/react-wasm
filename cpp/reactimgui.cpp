@@ -25,12 +25,7 @@
 using json = nlohmann::json;
 
 struct MultiSliderStuff {
-    std::unique_ptr<float[]> values;
-    float min;
-    float max;
-    int numValues;
-    int decimalDigits;
-    std::string label;
+   
 };
 
 struct TabItemStuff {
@@ -205,6 +200,44 @@ class Slider final : public Widget {
         }
 };
 
+class MultiSlider final : public Widget {
+    protected:
+        MultiSlider(std::string label, float min, float max, int numValues, int decimalDigits) {
+            this->label = label;
+            this->numValues = numValues;
+            this->values = std::make_unique<float[]>(numValues);
+            this->min = min;
+            this->max = max;
+            this->decimalDigits = decimalDigits;
+
+            
+        }
+
+    public:
+        std::unique_ptr<float[]> values;
+        float min;
+        float max;
+        int numValues;
+        int decimalDigits;
+        std::string label;
+
+        static std::unique_ptr<MultiSlider> makeMultiSliderWidget(std::string label, float min, float max, int numValues, int decimalDigits, const json& defaultValues) {
+            MultiSlider instance(label, min, max, numValues, decimalDigits);
+
+            for (auto& [key, item] : defaultValues.items()) {
+                instance.values[stoi(key)] = item.template get<float>();
+            }
+
+            return std::make_unique<MultiSlider>(std::move(instance));
+        }
+
+        static std::unique_ptr<MultiSlider> makeMultiSliderWidget(std::string label, float min, float max, int numValues, int decimalDigits) {
+            MultiSlider instance(label, min, max, numValues, decimalDigits);
+
+            return std::make_unique<MultiSlider>(std::move(instance));
+        }
+};
+
 class ReactImgui final : public ImPlotView {
     typedef std::function<void(const json&)> rendererFunction;
 
@@ -213,7 +246,7 @@ class ReactImgui final : public ImPlotView {
         std::unordered_map<std::string, std::unique_ptr<InputText>> inputTexts;
         std::unordered_map<std::string, std::unique_ptr<Combo>> combos;
         std::unordered_map<std::string, std::unique_ptr<Slider>> sliders;
-        std::unordered_map<std::string, std::unique_ptr<MultiSliderStuff>> multiSliders;
+        std::unordered_map<std::string, std::unique_ptr<MultiSlider>> multiSliders;
         std::unordered_map<std::string, std::unique_ptr<Checkbox>> checkboxes;
         std::unordered_map<std::string, std::unique_ptr<ButtonStuff>> buttons;
         std::unordered_map<std::string, std::unique_ptr<TabItemStuff>> tabItems;
@@ -613,20 +646,12 @@ class ReactImgui final : public ImPlotView {
                 multiSliders[id]->max = max;
                 multiSliders[id]->decimalDigits = decimalDigits;
             } else {
-                multiSliders[id] = std::make_unique<MultiSliderStuff>();
-
-                multiSliders[id]->label = label;
-                multiSliders[id]->numValues = numValues;
-                multiSliders[id]->values = std::make_unique<float[]>(numValues);
-                multiSliders[id]->min = min;
-                multiSliders[id]->max = max;
-                multiSliders[id]->decimalDigits = decimalDigits;
-
                 if (val.contains("defaultValues") && val["defaultValues"].is_array() && val["defaultValues"].size() == numValues) {
-                    for (auto& [key, item] : val["defaultValues"].items()) {
-                        multiSliders[id]->values[stoi(key)] = item.template get<float>();
-                    }
+                    multiSliders[id] = MultiSlider::makeMultiSliderWidget(label, min, max, numValues, decimalDigits, val["defaultValues"]);
+                } else {
+                    multiSliders[id] = MultiSlider::makeMultiSliderWidget(label, min, max, numValues, decimalDigits);
                 }
+                
             }
         }
 
