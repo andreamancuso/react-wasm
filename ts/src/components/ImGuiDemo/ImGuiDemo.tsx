@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from "react";
-import { HelpMarker } from "./HelpMarker/HelpMarker";
-import { ReactImgui } from "../ReactImgui/components";
-import { UserGuide } from "./UserGuide/UserGuide";
-import { StyleEditor } from "./StyleEditor/StyleEditor";
+import { HelpMarker } from "src/components/ImGuiDemo/HelpMarker/HelpMarker";
+import { ReactImgui } from "src/components/ReactImgui/components";
+import { UserGuide } from "src/components/ImGuiDemo/UserGuide/UserGuide";
+import { StyleEditor } from "src/components/ImGuiDemo/StyleEditor/StyleEditor";
 
 export const ImGuiDemo = () => {
     const [text, setText] = useState("Hello, world!");

@@ -1,4 +1,4 @@
-import { ReactImgui } from "../../ReactImgui/components";
+import { ReactImgui } from "src/components/ReactImgui/components";
 
 type HelpMarkerProps = {
     text: string;

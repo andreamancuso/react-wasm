@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
-import { ReactImgui } from "../../../../../ReactImgui/components";
-import { useWidgetRegistrationService } from "../../../../../../hooks/useWidgetRegistrationService";
-import { Primitive } from "../../../../../ReactImgui/types";
+import { ReactImgui } from "src/components/ReactImgui/components";
+import { useWidgetRegistrationService } from "src/hooks/useWidgetRegistrationService";
+import { Primitive } from "src/components/ReactImgui/types";
 
 export const FramePadding = () => {
     const service = useWidgetRegistrationService();

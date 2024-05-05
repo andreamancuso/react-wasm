@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import { ReactImgui } from "../../../../../ReactImgui/components";
-import { useWidgetRegistrationService } from "../../../../../../hooks/useWidgetRegistrationService";
+import { ReactImgui } from "src/components/ReactImgui/components";
+import { useWidgetRegistrationService } from "src/hooks/useWidgetRegistrationService";
 
 export const GrabMinSize = () => {
     const service = useWidgetRegistrationService();
