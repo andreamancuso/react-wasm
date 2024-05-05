@@ -32,12 +32,6 @@ struct InputTextStuff {
     std::string label;
 };
 
-struct ComboStuff {
-    int selectedIndex;
-    std::string label;
-    std::unique_ptr<char[]> itemsSeparatedByZeros; // Relevant for 'basic' combo only
-};
-
 struct SliderStuff {
     std::string type;
     float value;
@@ -69,9 +63,23 @@ struct ButtonStuff {
     std::string label;
 };
 
-class Combo {
-    private:
-        Combo() {}
+class Widget {
+
+};
+
+class Combo final : public Widget {
+    protected:
+        Combo(std::string label, int defaultValue, const json& options) {
+            this->selectedIndex = defaultValue;
+            this->label = label;
+            this->itemsSeparatedByZeros = Combo::getItemsSeparatedByZeros(options);
+        }
+        
+        Combo(std::string label, int defaultValue, std::string optionsList) {
+            this->selectedIndex = defaultValue;
+            this->label = label;
+            this->itemsSeparatedByZeros = Combo::getItemsSeparatedByZeros(optionsList);
+        }
 
         /**
          * Takes array of [{value: number; label: string}] and converts into "label\0label\0label\0" (double NULL character at the end)
@@ -138,24 +146,18 @@ class Combo {
         }
 
     public:
-        static std::unique_ptr<ComboStuff> getComboStuff(std::string label, int defaultValue, const json& options) {
-            auto comboStuff = std::make_unique<ComboStuff>();
+        int selectedIndex;
+        std::string label;
+        std::unique_ptr<char[]> itemsSeparatedByZeros; // Relevant for 'basic' combo only
 
-            comboStuff->selectedIndex = defaultValue;
-            comboStuff->label = label;
-            comboStuff->itemsSeparatedByZeros = Combo::getItemsSeparatedByZeros(options);
-
-            return comboStuff;
+        static std::unique_ptr<Combo> makeComboWidget(std::string label, int defaultValue, const json& options) {
+            Combo instance(label, defaultValue, options);
+            return std::make_unique<Combo>(std::move(instance));
         }
 
-        static std::unique_ptr<ComboStuff> getComboStuff(std::string label, int defaultValue, std::string optionsList) {
-            auto comboStuff = std::make_unique<ComboStuff>();
-
-            comboStuff->selectedIndex = defaultValue;
-            comboStuff->label = label;
-            comboStuff->itemsSeparatedByZeros = Combo::getItemsSeparatedByZeros(optionsList);
-
-            return comboStuff;
+        static std::unique_ptr<Combo> makeComboWidget(std::string label, int defaultValue, std::string optionsList) {
+            Combo instance(label, defaultValue, optionsList);
+            return std::make_unique<Combo>(std::move(instance));
         }
 };
 
@@ -165,7 +167,7 @@ class ReactImgui final : public ImPlotView {
     private:
         json widgets;
         std::unordered_map<std::string, std::unique_ptr<InputTextStuff>> inputTexts;
-        std::unordered_map<std::string, std::unique_ptr<ComboStuff>> combos;
+        std::unordered_map<std::string, std::unique_ptr<Combo>> combos;
         std::unordered_map<std::string, std::unique_ptr<SliderStuff>> sliders;
         std::unordered_map<std::string, std::unique_ptr<MultiSliderStuff>> multiSliders;
         std::unordered_map<std::string, std::unique_ptr<CheckboxStuff>> checkboxes;
@@ -629,7 +631,7 @@ class ReactImgui final : public ImPlotView {
             if (combos.contains(id)) {
                 combos[id]->label = label;
             } else {
-                combos[id] = Combo::getComboStuff(label, defaultValue, val["optionsList"].template get<std::string>());
+                combos[id] = Combo::makeComboWidget(label, defaultValue, val["optionsList"].template get<std::string>());
             }
         }
 
