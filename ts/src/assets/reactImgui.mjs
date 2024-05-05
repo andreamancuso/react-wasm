@@ -2615,6 +2615,16 @@ function dbg(...args) {
     };
 
   
+  var __embind_register_constant = (name, type, value) => {
+      name = readLatin1String(name);
+      whenDependentTypesAreResolved([], [type], (type) => {
+        type = type[0];
+        Module[name] = type['fromWireType'](value);
+        return [];
+      });
+    };
+
+  
   var emval_freelist = [];
   
   var emval_handles = [];
@@ -2688,6 +2698,70 @@ function dbg(...args) {
       // emval is passed into JS via an interface
     };
   var __embind_register_emval = (rawType) => registerType(rawType, EmValType);
+
+  
+  var enumReadValueFromPointer = (name, width, signed) => {
+      switch (width) {
+          case 1: return signed ?
+              function(pointer) { return this['fromWireType'](HEAP8[pointer]) } :
+              function(pointer) { return this['fromWireType'](HEAPU8[pointer]) };
+          case 2: return signed ?
+              function(pointer) { return this['fromWireType'](HEAP16[((pointer)>>1)]) } :
+              function(pointer) { return this['fromWireType'](HEAPU16[((pointer)>>1)]) };
+          case 4: return signed ?
+              function(pointer) { return this['fromWireType'](HEAP32[((pointer)>>2)]) } :
+              function(pointer) { return this['fromWireType'](HEAPU32[((pointer)>>2)]) };
+          default:
+              throw new TypeError(`invalid integer width (${width}): ${name}`);
+      }
+    };
+  
+  
+  /** @suppress {globalThis} */
+  var __embind_register_enum = (rawType, name, size, isSigned) => {
+      name = readLatin1String(name);
+  
+      function ctor() {}
+      ctor.values = {};
+  
+      registerType(rawType, {
+        name,
+        constructor: ctor,
+        'fromWireType': function(c) {
+          return this.constructor.values[c];
+        },
+        'toWireType': (destructors, c) => c.value,
+        'argPackAdvance': GenericWireTypeSize,
+        'readValueFromPointer': enumReadValueFromPointer(name, size, isSigned),
+        destructorFunction: null,
+      });
+      exposePublicSymbol(name, ctor);
+    };
+
+  
+  
+  
+  
+  var requireRegisteredType = (rawType, humanName) => {
+      var impl = registeredTypes[rawType];
+      if (undefined === impl) {
+        throwBindingError(`${humanName} has unknown type ${getTypeName(rawType)}`);
+      }
+      return impl;
+    };
+  var __embind_register_enum_value = (rawEnumType, name, enumValue) => {
+      var enumType = requireRegisteredType(rawEnumType, 'enum');
+      name = readLatin1String(name);
+  
+      var Enum = enumType.constructor;
+  
+      var Value = Object.create(enumType.constructor.prototype, {
+        value: {value: enumValue},
+        constructor: {value: createNamedFunction(`${enumType.name}_${name}`, function() {})},
+      });
+      Enum.values[enumValue] = Value;
+      Enum[name] = Value;
+    };
 
   var embindRepr = (v) => {
       if (v === null) {
@@ -3269,15 +3343,6 @@ function dbg(...args) {
       return id;
     };
   
-  
-  
-  var requireRegisteredType = (rawType, humanName) => {
-      var impl = registeredTypes[rawType];
-      if (undefined === impl) {
-        throwBindingError(`${humanName} has unknown type ${getTypeName(rawType)}`);
-      }
-      return impl;
-    };
   var emval_lookupTypes = (argCount, argTypes) => {
       var a = new Array(argCount);
       for (var i = 0; i < argCount; ++i) {
@@ -3348,6 +3413,9 @@ function dbg(...args) {
     };
 
   var __emval_new_array = () => Emval.toHandle([]);
+
+  
+  var __emval_new_cstring = (v) => Emval.toHandle(getStringOrSymbol(v));
 
   
   
@@ -7943,7 +8011,13 @@ var wasmImports = {
   /** @export */
   _embind_register_class_function: __embind_register_class_function,
   /** @export */
+  _embind_register_constant: __embind_register_constant,
+  /** @export */
   _embind_register_emval: __embind_register_emval,
+  /** @export */
+  _embind_register_enum: __embind_register_enum,
+  /** @export */
+  _embind_register_enum_value: __embind_register_enum_value,
   /** @export */
   _embind_register_float: __embind_register_float,
   /** @export */
@@ -7970,6 +8044,8 @@ var wasmImports = {
   _emval_incref: __emval_incref,
   /** @export */
   _emval_new_array: __emval_new_array,
+  /** @export */
+  _emval_new_cstring: __emval_new_cstring,
   /** @export */
   _emval_run_destructors: __emval_run_destructors,
   /** @export */
@@ -8286,6 +8362,17 @@ function invoke_viiiiii(index,a1,a2,a3,a4,a5,a6) {
   }
 }
 
+function invoke_vi(index,a1) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
 function invoke_iiiiiiii(index,a1,a2,a3,a4,a5,a6,a7) {
   var sp = stackSave();
   try {
@@ -8312,17 +8399,6 @@ function invoke_iii(index,a1,a2) {
   var sp = stackSave();
   try {
     return getWasmTableEntry(index)(a1,a2);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_vi(index,a1) {
-  var sp = stackSave();
-  try {
-    getWasmTableEntry(index)(a1);
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;
@@ -8765,7 +8841,6 @@ var missingLibrarySymbols = [
   'createJsInvokerSignature',
   'registerInheritedInstance',
   'unregisterInheritedInstance',
-  'enumReadValueFromPointer',
   'validateThis',
   'emval_get_global',
 ];
@@ -8952,6 +9027,7 @@ var unexportedSymbols = [
   'registeredPointers',
   'registerType',
   'integerReadValueFromPointer',
+  'enumReadValueFromPointer',
   'floatReadValueFromPointer',
   'readPointer',
   'runDestructors',

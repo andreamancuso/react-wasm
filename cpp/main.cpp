@@ -120,4 +120,34 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::register_type<OnMultiValueChangeType>("(id: string, values: Primitive[]) => void");
     emscripten::register_type<OnBooleanValueChangeType>("(id: string, value: boolean) => void");
     emscripten::register_type<OnClickType>("(id: string) => void");
+
+    emscripten::enum_<ImGuiWindowFlags_>("ImGuiWindowFlags")
+        .value("None", ImGuiWindowFlags_None)
+        .value("NoTitleBar", ImGuiWindowFlags_NoTitleBar)
+        .value("NoResize", ImGuiWindowFlags_NoResize)
+        .value("NoMove", ImGuiWindowFlags_NoMove)
+        .value("NoScrollbar", ImGuiWindowFlags_NoScrollbar)
+        .value("NoScrollWithMouse", ImGuiWindowFlags_NoScrollWithMouse)
+        .value("NoCollapse", ImGuiWindowFlags_NoCollapse)
+        .value("AlwaysAutoResize", ImGuiWindowFlags_AlwaysAutoResize)
+        .value("NoBackground", ImGuiWindowFlags_NoBackground)
+        .value("NoSavedSettings", ImGuiWindowFlags_NoSavedSettings)
+        .value("NoMouseInputs", ImGuiWindowFlags_NoMouseInputs)
+        .value("MenuBar", ImGuiWindowFlags_MenuBar)
+        .value("HorizontalScrollbar", ImGuiWindowFlags_HorizontalScrollbar)
+        .value("NoFocusOnAppearing", ImGuiWindowFlags_NoFocusOnAppearing)
+        .value("NoBringToFrontOnFocus", ImGuiWindowFlags_NoBringToFrontOnFocus)
+        .value("AlwaysVerticalScrollbar", ImGuiWindowFlags_AlwaysVerticalScrollbar)
+        .value("AlwaysHorizontalScrollbar", ImGuiWindowFlags_AlwaysHorizontalScrollbar)
+        .value("NoNavInputs", ImGuiWindowFlags_NoNavInputs)
+        .value("NoNavFocus", ImGuiWindowFlags_NoNavFocus)
+        .value("UnsavedDocument", ImGuiWindowFlags_UnsavedDocument)
+        .value("NoNav", ImGuiWindowFlags_NoNav)
+        .value("NoDecoration", ImGuiWindowFlags_NoDecoration)
+        .value("NoInputs", ImGuiWindowFlags_NoInputs)
+        // Deprecated
+        .value("AlwaysUseWindowPadding", ImGuiWindowFlags_AlwaysUseWindowPadding)
+        ;
+
+    emscripten::constant("IMGUI_VERSION", emscripten::val(IMGUI_VERSION));
 }
