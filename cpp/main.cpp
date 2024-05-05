@@ -149,5 +149,93 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .value("AlwaysUseWindowPadding", ImGuiWindowFlags_AlwaysUseWindowPadding)
         ;
 
+    emscripten::enum_<ImGuiChildFlags_>("ImGuiChildFlags")
+        .value("None", ImGuiChildFlags_None)
+        .value("Border", ImGuiChildFlags_Border)
+        .value("AlwaysUseWindowPadding", ImGuiChildFlags_AlwaysUseWindowPadding)
+        .value("ResizeX", ImGuiChildFlags_ResizeX)
+        .value("ResizeY", ImGuiChildFlags_ResizeY)
+        .value("AutoResizeX", ImGuiChildFlags_AutoResizeX)
+        .value("AutoResizeY", ImGuiChildFlags_AutoResizeY)
+        .value("AlwaysAutoResize", ImGuiChildFlags_AlwaysAutoResize)
+        .value("FrameStyle", ImGuiChildFlags_FrameStyle)
+        ;
+
+    emscripten::enum_<ImGuiInputTextFlags_>("ImGuiInputTextFlags")
+        .value("None", ImGuiInputTextFlags_None)
+        .value("CharsDecimal", ImGuiInputTextFlags_CharsDecimal)
+        .value("CharsHexadecimal", ImGuiInputTextFlags_CharsHexadecimal)
+        .value("CharsUppercase", ImGuiInputTextFlags_CharsUppercase)
+        .value("CharsNoBlank", ImGuiInputTextFlags_CharsNoBlank)
+        .value("AutoSelectAll", ImGuiInputTextFlags_AutoSelectAll)
+        .value("EnterReturnsTrue", ImGuiInputTextFlags_EnterReturnsTrue)
+        .value("CallbackCompletion", ImGuiInputTextFlags_CallbackCompletion)
+        .value("CallbackHistory", ImGuiInputTextFlags_CallbackHistory)
+        .value("CallbackAlways", ImGuiInputTextFlags_CallbackAlways)
+        .value("CallbackCharFilter", ImGuiInputTextFlags_CallbackCharFilter)
+        .value("AllowTabInput", ImGuiInputTextFlags_AllowTabInput)
+        .value("CtrlEnterForNewLine", ImGuiInputTextFlags_CtrlEnterForNewLine)
+        .value("NoHorizontalScroll", ImGuiInputTextFlags_NoHorizontalScroll)
+        .value("AlwaysOverwrite", ImGuiInputTextFlags_AlwaysOverwrite)
+        .value("ReadOnly", ImGuiInputTextFlags_ReadOnly)
+        .value("Password", ImGuiInputTextFlags_Password)
+        .value("NoUndoRedo", ImGuiInputTextFlags_NoUndoRedo)
+        .value("CharsScientific", ImGuiInputTextFlags_CharsScientific)
+        .value("CallbackResize", ImGuiInputTextFlags_CallbackResize)
+        .value("CallbackEdit", ImGuiInputTextFlags_CallbackEdit)
+        .value("EscapeClearsAll", ImGuiInputTextFlags_EscapeClearsAll)
+        ;
+
+    emscripten::enum_<ImGuiTreeNodeFlags_>("ImGuiTreeNodeFlags")
+        .value("None", ImGuiTreeNodeFlags_None)
+        .value("Selected", ImGuiTreeNodeFlags_Selected)
+        .value("Framed", ImGuiTreeNodeFlags_Framed)
+        .value("AllowOverlap", ImGuiTreeNodeFlags_AllowOverlap)
+        .value("NoTreePushOnOpen", ImGuiTreeNodeFlags_NoTreePushOnOpen)
+        .value("NoAutoOpenOnLog", ImGuiTreeNodeFlags_NoAutoOpenOnLog)
+        .value("DefaultOpen", ImGuiTreeNodeFlags_DefaultOpen)
+        .value("OpenOnDoubleClick", ImGuiTreeNodeFlags_OpenOnDoubleClick)
+        .value("OpenOnArrow", ImGuiTreeNodeFlags_OpenOnArrow)
+        .value("Leaf", ImGuiTreeNodeFlags_Leaf)
+        .value("Bullet", ImGuiTreeNodeFlags_Bullet)
+        .value("FramePadding", ImGuiTreeNodeFlags_FramePadding)
+        .value("SpanAvailWidth", ImGuiTreeNodeFlags_SpanAvailWidth)
+        .value("SpanFullWidth", ImGuiTreeNodeFlags_SpanFullWidth)
+        .value("SpanTextWidth", ImGuiTreeNodeFlags_SpanTextWidth)
+        .value("SpanAllColumns", ImGuiTreeNodeFlags_SpanAllColumns)
+        .value("NavLeftJumpsBackHere", ImGuiTreeNodeFlags_NavLeftJumpsBackHere)
+        // .value("ImGuiTreeNodeFlags_NoScrollOnOpen", ImGuiTreeNodeFlags_NoScrollOnOpen) WIP
+        .value("CollapsingHeader", ImGuiTreeNodeFlags_CollapsingHeader)
+        // Renamed in 1.89.7
+        .value("AllowItemOverlap", ImGuiTreeNodeFlags_AllowItemOverlap)
+        ;
+
+    emscripten::enum_<ImGuiPopupFlags_>("ImGuiPopupFlags")
+        .value("None", ImGuiPopupFlags_None)
+        .value("MouseButtonLeft", ImGuiPopupFlags_MouseButtonLeft)
+        .value("MouseButtonRight", ImGuiPopupFlags_MouseButtonRight)
+        .value("MouseButtonMiddle", ImGuiPopupFlags_MouseButtonMiddle)
+        .value("MouseButtonMask_", ImGuiPopupFlags_MouseButtonMask_)
+        .value("MouseButtonDefault_", ImGuiPopupFlags_MouseButtonDefault_)
+        .value("NoReopen", ImGuiPopupFlags_NoReopen)
+        // .value("NoReopenAlwaysNavInit", ImGuiPopupFlags_NoReopenAlwaysNavInit)
+        .value("NoOpenOverExistingPopup", ImGuiPopupFlags_NoOpenOverExistingPopup)
+        .value("NoOpenOverItems", ImGuiPopupFlags_NoOpenOverItems)
+        .value("AnyPopupId", ImGuiPopupFlags_AnyPopupId)
+        .value("AnyPopupLevel", ImGuiPopupFlags_AnyPopupLevel)
+        .value("AnyPopup", ImGuiPopupFlags_AnyPopup)
+        ;
+
+    emscripten::enum_<ImGuiSelectableFlags_>("ImGuiSelectableFlags")
+        .value("None", ImGuiSelectableFlags_None)
+        .value("DontClosePopups", ImGuiSelectableFlags_DontClosePopups)
+        .value("SpanAllColumns", ImGuiSelectableFlags_SpanAllColumns)
+        .value("AllowDoubleClick", ImGuiSelectableFlags_AllowDoubleClick)
+        .value("Disabled", ImGuiSelectableFlags_Disabled)
+        .value("AllowOverlap", ImGuiSelectableFlags_AllowOverlap)
+        // Deprecated
+        .value("ImGuiSelectableFlags_AllowItemOverlap", ImGuiSelectableFlags_AllowItemOverlap)
+        ;
+
     emscripten::constant("IMGUI_VERSION", emscripten::val(IMGUI_VERSION));
 }
