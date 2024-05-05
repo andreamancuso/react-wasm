@@ -24,14 +24,6 @@
 
 using json = nlohmann::json;
 
-struct SliderStuff {
-    std::string type;
-    float value;
-    float min;
-    float max;
-    std::string label;
-};
-
 struct MultiSliderStuff {
     std::unique_ptr<float[]> values;
     float min;
@@ -190,6 +182,29 @@ class Checkbox final : public Widget {
         }
 };
 
+class Slider final : public Widget {
+    protected:
+        Slider(std::string label, float defaultValue, float min, float max, std::string sliderType) {
+            this->type = sliderType;
+            this->label = label;
+            this->value = defaultValue;
+            this->min = min;
+            this->max = max;
+        }
+
+    public:
+        std::string type;
+        float value;
+        float min;
+        float max;
+        std::string label;
+
+        static std::unique_ptr<Slider> makeSliderWidget(std::string label, float defaultValue, float min, float max, std::string sliderType) {
+            Slider instance(label, defaultValue, min, max, sliderType);
+            return std::make_unique<Slider>(std::move(instance));
+        }
+};
+
 class ReactImgui final : public ImPlotView {
     typedef std::function<void(const json&)> rendererFunction;
 
@@ -197,7 +212,7 @@ class ReactImgui final : public ImPlotView {
         json widgets;
         std::unordered_map<std::string, std::unique_ptr<InputText>> inputTexts;
         std::unordered_map<std::string, std::unique_ptr<Combo>> combos;
-        std::unordered_map<std::string, std::unique_ptr<SliderStuff>> sliders;
+        std::unordered_map<std::string, std::unique_ptr<Slider>> sliders;
         std::unordered_map<std::string, std::unique_ptr<MultiSliderStuff>> multiSliders;
         std::unordered_map<std::string, std::unique_ptr<Checkbox>> checkboxes;
         std::unordered_map<std::string, std::unique_ptr<ButtonStuff>> buttons;
@@ -572,13 +587,7 @@ class ReactImgui final : public ImPlotView {
                 sliders[id]->min = min;
                 sliders[id]->max = max;
             } else {
-                sliders[id] = std::make_unique<SliderStuff>();
-
-                sliders[id]->type = sliderType;
-                sliders[id]->label = label;
-                sliders[id]->value = defaultValue;
-                sliders[id]->min = min;
-                sliders[id]->max = max;
+                sliders[id] = Slider::makeSliderWidget(label, defaultValue, min, max, sliderType);
             }
         }
 
