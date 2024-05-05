@@ -24,14 +24,6 @@
 
 using json = nlohmann::json;
 
-struct InputTextStuff {
-    std::unique_ptr<char[]> bufferPointer;
-    std::shared_ptr<emscripten::val> onInputTextChange;
-    std::string widgetId;
-    std::string defaultValue;
-    std::string label;
-};
-
 struct SliderStuff {
     std::string type;
     float value;
@@ -161,12 +153,37 @@ class Combo final : public Widget {
         }
 };
 
+class InputText final : public Widget {
+    protected:
+        InputText(std::string id, std::string defaultValue, std::string label) {
+            this->bufferPointer = std::make_unique<char[]>(100);
+            this->widgetId = id;
+            this->defaultValue = defaultValue;
+            this->label = label;
+
+            strncpy(this->bufferPointer.get(), defaultValue.c_str(), 99);
+        }
+
+    public:
+        std::unique_ptr<char[]> bufferPointer;
+        std::string widgetId;
+        std::string defaultValue;
+        std::string label;
+
+        inline static emscripten::val onInputTextChange_;
+
+        static std::unique_ptr<InputText> makeInputTextWidget(std::string id, std::string defaultValue, std::string label) {
+            InputText instance(id, defaultValue, label);
+            return std::make_unique<InputText>(std::move(instance));
+        }
+};
+
 class ReactImgui final : public ImPlotView {
     typedef std::function<void(const json&)> rendererFunction;
 
     private:
         json widgets;
-        std::unordered_map<std::string, std::unique_ptr<InputTextStuff>> inputTexts;
+        std::unordered_map<std::string, std::unique_ptr<InputText>> inputTexts;
         std::unordered_map<std::string, std::unique_ptr<Combo>> combos;
         std::unordered_map<std::string, std::unique_ptr<SliderStuff>> sliders;
         std::unordered_map<std::string, std::unique_ptr<MultiSliderStuff>> multiSliders;
@@ -202,10 +219,10 @@ class ReactImgui final : public ImPlotView {
         static int InputTextCb(ImGuiInputTextCallbackData* data)
         {
             if (data->EventFlag == ImGuiInputTextFlags_CallbackEdit) {
-                auto inputTextStuff = reinterpret_cast<InputTextStuff*>(data->UserData);
+                auto inputText = reinterpret_cast<InputText*>(data->UserData);
 
-                std::string str = data->Buf;
-                inputTextStuff->onInputTextChange->call<void>("call", 0, inputTextStuff->widgetId, str);
+                std::string value = data->Buf;
+                InputText::onInputTextChange_.call<void>("call", 0, inputText->widgetId, value);
             }
 
             return 0;
@@ -607,15 +624,7 @@ class ReactImgui final : public ImPlotView {
             if (inputTexts.contains(id)) {
                 inputTexts[id]->label = label;
             } else {
-                inputTexts[id] = std::make_unique<InputTextStuff>();
-
-                inputTexts[id]->bufferPointer = std::make_unique<char[]>(100);
-                inputTexts[id]->onInputTextChange = onInputTextChange;
-                inputTexts[id]->widgetId = id;
-                inputTexts[id]->defaultValue = defaultValue;
-                inputTexts[id]->label = label;
-
-                strncpy(inputTexts[id].get()->bufferPointer.get(), defaultValue.c_str(), 99);
+                inputTexts[id] = InputText::makeInputTextWidget(id, defaultValue, label);
             }
         }
 
@@ -652,6 +661,8 @@ class ReactImgui final : public ImPlotView {
             onMultiValueChange = std::make_unique<emscripten::val>(onMultiValueChangeFn);
             onBooleanValueChange = std::make_unique<emscripten::val>(onBooleanValueChangeFn);
             onClick = std::make_unique<emscripten::val>(onClickFn);
+
+            InputText::onInputTextChange_ = onInputTextChangeFn;
 
             rendererFunctionMap["Button"] = std::bind(&ReactImgui::RenderButton, this, std::placeholders::_1);
             rendererFunctionMap["Checkbox"] = std::bind(&ReactImgui::RenderCheckbox, this, std::placeholders::_1);
