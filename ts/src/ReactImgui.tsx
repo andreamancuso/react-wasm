@@ -58,8 +58,6 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
     }, []);
 
     const onBooleanValueChange = useCallback((id: string, value: boolean) => {
-        console.log(id);
-
         setTimeout(() => {
             widgetRegistrationServiceRef.current.emitBooleanValueChangeEvent(id, value);
         }, 10);

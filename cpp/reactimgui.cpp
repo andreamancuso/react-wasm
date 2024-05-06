@@ -872,7 +872,6 @@ class ReactImgui final : public ImPlotView {
             // printf("%s\n", widgetsJson.c_str());
 
             InitWidgets(widgetsTree);
-            
         }
 
         json GetAvailableFonts() {
