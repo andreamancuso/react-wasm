@@ -242,13 +242,8 @@ class ReactImgui final : public ImPlotView {
     typedef std::function<void(const json&)> rendererFunction;
 
     private:
-        json widgets;
-        std::unordered_map<std::string, std::unique_ptr<InputText>> inputTexts;
-        std::unordered_map<std::string, std::unique_ptr<Combo>> combos;
-        std::unordered_map<std::string, std::unique_ptr<Slider>> sliders;
-        std::unordered_map<std::string, std::unique_ptr<MultiSlider>> multiSliders;
-        std::unordered_map<std::string, std::unique_ptr<Checkbox>> checkboxes;
-        std::unordered_map<std::string, std::unique_ptr<Button>> buttons;
+        json widgetsTree;
+        std::unordered_map<std::string, std::unique_ptr<Widget>> widgets;
 
         std::unordered_map<std::string, rendererFunction> rendererFunctionMap;
         std::unordered_map<int, std::unique_ptr<char[]>> floatFormatChars;
@@ -278,10 +273,10 @@ class ReactImgui final : public ImPlotView {
         static int InputTextCb(ImGuiInputTextCallbackData* data)
         {
             if (data->EventFlag == ImGuiInputTextFlags_CallbackEdit) {
-                auto inputText = reinterpret_cast<InputText*>(data->UserData);
+                auto pInputText = reinterpret_cast<InputText*>(data->UserData);
 
                 std::string value = data->Buf;
-                InputText::onInputTextChange_.call<void>("call", 0, inputText->widgetId, value);
+                InputText::onInputTextChange_.call<void>("call", 0, pInputText->widgetId, value);
             }
 
             return 0;
@@ -416,10 +411,12 @@ class ReactImgui final : public ImPlotView {
             auto id = val["id"].template get<std::string>();
             const char* idAsChar = id.c_str();
 
-            if (checkboxes.contains(id)) {
+            if (widgets.contains(id)) {
+                auto pCheckbox = static_cast<Checkbox*>(widgets[id].get());
+
                 ImGui::PushID(idAsChar);
-                if (ImGui::Checkbox(checkboxes[id].get()->label.c_str(), &checkboxes[id]->checked)) {
-                    onBooleanValueChange->call<void>("call", 0, id, checkboxes[id]->checked);
+                if (ImGui::Checkbox(pCheckbox->label.c_str(), &pCheckbox->checked)) {
+                    onBooleanValueChange->call<void>("call", 0, id, pCheckbox->checked);
                 }
                 ImGui::PopID();
             }
@@ -429,9 +426,11 @@ class ReactImgui final : public ImPlotView {
             auto id = val["id"].template get<std::string>();
             const char* idAsChar = id.c_str();
 
-            if (buttons.contains(id)) {
+            if (widgets.contains(id)) {
+                auto pButton = static_cast<Button*>(widgets[id].get());
+
                 ImGui::PushID(idAsChar);
-                if (ImGui::Button(buttons[id].get()->label.c_str())) {
+                if (ImGui::Button(pButton->label.c_str())) {
                     onClick->call<void>("call", 0, id);
                 }
                 ImGui::PopID();
@@ -442,15 +441,29 @@ class ReactImgui final : public ImPlotView {
             auto id = val["id"].template get<std::string>();
             const char* idAsChar = id.c_str();
 
-            if (sliders.contains(id)) {
+            if (widgets.contains(id)) {
+                auto pSlider = static_cast<Slider*>(widgets[id].get());
+
                 ImGui::PushID(idAsChar);
-                if (sliders[id]->type == "angle") {
-                    if (ImGui::SliderAngle(sliders[id].get()->label.c_str(), &sliders[id]->value, sliders[id]->min, sliders[id]->max, "%.0f")) { // min and max are not passed by reference, it's a copy every time...
-                        onNumericValueChange->call<void>("call", 0, id, sliders[id]->value);
+                if (pSlider->type == "angle") {
+                    if (ImGui::SliderAngle(
+                            pSlider->label.c_str(), 
+                            &pSlider->value, 
+                            pSlider->min, 
+                            pSlider->max, 
+                            "%.0f"
+                        )) { // min and max are not passed by reference, it's a copy every time...
+                        onNumericValueChange->call<void>("call", 0, id, pSlider->value);
                     }
                 } else {
-                    if (ImGui::SliderFloat(sliders[id].get()->label.c_str(), &sliders[id]->value, sliders[id]->min, sliders[id]->max, "%.0f")) { // min and max are not passed by reference, it's a copy every time...
-                        onNumericValueChange->call<void>("call", 0, id, sliders[id]->value);
+                    if (ImGui::SliderFloat(
+                            pSlider->label.c_str(), 
+                            &pSlider->value, 
+                            pSlider->min, 
+                            pSlider->max, 
+                            "%.0f"
+                        )) { // min and max are not passed by reference, it's a copy every time...
+                        onNumericValueChange->call<void>("call", 0, id, pSlider->value);
                     }
                 }
                 ImGui::PopID();
@@ -461,20 +474,64 @@ class ReactImgui final : public ImPlotView {
             auto id = val["id"].template get<std::string>();
             const char* idAsChar = id.c_str();
 
-            if (multiSliders.contains(id)) {
+            if (widgets.contains(id)) {
+                auto pMultiSlider = static_cast<MultiSlider*>(widgets[id].get());
+
                 ImGui::PushID(idAsChar);
 
-                if (multiSliders[id]->numValues == 2) {
-                    if (ImGui::SliderFloat2(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, floatFormatChars[multiSliders[id]->decimalDigits].get())) {
-                        onMultiValueChange->call<void>("call", 0, id, ReactImgui::ConvertArrayPointerToJsArray(multiSliders[id]->values.get(), multiSliders[id]->numValues));
+                if (pMultiSlider->numValues == 2) {
+                    if (ImGui::SliderFloat2(
+                            pMultiSlider->label.c_str(), 
+                            pMultiSlider->values.get(), 
+                            pMultiSlider->min, 
+                            pMultiSlider->max, 
+                            floatFormatChars[pMultiSlider->decimalDigits].get()
+                        )) {
+                        onMultiValueChange->call<void>(
+                            "call", 
+                            0, 
+                            id, 
+                            ReactImgui::ConvertArrayPointerToJsArray(
+                                pMultiSlider->values.get(), 
+                                pMultiSlider->numValues
+                            )
+                        );
                     }
-                } else if (multiSliders[id]->numValues == 3) {
-                    if (ImGui::SliderFloat3(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, floatFormatChars[multiSliders[id]->decimalDigits].get())) {
-                        onMultiValueChange->call<void>("call", 0, id, ReactImgui::ConvertArrayPointerToJsArray(multiSliders[id]->values.get(), multiSliders[id]->numValues));
+                } else if (pMultiSlider->numValues == 3) {
+                    if (ImGui::SliderFloat3(
+                            pMultiSlider->label.c_str(), 
+                            pMultiSlider->values.get(), 
+                            pMultiSlider->min, 
+                            pMultiSlider->max, 
+                            floatFormatChars[pMultiSlider->decimalDigits].get()
+                        )) {
+                        onMultiValueChange->call<void>(
+                            "call", 
+                            0, 
+                            id, 
+                            ReactImgui::ConvertArrayPointerToJsArray(
+                                pMultiSlider->values.get(), 
+                                pMultiSlider->numValues
+                            )
+                        );
                     }
-                } else if (multiSliders[id]->numValues == 4) {
-                    if (ImGui::SliderFloat4(multiSliders[id].get()->label.c_str(), multiSliders[id]->values.get(), multiSliders[id]->min, multiSliders[id]->max, floatFormatChars[multiSliders[id]->decimalDigits].get())) {
-                        onMultiValueChange->call<void>("call", 0, id, ReactImgui::ConvertArrayPointerToJsArray(multiSliders[id]->values.get(), multiSliders[id]->numValues));
+                } else if (pMultiSlider->numValues == 4) {
+                    if (ImGui::SliderFloat4(
+                            pMultiSlider->label.c_str(), 
+                            pMultiSlider->values.get(), 
+                            pMultiSlider->min, 
+                            pMultiSlider->max, 
+                            floatFormatChars[pMultiSlider->decimalDigits].get()
+                        )) {
+                        onMultiValueChange->call<void>(
+                            "call", 
+                            0, 
+                            id, 
+                            ReactImgui::ConvertArrayPointerToJsArray(
+                                pMultiSlider->values.get(), 
+                                pMultiSlider->numValues
+                            )
+                        );
                     }
                 }
 
@@ -486,9 +543,18 @@ class ReactImgui final : public ImPlotView {
             auto id = val["id"].template get<std::string>();
             const char* idAsChar = id.c_str();
 
-            if (inputTexts.contains(id)) {
+            if (widgets.contains(id)) {
+                auto pInputText = static_cast<InputText*>(widgets[id].get());
+
                 ImGui::PushID(idAsChar);
-                ImGui::InputText(inputTexts[id].get()->label.c_str(), inputTexts[id].get()->bufferPointer.get(), 100, inputTextFlags, InputTextCb, (void*)inputTexts[id].get());
+                ImGui::InputText(
+                    pInputText->label.c_str(), 
+                    pInputText->bufferPointer.get(), 
+                    100, 
+                    inputTextFlags, 
+                    InputTextCb, 
+                    (void*)pInputText
+                );
                 ImGui::PopID();
             }
         }
@@ -497,10 +563,21 @@ class ReactImgui final : public ImPlotView {
             auto id = val["id"].template get<std::string>();
             const char* idAsChar = id.c_str();
 
-            if (combos.contains(id)) {
+            if (widgets.contains(id)) {
+                auto pCombo = static_cast<Combo*>(widgets[id].get());
+
                 ImGui::PushID(idAsChar);
-                if (ImGui::Combo(combos[id].get()->label.c_str(), &combos[id].get()->selectedIndex, combos[id].get()->itemsSeparatedByZeros.get())) {
-                    onComboChange->call<void>("call", 0, id, combos[id].get()->selectedIndex);
+                if (ImGui::Combo(
+                        pCombo->label.c_str(), 
+                        &pCombo->selectedIndex, 
+                        pCombo->itemsSeparatedByZeros.get()
+                    )) {
+                    onComboChange->call<void>(
+                        "call", 
+                        0, 
+                        id, 
+                        pCombo->selectedIndex
+                    );
                 }
                 ImGui::PopID();
             }
@@ -545,10 +622,12 @@ class ReactImgui final : public ImPlotView {
             auto id = val["id"].template get<std::string>();
             auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
 
-            if (buttons.contains(id)) {
-                buttons[id]->label = label;
+            if (widgets.contains(id)) {
+                auto pButton = static_cast<Button*>(widgets[id].get());
+
+                pButton->label = label;
             } else {
-                buttons[id] = Button::makeButtonWidget(label);
+                widgets[id] = Button::makeButtonWidget(label);
             }
         }
 
@@ -561,10 +640,12 @@ class ReactImgui final : public ImPlotView {
             auto defaultChecked = val.contains("defaultChecked") && val["defaultChecked"].is_boolean() ? val["defaultChecked"].template get<bool>() : false;
             auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
 
-            if (checkboxes.contains(id)) {
-                checkboxes[id]->label = label;
+            if (widgets.contains(id)) {
+                auto pCheckbox = static_cast<Checkbox*>(widgets[id].get());
+
+                pCheckbox->label = label;
             } else {
-                checkboxes[id] = Checkbox::makeCheckboxWidget(label, defaultChecked);
+                widgets[id] = Checkbox::makeCheckboxWidget(label, defaultChecked);
             }
         }
 
@@ -580,18 +661,20 @@ class ReactImgui final : public ImPlotView {
             auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
             auto sliderType = val.contains("sliderType") && val["sliderType"].is_string() ? val["sliderType"].template get<std::string>() : "default";
 
-            if (sliders.contains(id)) {
-                sliders[id]->label = label;
+            if (widgets.contains(id)) {
+                auto pSlider = static_cast<Slider*>(widgets[id].get());
+
+                pSlider->label = label;
                 
-                if (sliders[id]->value > max) {
+                if (pSlider->value > max) {
                     // Don't want to go out of bounds!
-                    sliders[id]->value = max;
+                    pSlider->value = max;
                 }
 
-                sliders[id]->min = min;
-                sliders[id]->max = max;
+                pSlider->min = min;
+                pSlider->max = max;
             } else {
-                sliders[id] = Slider::makeSliderWidget(label, defaultValue, min, max, sliderType);
+                widgets[id] = Slider::makeSliderWidget(label, defaultValue, min, max, sliderType);
             }
         }
 
@@ -608,21 +691,22 @@ class ReactImgui final : public ImPlotView {
             auto max = val.contains("max") && val["max"].is_number() ? val["max"].template get<float>() : 10.0f;
             auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
 
-            if (multiSliders.contains(id)) {
-                multiSliders[id]->label = label;
+            if (widgets.contains(id)) {
+                auto pMultiSlider = static_cast<MultiSlider*>(widgets[id].get());
+
+                pMultiSlider->label = label;
                 
                 // todo: Changing numValues should probably throw - or emit a warning?
 
-                multiSliders[id]->min = min;
-                multiSliders[id]->max = max;
-                multiSliders[id]->decimalDigits = decimalDigits;
+                pMultiSlider->min = min;
+                pMultiSlider->max = max;
+                pMultiSlider->decimalDigits = decimalDigits;
             } else {
                 if (val.contains("defaultValues") && val["defaultValues"].is_array() && val["defaultValues"].size() == numValues) {
-                    multiSliders[id] = MultiSlider::makeMultiSliderWidget(label, min, max, numValues, decimalDigits, val["defaultValues"]);
+                    widgets[id] = MultiSlider::makeMultiSliderWidget(label, min, max, numValues, decimalDigits, val["defaultValues"]);
                 } else {
-                    multiSliders[id] = MultiSlider::makeMultiSliderWidget(label, min, max, numValues, decimalDigits);
+                    widgets[id] = MultiSlider::makeMultiSliderWidget(label, min, max, numValues, decimalDigits);
                 }
-                
             }
         }
 
@@ -635,10 +719,12 @@ class ReactImgui final : public ImPlotView {
             auto defaultValue = val.contains("defaultValue") && val["defaultValue"].is_string() ? val["defaultValue"].template get<std::string>() : "";
             auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
 
-            if (inputTexts.contains(id)) {
-                inputTexts[id]->label = label;
+            if (widgets.contains(id)) {
+                auto pInputText = static_cast<InputText*>(widgets[id].get());
+
+                pInputText->label = label;
             } else {
-                inputTexts[id] = InputText::makeInputTextWidget(id, defaultValue, label);
+                widgets[id] = InputText::makeInputTextWidget(id, defaultValue, label);
             }
         }
 
@@ -651,10 +737,12 @@ class ReactImgui final : public ImPlotView {
             auto defaultValue = val.contains("defaultValue") && val["defaultValue"].is_number() ? val["defaultValue"].template get<int>() : 0;
             auto label = val["label"].template get<std::string>();
             
-            if (combos.contains(id)) {
-                combos[id]->label = label;
+            if (widgets.contains(id)) {
+                auto pCombo = static_cast<Combo*>(widgets[id].get());
+
+                pCombo->label = label;
             } else {
-                combos[id] = Combo::makeComboWidget(label, defaultValue, val["optionsList"].template get<std::string>());
+                widgets[id] = Combo::makeComboWidget(label, defaultValue, val["optionsList"].template get<std::string>());
             }
         }
 
@@ -772,18 +860,18 @@ class ReactImgui final : public ImPlotView {
 
             ImGui::Begin(windowId, NULL, window_flags);
 
-            RenderWidgets(widgets);
+            RenderWidgets(widgetsTree);
 
             ImGui::End();
             ImGui::Render();
         }
 
         void SetWidgets(std::string widgetsJson) {
-            widgets = json::parse(widgetsJson);
+            widgetsTree = json::parse(widgetsJson);
 
             // printf("%s\n", widgetsJson.c_str());
 
-            InitWidgets(widgets);
+            InitWidgets(widgetsTree);
             
         }
 
