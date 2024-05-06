@@ -24,19 +24,6 @@
 
 using json = nlohmann::json;
 
-struct MultiSliderStuff {
-   
-};
-
-struct TabItemStuff {
-    bool visible; // ImGui misleadingly refers to this as `p_open`
-    std::string label;
-};
-
-struct ButtonStuff {
-    std::string label;
-};
-
 class Widget {
 
 };
@@ -177,6 +164,21 @@ class Checkbox final : public Widget {
         }
 };
 
+class Button final : public Widget {
+    protected:
+        Button(std::string label) {
+            this->label = label;
+        }
+
+    public:
+        std::string label;
+
+        static std::unique_ptr<Button> makeButtonWidget(std::string label) {
+            Button instance(label);
+            return std::make_unique<Button>(std::move(instance));
+        }
+};
+
 class Slider final : public Widget {
     protected:
         Slider(std::string label, float defaultValue, float min, float max, std::string sliderType) {
@@ -209,8 +211,6 @@ class MultiSlider final : public Widget {
             this->min = min;
             this->max = max;
             this->decimalDigits = decimalDigits;
-
-            
         }
 
     public:
@@ -248,8 +248,7 @@ class ReactImgui final : public ImPlotView {
         std::unordered_map<std::string, std::unique_ptr<Slider>> sliders;
         std::unordered_map<std::string, std::unique_ptr<MultiSlider>> multiSliders;
         std::unordered_map<std::string, std::unique_ptr<Checkbox>> checkboxes;
-        std::unordered_map<std::string, std::unique_ptr<ButtonStuff>> buttons;
-        std::unordered_map<std::string, std::unique_ptr<TabItemStuff>> tabItems;
+        std::unordered_map<std::string, std::unique_ptr<Button>> buttons;
 
         std::unordered_map<std::string, rendererFunction> rendererFunctionMap;
         std::unordered_map<int, std::unique_ptr<char[]>> floatFormatChars;
@@ -397,25 +396,20 @@ class ReactImgui final : public ImPlotView {
 
         void RenderTabItem(const json& val) {
             auto id = val["id"].template get<std::string>();
+            auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
             const char* idAsChar = id.c_str();
 
-            if (tabItems.contains(id)) {
-                ImGui::PushID(idAsChar);
-                // when p_open is true, tab item can be closed via dedicated button
-                // when p_open is false, tab item isn't even rendered
-                if (ImGui::BeginTabItem(tabItems[id].get()->label.c_str())) {
-                // if (ImGui::BeginTabItem(tabItems[id].get()->label.c_str(), &tabItems[id]->visible)) {
-                    // todo: how to send onSelectedTabChange event?
-                    // onBooleanValueChange->call<void>("call", 0, id, tabItems[id]->open);
-
-                    if (val.contains("children")) {
-                        RenderWidgets(val["children"]);
-                    }
-
-                    ImGui::EndTabItem();
+            ImGui::PushID(idAsChar);
+            // when p_open is true, tab item can be closed via dedicated button
+            // when p_open is false, tab item isn't even rendered
+            if (ImGui::BeginTabItem(label.c_str())) {
+                if (val.contains("children")) {
+                    RenderWidgets(val["children"]);
                 }
-                ImGui::PopID();
+
+                ImGui::EndTabItem();
             }
+            ImGui::PopID();
         }
 
         void RenderCheckbox(const json& val) {
@@ -538,8 +532,6 @@ class ReactImgui final : public ImPlotView {
                         InitCheckbox(val);
                     } else if (type == "Button") {
                         InitButton(val);
-                    } else if (type == "TabItem") {
-                        InitTabItem(val);
                     }
                 }
             }
@@ -556,28 +548,7 @@ class ReactImgui final : public ImPlotView {
             if (buttons.contains(id)) {
                 buttons[id]->label = label;
             } else {
-                buttons[id] = std::make_unique<ButtonStuff>();
-
-                buttons[id]->label = label;
-            }
-        }
-
-        void InitTabItem(const json& val) {
-            if (!val.contains("id") || !val["id"].is_string()) {
-                // throw?
-            }
-
-            auto id = val["id"].template get<std::string>();
-            // auto defaultOpen = val.contains("defaultOpen") && val["defaultOpen"].is_boolean() ? val["defaultOpen"].template get<bool>() : false;
-            auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
-
-            if (tabItems.contains(id)) {
-                tabItems[id]->label = label;
-            } else {
-                tabItems[id] = std::make_unique<TabItemStuff>();
-
-                tabItems[id]->label = label;
-                tabItems[id]->visible = true;
+                buttons[id] = Button::makeButtonWidget(label);
             }
         }
 
@@ -687,26 +658,7 @@ class ReactImgui final : public ImPlotView {
             }
         }
 
-    public:
-        ReactImgui(
-            emscripten::val onInputTextChangeFn,
-            emscripten::val onComboChangeFn,
-            emscripten::val onNumericValueChangeFn,
-            emscripten::val onMultiValueChangeFn,
-            emscripten::val onBooleanValueChangeFn,
-            emscripten::val onClickFn,
-            const char* newWindowId, 
-            const char* newGlWindowTitle
-        ) : ImPlotView(newWindowId, newGlWindowTitle) {
-            onInputTextChange = std::make_unique<emscripten::val>(onInputTextChangeFn);
-            onComboChange = std::make_unique<emscripten::val>(onComboChangeFn);
-            onNumericValueChange = std::make_unique<emscripten::val>(onNumericValueChangeFn);
-            onMultiValueChange = std::make_unique<emscripten::val>(onMultiValueChangeFn);
-            onBooleanValueChange = std::make_unique<emscripten::val>(onBooleanValueChangeFn);
-            onClick = std::make_unique<emscripten::val>(onClickFn);
-
-            InputText::onInputTextChange_ = onInputTextChangeFn;
-
+        void bindRendererFunctions() {
             rendererFunctionMap["Button"] = std::bind(&ReactImgui::RenderButton, this, std::placeholders::_1);
             rendererFunctionMap["Checkbox"] = std::bind(&ReactImgui::RenderCheckbox, this, std::placeholders::_1);
             rendererFunctionMap["MultiSlider"] = std::bind(&ReactImgui::RenderMultiSlider, this, std::placeholders::_1);
@@ -728,7 +680,9 @@ class ReactImgui final : public ImPlotView {
             rendererFunctionMap["Unindent"] = std::bind(&ReactImgui::RenderUnindent, this, std::placeholders::_1);
             rendererFunctionMap["SameLine"] = std::bind(&ReactImgui::RenderSameLine, this, std::placeholders::_1);
             rendererFunctionMap["Separator"] = std::bind(&ReactImgui::RenderSeparator, this, std::placeholders::_1);
-
+        }
+    
+        void setUpFloatFormatChars() {
             floatFormatChars[0] = std::make_unique<char[]>(4);
             floatFormatChars[1] = std::make_unique<char[]>(4);
             floatFormatChars[2] = std::make_unique<char[]>(4);
@@ -750,6 +704,30 @@ class ReactImgui final : public ImPlotView {
             strcpy(floatFormatChars[7].get(), "%.7f");
             strcpy(floatFormatChars[8].get(), "%.8f");
             strcpy(floatFormatChars[9].get(), "%.9f");
+        }
+    public:
+        ReactImgui(
+            emscripten::val onInputTextChangeFn,
+            emscripten::val onComboChangeFn,
+            emscripten::val onNumericValueChangeFn,
+            emscripten::val onMultiValueChangeFn,
+            emscripten::val onBooleanValueChangeFn,
+            emscripten::val onClickFn,
+            const char* newWindowId, 
+            const char* newGlWindowTitle
+        ) : ImPlotView(newWindowId, newGlWindowTitle) {
+            onInputTextChange = std::make_unique<emscripten::val>(onInputTextChangeFn);
+            onComboChange = std::make_unique<emscripten::val>(onComboChangeFn);
+            onNumericValueChange = std::make_unique<emscripten::val>(onNumericValueChangeFn);
+            onMultiValueChange = std::make_unique<emscripten::val>(onMultiValueChangeFn);
+            onBooleanValueChange = std::make_unique<emscripten::val>(onBooleanValueChangeFn);
+            onClick = std::make_unique<emscripten::val>(onClickFn);
+
+            // todo: should `onInputTextChangeFn` be wrapped with a shared pointer?
+            InputText::onInputTextChange_ = onInputTextChangeFn;
+
+            bindRendererFunctions();
+            setUpFloatFormatChars();
         }
 
         void PrepareForRender() {
