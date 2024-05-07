@@ -142,30 +142,37 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
             // console.log("sending widgets");
 
+            if (containerRef?.current) {
+                wasmRunner.resizeWindow(
+                    containerRef.current.clientWidth,
+                    containerRef.current.clientHeight - 62,
+                );
+            }
+
             wasmRunner.setWidgets(JSON.stringify(widgets));
         }
     }, [wasmRunner, widgets]);
 
-    useEffect(() => {
-        if (wasmRunner && containerRef?.current) {
-            const resizeObserver = new ResizeObserver(
-                debounce(() => {
-                    if (containerRef.current) {
-                        wasmRunner.resizeWindow(
-                            containerRef.current.clientWidth,
-                            containerRef.current.clientHeight - 62,
-                        );
-                    }
-                }, 20),
-            );
+    // useEffect(() => {
+    //     if (wasmRunner && containerRef?.current) {
+    //         const resizeObserver = new ResizeObserver(
+    //             debounce(() => {
+    //                 if (containerRef.current) {
+    //                     wasmRunner.resizeWindow(
+    //                         containerRef.current.clientWidth,
+    //                         containerRef.current.clientHeight - 62,
+    //                     );
+    //                 }
+    //             }, 20),
+    //         );
 
-            resizeObserver.observe(containerRef.current);
+    //         resizeObserver.observe(containerRef.current);
 
-            return () => resizeObserver.disconnect(); // clean up
-        } else {
-            return () => {};
-        }
-    }, [wasmRunner, containerRef]);
+    //         return () => resizeObserver.disconnect(); // clean up
+    //     } else {
+    //         return () => {};
+    //     }
+    // }, [wasmRunner, containerRef]);
 
     // console.log(widgets);
 
