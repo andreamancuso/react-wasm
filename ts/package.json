@@ -2,7 +2,6 @@
     "name": "react-imgui",
     "private": true,
     "version": "0.0.0",
-    "type": "module",
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
@@ -21,6 +20,7 @@
     },
     "devDependencies": {
         "@types/lodash.debounce": "4.0.9",
+        "@types/node": "^20.11.1",
         "@types/react": "^18.2.66",
         "@types/react-dom": "^18.2.22",
         "@types/react-reconciler": "^0",
