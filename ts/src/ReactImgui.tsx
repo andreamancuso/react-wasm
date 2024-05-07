@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useEffect, useMemo, useState, useRef, useCallback, PropsWithChildren } from "react";
+import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactNativeRenderer-dev.js";
 import { v4 as uuidv4 } from "uuid";
 import debounce from "lodash.debounce";
 // @ts-ignore wasm?
@@ -7,7 +8,7 @@ import getWasmModule from "./assets/reactImgui";
 import { WidgetRegistrationServiceContext } from "./contexts/widgetRegistrationServiceContext";
 
 import { MainModule, WasmExitStatus, WasmRunner } from "./wasm-app-types";
-import { render } from "./renderer/renderer";
+// import { render } from "./renderer/renderer";
 import { WidgetRegistrationService } from "./lib/widgetRegistrationService";
 import { resolveWidgets } from "./lib/resolveWidgets";
 import { ImguiWidgetsFlat, JSXWidgetNodesFlat, Primitive } from "./components/ReactImgui/types";
@@ -153,39 +154,52 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         }
     }, [wasmRunner, widgets]);
 
-    // useEffect(() => {
-    //     if (wasmRunner && containerRef?.current) {
-    //         const resizeObserver = new ResizeObserver(
-    //             debounce(() => {
-    //                 if (containerRef.current) {
-    //                     wasmRunner.resizeWindow(
-    //                         containerRef.current.clientWidth,
-    //                         containerRef.current.clientHeight - 62,
-    //                     );
-    //                 }
-    //             }, 20),
-    //         );
+    useEffect(() => {
+        if (wasmRunner && containerRef?.current) {
+            const resizeObserver = new ResizeObserver(
+                debounce(() => {
+                    if (containerRef.current) {
+                        wasmRunner.resizeWindow(
+                            containerRef.current.clientWidth,
+                            containerRef.current.clientHeight - 62,
+                        );
+                    }
+                }, 20),
+            );
 
-    //         resizeObserver.observe(containerRef.current);
+            resizeObserver.observe(containerRef.current);
 
-    //         return () => resizeObserver.disconnect(); // clean up
-    //     } else {
-    //         return () => {};
-    //     }
-    // }, [wasmRunner, containerRef]);
+            return () => resizeObserver.disconnect(); // clean up
+        } else {
+            return () => {};
+        }
+    }, [wasmRunner, containerRef]);
 
     // console.log(widgets);
 
     useEffect(() => {
         if (wasmRunner && !widgetsDefsRef.current) {
-            widgetsDefsRef.current = render(
+            // console.log(render);
+
+            render(
                 <WidgetRegistrationServiceContext.Provider
                     value={widgetRegistrationServiceRef.current}
                 >
                     {children}
                 </WidgetRegistrationServiceContext.Provider>,
-                { container: setWidgetsProxy },
+                0,
             );
+
+            // AppRegistry.registerComponent("");
+
+            // widgetsDefsRef.current = render(
+            //     <WidgetRegistrationServiceContext.Provider
+            //         value={widgetRegistrationServiceRef.current}
+            //     >
+            //         {children}
+            //     </WidgetRegistrationServiceContext.Provider>,
+            //     { container: setWidgetsProxy },
+            // );
         }
     }, [wasmRunner, widgetsDefsRef]);
 

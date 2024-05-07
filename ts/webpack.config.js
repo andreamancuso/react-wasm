@@ -21,23 +21,58 @@ module.exports = {
     resolve: {
         extensions: [".ts", ".tsx", ".js", ".mjs", ".css"],
         modules: [path.resolve(__dirname, "./"), path.resolve(__dirname, "./node_modules/")],
+        alias: {
+            "@react-native": path.resolve(__dirname, "react-native/"),
+            "react-native": path.resolve(__dirname, "react-native/"),
+        },
     },
     module: {
         rules: [
             {
                 test: /\.(m?js|jsx|tsx|ts)$/,
+                include: [path.resolve(__dirname, "src")],
                 exclude: /node_modules/,
-                use: ["babel-loader"],
+                use: {
+                    loader: "babel-loader",
+                    options: {
+                        presets: [
+                            ["@babel/preset-env", { targets: "defaults" }],
+                            "@babel/preset-typescript",
+                            ["@babel/preset-react", { runtime: "automatic" }],
+                        ],
+                        plugins: ["@babel/plugin-proposal-class-properties"],
+                    },
+                },
+            },
+            {
+                test: /\.(js)$/,
+                include: [path.resolve(__dirname, "react-native")],
+                exclude: /node_modules/,
+                use: {
+                    loader: "babel-loader",
+                    options: {
+                        presets: ["@babel/preset-env"],
+                        plugins: [
+                            "babel-plugin-syntax-hermes-parser",
+                            "@babel/plugin-transform-react-jsx",
+                            "@babel/plugin-transform-flow-strip-types",
+                            "@babel/plugin-proposal-class-properties",
+                            "@babel/plugin-transform-modules-commonjs",
+                        ],
+                    },
+                },
             },
             {
                 test: /\.css$/i,
                 use: [MiniCssExtractPlugin.loader, "css-loader"],
             },
             {
-                test: /\.(ico|icns|eot|woff|woff2|jpe?g)$/,
+                test: /\.(ico|icns|eot|woff|woff2|jpe?g|png)$/,
+                // exclude: [path.resolve(__dirname, "react-native")],
                 use: [
                     {
-                        loader: "file-loader",
+                        // loader: "asset/inline",
+                        loader: "url-loader",
                     },
                 ],
             },
