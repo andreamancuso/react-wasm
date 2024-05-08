@@ -11,7 +11,7 @@
 #include "implot.h"
 #include "implot_internal.h"
 
-#include "implotview.cpp"
+#include "implotview.h"
 
 ImPlotAxisFlags axis_auto_fit_flag = ImPlotAxisFlags_AutoFit;
 

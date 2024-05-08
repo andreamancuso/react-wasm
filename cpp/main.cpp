@@ -22,7 +22,7 @@
 #include <nlohmann/json.hpp>
 
 #include "glwasm.cpp"
-#include "reactimgui.cpp"
+#include "reactimgui.h"
 
 using json = nlohmann::json;
 
@@ -73,8 +73,12 @@ class WasmRunner {
             glWasm->SetWindowSize(width, height);
         }
 
-        void setWidgets(std::string widgetsJson) {
-            view->SetWidgets(widgetsJson);
+        void setWidget(std::string widgetJsonAsString) {
+            view->SetWidget(widgetJsonAsString);
+        }
+
+        void setChildren(int id, emscripten::val childrenIds) {
+            view->SetChildren(id, childrenIds);
         }
 
         std::string getAvailableFonts() {
@@ -107,7 +111,8 @@ EMSCRIPTEN_BINDINGS(my_module) {
     .function("run", &WasmRunner::run)
     .function("exit", &WasmRunner::exit)
     .function("resizeWindow", &WasmRunner::resizeWindow)
-    .function("setWidgets", &WasmRunner::setWidgets)
+    .function("setWidget", &WasmRunner::setWidget)
+    .function("setChildren", &WasmRunner::setChildren)
     .function("getAvailableFonts", &WasmRunner::getAvailableFonts)
     // .function("appendChartData", &WasmRunner::appendChartData)
     // .function("setAxesDecimalPlaces", &WasmRunner::setAxesDecimalPlaces)

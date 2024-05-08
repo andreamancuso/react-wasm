@@ -25,9 +25,7 @@ class ImGuiView : public View {
             clearColor = { v4.x * v4.w, v4.y * v4.w, v4.z * v4.w, v4.w };
         }
 
-        WGPUColor GetClearColor() {
-            return clearColor;
-        }
+        WGPUColor GetClearColor();
 
         void SetCurrentContext() {
             ImGui::SetCurrentContext(imGuiCtx);

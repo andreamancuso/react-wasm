@@ -21,6 +21,7 @@
 #include <nlohmann/json.hpp>
 
 #include "reactimgui.h"
+#include "implotview.h"
 #include "widget.h"
 
 using json = nlohmann::json;
@@ -69,8 +70,7 @@ void ReactImgui::InitWidget(const json& widgetDef) {
     } else if (type == "Button") {
         InitButton(widgetDef);
     } else if (type == "Fragment") {
-        Fragment fragment(id);
-        widgets[id] = std::make_unique<Fragment>(fragment);
+        widgets[id] = std::make_unique<Fragment>(id);
     } else if (type == "SameLine") {
         widgets[id] = std::make_unique<SameLine>(id);
     } else if (type == "Separator") {
@@ -124,7 +124,7 @@ void ReactImgui::InitButton(const json& val) {
 
         pButton->label = label;
     } else {
-        widgets[id] = Button::makeButtonWidget(int, label);
+        widgets[id] = Button::makeButtonWidget(id, label);
     }
 };
 
@@ -268,7 +268,7 @@ void ReactImgui::SetUpFloatFormatChars() {
 };
 
 void ReactImgui::RenderWidgetById(int id) {
-    widgets[id]->Render(this, hierarchy[id]);
+    widgets[id]->Render(this);
 };
 
 void ReactImgui::PrepareForRender() {
@@ -324,8 +324,8 @@ void ReactImgui::SetWidget(std::string widgetJsonAsString) {
     InitWidget(json::parse(widgetJsonAsString));
 };
 
-void ReactImgui::SetChildren(int id, emscripten::val childIds) {
-    hierarchy[id] = emscripten::val::convertJSArrayToNumberVector(childIds);
+void ReactImgui::SetChildren(int id, emscripten::val childrenIds) {
+    hierarchy[id] = emscripten::convertJSArrayToNumberVector<int>(childrenIds);
 };
 
 json ReactImgui::GetAvailableFonts() {

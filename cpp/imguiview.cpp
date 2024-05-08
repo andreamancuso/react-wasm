@@ -6,5 +6,8 @@
 #include <webgpu/webgpu_cpp.h>
 
 #include "./imguiview.h"
-#include "./view.cpp"
 
+
+WGPUColor ImGuiView::GetClearColor() {
+    return clearColor;
+};

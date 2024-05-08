@@ -20,9 +20,9 @@
 #include "implot_internal.h"
 #include <nlohmann/json.hpp>
 
-#include "implotview.h"
-
 using json = nlohmann::json;
+
+#include "implotview.h"
 
 #pragma once
 
@@ -32,7 +32,7 @@ class ReactImgui : public ImPlotView {
     typedef std::function<void(const json&)> rendererFunction;
 
     private:
-        std::unordered_map<std::string, std::unique_ptr<Widget>> widgets;
+        std::unordered_map<int, std::unique_ptr<Widget>> widgets;
 
         void RenderWidgets();
         void InitWidget(const json& widgetDef);
