@@ -85,6 +85,10 @@ class WasmRunner {
             view->SetChildren(id, childrenIds);
         }
 
+        emscripten::val getChildren(int id) {
+            return view->GetChildren(id);
+        }
+
         std::string getAvailableFonts() {
             return view->GetAvailableFonts().dump();
         }
@@ -118,6 +122,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     .function("setWidget", &WasmRunner::setWidget)
     .function("patchWidget", &WasmRunner::patchWidget)
     .function("setChildren", &WasmRunner::setChildren)
+    .function("getChildren", &WasmRunner::getChildren)
     .function("getAvailableFonts", &WasmRunner::getAvailableFonts)
     // .function("appendChartData", &WasmRunner::appendChartData)
     // .function("setAxesDecimalPlaces", &WasmRunner::setAxesDecimalPlaces)

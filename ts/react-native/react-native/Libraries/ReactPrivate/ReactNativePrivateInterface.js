@@ -56,15 +56,33 @@ class UIManager {
         addAtIndices,
         removeAtIndices,
     ) {
-        console.log(
-            "manageChildren",
-            id,
-            moveFromIndices,
-            moveToIndices,
-            addChildReactTags,
-            addAtIndices,
-            removeAtIndices,
-        );
+        // console.log(
+        //     "manageChildren",
+        //     id,
+        //     moveFromIndices,
+        //     moveToIndices,
+        //     addChildReactTags,
+        //     addAtIndices,
+        //     removeAtIndices,
+        // );
+
+        const children = this.wasmRunner.getChildren(id);
+
+        // console.log(children);
+
+        if (addChildReactTags.length > 0 && addAtIndices.length > 0) {
+            addChildReactTags.forEach((addChildReactTag, index) => {
+                const addAtIndice = addAtIndices[index];
+
+                children.splice(addAtIndice, 0, ...addChildReactTags);
+            });
+        }
+
+        if (removeAtIndices.length > 0) {
+            children.splice(removeAtIndices[0], 1);
+        }
+
+        this.wasmRunner.setChildren(id, children);
     }
 }
 
@@ -141,7 +159,7 @@ module.exports = {
                         };
                 }
 
-                console.log(elementType);
+                // console.log(elementType);
 
                 return {
                     validAttributes: [],

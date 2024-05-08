@@ -3428,6 +3428,14 @@ function dbg(...args) {
 
   var __emval_new_array = () => Emval.toHandle([]);
 
+  var __emval_new_array_from_memory_view = (view) => {
+      view = Emval.toValue(view);
+      // using for..loop is faster than Array.from
+      var a = new Array(view.length);
+      for (var i = 0; i < view.length; i++) a[i] = view[i];
+      return Emval.toHandle(a);
+    };
+
   
   var __emval_new_cstring = (v) => Emval.toHandle(getStringOrSymbol(v));
 
@@ -8062,6 +8070,8 @@ var wasmImports = {
   _emval_incref: __emval_incref,
   /** @export */
   _emval_new_array: __emval_new_array,
+  /** @export */
+  _emval_new_array_from_memory_view: __emval_new_array_from_memory_view,
   /** @export */
   _emval_new_cstring: __emval_new_cstring,
   /** @export */

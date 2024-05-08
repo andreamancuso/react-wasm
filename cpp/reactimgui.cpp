@@ -429,6 +429,10 @@ void ReactImgui::SetChildren(int id, emscripten::val childrenIds) {
     hierarchy[id] = emscripten::convertJSArrayToNumberVector<int>(childrenIds);
 };
 
+emscripten::val ReactImgui::GetChildren(int id) {
+    return emscripten::val::array(hierarchy[id]);
+};
+
 json ReactImgui::GetAvailableFonts() {
     SetCurrentContext();
     ImGuiIO& io = ImGui::GetIO();

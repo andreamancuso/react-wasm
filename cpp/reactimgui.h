@@ -97,6 +97,8 @@ class ReactImgui : public ImPlotView {
 
         void SetChildren(int id, emscripten::val childIds);
 
+        emscripten::val GetChildren(int id);
+
         json GetAvailableFonts();
 };
 

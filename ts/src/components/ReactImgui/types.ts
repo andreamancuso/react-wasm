@@ -22,7 +22,7 @@ export type WidgetPropsMap = {
     UnformattedText: {
         text: string;
     };
-    TextDisabled: {
+    DisabledText: {
         text: string;
     };
     HelpMarker: {

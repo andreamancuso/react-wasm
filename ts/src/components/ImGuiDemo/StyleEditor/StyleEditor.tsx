@@ -11,10 +11,21 @@ import { Tables } from "./Sizes/Tables";
 import { Widgets } from "./Sizes/Widgets";
 import { Tooltips } from "./Sizes/Tooltips";
 import { Misc } from "./Sizes/Misc";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 export const StyleEditor = () => {
-    const handleClick = useCallback(() => console.log("clicked"), []);
+    const [items, setItems] = useState<any[]>([]);
+    const addItem = useCallback(() => setItems((value) => [...value, "hello"]), []);
+    const addManyItems = useCallback(
+        () => setItems((items) => items.concat(Array.from({ length: 200 }, (_, i) => i + 1))),
+        [],
+    );
+    const resetItems = useCallback(() => setItems([]), []);
+
+    const removeItem = useCallback(
+        (index: number) => setItems((value) => value.filter((_item, i) => i !== index)),
+        [],
+    );
 
     return (
         <ReactImgui.Fragment>
@@ -23,10 +34,17 @@ export const StyleEditor = () => {
             <FrameRounding />
             <BorderControl />
             <ReactImgui.SameLine>
-                <ReactImgui.Button label="Save Ref" onClick={handleClick} />
-                <ReactImgui.Button label="Revert Ref" onClick={handleClick} />
+                <ReactImgui.Button label="Save Ref" onClick={addItem} />
+                <ReactImgui.Button label="Add Many" onClick={addManyItems} />
+                <ReactImgui.Button label="Revert Ref" onClick={resetItems} />
                 <HelpMarker text='Save/Revert in local non-persistent storage. Default Colors definition are not affected. Use "Export" below to save them somewhere.' />
             </ReactImgui.SameLine>
+            {items.map((item, index) => (
+                <ReactImgui.SameLine key={index}>
+                    <ReactImgui.UnformattedText text={`${item}`} />
+                    <ReactImgui.Button onClick={() => removeItem(index)} label="X" />
+                </ReactImgui.SameLine>
+            ))}
             <ReactImgui.Separator />
             <ReactImgui.TabBar>
                 <ReactImgui.TabItem label="Sizes">

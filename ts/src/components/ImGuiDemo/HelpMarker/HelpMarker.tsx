@@ -6,7 +6,7 @@ type HelpMarkerProps = {
 
 export const HelpMarker = ({ text }: HelpMarkerProps) => (
     <ReactImgui.Fragment>
-        <ReactImgui.TextDisabled text="(?)" />
+        <ReactImgui.DisabledText text="(?)" />
         <ReactImgui.ItemTooltip>
             <ReactImgui.TextWrap width={35 * 12}>
                 <ReactImgui.UnformattedText text={text} />

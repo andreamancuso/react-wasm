@@ -16,7 +16,7 @@ import { SeparatorText } from "./SeparatorText";
 import { Slider } from "./Slider";
 import { TabBar } from "./TabBar";
 import { TabItem } from "./TabItem";
-import { TextDisabled } from "./TextDisabled";
+import { DisabledText } from "./DisabledText";
 import { TextWrap } from "./TextWrap";
 import { TreeNode } from "./TreeNode";
 import { UnformattedText } from "./UnformattedText";
@@ -32,7 +32,7 @@ export const components = {
     SeparatorText,
     BulletText,
     Indent,
-    TextDisabled,
+    DisabledText,
     ItemTooltip,
     TextWrap,
     Combo,
