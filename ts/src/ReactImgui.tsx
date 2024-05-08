@@ -1,7 +1,9 @@
 import * as React from "react";
 import { useEffect, useMemo, useState, useRef, useCallback, PropsWithChildren } from "react";
 // @ts-ignore
-import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactNativeRenderer-dev.js";
+// import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactNativeRenderer-dev.js";
+// @ts-ignore
+import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactNativeRenderer-prod.js";
 // @ts-ignore
 import * as rnInterface from "../react-native/react-native/libraries/ReactPrivate/ReactNativePrivateInterface";
 import { v4 as uuidv4 } from "uuid";
@@ -38,7 +40,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
     const [widgets, setWidgets] = useState<ImguiWidgetsFlat[]>([]);
 
     const onTextChange = useCallback((id: string, value: string) => {
-        console.log(id, value);
+        // console.log(id, value);
 
         const rootNodeID = id;
         const topLevelType = "onChange";
@@ -89,7 +91,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const topLevelType = "onChange";
         const nativeEventParam = { value };
 
-        console.log("changed boolean", id, value);
+        // console.log("changed boolean", id, value);
 
         rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
         // setTimeout(() => {
@@ -101,7 +103,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const rootNodeID = id;
         const topLevelType = "onClick";
 
-        console.log("clicked", id);
+        // console.log("clicked", id);
 
         rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, { value: "clicked" });
         // const nativeEventParam = { value };
@@ -223,7 +225,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                 </WidgetRegistrationServiceContext.Provider>,
                 0, // containerTag,
                 () => {
-                    console.log("initialised");
+                    // console.log("initialised");
                 },
             );
 

@@ -38,6 +38,7 @@ export const StyleEditor = () => {
                 <ReactImgui.Button label="Add Many" onClick={addManyItems} />
                 <ReactImgui.Button label="Revert Ref" onClick={resetItems} />
                 <HelpMarker text='Save/Revert in local non-persistent storage. Default Colors definition are not affected. Use "Export" below to save them somewhere.' />
+                <ReactImgui.UnformattedText text={`${items.length}`} />
             </ReactImgui.SameLine>
             {items.map((item, index) => (
                 <ReactImgui.SameLine key={index}>
