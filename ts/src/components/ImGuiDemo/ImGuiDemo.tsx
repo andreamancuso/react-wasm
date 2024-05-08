@@ -6,10 +6,35 @@ import { StyleEditor } from "src/components/ImGuiDemo/StyleEditor/StyleEditor";
 
 export const ImGuiDemo = () => {
     const [text, setText] = useState("Hello, world!");
+    const [tripleSliderValue, setTripleSliderValue] = useState<[number, number, number]>([9, 9, 9]);
+    const [quadSliderValue, setQuadSliderValue] = useState<[number, number, number, number]>([
+        9, 9, 9, 9,
+    ]);
 
     const handleInputTextChanged = useCallback((event: any) => {
         if (event?.nativeEvent) {
             setText(event?.nativeEvent.value);
+        }
+    }, []);
+
+    const handleTripleSliderValueChanged = useCallback((event: any) => {
+        if (event.nativeEvent) {
+            setTripleSliderValue([
+                event.nativeEvent.values[0],
+                event.nativeEvent.values[1],
+                event.nativeEvent.values[2],
+            ]);
+        }
+    }, []);
+
+    const handleQuadSliderValueChanged = useCallback((event: any) => {
+        if (event.nativeEvent) {
+            setQuadSliderValue([
+                event.nativeEvent.values[0],
+                event.nativeEvent.values[1],
+                event.nativeEvent.values[2],
+                event.nativeEvent.values[3],
+            ]);
         }
     }, []);
 
@@ -58,10 +83,19 @@ export const ImGuiDemo = () => {
                 <ReactImgui.UnformattedText text="Coming soon!" />
             </ReactImgui.CollapsingHeader>
             <ReactImgui.CollapsingHeader label="Widgets">
-                <ReactImgui.UnformattedText text="Triple Slider" />
-                <ReactImgui.MultiSlider numValues={3} />
-                <ReactImgui.UnformattedText text="Quadruple Slider" />
-                <ReactImgui.MultiSlider numValues={4} />
+                <ReactImgui.SameLine>
+                    <ReactImgui.UnformattedText text="Triple Slider" />
+                    <ReactImgui.MultiSlider
+                        numValues={3}
+                        onChange={handleTripleSliderValueChanged}
+                    />
+                    <ReactImgui.UnformattedText text={tripleSliderValue.join(", ")} />
+                </ReactImgui.SameLine>
+                <ReactImgui.SameLine>
+                    <ReactImgui.UnformattedText text="Quadruple Slider" />
+                    <ReactImgui.MultiSlider numValues={4} onChange={handleQuadSliderValueChanged} />
+                    <ReactImgui.UnformattedText text={quadSliderValue.join(", ")} />
+                </ReactImgui.SameLine>
             </ReactImgui.CollapsingHeader>
         </ReactImgui.Fragment>
     );

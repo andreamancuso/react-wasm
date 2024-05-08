@@ -11,8 +11,11 @@ import { Tables } from "./Sizes/Tables";
 import { Widgets } from "./Sizes/Widgets";
 import { Tooltips } from "./Sizes/Tooltips";
 import { Misc } from "./Sizes/Misc";
+import { useCallback } from "react";
 
 export const StyleEditor = () => {
+    const handleClick = useCallback(() => console.log("clicked"), []);
+
     return (
         <ReactImgui.Fragment>
             <StyleSelector />
@@ -20,8 +23,8 @@ export const StyleEditor = () => {
             <FrameRounding />
             <BorderControl />
             <ReactImgui.SameLine>
-                <ReactImgui.Button label="Save Ref" />
-                <ReactImgui.Button label="Revert Ref" />
+                <ReactImgui.Button label="Save Ref" onClick={handleClick} />
+                <ReactImgui.Button label="Revert Ref" onClick={handleClick} />
                 <HelpMarker text='Save/Revert in local non-persistent storage. Default Colors definition are not affected. Use "Export" below to save them somewhere.' />
             </ReactImgui.SameLine>
             <ReactImgui.Separator />

@@ -136,10 +136,12 @@ module.exports = {
                                 defaultChecked: true,
                                 size: true,
                                 onChange: true,
-                                onChangeText: true,
+                                onClick: true,
                             },
                         };
                 }
+
+                console.log(elementType);
 
                 return {
                     validAttributes: [],

@@ -8,9 +8,10 @@ export const DisplaySafeAreaPadding = () => {
     const service = useWidgetRegistrationService();
     const [value, setValue] = useState<[number, number]>([9, 9]);
 
-    // todo: remove casting
-    const handleValueChanged = useCallback((values: Primitive[]) => {
-        setValue([values[0] as number, values[1] as number]);
+    const handleValueChanged = useCallback((event: any) => {
+        if (event.nativeEvent) {
+            setValue([event.nativeEvent.values[0], event.nativeEvent.values[1]]);
+        }
     }, []);
 
     return (

@@ -9,13 +9,7 @@ type ButtonProps = {
 };
 
 export const Button: WidgetFunctionComponent<ButtonProps> = ({ label, onClick }) => {
-    const [widgetId, widgetRegistrationService] = useWidgetEventManagement("boolean");
-
-    useEffect(() => {
-        if (onClick) {
-            widgetRegistrationService.onBooleanValueChange(widgetId.current, onClick);
-        }
-    }, [onClick]);
+    const [widgetId, widgetRegistrationService] = useWidgetEventManagement();
 
     return <widget type="Button" label={label} id={widgetId.current} onClick={onClick} />;
 };

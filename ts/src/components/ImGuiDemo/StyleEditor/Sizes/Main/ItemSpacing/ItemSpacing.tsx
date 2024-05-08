@@ -9,7 +9,7 @@ export const ItemSpacing = () => {
 
     const handleValueChanged = useCallback((event: any) => {
         if (event.nativeEvent) {
-            setValue(event.nativeEvent.value);
+            setValue([event.nativeEvent.values[0], event.nativeEvent.values[1]]);
         }
     }, []);
 

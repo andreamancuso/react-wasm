@@ -351,27 +351,31 @@ void ReactImgui::PatchWidget(int id, std::string widgetJsonAsString) {
         auto type = pWidget->type;
 
         if (type == "InputText") {
-            // auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_string() ? widgetDef["defaultValue"].template get<std::string>() : "";
-            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
-            static_cast<InputText*>(pWidget)->label = label;
+            if (widgetDef.contains("label") && widgetDef["label"].is_string()) {
+                static_cast<InputText*>(pWidget)->label = widgetDef["label"].template get<std::string>();
+            }
         } else if (type == "Combo") {
-            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
-            static_cast<Combo*>(pWidget)->label = label;
+            if (widgetDef.contains("label") && widgetDef["label"].is_string()) {
+                static_cast<Combo*>(pWidget)->label = widgetDef["label"].template get<std::string>();
+            }
         } else if (type == "Slider") {
-            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
-            static_cast<Slider*>(pWidget)->label = label;
+            if (widgetDef.contains("label") && widgetDef["label"].is_string()) {
+                static_cast<Slider*>(pWidget)->label = widgetDef["label"].template get<std::string>();
+            }
         } else if (type == "MultiSlider") {
-            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
-            static_cast<MultiSlider*>(pWidget)->label = label;
+            if (widgetDef.contains("label") && widgetDef["label"].is_string()) {
+                static_cast<MultiSlider*>(pWidget)->label = widgetDef["label"].template get<std::string>();
+            }
         } else if (type == "Checkbox") {
-            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
-            static_cast<Checkbox*>(pWidget)->label = label;
+            if (widgetDef.contains("label") && widgetDef["label"].is_string()) {
+                static_cast<Checkbox*>(pWidget)->label = widgetDef["label"].template get<std::string>();
+            }
         } else if (type == "Button") {
-            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
-            static_cast<Button*>(pWidget)->label = label;
+            if (widgetDef.contains("label") && widgetDef["label"].is_string()) {
+                static_cast<Button*>(pWidget)->label = widgetDef["label"].template get<std::string>();
+            }
         } else if (type == "Fragment") {
-            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
-            static_cast<Fragment*>(pWidget)->label = label;
+            
         } else if (type == "SameLine") {
             
         } else if (type == "Separator") {
@@ -381,33 +385,41 @@ void ReactImgui::PatchWidget(int id, std::string widgetJsonAsString) {
         } else if (type == "Unindent") {
             
         } else if (type == "SeparatorText") {
-            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
-            static_cast<SeparatorText*>(pWidget)->label = label;
+            if (widgetDef.contains("label") && widgetDef["label"].is_string()) {
+                static_cast<SeparatorText*>(pWidget)->label = widgetDef["label"].template get<std::string>();
+            }
         } else if (type == "BulletText") {
-            auto text = widgetDef.contains("text") && widgetDef["text"].is_string() ? widgetDef["text"].template get<std::string>() : "";
-            static_cast<BulletText*>(pWidget)->text = text;
+            if (widgetDef.contains("text") && widgetDef["text"].is_string()) {
+                static_cast<BulletText*>(pWidget)->text = widgetDef["text"].template get<std::string>();
+            }
         } else if (type == "UnformattedText") {
-            auto text = widgetDef.contains("text") && widgetDef["text"].is_string() ? widgetDef["text"].template get<std::string>() : "";
-            static_cast<UnformattedText*>(pWidget)->text = text;
+            if (widgetDef.contains("text") && widgetDef["text"].is_string()) {
+                static_cast<UnformattedText*>(pWidget)->text = widgetDef["text"].template get<std::string>();
+            }
         } else if (type == "DisabledText") {
-            auto text = widgetDef.contains("text") && widgetDef["text"].is_string() ? widgetDef["text"].template get<std::string>() : "";
-            static_cast<DisabledText*>(pWidget)->text = text;
+            if (widgetDef.contains("text") && widgetDef["text"].is_string()) {
+                static_cast<DisabledText*>(pWidget)->text = widgetDef["text"].template get<std::string>();
+            }
         } else if (type == "TabBar") {
             
         } else if (type == "TabItem") {
-            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
-            static_cast<TabItem*>(pWidget)->label = label;
+            if (widgetDef.contains("label") && widgetDef["label"].is_string()) {
+                static_cast<TabItem*>(pWidget)->label = widgetDef["label"].template get<std::string>();
+            }
         } else if (type == "CollapsingHeader") {
-            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
-            static_cast<CollapsingHeader*>(pWidget)->label = label;
+            if (widgetDef.contains("label") && widgetDef["label"].is_string()) {
+                static_cast<CollapsingHeader*>(pWidget)->label = widgetDef["label"].template get<std::string>();
+            }
         } else if (type == "TextWrap") {
-            double width = widgetDef.contains("width") && widgetDef["width"].is_number() ? widgetDef["width"].template get<double>() : 0;
-            static_cast<TextWrap*>(pWidget)->width = width;
+            if (widgetDef.contains("width") && widgetDef["width"].is_number()) {
+                static_cast<TextWrap*>(pWidget)->width = widgetDef["width"].template get<double>();
+            }
         } else if (type == "ItemTooltip") {
             
         } else if (type == "TreeNode") {
-            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
-            static_cast<TreeNode*>(pWidget)->label = label;
+            if (widgetDef.contains("label") && widgetDef["label"].is_string()) {
+                static_cast<TreeNode*>(pWidget)->label = widgetDef["label"].template get<std::string>();
+            }
         }
 
     }

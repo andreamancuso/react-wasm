@@ -9,6 +9,8 @@ export const BorderControl = () => {
     const [popupBorder, setPopupBorder] = useState(true);
 
     const handleWindowBorderChanged = useCallback((event: any) => {
+        console.log(event.nativeEvent.value);
+
         if (event.nativeEvent) {
             setWindowBorder(event.nativeEvent.value);
         }
@@ -33,16 +35,19 @@ export const BorderControl = () => {
                 onChange={handleWindowBorderChanged}
                 defaultChecked={windowBorder}
             />
+            <ReactImgui.UnformattedText text={windowBorder ? "[enabled]" : "[disabled]"} />
             <ReactImgui.Checkbox
                 label="FrameBorder"
                 onChange={handleFrameBorderChanged}
                 defaultChecked={frameBorder}
             />
+            <ReactImgui.UnformattedText text={frameBorder ? "[enabled]" : "[disabled]"} />
             <ReactImgui.Checkbox
                 label="WindowBorder"
                 onChange={handlePopupBorderChanged}
                 defaultChecked={popupBorder}
             />
+            <ReactImgui.UnformattedText text={popupBorder ? "[enabled]" : "[disabled]"} />
         </ReactImgui.SameLine>
     );
 };

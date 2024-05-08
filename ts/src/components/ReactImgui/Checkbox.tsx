@@ -27,6 +27,7 @@ export const Checkbox: WidgetFunctionComponent<CheckboxProps> = ({
             label={label}
             id={widgetId.current}
             defaultChecked={defaultChecked}
+            onChange={onChange}
         />
     );
 };

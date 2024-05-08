@@ -89,6 +89,8 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const topLevelType = "onChange";
         const nativeEventParam = { value };
 
+        console.log("changed boolean", id, value);
+
         rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
         // setTimeout(() => {
         // widgetRegistrationServiceRef.current.emitBooleanValueChangeEvent(id, value);
@@ -99,7 +101,9 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const rootNodeID = id;
         const topLevelType = "onClick";
 
-        rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType);
+        console.log("clicked", id);
+
+        rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, { value: "clicked" });
         // const nativeEventParam = { value };
         // setTimeout(() => {
         // widgetRegistrationServiceRef.current.emitClick(id);
