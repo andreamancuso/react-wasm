@@ -17,5 +17,5 @@ export const Button: WidgetFunctionComponent<ButtonProps> = ({ label, onClick })
         }
     }, [onClick]);
 
-    return <widget type="Button" label={label} id={widgetId.current} />;
+    return <widget type="Button" label={label} id={widgetId.current} onClick={onClick} />;
 };

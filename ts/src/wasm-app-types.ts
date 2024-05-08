@@ -13,8 +13,13 @@ export interface WasmRunner {
     exit(): void;
     resizeWindow(_0: number, _1: number): void;
     run(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
-    setWidgets(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
+    patchWidget(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
+    updateWidget(
+        _0: number,
+        _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
+    ): void;
     getAvailableFonts(): string;
+    setChildren(_0: number, _1: any): void;
     delete(): void;
 }
 
@@ -429,7 +434,6 @@ export type ImGuiKey =
     | ImGuiKeyValue<659>
     | ImGuiKeyValue<660>
     | ImGuiKeyValue<661>
-    | ImGuiKeyValue<0>
     | ImGuiKeyValue<4096>
     | ImGuiKeyValue<8192>
     | ImGuiKeyValue<16384>
@@ -1176,7 +1180,6 @@ interface EmbindModule {
         MouseX2: ImGuiKeyValue<659>;
         MouseWheelX: ImGuiKeyValue<660>;
         MouseWheelY: ImGuiKeyValue<661>;
-        None: ImGuiKeyValue<0>;
         Ctrl: ImGuiKeyValue<4096>;
         Shift: ImGuiKeyValue<8192>;
         Alt: ImGuiKeyValue<16384>;

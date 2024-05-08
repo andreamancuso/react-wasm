@@ -6,8 +6,10 @@ export const WindowRounding = () => {
     const service = useWidgetRegistrationService();
     const [value, setValue] = useState(0);
 
-    const handleValueChanged = useCallback((value: number) => {
-        setValue(value);
+    const handleValueChanged = useCallback((event: any) => {
+        if (event?.nativeEvent) {
+            setValue(event?.nativeEvent.value);
+        }
     }, []);
 
     return (

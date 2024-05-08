@@ -29,11 +29,15 @@ class ReactImgui;
 class Widget {
     public:
         int id;
+        std::string type;
+        bool handlesChildrenWithinRenderMethod;
 
         inline static emscripten::val onInputTextChange_;
 
         Widget(int id) {
             this->id = id;
+            this->type = "Unknown";
+            this->handlesChildrenWithinRenderMethod = false;
         }
 
         void HandleChildren(ReactImgui* view);
@@ -45,14 +49,20 @@ class Fragment final : public Widget {
     public:
         std::string label;
 
-        Fragment(int id) : Widget(id) {}
+        Fragment(int id) : Widget(id) {
+            this->type = "Fragment";
+            this->handlesChildrenWithinRenderMethod = true;
+        }
 
         void Render(ReactImgui* view);
 };
 
 class SameLine final : public Widget {
     public:
-        SameLine(int id) : Widget(id) {}
+        SameLine(int id) : Widget(id) {
+            this->type = "SameLine";
+            this->handlesChildrenWithinRenderMethod = true;
+        }
 
         void Render(ReactImgui* view);
 };
@@ -66,14 +76,20 @@ class Separator final : public Widget {
 
 class Indent final : public Widget {
     public:
-        Indent(int id) : Widget(id) {}
+        Indent(int id) : Widget(id) {
+            this->type = "Indent";
+            this->handlesChildrenWithinRenderMethod = true;
+        }
 
         void Render(ReactImgui* view);
 };
 
+// Likely unused
 class Unindent final : public Widget {
     public:
-        Unindent(int id) : Widget(id) {}
+        Unindent(int id) : Widget(id) {
+            this->type = "Unindent";
+        }
 
         void Render(ReactImgui* view);
 };
@@ -83,6 +99,7 @@ class SeparatorText final : public Widget {
         std::string label;
 
         SeparatorText(int id, std::string label) : Widget(id) {
+            this->type = "SeparatorText";
             this->label = label;
         }
 
@@ -94,6 +111,7 @@ class BulletText final : public Widget {
         std::string text;
 
         BulletText(int id, std::string text) : Widget(id) {
+            this->type = "BulletText";
             this->text = text;
         }
 
@@ -105,6 +123,7 @@ class UnformattedText final : public Widget {
         std::string text;
 
         UnformattedText(int id, std::string text) : Widget(id) {
+            this->type = "UnformattedText";
             this->text = text;
         }
 
@@ -116,6 +135,7 @@ class DisabledText final : public Widget {
         std::string text;
 
         DisabledText(int id, std::string text) : Widget(id) {
+            this->type = "DisabledText";
             this->text = text;
         }
 
@@ -124,10 +144,9 @@ class DisabledText final : public Widget {
 
 class TabBar final : public Widget {
     public:
-        std::string label;
-
-        TabBar(int id, std::string label) : Widget(id) {
-            this->label = label;
+        TabBar(int id) : Widget(id) {
+            this->type = "TabBar";
+            this->handlesChildrenWithinRenderMethod = true;
         }
 
         void Render(ReactImgui* view);
@@ -138,6 +157,8 @@ class TabItem final : public Widget {
         std::string label;
 
         TabItem(int id, std::string label) : Widget(id) {
+            this->type = "TabItem";
+            this->handlesChildrenWithinRenderMethod = true;
             this->label = label;
         }
 
@@ -149,6 +170,8 @@ class CollapsingHeader final : public Widget {
         std::string label;
 
         CollapsingHeader(int id, std::string label) : Widget(id) {
+            this->type = "CollapsingHeader";
+            this->handlesChildrenWithinRenderMethod = true;
             this->label = label;
         }
 
@@ -160,6 +183,8 @@ class TextWrap final : public Widget {
         double width;
 
         TextWrap(int id, double width) : Widget(id) {
+            this->type = "TextWrap";
+            this->handlesChildrenWithinRenderMethod = true;
             this->width = width;
         }
 
@@ -168,7 +193,10 @@ class TextWrap final : public Widget {
 
 class ItemTooltip final : public Widget {
     public:
-        ItemTooltip(int id) : Widget(id) {}
+        ItemTooltip(int id) : Widget(id) {
+            this->type = "ItemTooltip";
+            this->handlesChildrenWithinRenderMethod = true;
+        }
 
         void Render(ReactImgui* view);
 };
@@ -178,6 +206,8 @@ class TreeNode final : public Widget {
         std::string label;
 
         TreeNode(int id, std::string label) : Widget(id) {
+            this->type = "TreeNode";
+            this->handlesChildrenWithinRenderMethod = true;
             this->label = label;
         }
 
@@ -187,12 +217,14 @@ class TreeNode final : public Widget {
 class Combo final : public Widget {
     protected:
         Combo(int id, std::string label, int defaultValue, const json& options) : Widget(id) {
+            this->type = "Combo";
             this->selectedIndex = defaultValue;
             this->label = label;
             this->itemsSeparatedByZeros = Combo::getItemsSeparatedByZeros(options);
         }
         
         Combo(int id, std::string label, int defaultValue, std::string optionsList) : Widget(id) {
+            this->type = "Combo";
             this->selectedIndex = defaultValue;
             this->label = label;
             this->itemsSeparatedByZeros = Combo::getItemsSeparatedByZeros(optionsList);
@@ -297,6 +329,7 @@ class InputText final : public Widget {
         }
 
         InputText(int id, std::string defaultValue, std::string label) : Widget(id) {
+            this->type = "InputText";
             this->bufferPointer = std::make_unique<char[]>(100);
             this->defaultValue = defaultValue;
             this->label = label;
@@ -320,6 +353,7 @@ class InputText final : public Widget {
 class Checkbox final : public Widget {
     protected:
         Checkbox(int id, std::string label, bool defaultChecked) : Widget(id) {
+            this->type = "Checkbox";
             this->checked = defaultChecked;
             this->label = label;
         }
@@ -339,6 +373,7 @@ class Checkbox final : public Widget {
 class Button final : public Widget {
     protected:
         Button(int id, std::string label) : Widget(id) {
+            this->type = "Button";
             this->label = label;
         }
 
@@ -356,6 +391,7 @@ class Button final : public Widget {
 class Slider final : public Widget {
     protected:
         Slider(int id, std::string label, float defaultValue, float min, float max, std::string sliderType) : Widget(id) {
+            this->type = "Slider";
             this->type = sliderType;
             this->label = label;
             this->value = defaultValue;
@@ -381,6 +417,7 @@ class Slider final : public Widget {
 class MultiSlider final : public Widget {
     protected:
         MultiSlider(int id, std::string label, float min, float max, int numValues, int decimalDigits) : Widget(id) {
+            this->type = "MultiSlider";
             this->label = label;
             this->numValues = numValues;
             this->values = std::make_unique<float[]>(numValues);

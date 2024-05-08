@@ -88,7 +88,8 @@ type WidgetsRequiringId =
     | "TabBar"
     | "TabItem"
     | "Slider"
-    | "MultiSlider";
+    | "MultiSlider"
+    | "Button";
 
 type WidgetsWithChildren =
     | "CollapsingHeader"
@@ -126,7 +127,7 @@ export type ReactElementWidget<
           id: string;
           type: K;
           children?: WidgetReactElementsFlat | WidgetReactElementsFlat[] | Element | undefined;
-      }
+      } & { onChange?: any; onClick?: any }
     : { [L in keyof Omit<P, "children">]: P[L] } & {
           type: K;
           children?: WidgetReactElementsFlat | WidgetReactElementsFlat[] | Element | undefined;

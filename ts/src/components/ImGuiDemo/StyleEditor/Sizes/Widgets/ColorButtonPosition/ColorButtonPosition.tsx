@@ -13,8 +13,10 @@ export const ColorButtonPosition = () => {
         [],
     );
 
-    const handleSelectedIndexChanged = useCallback((value: number) => {
-        setSelectedIndex(value);
+    const handleSelectedIndexChanged = useCallback((event: any) => {
+        if (event?.nativeEvent) {
+            setSelectedIndex(event?.nativeEvent.value);
+        }
     }, []);
 
     return (

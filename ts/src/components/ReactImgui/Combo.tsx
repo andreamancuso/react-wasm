@@ -33,6 +33,7 @@ export const Combo: WidgetFunctionComponent<ComboProps> = ({
             defaultValue={defaultValue}
             // Is it possible to pass arrays here?
             optionsList={optionsList}
+            onChange={onChange}
         >
             {/* {options.map(({ value, label }) => (
                 <div key={value} data-value={value} data-label={label} />

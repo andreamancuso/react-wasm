@@ -26,15 +26,7 @@
 using json = nlohmann::json;
 
 void Widget::HandleChildren(ReactImgui* view) {
-    if (view->hierarchy.contains(id)) {
-        if (view->hierarchy[id].size() > 0) {
-            auto childrenIds = view->hierarchy[id];
-
-            for (auto& childId : childrenIds) {
-                view->RenderWidgetById(childId);
-            }
-        }
-    }
+    view->RenderChildren(id);
 };
 
 void Fragment::Render(ReactImgui* view) {
@@ -43,7 +35,28 @@ void Fragment::Render(ReactImgui* view) {
 
 
 void SameLine::Render(ReactImgui* view) {
-    ImGui::SameLine();
+    // Special case
+    if (view->hierarchy.contains(id)) {
+        // for (auto& childId : view->hierarchy[id]) {
+        //     view->RenderWidgets(childId);
+
+        //     ImGui::SameLine();
+        // }
+
+        // for (auto it = view->hierarchy[id].begin(); it != view->hierarchy[id].end(); ++it) {
+        //     int index = std::distance(aVector.begin(), it);
+        // }
+
+        size_t size = view->hierarchy[id].size() - 1;
+
+        for (int index = 0; index < view->hierarchy[id].size(); ++index) {
+            view->RenderWidgets(view->hierarchy[id][index]);
+
+            if (index < (size)) {
+                ImGui::SameLine();
+            }
+        }
+    }
 };
 
 void Separator::Render(ReactImgui* view) {
@@ -52,6 +65,8 @@ void Separator::Render(ReactImgui* view) {
 
 void Indent::Render(ReactImgui* view) {
     ImGui::Indent();
+    Widget::HandleChildren(view);
+    ImGui::Unindent();
 };
 
 void Unindent::Render(ReactImgui* view) {

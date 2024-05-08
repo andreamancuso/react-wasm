@@ -26914,6 +26914,7 @@ to return true:wantsResponderID|                            |
                 onRecoverableError,
                 null,
             );
+
             roots.set(containerTag, root);
         }
 

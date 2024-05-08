@@ -77,6 +77,10 @@ class WasmRunner {
             view->SetWidget(widgetJsonAsString);
         }
 
+        void patchWidget(int id, std::string widgetJsonAsString) {
+            view->PatchWidget(id, widgetJsonAsString);
+        }
+
         void setChildren(int id, emscripten::val childrenIds) {
             view->SetChildren(id, childrenIds);
         }
@@ -112,6 +116,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     .function("exit", &WasmRunner::exit)
     .function("resizeWindow", &WasmRunner::resizeWindow)
     .function("setWidget", &WasmRunner::setWidget)
+    .function("patchWidget", &WasmRunner::patchWidget)
     .function("setChildren", &WasmRunner::setChildren)
     .function("getAvailableFonts", &WasmRunner::getAvailableFonts)
     // .function("appendChartData", &WasmRunner::appendChartData)
@@ -512,7 +517,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .value("MouseX2", ImGuiKey_MouseX2)
         .value("MouseWheelX", ImGuiKey_MouseWheelX)
         .value("MouseWheelY", ImGuiKey_MouseWheelY)
-        .value("None", ImGuiMod_None)
+        // .value("None", ImGuiMod_None) // Duplicate (ImGuiKey_None)
         .value("Ctrl", ImGuiMod_Ctrl)
         .value("Shift", ImGuiMod_Shift)
         .value("Alt", ImGuiMod_Alt)

@@ -6,9 +6,10 @@ export const GrabMinSize = () => {
     const service = useWidgetRegistrationService();
     const [value, setValue] = useState(0);
 
-    // todo: remove casting
-    const handleValueChanged = useCallback((value: number) => {
-        setValue(value);
+    const handleValueChanged = useCallback((event: any) => {
+        if (event.nativeEvent) {
+            setValue(event.nativeEvent.value);
+        }
     }, []);
 
     return (

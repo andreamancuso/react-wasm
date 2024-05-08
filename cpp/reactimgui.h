@@ -34,7 +34,6 @@ class ReactImgui : public ImPlotView {
     private:
         std::unordered_map<int, std::unique_ptr<Widget>> widgets;
 
-        void RenderWidgets();
         void InitWidget(const json& widgetDef);
         void InitButton(const json& val);
         void InitCheckbox(const json& val);
@@ -87,8 +86,14 @@ class ReactImgui : public ImPlotView {
 
         void Render(int window_width, int window_height);
 
+        void RenderChildren(int id);
+
+        void RenderWidgets(int id = 0);
+
         // todo: maybe we can avoid the JSON parsing and use emscripten::val() instead - though we may want to benchmark the 2 approaches...
         void SetWidget(std::string widgetJsonAsString);
+
+        void PatchWidget(int id, std::string widgetJsonAsString);
 
         void SetChildren(int id, emscripten::val childIds);
 

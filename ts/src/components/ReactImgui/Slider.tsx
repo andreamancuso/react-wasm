@@ -36,6 +36,7 @@ export const Slider: WidgetFunctionComponent<SliderProps> = ({
             min={min}
             max={max}
             sliderType={sliderType}
+            onChange={onChange}
         />
     );
 };

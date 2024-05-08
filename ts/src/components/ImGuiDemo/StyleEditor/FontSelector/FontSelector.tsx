@@ -8,8 +8,10 @@ export const FontSelector = () => {
     const fonts = useMemo(() => service.getFonts(), []);
     const options = useMemo(() => fonts.map((font, i) => ({ value: i, label: font })), [fonts]);
 
-    const handleFontChanged = useCallback((value: number) => {
-        setSelectedFontIndex(value);
+    const handleFontChanged = useCallback((event: any) => {
+        if (event?.nativeEvent) {
+            setSelectedFontIndex(event?.nativeEvent.value);
+        }
     }, []);
 
     return (

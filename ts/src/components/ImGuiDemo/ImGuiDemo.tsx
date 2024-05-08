@@ -7,12 +7,14 @@ import { StyleEditor } from "src/components/ImGuiDemo/StyleEditor/StyleEditor";
 export const ImGuiDemo = () => {
     const [text, setText] = useState("Hello, world!");
 
-    const handleInputTextChanged = useCallback((value: string) => {
-        setText(value);
+    const handleInputTextChanged = useCallback((event: any) => {
+        if (event?.nativeEvent) {
+            setText(event?.nativeEvent.value);
+        }
     }, []);
 
     return (
-        <>
+        <ReactImgui.Fragment>
             <ReactImgui.SameLine>
                 <ReactImgui.InputText defaultValue={text} onChange={handleInputTextChanged} />
                 <ReactImgui.UnformattedText text={text} />
@@ -61,6 +63,6 @@ export const ImGuiDemo = () => {
                 <ReactImgui.UnformattedText text="Quadruple Slider" />
                 <ReactImgui.MultiSlider numValues={4} />
             </ReactImgui.CollapsingHeader>
-        </>
+        </ReactImgui.Fragment>
     );
 };

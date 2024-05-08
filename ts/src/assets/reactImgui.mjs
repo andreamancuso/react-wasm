@@ -8185,6 +8185,8 @@ var wasmImports = {
   /** @export */
   invoke_iii: invoke_iii,
   /** @export */
+  invoke_iiid: invoke_iiid,
+  /** @export */
   invoke_iiifffi: invoke_iiifffi,
   /** @export */
   invoke_iiiffii: invoke_iiiffii,
@@ -8572,6 +8574,17 @@ function invoke_iiiffii(index,a1,a2,a3,a4,a5,a6) {
   var sp = stackSave();
   try {
     return getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_iiid(index,a1,a2,a3) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)(a1,a2,a3);
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;

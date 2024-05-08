@@ -43,6 +43,7 @@ export const MultiSlider: WidgetFunctionComponent<MultiSliderProps> = ({
             max={max}
             decimalDigits={decimalDigits}
             numValues={numValues}
+            onChange={onChange}
         />
     );
 };

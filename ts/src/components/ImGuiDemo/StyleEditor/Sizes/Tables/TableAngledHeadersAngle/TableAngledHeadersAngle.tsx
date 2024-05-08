@@ -6,8 +6,10 @@ export const TableAngledHeadersAngle = () => {
     const service = useWidgetRegistrationService();
     const [value, setValue] = useState(0);
 
-    const handleValueChanged = useCallback((valueInRadians: number) => {
-        setValue((valueInRadians * 360) / (2 * Math.PI));
+    const handleValueChanged = useCallback((event: any) => {
+        if (event.nativeEvent) {
+            setValue((event.nativeEvent.value * 360) / (2 * Math.PI));
+        }
     }, []);
 
     return (

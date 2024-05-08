@@ -14,7 +14,7 @@ import { Misc } from "./Sizes/Misc";
 
 export const StyleEditor = () => {
     return (
-        <>
+        <ReactImgui.Fragment>
             <StyleSelector />
             <FontSelector />
             <FrameRounding />
@@ -52,6 +52,6 @@ export const StyleEditor = () => {
                     <ReactImgui.SeparatorText label="Main" />
                 </ReactImgui.TabItem>
             </ReactImgui.TabBar>
-        </>
+        </ReactImgui.Fragment>
     );
 };

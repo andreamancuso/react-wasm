@@ -8,16 +8,22 @@ export const BorderControl = () => {
     const [frameBorder, setFrameBorder] = useState(false);
     const [popupBorder, setPopupBorder] = useState(true);
 
-    const handleWindowBorderChanged = useCallback((value: boolean) => {
-        setWindowBorder(value);
+    const handleWindowBorderChanged = useCallback((event: any) => {
+        if (event.nativeEvent) {
+            setWindowBorder(event.nativeEvent.value);
+        }
     }, []);
 
-    const handleFrameBorderChanged = useCallback((value: boolean) => {
-        setFrameBorder(value);
+    const handleFrameBorderChanged = useCallback((event: any) => {
+        if (event.nativeEvent) {
+            setFrameBorder(event.nativeEvent.value);
+        }
     }, []);
 
-    const handlePopupBorderChanged = useCallback((value: boolean) => {
-        setPopupBorder(value);
+    const handlePopupBorderChanged = useCallback((event: any) => {
+        if (event.nativeEvent) {
+            setPopupBorder(event.nativeEvent.value);
+        }
     }, []);
 
     return (

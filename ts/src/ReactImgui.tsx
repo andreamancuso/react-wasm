@@ -1,6 +1,9 @@
 import * as React from "react";
 import { useEffect, useMemo, useState, useRef, useCallback, PropsWithChildren } from "react";
+// @ts-ignore
 import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactNativeRenderer-dev.js";
+// @ts-ignore
+import * as rnInterface from "../react-native/react-native/libraries/ReactPrivate/ReactNativePrivateInterface";
 import { v4 as uuidv4 } from "uuid";
 import debounce from "lodash.debounce";
 // @ts-ignore wasm?
@@ -35,39 +38,72 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
     const [widgets, setWidgets] = useState<ImguiWidgetsFlat[]>([]);
 
     const onTextChange = useCallback((id: string, value: string) => {
-        setTimeout(() => {
-            widgetRegistrationServiceRef.current.emitTextInputChangeEvent(id, value);
-        }, 10);
+        console.log(id, value);
+
+        const rootNodeID = id;
+        const topLevelType = "onChange";
+        const nativeEventParam = { value };
+
+        rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
+
+        // widgetRegistrationServiceRef.current.emitTextInputChangeEvent(id, value);
     }, []);
 
     const onComboChange = useCallback((id: string, value: number) => {
-        setTimeout(() => {
-            widgetRegistrationServiceRef.current.emitComboChangeEvent(id, value);
-        }, 10);
+        const rootNodeID = id;
+        const topLevelType = "onChange";
+        const nativeEventParam = { value };
+
+        rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
+        // setTimeout(() => {
+        // widgetRegistrationServiceRef.current.emitComboChangeEvent(id, value);
+        // }, 10);
     }, []);
 
     const onNumericValueChange = useCallback((id: string, value: number) => {
-        setTimeout(() => {
-            widgetRegistrationServiceRef.current.emitNumericValueChangeEvent(id, value);
-        }, 10);
+        const rootNodeID = id;
+        const topLevelType = "onChange";
+        const nativeEventParam = { value };
+
+        rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
+
+        // setTimeout(() => {
+        // widgetRegistrationServiceRef.current.emitNumericValueChangeEvent(id, value);
+        // }, 10);
     }, []);
 
     const onMultiValueChange = useCallback((id: string, values: Primitive[]) => {
-        setTimeout(() => {
-            widgetRegistrationServiceRef.current.emitMultiValueChangeEvent(id, values);
-        }, 10);
+        const rootNodeID = id;
+        const topLevelType = "onChange";
+        const nativeEventParam = { values };
+
+        rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
+
+        // setTimeout(() => {
+        // widgetRegistrationServiceRef.current.emitMultiValueChangeEvent(id, values);
+        // }, 10);
     }, []);
 
     const onBooleanValueChange = useCallback((id: string, value: boolean) => {
-        setTimeout(() => {
-            widgetRegistrationServiceRef.current.emitBooleanValueChangeEvent(id, value);
-        }, 10);
+        const rootNodeID = id;
+        const topLevelType = "onChange";
+        const nativeEventParam = { value };
+
+        rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
+        // setTimeout(() => {
+        // widgetRegistrationServiceRef.current.emitBooleanValueChangeEvent(id, value);
+        // }, 10);
     }, []);
 
     const onClick = useCallback((id: string) => {
-        setTimeout(() => {
-            widgetRegistrationServiceRef.current.emitClick(id);
-        }, 10);
+        const rootNodeID = id;
+        const topLevelType = "onClick";
+
+        rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType);
+        // const nativeEventParam = { value };
+        // setTimeout(() => {
+        // widgetRegistrationServiceRef.current.emitClick(id);
+        // }, 10);
     }, []);
 
     const setWidgetsProxy = useCallback((rawWidgetTree: JSXWidgetNodesFlat[]) => {
@@ -139,18 +175,12 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
     useEffect(() => {
         if (wasmRunner) {
-            // console.log(JSON.stringify(widgets));
-
-            // console.log("sending widgets");
-
             if (containerRef?.current) {
                 wasmRunner.resizeWindow(
                     containerRef.current.clientWidth,
                     containerRef.current.clientHeight - 62,
                 );
             }
-
-            wasmRunner.setWidgets(JSON.stringify(widgets));
         }
     }, [wasmRunner, widgets]);
 
@@ -179,7 +209,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
     useEffect(() => {
         if (wasmRunner && !widgetsDefsRef.current) {
-            // console.log(render);
+            rnInterface.UIManager.init(wasmRunner);
 
             render(
                 <WidgetRegistrationServiceContext.Provider
@@ -187,7 +217,10 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                 >
                     {children}
                 </WidgetRegistrationServiceContext.Provider>,
-                0,
+                0, // containerTag,
+                () => {
+                    console.log("initialised");
+                },
             );
 
             // AppRegistry.registerComponent("");

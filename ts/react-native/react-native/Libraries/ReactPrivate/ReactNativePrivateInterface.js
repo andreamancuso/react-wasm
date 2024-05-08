@@ -1,15 +1,94 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- * @format
- * @flow strict-local
- */
+class UIManager {
+    wasmRunner;
+    views;
+    hierarchy;
 
-const views = new Map();
-const hierarchy = new Map();
+    constructor() {
+        this.views = new Map();
+        this.hierarchy = new Map();
+    }
+
+    init(runner) {
+        this.wasmRunner = runner;
+    }
+
+    removeRootView(containerTag) {
+        console.log("removeRootView", containerTag);
+    }
+    createView(generatedId, uiViewClassName, rootContainerInstance, payload) {
+        // console.log(
+        //     "UIManager.createView",
+        //     generatedId,
+        //     uiViewClassName,
+        //     rootContainerInstance,
+        //     payload,
+        // );
+
+        const { children, type, id, ...props } = payload;
+
+        const widget = { ...props, id: generatedId, type };
+
+        this.views.set(generatedId, widget);
+        this.hierarchy.set(generatedId, []);
+
+        // console.log(JSON.stringify(widget));
+
+        this.wasmRunner.setWidget(JSON.stringify(widget));
+        this.wasmRunner.setChildren(generatedId, []);
+    }
+    updateView(generatedId, className, payload) {
+        // console.log("updateView", generatedId, className, payload);
+
+        const { children, type, id, ...props } = payload;
+
+        this.wasmRunner.patchWidget(generatedId, JSON.stringify(props));
+    }
+    setChildren(id, childrenIds) {
+        // console.log("UIManager.setChildren", id, childrenIds);
+        this.hierarchy.set(id, childrenIds);
+        this.wasmRunner.setChildren(id, childrenIds);
+    }
+    manageChildren(
+        id,
+        moveFromIndices,
+        moveToIndices,
+        addChildReactTags,
+        addAtIndices,
+        removeAtIndices,
+    ) {
+        console.log(
+            "manageChildren",
+            id,
+            moveFromIndices,
+            moveToIndices,
+            addChildReactTags,
+            addAtIndices,
+            removeAtIndices,
+        );
+    }
+}
+
+class RCTEventEmitter {
+    re;
+    rt;
+
+    // init(receiveEvent, receiveTouches) {
+    //     re = receiveEvent;
+    //     rt = receiveTouches;
+    // }
+
+    register({ receiveEvent, receiveTouches }) {
+        this.re = receiveEvent;
+        this.rt = receiveTouches;
+    }
+
+    propagateEvent(rootNodeID, topLevelType, nativeEventParam) {
+        this.re(rootNodeID, topLevelType, nativeEventParam);
+    }
+}
+
+const uiManager = new UIManager();
+const rctEventEmitter = new RCTEventEmitter();
 
 // flowlint unsafe-getters-setters:off
 module.exports = {
@@ -23,14 +102,17 @@ module.exports = {
         return {};
     },
     get RCTEventEmitter() {
-        return {
-            register(...args) {
-                // console.log("RCTEventEmitter.register", args);
-            },
-        };
+        return rctEventEmitter;
     },
     get ReactNativeViewConfigRegistry() {
         return {
+            customBubblingEventTypes: {
+                //     onChange: { registrationName: "onChange", phasedRegistrationNames: [] },
+            },
+            customDirectEventTypes: {
+                onChange: { registrationName: "onChange" },
+                onClick: { registrationName: "onClick" },
+            },
             get(elementType, ...unknownArgs) {
                 // console.log("ReactNativeViewConfigRegistry.get", elementType, unknownArgs);
 
@@ -41,9 +123,20 @@ module.exports = {
                                 type: true,
                                 id: true,
                                 label: true,
-                                children: true,
+                                text: true,
                                 defaultValues: true,
+                                defaultValue: true,
                                 min: true,
+                                max: true,
+                                width: true,
+                                optionsList: true,
+                                sliderType: true,
+                                numValues: true,
+                                decimalDigits: true,
+                                defaultChecked: true,
+                                size: true,
+                                onChange: true,
+                                onChangeText: true,
                             },
                         };
                 }
@@ -58,50 +151,7 @@ module.exports = {
         return {};
     },
     get UIManager() {
-        return {
-            removeRootView(containerTag) {
-                console.log("removeRootView", containerTag);
-            },
-            createView(id, uiViewClassName, rootContainerInstance, payload) {
-                // console.log(
-                //     "UIManager.createView",
-                //     id,
-                //     uiViewClassName,
-                //     rootContainerInstance,
-                //     payload,
-                // );
-
-                const { children, type, ...props } = payload;
-
-                views.set(id, { id, type, props });
-                hierarchy.set(id, []);
-            },
-            updateView(id, className, payload) {
-                console.log("updateView", id, className, payload);
-            },
-            setChildren(id, childIds) {
-                // console.log("UIManager.setChildren", targetReactTag, childReactTags);
-                hierarchy.set(id, childIds);
-            },
-            manageChildren(
-                id,
-                moveFromIndices,
-                moveToIndices,
-                addChildReactTags,
-                addAtIndices,
-                removeAtIndices,
-            ) {
-                console.log(
-                    "manageChildren",
-                    id,
-                    moveFromIndices,
-                    moveToIndices,
-                    addChildReactTags,
-                    addAtIndices,
-                    removeAtIndices,
-                );
-            },
-        };
+        return uiManager;
     },
     // TODO: Remove when React has migrated to `createAttributePayload` and `diffAttributePayloads`
     get deepDiffer() {

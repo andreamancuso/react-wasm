@@ -49,13 +49,38 @@ ReactImgui::ReactImgui(
     SetUpFloatFormatChars();
 }
 
-void ReactImgui::RenderWidgets() {
-    RenderWidgetById(0);
+void ReactImgui::RenderWidgetById(int id) {
+    widgets[id]->Render(this);
+};
+
+void ReactImgui::RenderWidgets(int id) {
+    if (this->widgets.contains(id)) {
+        // printf("Rendering widget #%d\n", id);
+        RenderWidgetById(id);
+    }
+
+    if (!this->widgets.contains(id) || this->widgets[id]->handlesChildrenWithinRenderMethod == false) {
+        RenderChildren(id);
+    }
+};
+
+void ReactImgui::RenderChildren(int id) {
+    if (this->hierarchy.contains(id)) {
+        if (this->hierarchy[id].size() > 0) {
+            // printf("About to render %lu children for widget #%d\n", this->hierarchy[id].size(), id);
+            auto childrenIds = this->hierarchy[id];
+
+            for (auto& childId : childrenIds) {
+                // printf("About to render child widget #%d of widget #%d\n", childId, id);
+                this->RenderWidgets(childId);
+            }
+        }
+    }
 };
 
 void ReactImgui::InitWidget(const json& widgetDef) {
     std::string type = widgetDef["type"].template get<std::string>();
-    int id = widgetDef["int"].template get<int>();
+    int id = widgetDef["id"].template get<int>();
 
     if (type == "InputText") {
         InitInputText(widgetDef);
@@ -92,8 +117,7 @@ void ReactImgui::InitWidget(const json& widgetDef) {
         std::string text = widgetDef["text"].template get<std::string>();
         widgets[id] = std::make_unique<DisabledText>(id, text);
     } else if (type == "TabBar") {
-        std::string label = widgetDef["label"].template get<std::string>();
-        widgets[id] = std::make_unique<TabBar>(id, label);
+        widgets[id] = std::make_unique<TabBar>(id);
     } else if (type == "TabItem") {
         std::string label = widgetDef["label"].template get<std::string>();
         widgets[id] = std::make_unique<TabItem>(id, label);
@@ -267,10 +291,6 @@ void ReactImgui::SetUpFloatFormatChars() {
     strcpy(floatFormatChars[9].get(), "%.9f");
 };
 
-void ReactImgui::RenderWidgetById(int id) {
-    widgets[id]->Render(this);
-};
-
 void ReactImgui::PrepareForRender() {
     SetCurrentContext();
 
@@ -322,6 +342,75 @@ void ReactImgui::Render(int window_width, int window_height) {
 // todo: maybe we can avoid the JSON parsing and use emscripten::val() instead - though we may want to benchmark the 2 approaches...
 void ReactImgui::SetWidget(std::string widgetJsonAsString) {
     InitWidget(json::parse(widgetJsonAsString));
+};
+
+void ReactImgui::PatchWidget(int id, std::string widgetJsonAsString) {
+    if (this->widgets.contains(id)) {
+        auto widgetDef = json::parse(widgetJsonAsString);
+        auto pWidget = widgets[id].get();
+        auto type = pWidget->type;
+
+        if (type == "InputText") {
+            // auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_string() ? widgetDef["defaultValue"].template get<std::string>() : "";
+            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+            static_cast<InputText*>(pWidget)->label = label;
+        } else if (type == "Combo") {
+            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+            static_cast<Combo*>(pWidget)->label = label;
+        } else if (type == "Slider") {
+            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+            static_cast<Slider*>(pWidget)->label = label;
+        } else if (type == "MultiSlider") {
+            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+            static_cast<MultiSlider*>(pWidget)->label = label;
+        } else if (type == "Checkbox") {
+            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+            static_cast<Checkbox*>(pWidget)->label = label;
+        } else if (type == "Button") {
+            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+            static_cast<Button*>(pWidget)->label = label;
+        } else if (type == "Fragment") {
+            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+            static_cast<Fragment*>(pWidget)->label = label;
+        } else if (type == "SameLine") {
+            
+        } else if (type == "Separator") {
+            
+        } else if (type == "Indent") {
+            
+        } else if (type == "Unindent") {
+            
+        } else if (type == "SeparatorText") {
+            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+            static_cast<SeparatorText*>(pWidget)->label = label;
+        } else if (type == "BulletText") {
+            auto text = widgetDef.contains("text") && widgetDef["text"].is_string() ? widgetDef["text"].template get<std::string>() : "";
+            static_cast<BulletText*>(pWidget)->text = text;
+        } else if (type == "UnformattedText") {
+            auto text = widgetDef.contains("text") && widgetDef["text"].is_string() ? widgetDef["text"].template get<std::string>() : "";
+            static_cast<UnformattedText*>(pWidget)->text = text;
+        } else if (type == "DisabledText") {
+            auto text = widgetDef.contains("text") && widgetDef["text"].is_string() ? widgetDef["text"].template get<std::string>() : "";
+            static_cast<DisabledText*>(pWidget)->text = text;
+        } else if (type == "TabBar") {
+            
+        } else if (type == "TabItem") {
+            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+            static_cast<TabItem*>(pWidget)->label = label;
+        } else if (type == "CollapsingHeader") {
+            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+            static_cast<CollapsingHeader*>(pWidget)->label = label;
+        } else if (type == "TextWrap") {
+            double width = widgetDef.contains("width") && widgetDef["width"].is_number() ? widgetDef["width"].template get<double>() : 0;
+            static_cast<TextWrap*>(pWidget)->width = width;
+        } else if (type == "ItemTooltip") {
+            
+        } else if (type == "TreeNode") {
+            auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+            static_cast<TreeNode*>(pWidget)->label = label;
+        }
+
+    }
 };
 
 void ReactImgui::SetChildren(int id, emscripten::val childrenIds) {
