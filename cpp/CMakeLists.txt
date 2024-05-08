@@ -11,6 +11,7 @@ set(CMAKE_EXECUTABLE_SUFFIX ".mjs")
 if (DEFINED EMSCRIPTEN)
 	add_executable(reactImgui main.cpp
         plot.cpp
+        widget.cpp
         reactimgui.cpp
         ${DEPS}/imgui/imgui.cpp
         ${DEPS}/imgui/imgui_draw.cpp
@@ -25,7 +26,7 @@ if (DEFINED EMSCRIPTEN)
         imguiview.cpp implotview.cpp
     )
 
-    target_include_directories(reactImgui PRIVATE ${DEPS}/imgui ${DEPS}/imgui/backends ${DEPS}/implot ${DEPS}/json/include ${DEPS}/wasm-glfw3-boilerplate)
+    target_include_directories(reactImgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${DEPS}/imgui ${DEPS}/imgui/backends ${DEPS}/implot ${DEPS}/json/include ${DEPS}/wasm-glfw3-boilerplate)
 
 	set_target_properties(reactImgui PROPERTIES COMPILE_FLAGS "-Dmain=runMain --embind-emit-tsd interface.d.ts -O0 -DIMGUI_DISABLE_FILE_FUNCTIONS -Wall -Wformat -s DISABLE_EXCEPTION_CATCHING=0")
     set_target_properties(reactImgui PROPERTIES LINK_FLAGS "-O0 -Dmain=runMain -lembind --embind-emit-tsd interface.d.ts -s ENVIRONMENT='web' -s MODULARIZE=1 -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s USE_GLFW=3 -s USE_WEBGPU=1 -s NO_FILESYSTEM=1 -s NO_EXIT_RUNTIME=0 -s STANDALONE_WASM=0 -s EXIT_RUNTIME=1 -s ASSERTIONS=1 -s STACK_OVERFLOW_CHECK=2 -s MIN_WEBGL_VERSION=2 -s MAX_WEBGL_VERSION=2 -s DISABLE_EXCEPTION_CATCHING=0")
