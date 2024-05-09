@@ -6,21 +6,22 @@ export type WasmExitStatus = {
 
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 interface WasmModule {
-    ___set_stack_limits(_0: number, _1: number): void;
-}
-
-export interface WasmRunner {
-    exit(): void;
-    resizeWindow(_0: number, _1: number): void;
-    run(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
-    patchWidget(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
-    updateWidget(
+    _main(_0: number, _1: number): number;
+    _pthread_self(): number;
+    __emscripten_tls_init(): number;
+    __emscripten_proxy_main(_0: number, _1: number): number;
+    __embind_initialize_bindings(): void;
+    __emscripten_thread_init(
         _0: number,
-        _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
+        _1: number,
+        _2: number,
+        _3: number,
+        _4: number,
+        _5: number,
     ): void;
-    getAvailableFonts(): string;
-    setChildren(_0: number, _1: any): void;
-    delete(): void;
+    __emscripten_thread_crashed(): void;
+    __emscripten_thread_exit(_0: number): void;
+    ___set_stack_limits(_0: number, _1: number): void;
 }
 
 export interface ImGuiWindowFlagsValue<T extends number> {
@@ -576,12 +577,12 @@ export type ImGuiStyleVar =
     | ImGuiStyleVarValue<23>
     | ImGuiStyleVarValue<24>
     | ImGuiStyleVarValue<25>
-    | ImGuiStyleVarValue<26>
     | ImGuiStyleVarValue<27>
     | ImGuiStyleVarValue<28>
     | ImGuiStyleVarValue<29>
     | ImGuiStyleVarValue<30>
-    | ImGuiStyleVarValue<31>;
+    | ImGuiStyleVarValue<31>
+    | ImGuiStyleVarValue<32>;
 
 export interface ImGuiButtonFlagsValue<T extends number> {
     value: T;
@@ -807,16 +808,6 @@ export type ImGuiViewportFlags =
     | ImGuiViewportFlagsValue<4>;
 
 interface EmbindModule {
-    WasmRunner: {
-        new (
-            _0: (id: string, value: string) => void,
-            _1: (id: string, value: number) => void,
-            _2: (id: string, value: number) => void,
-            _3: (id: string, values: Primitive[]) => void,
-            _4: (id: string, value: boolean) => void,
-            _5: (id: string) => void,
-        ): WasmRunner;
-    };
     ImGuiWindowFlags: {
         None: ImGuiWindowFlagsValue<0>;
         NoTitleBar: ImGuiWindowFlagsValue<1>;
@@ -1307,12 +1298,12 @@ interface EmbindModule {
         TabBorderSize: ImGuiStyleVarValue<23>;
         TabBarBorderSize: ImGuiStyleVarValue<24>;
         TableAngledHeadersAngle: ImGuiStyleVarValue<25>;
-        ButtonTextAlign: ImGuiStyleVarValue<26>;
-        SelectableTextAlign: ImGuiStyleVarValue<27>;
-        SeparatorTextBorderSize: ImGuiStyleVarValue<28>;
-        SeparatorTextAlign: ImGuiStyleVarValue<29>;
-        SeparatorTextPadding: ImGuiStyleVarValue<30>;
-        COUNT: ImGuiStyleVarValue<31>;
+        ButtonTextAlign: ImGuiStyleVarValue<27>;
+        SelectableTextAlign: ImGuiStyleVarValue<28>;
+        SeparatorTextBorderSize: ImGuiStyleVarValue<29>;
+        SeparatorTextAlign: ImGuiStyleVarValue<30>;
+        SeparatorTextPadding: ImGuiStyleVarValue<31>;
+        COUNT: ImGuiStyleVarValue<32>;
     };
     ImGuiButtonFlags: {
         None: ImGuiButtonFlagsValue<0>;
@@ -1495,6 +1486,22 @@ interface EmbindModule {
         OwnedByApp: ImGuiViewportFlagsValue<4>;
     };
     exit(): void;
+    setEventHandlers(
+        _0: (id: string, value: string) => void,
+        _1: (id: string, value: number) => void,
+        _2: (id: string, value: number) => void,
+        _3: (id: string, values: Primitive[]) => void,
+        _4: (id: string, value: boolean) => void,
+        _5: (id: string) => void,
+    ): void;
+    resizeWindow(_0: number, _1: number): void;
+    setWidget(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
+    patchWidget(
+        _0: number,
+        _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
+    ): void;
+    setChildren(_0: number, _1: any): void;
+    getChildren(_0: number): any;
     IMGUI_VERSION: any;
     IMGUI_PAYLOAD_TYPE_COLOR_3F: any;
     IMGUI_PAYLOAD_TYPE_COLOR_4F: any;

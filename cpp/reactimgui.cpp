@@ -27,23 +27,10 @@
 using json = nlohmann::json;
 
 ReactImgui::ReactImgui(
-    emscripten::val onInputTextChangeFn,
-    emscripten::val onComboChangeFn,
-    emscripten::val onNumericValueChangeFn,
-    emscripten::val onMultiValueChangeFn,
-    emscripten::val onBooleanValueChangeFn,
-    emscripten::val onClickFn,
     const char* newWindowId, 
     const char* newGlWindowTitle
 ) : ImPlotView(newWindowId, newGlWindowTitle) {
-    onInputTextChange = std::make_unique<emscripten::val>(onInputTextChangeFn);
-    onComboChange = std::make_unique<emscripten::val>(onComboChangeFn);
-    onNumericValueChange = std::make_unique<emscripten::val>(onNumericValueChangeFn);
-    onMultiValueChange = std::make_unique<emscripten::val>(onMultiValueChangeFn);
-    onBooleanValueChange = std::make_unique<emscripten::val>(onBooleanValueChangeFn);
-    onClick = std::make_unique<emscripten::val>(onClickFn);
-
-    Widget::onInputTextChange_ = onInputTextChangeFn;
+    
 
     // bindRendererFunctions();
     SetUpFloatFormatChars();
@@ -231,6 +218,24 @@ void ReactImgui::InitMultiSlider(const json& val) {
     }
 };
 
+void ReactImgui::SetEventHandlers(
+    OnTextChangedCallback onInputTextChangeFn,
+    OnComboChangedCallback onComboChangeFn,
+    OnNumericValueChangedCallback onNumericValueChangeFn,
+    OnMultipleNumericValuesChangedCallback onMultiValueChangeFn,
+    OnBooleanValueChangedCallback onBooleanValueChangeFn,
+    OnClickCallback onClickFn
+) {
+    onInputTextChange = onInputTextChangeFn;
+    onComboChange = onComboChangeFn;
+    onNumericValueChange = onNumericValueChangeFn;
+    onMultiValueChange = onMultiValueChangeFn;
+    onBooleanValueChange = onBooleanValueChangeFn;
+    onClick = onClickFn;
+
+    Widget::onInputTextChange_ = onInputTextChangeFn;
+};
+
 void ReactImgui::InitInputText(const json& val) {
     if (!val.contains("id") || !val["id"].is_number_integer()) {
         // throw?
@@ -339,7 +344,6 @@ void ReactImgui::Render(int window_width, int window_height) {
     ImGui::Render();
 };
 
-// todo: maybe we can avoid the JSON parsing and use emscripten::val() instead - though we may want to benchmark the 2 approaches...
 void ReactImgui::SetWidget(std::string widgetJsonAsString) {
     InitWidget(json::parse(widgetJsonAsString));
 };
@@ -425,12 +429,12 @@ void ReactImgui::PatchWidget(int id, std::string widgetJsonAsString) {
     }
 };
 
-void ReactImgui::SetChildren(int id, emscripten::val childrenIds) {
-    hierarchy[id] = emscripten::convertJSArrayToNumberVector<int>(childrenIds);
+void ReactImgui::SetChildren(int id, std::vector<int> childrenIds) {
+    hierarchy[id] = childrenIds;
 };
 
-emscripten::val ReactImgui::GetChildren(int id) {
-    return emscripten::val::array(hierarchy[id]);
+std::vector<int> ReactImgui::GetChildren(int id) {
+    return hierarchy[id];
 };
 
 json ReactImgui::GetAvailableFonts() {

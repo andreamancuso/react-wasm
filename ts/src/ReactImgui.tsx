@@ -12,7 +12,7 @@ import debounce from "lodash.debounce";
 import getWasmModule from "./assets/reactImgui";
 import { WidgetRegistrationServiceContext } from "./contexts/widgetRegistrationServiceContext";
 
-import { MainModule, WasmExitStatus, WasmRunner } from "./wasm-app-types";
+import { MainModule, WasmExitStatus } from "./wasm-app-types";
 // import { render } from "./renderer/renderer";
 import { WidgetRegistrationService } from "./lib/widgetRegistrationService";
 import { resolveWidgets } from "./lib/resolveWidgets";
@@ -34,8 +34,8 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const isWasmModuleLoading = useRef(false);
-    const [module, setModule] = useState<MainModule | undefined>();
-    const [wasmRunner, setWasmRunner] = useState<WasmRunner | undefined>();
+    const [wasmModule, setWasmModule] = useState<MainModule | undefined>();
+    // const [wasmRunner, setWasmRunner] = useState<WasmRunner | undefined>();
 
     const [widgets, setWidgets] = useState<ImguiWidgetsFlat[]>([]);
 
@@ -123,16 +123,16 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
             isWasmModuleLoading.current = true;
 
             let localModule: MainModule;
-            let localWasmRunner: WasmRunner;
 
             const load = async () => {
                 const moduleArg: any = {
-                    canvas: canvasRef.current,
+                    canvas: canvasRef.current, // ?
+                    arguments: [`#${canvasId}`],
                 };
 
                 localModule = await getWasmModule(moduleArg);
 
-                localWasmRunner = new localModule.WasmRunner(
+                localModule.setEventHandlers(
                     onTextChange,
                     onComboChange,
                     onNumericValueChange,
@@ -141,14 +141,23 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                     onClick,
                 );
 
-                localWasmRunner.run(`#${canvasId}`);
+                // localWasmRunner = new localModule.WasmRunner(
+                //     onTextChange,
+                //     onComboChange,
+                //     onNumericValueChange,
+                //     onMultiValueChange,
+                //     onBooleanValueChange,
+                //     onClick,
+                // );
 
-                widgetRegistrationServiceRef.current.setFonts(
-                    JSON.parse(localWasmRunner.getAvailableFonts()),
-                );
+                // localWasmRunner.run(`#${canvasId}`);
 
-                setModule(localModule);
-                setWasmRunner(localWasmRunner);
+                // widgetRegistrationServiceRef.current.setFonts(
+                //     JSON.parse(localWasmRunner.getAvailableFonts()),
+                // );
+
+                setWasmModule(localModule);
+                // setWasmRunner(localWasmRunner);
             };
 
             load();
@@ -156,7 +165,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
             return () => {
                 if (localModule) {
                     try {
-                        localWasmRunner.delete();
+                        // localWasmRunner.delete();
                         localModule.exit();
                     } catch (error) {
                         if ((error as WasmExitStatus).status !== 0) {
@@ -180,22 +189,22 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
     ]);
 
     useEffect(() => {
-        if (wasmRunner) {
+        if (wasmModule) {
             if (containerRef?.current) {
-                wasmRunner.resizeWindow(
+                wasmModule.resizeWindow(
                     containerRef.current.clientWidth,
                     containerRef.current.clientHeight - 62,
                 );
             }
         }
-    }, [wasmRunner, widgets]);
+    }, [wasmModule, widgets]);
 
     useEffect(() => {
-        if (wasmRunner && containerRef?.current) {
+        if (wasmModule && containerRef?.current) {
             const resizeObserver = new ResizeObserver(
                 debounce(() => {
                     if (containerRef.current) {
-                        wasmRunner.resizeWindow(
+                        wasmModule.resizeWindow(
                             containerRef.current.clientWidth,
                             containerRef.current.clientHeight - 62,
                         );
@@ -209,13 +218,13 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         } else {
             return () => {};
         }
-    }, [wasmRunner, containerRef]);
+    }, [wasmModule, containerRef]);
 
     // console.log(widgets);
 
     useEffect(() => {
-        if (wasmRunner && !widgetsDefsRef.current) {
-            rnInterface.UIManager.init(wasmRunner);
+        if (wasmModule && !widgetsDefsRef.current) {
+            rnInterface.UIManager.init(wasmModule);
 
             render(
                 <WidgetRegistrationServiceContext.Provider
@@ -240,7 +249,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
             //     { container: setWidgetsProxy },
             // );
         }
-    }, [wasmRunner, widgetsDefsRef]);
+    }, [wasmModule, widgetsDefsRef]);
 
     return (
         <>

@@ -28,10 +28,48 @@ using json = nlohmann::json;
 
 EMSCRIPTEN_DECLARE_VAL_TYPE(OnInputTextChangeType);
 EMSCRIPTEN_DECLARE_VAL_TYPE(OnComboChangeType);
-EMSCRIPTEN_DECLARE_VAL_TYPE(OnNumbericValueChangeType);
+EMSCRIPTEN_DECLARE_VAL_TYPE(OnNumericValueChangeType);
 EMSCRIPTEN_DECLARE_VAL_TYPE(OnMultiValueChangeType);
 EMSCRIPTEN_DECLARE_VAL_TYPE(OnBooleanValueChangeType);
 EMSCRIPTEN_DECLARE_VAL_TYPE(OnClickType);
+
+template <typename T> 
+emscripten::val ConvertArrayPointerToJsArray(T* arr, int size) {
+    const T *end = &arr[size];
+
+    emscripten::val jsArray = emscripten::val::array();
+
+    for (T * curr = arr; curr != end; ++curr) {
+        jsArray.call<void>("push", *curr);
+    }
+
+    return jsArray;
+}
+
+void OnTextChanged(int id, std::string value) {
+    printf("OnTextChanged(%d, %s)\n", id, value.c_str());
+}
+
+void OnComboChanged(int id, int value) {
+    printf("OnComboChanged(%d, %d)\n", id, value);
+}
+
+void OnNumericValueChanged(int id, int value) {
+    printf("OnNumericValueChanged(%d, %d)\n", id, value);
+}
+
+void OnBooleanValueChanged(int id, bool value) {
+    printf("OnBooleanValueChanged(%d)\n", id);
+}
+
+void OnClick(int id) {
+    printf("OnClick(%d)\n", id);
+}
+
+void OnMultipleNumericValuesChanged(int id, float* values, int size) {
+    auto jsValue = ConvertArrayPointerToJsArray(values, size);
+    printf("OnMultipleNumericValuesChanged(%d, %d values)\n", id, size);
+}
 
 class WasmRunner {
     protected:
@@ -39,28 +77,15 @@ class WasmRunner {
         ReactImgui* view;
 
     public:
-        WasmRunner(
-            emscripten::val onInputTextChange,
-            emscripten::val onComboChange,
-            emscripten::val onNumericValueChange,
-            emscripten::val onMultiValueChange,
-            emscripten::val onBooleanValueChange,
-            emscripten::val onClick
-        ) {
+        WasmRunner() {}
+
+        void run(
+                std::string canvasSelector) {
             view = new ReactImgui(
-                onInputTextChange, 
-                onComboChange, 
-                onNumericValueChange, 
-                onMultiValueChange, 
-                onBooleanValueChange,
-                onClick,
                 "ReactImgui", 
                 "ReactImgui"
             );
             glWasm = &GLWasm::GetInstance(view);
-        }
-
-        void run(std::string canvasSelector) {
             glWasm->Init(canvasSelector);
         }
 
@@ -82,11 +107,26 @@ class WasmRunner {
         }
 
         void setChildren(int id, emscripten::val childrenIds) {
-            view->SetChildren(id, childrenIds);
+            view->SetChildren(id, emscripten::convertJSArrayToNumberVector<int>(childrenIds));
+        }
+
+        void setEventHandlers(emscripten::val onInputTextChangeVal,
+                emscripten::val onComboChangeVal,
+                emscripten::val onNumericValueChangeVal,
+                emscripten::val onMultiValueChangeVal,
+                emscripten::val onBooleanValueChangeVal,
+                emscripten::val onClickVal) {
+            view->SetEventHandlers(
+                OnTextChanged,
+                OnComboChanged,
+                OnNumericValueChanged,
+                OnMultipleNumericValuesChanged,
+                OnBooleanValueChanged,
+                OnClick);
         }
 
         emscripten::val getChildren(int id) {
-            return view->GetChildren(id);
+            return emscripten::val::array(view->GetChildren(id));
         }
 
         std::string getAvailableFonts() {
@@ -106,24 +146,68 @@ class WasmRunner {
         // }
 };
 
+std::unique_ptr<WasmRunner> pRunner = std::make_unique<WasmRunner>();
+
+int main(int argc, char* argv[]) {
+    std::string canvasSelector = argv[1];
+
+    pRunner->run(canvasSelector);
+
+    return 0;
+}
+
+void setEventHandlers(OnInputTextChangeType onInputTextChange,
+        OnComboChangeType onComboChange,
+        OnNumericValueChangeType onNumericValueChange,
+        OnMultiValueChangeType onMultiValueChange,
+        OnBooleanValueChangeType onBooleanValueChange,
+        OnClickType onClick) {
+    pRunner->setEventHandlers(onInputTextChange, onComboChange, onNumericValueChange, onMultiValueChange, onBooleanValueChange, onClick);
+}
+
 void _exit() {
-    emscripten_cancel_main_loop();
-    emscripten_force_exit(0);
+    pRunner->exit();
+}
+
+void resizeWindow(int width, int height) {
+    pRunner->resizeWindow(width, height);
+}
+
+void setWidget(std::string widgetsJson) {
+    pRunner->setWidget(widgetsJson);
+}
+
+void patchWidget(int id, std::string widgetsJson) {
+    pRunner->patchWidget(id, widgetsJson);
+}
+
+void setChildren(int id, emscripten::val childrenIds) {
+    pRunner->setChildren(id, childrenIds);
+}
+
+emscripten::val getChildren(int id) {
+    return pRunner->getChildren(id);
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("exit", &_exit);
+    emscripten::function("setEventHandlers", &setEventHandlers);
+    emscripten::function("resizeWindow", &resizeWindow);
+    emscripten::function("setWidget", &setWidget);
+    emscripten::function("patchWidget", &patchWidget);
+    emscripten::function("setChildren", &setChildren);
+    emscripten::function("getChildren", &getChildren);
 
-    emscripten::class_<WasmRunner>("WasmRunner")
-    .constructor<OnInputTextChangeType, OnComboChangeType, OnNumbericValueChangeType, OnMultiValueChangeType, OnBooleanValueChangeType, OnClickType>()
-    .function("run", &WasmRunner::run)
-    .function("exit", &WasmRunner::exit)
-    .function("resizeWindow", &WasmRunner::resizeWindow)
-    .function("setWidget", &WasmRunner::setWidget)
-    .function("patchWidget", &WasmRunner::patchWidget)
-    .function("setChildren", &WasmRunner::setChildren)
-    .function("getChildren", &WasmRunner::getChildren)
-    .function("getAvailableFonts", &WasmRunner::getAvailableFonts)
+    // emscripten::class_<WasmRunner>("WasmRunner")
+    // .constructor<OnInputTextChangeType, OnComboChangeType, OnNumericValueChangeType, OnMultiValueChangeType, OnBooleanValueChangeType, OnClickType>()
+    // .function("run", &WasmRunner::run)
+    // .function("exit", &WasmRunner::exit)
+    // .function("resizeWindow", &WasmRunner::resizeWindow)
+    // .function("setWidget", &WasmRunner::setWidget)
+    // .function("patchWidget", &WasmRunner::patchWidget)
+    // .function("setChildren", &WasmRunner::setChildren)
+    // .function("getChildren", &WasmRunner::getChildren)
+    // .function("getAvailableFonts", &WasmRunner::getAvailableFonts)
     // .function("appendChartData", &WasmRunner::appendChartData)
     // .function("setAxesDecimalPlaces", &WasmRunner::setAxesDecimalPlaces)
     // .function("resetChartData", &WasmRunner::resetChartData)
@@ -131,7 +215,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
 
     emscripten::register_type<OnInputTextChangeType>("(id: string, value: string) => void");
     emscripten::register_type<OnComboChangeType>("(id: string, value: number) => void");
-    emscripten::register_type<OnNumbericValueChangeType>("(id: string, value: number) => void");
+    emscripten::register_type<OnNumericValueChangeType>("(id: string, value: number) => void");
     emscripten::register_type<OnMultiValueChangeType>("(id: string, values: Primitive[]) => void");
     emscripten::register_type<OnBooleanValueChangeType>("(id: string, value: boolean) => void");
     emscripten::register_type<OnClickType>("(id: string) => void");

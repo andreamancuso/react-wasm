@@ -20,6 +20,8 @@
 #include "implot_internal.h"
 #include <nlohmann/json.hpp>
 
+#include "shared.h"
+
 using json = nlohmann::json;
 
 #pragma once
@@ -32,7 +34,7 @@ class Widget {
         std::string type;
         bool handlesChildrenWithinRenderMethod;
 
-        inline static emscripten::val onInputTextChange_;
+        inline static OnTextChangedCallback onInputTextChange_;
 
         Widget(int id) {
             this->id = id;
@@ -316,17 +318,7 @@ class InputText final : public Widget {
     protected:
         inline static ImGuiInputTextFlags inputTextFlags = ImGuiInputTextFlags_CallbackEdit | ImGuiInputTextFlags_NoUndoRedo;
 
-        static int InputTextCb(ImGuiInputTextCallbackData* data)
-        {
-            if (data->EventFlag == ImGuiInputTextFlags_CallbackEdit) {
-                auto pInputText = reinterpret_cast<InputText*>(data->UserData);
-
-                std::string value = data->Buf;
-                Widget::onInputTextChange_.call<void>("call", 0, pInputText->id, value);
-            }
-
-            return 0;
-        }
+        static int InputTextCb(ImGuiInputTextCallbackData* data);
 
         InputText(int id, std::string defaultValue, std::string label) : Widget(id) {
             this->type = "InputText";

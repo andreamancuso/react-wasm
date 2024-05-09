@@ -37,16 +37,6 @@ void Fragment::Render(ReactImgui* view) {
 void SameLine::Render(ReactImgui* view) {
     // Special case
     if (view->hierarchy.contains(id)) {
-        // for (auto& childId : view->hierarchy[id]) {
-        //     view->RenderWidgets(childId);
-
-        //     ImGui::SameLine();
-        // }
-
-        // for (auto it = view->hierarchy[id].begin(); it != view->hierarchy[id].end(); ++it) {
-        //     int index = std::distance(aVector.begin(), it);
-        // }
-
         size_t size = view->hierarchy[id].size() - 1;
 
         for (int index = 0; index < view->hierarchy[id].size(); ++index) {
@@ -146,28 +136,33 @@ void TreeNode::Render(ReactImgui* view) {
 void Combo::Render(ReactImgui* view) {
     ImGui::PushID(id);
     if (ImGui::Combo(label.c_str(), &selectedIndex, itemsSeparatedByZeros.get())) {
-        view->onComboChange->call<void>("call", 0, id, selectedIndex);
+        view->onComboChange(id, selectedIndex);
     }
     ImGui::PopID();
 };
 
 void InputText::Render(ReactImgui* view) {
     ImGui::PushID(id);
-    ImGui::InputText(
-        label.c_str(), 
-        bufferPointer.get(), 
-        100, 
-        inputTextFlags, 
-        InputTextCb, 
-        (void*)this
-    );
+    ImGui::InputText(label.c_str(), bufferPointer.get(), 100, inputTextFlags, InputTextCb, (void*)this);
     ImGui::PopID();
+};
+
+int InputText::InputTextCb(ImGuiInputTextCallbackData* data)
+{
+    if (data->EventFlag == ImGuiInputTextFlags_CallbackEdit) {
+        auto pInputText = reinterpret_cast<InputText*>(data->UserData);
+
+        std::string value = data->Buf;
+        Widget::onInputTextChange_(pInputText->id, value);
+    }
+
+    return 0;
 };
 
 void Checkbox::Render(ReactImgui* view) {
     ImGui::PushID(id);
     if (ImGui::Checkbox(label.c_str(), &checked)) {
-        view->onBooleanValueChange->call<void>("call", 0, id, checked);
+        view->onBooleanValueChange(id, checked);
     }
     ImGui::PopID();
 };
@@ -175,7 +170,7 @@ void Checkbox::Render(ReactImgui* view) {
 void Button::Render(ReactImgui* view) {
     ImGui::PushID(id);
     if (ImGui::Button(label.c_str())) {
-        view->onClick->call<void>("call", 0, id);
+        view->onClick(id);
     }
     ImGui::PopID();
 };
@@ -184,11 +179,11 @@ void Slider::Render(ReactImgui* view) {
     ImGui::PushID(id);
     if (type == "angle") {
         if (ImGui::SliderAngle(label.c_str(), &value, min, max, "%.0f")) {
-            view->onNumericValueChange->call<void>("call", 0, id, value);
+            view->onNumericValueChange(id, value);
         }
     } else {
         if (ImGui::SliderFloat(label.c_str(), &value, min, max, "%.0f")) {
-            view->onNumericValueChange->call<void>("call", 0, id, value);
+            view->onNumericValueChange(id, value);
         }
     }
     ImGui::PopID();
@@ -199,27 +194,15 @@ void MultiSlider::Render(ReactImgui* view) {
 
     if (this->numValues == 2) {
         if (ImGui::SliderFloat2(this->label.c_str(), this->values.get(), this->min, this->max, view->floatFormatChars[this->decimalDigits].get())) {
-            view->onMultiValueChange->call<void>("call", 0, id, ReactImgui::ConvertArrayPointerToJsArray(
-                    this->values.get(), 
-                    this->numValues
-                )
-            );
+            view->onMultiValueChange(this->id, this->values.get(), this->numValues);
         }
     } else if (this->numValues == 3) {
         if (ImGui::SliderFloat3(this->label.c_str(), values.get(), this->min, this->max, view->floatFormatChars[this->decimalDigits].get())) {
-            view->onMultiValueChange->call<void>("call", 0, id, ReactImgui::ConvertArrayPointerToJsArray(
-                    this->values.get(), 
-                    this->numValues
-                )
-            );
+            view->onMultiValueChange(this->id, this->values.get(), this->numValues);
         }
     } else if (this->numValues == 4) {
         if (ImGui::SliderFloat4(this->label.c_str(), values.get(), this->min, this->max, view->floatFormatChars[this->decimalDigits].get())) {
-            view->onMultiValueChange->call<void>("call", 0, id, ReactImgui::ConvertArrayPointerToJsArray(
-                    this->values.get(), 
-                    this->numValues
-                )
-            );
+            view->onMultiValueChange(this->id, this->values.get(), this->numValues);
         }
     }
 

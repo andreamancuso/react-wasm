@@ -1,5 +1,5 @@
 class UIManager {
-    wasmRunner;
+    wasmModule;
     views;
     hierarchy;
 
@@ -8,8 +8,8 @@ class UIManager {
         this.hierarchy = new Map();
     }
 
-    init(runner) {
-        this.wasmRunner = runner;
+    init(wasmModule) {
+        this.wasmModule = wasmModule;
     }
 
     removeRootView(containerTag) {
@@ -33,20 +33,20 @@ class UIManager {
 
         // console.log(JSON.stringify(widget));
 
-        this.wasmRunner.setWidget(JSON.stringify(widget));
-        this.wasmRunner.setChildren(generatedId, []);
+        this.wasmModule.setWidget(JSON.stringify(widget));
+        this.wasmModule.setChildren(generatedId, []);
     }
     updateView(generatedId, className, payload) {
         // console.log("updateView", generatedId, className, payload);
 
         const { children, type, id, ...props } = payload;
 
-        this.wasmRunner.patchWidget(generatedId, JSON.stringify(props));
+        this.wasmModule.patchWidget(generatedId, JSON.stringify(props));
     }
     setChildren(id, childrenIds) {
         // console.log("UIManager.setChildren", id, childrenIds);
         this.hierarchy.set(id, childrenIds);
-        this.wasmRunner.setChildren(id, childrenIds);
+        this.wasmModule.setChildren(id, childrenIds);
     }
     manageChildren(
         id,
@@ -66,7 +66,7 @@ class UIManager {
         //     removeAtIndices,
         // );
 
-        const children = this.wasmRunner.getChildren(id);
+        const children = this.wasmModule.getChildren(id);
 
         // console.log(children);
 
@@ -82,7 +82,7 @@ class UIManager {
             children.splice(removeAtIndices[0], 1);
         }
 
-        this.wasmRunner.setChildren(id, children);
+        this.wasmModule.setChildren(id, children);
     }
 }
 

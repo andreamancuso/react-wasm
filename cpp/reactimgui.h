@@ -22,6 +22,7 @@
 
 using json = nlohmann::json;
 
+#include "shared.h"
 #include "implotview.h"
 
 #pragma once
@@ -49,38 +50,30 @@ class ReactImgui : public ImPlotView {
         std::unordered_map<std::string, rendererFunction> rendererFunctionMap;
         std::unordered_map<int, std::unique_ptr<char[]>> floatFormatChars;
 
-        std::shared_ptr<emscripten::val> onInputTextChange;
-        std::unique_ptr<emscripten::val> onComboChange;
-        std::unique_ptr<emscripten::val> onNumericValueChange;
-        std::unique_ptr<emscripten::val> onMultiValueChange;
-        std::unique_ptr<emscripten::val> onBooleanValueChange;
-        std::unique_ptr<emscripten::val> onClick;
+        OnTextChangedCallback onInputTextChange;
+        OnComboChangedCallback onComboChange;
+        OnNumericValueChangedCallback onNumericValueChange;
+        OnMultipleNumericValuesChangedCallback onMultiValueChange;
+        OnBooleanValueChangedCallback onBooleanValueChange;
+        OnClickCallback onClick;
 
-        template <typename T> 
-        inline static emscripten::val ConvertArrayPointerToJsArray(T* arr, int size) {
-            const T *end = &arr[size];
-
-            emscripten::val jsArray = emscripten::val::array();
-
-            for (T * curr = arr; curr != end; ++curr) {
-                jsArray.call<void>("push", *curr);
-            }
-
-            return jsArray;
-        }
+        
 
         ReactImgui(
-            emscripten::val onInputTextChangeFn,
-            emscripten::val onComboChangeFn,
-            emscripten::val onNumericValueChangeFn,
-            emscripten::val onMultiValueChangeFn,
-            emscripten::val onBooleanValueChangeFn,
-            emscripten::val onClickFn,
             const char* newWindowId, 
             const char* newGlWindowTitle
         );
 
         void RenderWidgetById(int id);
+
+        void SetEventHandlers(
+            OnTextChangedCallback onInputTextChangeFn,
+            OnComboChangedCallback onComboChangeFn,
+            OnNumericValueChangedCallback onNumericValueChangeFn,
+            OnMultipleNumericValuesChangedCallback onMultiValueChangeFn,
+            OnBooleanValueChangedCallback onBooleanValueChangeFn,
+            OnClickCallback onClickFn
+        );
 
         void PrepareForRender();
 
@@ -90,14 +83,13 @@ class ReactImgui : public ImPlotView {
 
         void RenderWidgets(int id = 0);
 
-        // todo: maybe we can avoid the JSON parsing and use emscripten::val() instead - though we may want to benchmark the 2 approaches...
         void SetWidget(std::string widgetJsonAsString);
 
         void PatchWidget(int id, std::string widgetJsonAsString);
 
-        void SetChildren(int id, emscripten::val childIds);
+        void SetChildren(int id, std::vector<int> childIds);
 
-        emscripten::val GetChildren(int id);
+        std::vector<int> GetChildren(int id);
 
         json GetAvailableFonts();
 };

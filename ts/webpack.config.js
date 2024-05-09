@@ -12,6 +12,8 @@ module.exports = {
         open: true,
         headers: {
             "Access-Control-Allow-Origin": "*",
+            "Cross-Origin-Embedder-Policy": "require-corp",
+            "Cross-Origin-Opener-Policy": "same-origin",
         },
     },
     experiments: {
