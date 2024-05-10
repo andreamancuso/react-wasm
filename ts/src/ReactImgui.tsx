@@ -132,14 +132,15 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
                 localModule = await getWasmModule(moduleArg);
 
-                localModule.setEventHandlers(
-                    onTextChange,
-                    onComboChange,
-                    onNumericValueChange,
-                    onMultiValueChange,
-                    onBooleanValueChange,
-                    onClick,
-                );
+                localModule
+                    .setEventHandlers
+                    // onTextChange,
+                    // onComboChange,
+                    // onNumericValueChange,
+                    // onMultiValueChange,
+                    // onBooleanValueChange,
+                    // onClick,
+                    ();
 
                 // localWasmRunner = new localModule.WasmRunner(
                 //     onTextChange,

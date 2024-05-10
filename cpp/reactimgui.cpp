@@ -233,6 +233,14 @@ void ReactImgui::SetEventHandlers(
     onBooleanValueChange = onBooleanValueChangeFn;
     onClick = onClickFn;
 
+    printf("here!\n");
+
+    if (onClickFn == nullptr) {
+        printf("onClickfn is nullptr\n");
+    } else {
+        printf("onClickfn is set\n");
+    }
+
     Widget::onInputTextChange_ = onInputTextChangeFn;
 };
 

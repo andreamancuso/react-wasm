@@ -34,7 +34,7 @@ class UIManager {
         // console.log(JSON.stringify(widget));
 
         this.wasmModule.setWidget(JSON.stringify(widget));
-        this.wasmModule.setChildren(generatedId, []);
+        this.wasmModule.setChildren(generatedId, JSON.stringify([]));
     }
     updateView(generatedId, className, payload) {
         // console.log("updateView", generatedId, className, payload);
@@ -46,7 +46,7 @@ class UIManager {
     setChildren(id, childrenIds) {
         // console.log("UIManager.setChildren", id, childrenIds);
         this.hierarchy.set(id, childrenIds);
-        this.wasmModule.setChildren(id, childrenIds);
+        this.wasmModule.setChildren(id, JSON.stringify(childrenIds));
     }
     manageChildren(
         id,
@@ -66,7 +66,7 @@ class UIManager {
         //     removeAtIndices,
         // );
 
-        const children = this.wasmModule.getChildren(id);
+        const children = JSON.parse(this.wasmModule.getChildren(id));
 
         // console.log(children);
 

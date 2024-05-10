@@ -57,8 +57,6 @@ class ReactImgui : public ImPlotView {
         OnBooleanValueChangedCallback onBooleanValueChange;
         OnClickCallback onClick;
 
-        
-
         ReactImgui(
             const char* newWindowId, 
             const char* newGlWindowTitle

@@ -34,40 +34,27 @@ EMSCRIPTEN_DECLARE_VAL_TYPE(OnBooleanValueChangeType);
 EMSCRIPTEN_DECLARE_VAL_TYPE(OnClickType);
 
 template <typename T> 
-emscripten::val ConvertArrayPointerToJsArray(T* arr, int size) {
-    const T *end = &arr[size];
-
-    emscripten::val jsArray = emscripten::val::array();
-
-    for (T * curr = arr; curr != end; ++curr) {
-        jsArray.call<void>("push", *curr);
+std::vector<T> JsonToVector(std::string data) {
+    auto parsedData = json::parse(data);
+    std::vector<T> vec;
+    for (auto& [key, item] : parsedData.items()) {
+        vec.push_back(item.template get<T>());
     }
-
-    return jsArray;
+    return vec;
+}
+ 
+json IntVectorToJson(std::vector<int> data) {
+    auto jsonArray = json::array();
+    for (auto& item : data) {
+        jsonArray.push_back(item);
+    }
+    return jsonArray;
 }
 
-void OnTextChanged(int id, std::string value) {
-    printf("OnTextChanged(%d, %s)\n", id, value.c_str());
-}
 
-void OnComboChanged(int id, int value) {
-    printf("OnComboChanged(%d, %d)\n", id, value);
-}
-
-void OnNumericValueChanged(int id, int value) {
-    printf("OnNumericValueChanged(%d, %d)\n", id, value);
-}
-
-void OnBooleanValueChanged(int id, bool value) {
-    printf("OnBooleanValueChanged(%d)\n", id);
-}
-
-void OnClick(int id) {
-    printf("OnClick(%d)\n", id);
-}
 
 void OnMultipleNumericValuesChanged(int id, float* values, int size) {
-    auto jsValue = ConvertArrayPointerToJsArray(values, size);
+    // auto jsValue = ConvertArrayPointerToJsArray(values, size);
     printf("OnMultipleNumericValuesChanged(%d, %d values)\n", id, size);
 }
 
@@ -78,6 +65,26 @@ class WasmRunner {
 
     public:
         WasmRunner() {}
+
+        static void OnTextChanged(int id, std::string value) {
+            printf("OnTextChanged(%d, %s)\n", id, value.c_str());
+        }
+
+        static void OnComboChanged(int id, int value) {
+            printf("OnComboChanged(%d, %d)\n", id, value);
+        }
+
+        static void OnNumericValueChanged(int id, int value) {
+            printf("OnNumericValueChanged(%d, %d)\n", id, value);
+        }
+
+        static void OnBooleanValueChanged(int id, bool value) {
+            printf("OnBooleanValueChanged(%d)\n", id);
+        }
+
+        static void OnClick(int id) {
+            printf("OnClick(%d)\n", id);
+        }
 
         void run(
                 std::string canvasSelector) {
@@ -106,16 +113,11 @@ class WasmRunner {
             view->PatchWidget(id, widgetJsonAsString);
         }
 
-        void setChildren(int id, emscripten::val childrenIds) {
-            view->SetChildren(id, emscripten::convertJSArrayToNumberVector<int>(childrenIds));
+        void setChildren(int id, std::vector<int> childrenIds) {
+            view->SetChildren(id, childrenIds);
         }
 
-        void setEventHandlers(emscripten::val onInputTextChangeVal,
-                emscripten::val onComboChangeVal,
-                emscripten::val onNumericValueChangeVal,
-                emscripten::val onMultiValueChangeVal,
-                emscripten::val onBooleanValueChangeVal,
-                emscripten::val onClickVal) {
+        void setEventHandlers() {
             view->SetEventHandlers(
                 OnTextChanged,
                 OnComboChanged,
@@ -125,8 +127,8 @@ class WasmRunner {
                 OnClick);
         }
 
-        emscripten::val getChildren(int id) {
-            return emscripten::val::array(view->GetChildren(id));
+        std::vector<int> getChildren(int id) {
+            return view->GetChildren(id);
         }
 
         std::string getAvailableFonts() {
@@ -146,7 +148,7 @@ class WasmRunner {
         // }
 };
 
-std::unique_ptr<WasmRunner> pRunner = std::make_unique<WasmRunner>();
+static std::unique_ptr<WasmRunner> pRunner = std::make_unique<WasmRunner>();
 
 int main(int argc, char* argv[]) {
     std::string canvasSelector = argv[1];
@@ -156,13 +158,8 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-void setEventHandlers(OnInputTextChangeType onInputTextChange,
-        OnComboChangeType onComboChange,
-        OnNumericValueChangeType onNumericValueChange,
-        OnMultiValueChangeType onMultiValueChange,
-        OnBooleanValueChangeType onBooleanValueChange,
-        OnClickType onClick) {
-    pRunner->setEventHandlers(onInputTextChange, onComboChange, onNumericValueChange, onMultiValueChange, onBooleanValueChange, onClick);
+void setEventHandlers() {
+    pRunner->setEventHandlers();
 }
 
 void _exit() {
@@ -181,12 +178,12 @@ void patchWidget(int id, std::string widgetsJson) {
     pRunner->patchWidget(id, widgetsJson);
 }
 
-void setChildren(int id, emscripten::val childrenIds) {
-    pRunner->setChildren(id, childrenIds);
+void setChildren(int id, std::string childrenIds) {
+    pRunner->setChildren(id, JsonToVector<int>(childrenIds));
 }
 
-emscripten::val getChildren(int id) {
-    return pRunner->getChildren(id);
+std::string getChildren(int id) {
+    return IntVectorToJson(pRunner->getChildren(id)).dump();
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
@@ -212,6 +209,8 @@ EMSCRIPTEN_BINDINGS(my_module) {
     // .function("setAxesDecimalPlaces", &WasmRunner::setAxesDecimalPlaces)
     // .function("resetChartData", &WasmRunner::resetChartData)
     ;
+
+    // emscripten::register_vector<int>("IntVector");
 
     emscripten::register_type<OnInputTextChangeType>("(id: string, value: string) => void");
     emscripten::register_type<OnComboChangeType>("(id: string, value: number) => void");
@@ -944,7 +943,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .value("OwnedByApp", ImGuiViewportFlags_OwnedByApp)
         ;
 
-    emscripten::constant("IMGUI_VERSION", emscripten::val(IMGUI_VERSION));
-    emscripten::constant("IMGUI_PAYLOAD_TYPE_COLOR_3F", emscripten::val(IMGUI_PAYLOAD_TYPE_COLOR_3F));
-    emscripten::constant("IMGUI_PAYLOAD_TYPE_COLOR_4F", emscripten::val(IMGUI_PAYLOAD_TYPE_COLOR_4F));
+    // emscripten::constant("IMGUI_VERSION", emscripten::val(IMGUI_VERSION));
+    // emscripten::constant("IMGUI_PAYLOAD_TYPE_COLOR_3F", emscripten::val(IMGUI_PAYLOAD_TYPE_COLOR_3F));
+    // emscripten::constant("IMGUI_PAYLOAD_TYPE_COLOR_4F", emscripten::val(IMGUI_PAYLOAD_TYPE_COLOR_4F));
 }

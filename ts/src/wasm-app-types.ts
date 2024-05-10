@@ -7,8 +7,8 @@ export type WasmExitStatus = {
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 interface WasmModule {
     _main(_0: number, _1: number): number;
-    _pthread_self(): number;
     __emscripten_tls_init(): number;
+    _pthread_self(): number;
     __emscripten_proxy_main(_0: number, _1: number): number;
     __embind_initialize_bindings(): void;
     __emscripten_thread_init(
@@ -1486,24 +1486,17 @@ interface EmbindModule {
         OwnedByApp: ImGuiViewportFlagsValue<4>;
     };
     exit(): void;
-    setEventHandlers(
-        _0: (id: string, value: string) => void,
-        _1: (id: string, value: number) => void,
-        _2: (id: string, value: number) => void,
-        _3: (id: string, values: Primitive[]) => void,
-        _4: (id: string, value: boolean) => void,
-        _5: (id: string) => void,
-    ): void;
+    setEventHandlers(): void;
     resizeWindow(_0: number, _1: number): void;
     setWidget(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
     patchWidget(
         _0: number,
         _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
     ): void;
-    setChildren(_0: number, _1: any): void;
-    getChildren(_0: number): any;
-    IMGUI_VERSION: any;
-    IMGUI_PAYLOAD_TYPE_COLOR_3F: any;
-    IMGUI_PAYLOAD_TYPE_COLOR_4F: any;
+    setChildren(
+        _0: number,
+        _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
+    ): void;
+    getChildren(_0: number): string;
 }
 export type MainModule = WasmModule & EmbindModule;
