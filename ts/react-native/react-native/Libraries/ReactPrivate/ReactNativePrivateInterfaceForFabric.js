@@ -1,6 +1,6 @@
-import PQueue from "p-queue";
+// import PQueue from "p-queue";
 
-const queue = new PQueue({ concurrency: 10 });
+// const queue = new PQueue({ concurrency: 10 });
 
 // queue.on("empty", () => {
 //     console.log("queue is empty");
@@ -37,6 +37,7 @@ class NativeFabricUIManager {
 
         // queue.add(() => {
         // console.time("createView");
+
         this.wasmModule.setWidget(JSON.stringify(widget));
         // console.timeEnd("createView");
         // });
@@ -50,7 +51,9 @@ class NativeFabricUIManager {
 
         const newWidget = { ...node, ...newProps };
 
+        // queue.add(() => {
         this.wasmModule.patchWidget(node.id, JSON.stringify(newWidget));
+        // });
 
         // console.log("cloneNodeWithNewProps", JSON.stringify(newWidget));
 
@@ -91,7 +94,9 @@ class NativeFabricUIManager {
         if (this.cloningNode) {
             this.cloningNode.childrenIds.push(child.id);
         } else {
+            // queue.add(() => {
             this.wasmModule.appendChild(parent.id, child.id);
+            // });
         }
     };
     completeRoot = (container, newChildSet) => {
@@ -99,14 +104,19 @@ class NativeFabricUIManager {
 
         // todo: yikes
         if (this.cloningNode) {
-            this.wasmModule.setChildren(
-                this.cloningNode.id,
-                JSON.stringify(this.cloningNode.childrenIds),
-            );
+            const cloningNodeId = this.cloningNode.id;
+            const payload = JSON.stringify(this.cloningNode.childrenIds);
+            // queue.add(() => {
+            this.wasmModule.setChildren(cloningNodeId, payload);
+            // });
             this.cloningNode = null;
         }
 
-        this.wasmModule.setChildren(container, JSON.stringify(newChildSet.map(({ id }) => id)));
+        const payload = JSON.stringify(newChildSet.map(({ id }) => id));
+
+        // queue.add(() => {
+        this.wasmModule.setChildren(container, payload);
+        // });
     };
     registerEventHandler = (dispatchEventFn) => {
         this.dispatchEventFn = dispatchEventFn;
