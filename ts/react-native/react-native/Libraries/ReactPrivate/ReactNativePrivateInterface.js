@@ -1,12 +1,19 @@
+import PQueue from "p-queue";
+
+const queue = new PQueue({ concurrency: 10 });
+
+// queue.on("empty", () => {
+//     console.log("queue is empty");
+// });
+
+// queue.on("completed", () => {
+//     console.log("job completed");
+// });
+
 class UIManager {
     wasmModule;
-    views;
-    hierarchy;
 
-    constructor() {
-        this.views = new Map();
-        this.hierarchy = new Map();
-    }
+    constructor() {}
 
     init(wasmModule) {
         this.wasmModule = wasmModule;
@@ -24,29 +31,33 @@ class UIManager {
         //     payload,
         // );
 
-        const { children, type, id, ...props } = payload;
+        queue.add(() => {
+            // console.time("createView");
+            const { children, type, id, ...props } = payload;
+            const widget = { ...props, id: generatedId, type };
 
-        const widget = { ...props, id: generatedId, type };
-
-        this.views.set(generatedId, widget);
-        this.hierarchy.set(generatedId, []);
-
-        // console.log(JSON.stringify(widget));
-
-        this.wasmModule.setWidget(JSON.stringify(widget));
-        this.wasmModule.setChildren(generatedId, JSON.stringify([]));
+            this.wasmModule.setWidget(JSON.stringify(widget));
+            // console.timeEnd("createView");
+        });
     }
     updateView(generatedId, className, payload) {
         // console.log("updateView", generatedId, className, payload);
 
-        const { children, type, id, ...props } = payload;
-
-        this.wasmModule.patchWidget(generatedId, JSON.stringify(props));
+        queue.add(() => {
+            // console.time("updateView");
+            const { children, type, id, ...props } = payload;
+            this.wasmModule.patchWidget(generatedId, JSON.stringify(props));
+            // console.timeEnd("updateView");
+        });
     }
     setChildren(id, childrenIds) {
         // console.log("UIManager.setChildren", id, childrenIds);
-        this.hierarchy.set(id, childrenIds);
-        this.wasmModule.setChildren(id, JSON.stringify(childrenIds));
+
+        queue.add(() => {
+            // console.time("setChildren");
+            this.wasmModule.setChildren(id, JSON.stringify(childrenIds));
+            // console.timeEnd("setChildren");
+        });
     }
     manageChildren(
         id,
@@ -66,21 +77,26 @@ class UIManager {
         //     removeAtIndices,
         // );
 
-        const children = JSON.parse(this.wasmModule.getChildren(id));
+        // todo: this is seriously slow
+        queue.add(() => {
+            // console.time("manageChildren");
+            const children = JSON.parse(this.wasmModule.getChildren(id));
 
-        if (addChildReactTags.length > 0 && addAtIndices.length > 0) {
-            addChildReactTags.forEach((addChildReactTag, index) => {
-                const addAtIndice = addAtIndices[index];
+            if (addChildReactTags.length > 0 && addAtIndices.length > 0) {
+                addChildReactTags.forEach((addChildReactTag, index) => {
+                    const addAtIndex = addAtIndices[index];
 
-                children.splice(addAtIndice, 0, ...addChildReactTags);
-            });
-        }
+                    children.splice(addAtIndex, 0, ...addChildReactTags);
+                });
+            }
 
-        if (removeAtIndices.length > 0) {
-            children.splice(removeAtIndices[0], 1);
-        }
+            if (removeAtIndices.length > 0) {
+                children.splice(removeAtIndices[0], 1);
+            }
 
-        this.wasmModule.setChildren(id, JSON.stringify(children));
+            this.wasmModule.setChildren(id, JSON.stringify(children));
+            // console.timeEnd("manageChildren");
+        });
     }
 }
 

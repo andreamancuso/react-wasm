@@ -20,8 +20,6 @@ export const StyleSelector = () => {
     const [selectedStyleIndex, setSelectedStyleIndex] = useState(1);
 
     const handleStyleChanged = useCallback((event: any) => {
-        console.log(event.nativeEvent.value);
-
         if (event?.nativeEvent) {
             setSelectedStyleIndex(event?.nativeEvent.value);
         }
