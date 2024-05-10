@@ -14,6 +14,7 @@ const test = new Map();
 class NativeFabricUIManager {
     wasmModule;
     dispatchEventFn;
+    cloningNode;
 
     constructor() {}
 
@@ -24,7 +25,12 @@ class NativeFabricUIManager {
         this.dispatchEventFn(test.get(rootNodeID), topLevelType, nativeEventParam);
     };
     createNode = (generatedId, uiViewClassName, requiresClone, payload, fiberNode) => {
-        console.log("createNode", generatedId, uiViewClassName, requiresClone, payload, fiberNode);
+        // console.log("createNode", generatedId, uiViewClassName, requiresClone, payload, fiberNode);
+
+        // todo: yikes
+        if (this.cloningNode) {
+            this.cloningNode = null;
+        }
 
         const { children, type, id, ...props } = payload;
         const widget = { ...props, id: generatedId, type };
@@ -40,7 +46,7 @@ class NativeFabricUIManager {
         return widget;
     };
     cloneNodeWithNewProps = (node, newProps) => {
-        console.log("cloneNodeWithNewProps", node, newProps);
+        // console.log("cloneNodeWithNewProps", node, newProps);
 
         const newWidget = { ...node, ...newProps };
 
@@ -50,31 +56,55 @@ class NativeFabricUIManager {
 
         return newWidget;
     };
+    // This is a rather problematic method
+    // I should drop all children then re-append them but naturally this causes out of memory bounds issues
+    // Also, I still don't understand at which point I am supposed to delete widgets/nodes
+    // todo: have a look at react-native's own implementation of this...
     cloneNodeWithNewChildren = (node) => {
-        console.log("cloneNodeWithNewChildren", node);
+        // todo: yikes
+        if (this.cloningNode) {
+            this.wasmModule.setChildren(
+                this.cloningNode.id,
+                JSON.stringify(this.cloningNode.childrenIds),
+            );
+        }
 
-        this.wasmModule.setChildren(node.id, JSON.stringify([]));
+        this.cloningNode = { id: node.id, childrenIds: [] };
 
-        // return { ...node };
-
+        // todo: does this make sense?
         return node;
     };
     createChildSet(...args) {
-        console.log("createChildSet", args);
+        // console.log("createChildSet", args);
 
         return [];
     }
     appendChildToSet(set, child) {
-        console.log("appendChildToSet", set, child);
+        // console.log("appendChildToSet", set, child);
 
         set.push(child);
     }
     appendChild = (parent, child) => {
-        console.log("appendChild", parent, child);
-        this.wasmModule.appendChild(parent.id, child.id);
+        // console.log("appendChild", parent, child);
+
+        // todo: yikes
+        if (this.cloningNode) {
+            this.cloningNode.childrenIds.push(child.id);
+        } else {
+            this.wasmModule.appendChild(parent.id, child.id);
+        }
     };
     completeRoot = (container, newChildSet) => {
         // console.log("completeRoot", container, newChildSet);
+
+        // todo: yikes
+        if (this.cloningNode) {
+            this.wasmModule.setChildren(
+                this.cloningNode.id,
+                JSON.stringify(this.cloningNode.childrenIds),
+            );
+            this.cloningNode = null;
+        }
 
         this.wasmModule.setChildren(container, JSON.stringify(newChildSet.map(({ id }) => id)));
     };

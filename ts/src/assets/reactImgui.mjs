@@ -950,14 +950,14 @@ function dbg(...args) {
 // === Body ===
 
 var ASM_CONSTS = {
-  177636: ($0, $1) => { Module.eventHandlers.onTextChange($0, UTF8ToString($1)); },  
- 177697: ($0, $1) => { Module.eventHandlers.onComboChange($0, $1); },  
- 177745: ($0, $1) => { Module.eventHandlers.onNumericValueChange($0, $1); },  
- 177800: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float')]); },  
- 177901: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float')]); },  
- 178027: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float'), getValue($1+12, 'float')]); },  
- 178179: ($0, $1) => { Module.eventHandlers.onBooleanValueChange($0, $1); },  
- 178234: ($0) => { Module.eventHandlers.onClick($0); }
+  177684: ($0, $1) => { Module.eventHandlers.onTextChange($0, UTF8ToString($1)); },  
+ 177745: ($0, $1) => { Module.eventHandlers.onComboChange($0, $1); },  
+ 177793: ($0, $1) => { Module.eventHandlers.onNumericValueChange($0, $1); },  
+ 177848: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float')]); },  
+ 177949: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float')]); },  
+ 178075: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float'), getValue($1+12, 'float')]); },  
+ 178227: ($0, $1) => { Module.eventHandlers.onBooleanValueChange($0, $1); },  
+ 178282: ($0) => { Module.eventHandlers.onClick($0); }
 };
 
 
@@ -7503,6 +7503,17 @@ function invoke_iii(index,a1,a2) {
   }
 }
 
+function invoke_ii(index,a1) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)(a1);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
 function invoke_iiii(index,a1,a2,a3) {
   var sp = stackSave();
   try {
@@ -7518,17 +7529,6 @@ function invoke_viiiii(index,a1,a2,a3,a4,a5) {
   var sp = stackSave();
   try {
     getWasmTableEntry(index)(a1,a2,a3,a4,a5);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_ii(index,a1) {
-  var sp = stackSave();
-  try {
-    return getWasmTableEntry(index)(a1);
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;

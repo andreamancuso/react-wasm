@@ -33,6 +33,7 @@ class ReactImgui : public ImPlotView {
     typedef std::function<void(const json&)> rendererFunction;
 
     private:
+
         std::unordered_map<int, std::unique_ptr<Widget>> widgets;
 
         void InitWidget(const json& widgetDef);
@@ -45,7 +46,7 @@ class ReactImgui : public ImPlotView {
         void SetUpFloatFormatChars();
 
     public:
-        std::unordered_map<int, std::set<int>> hierarchy;
+        std::unordered_map<int, std::vector<int>> hierarchy;
 
         std::unordered_map<std::string, rendererFunction> rendererFunctionMap;
         std::unordered_map<int, std::unique_ptr<char[]>> floatFormatChars;
@@ -85,11 +86,11 @@ class ReactImgui : public ImPlotView {
 
         void PatchWidget(int id, std::string widgetJsonAsString);
 
-        void SetChildren(int id, std::set<int> childIds);
+        void SetChildren(int id, std::vector<int> childIds);
 
         void AppendChild(int parentId, int childId);
 
-        std::set<int> GetChildren(int id);
+        std::vector<int> GetChildren(int id);
 
         json GetAvailableFonts();
 };

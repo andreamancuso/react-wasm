@@ -224,7 +224,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
     useEffect(() => {
         if (wasmModule && !widgetsDefsRef.current) {
             // rnInterface.UIManager.init(wasmModule);
-            console.log(rnInterface.nativeFabricUIManager, wasmModule);
+            // console.log(rnInterface.nativeFabricUIManager, wasmModule);
 
             rnInterface.nativeFabricUIManager.init(wasmModule);
 
@@ -238,6 +238,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                 () => {
                     console.log("initialised");
                 },
+                1,
             );
 
             // AppRegistry.registerComponent("");

@@ -29,14 +29,16 @@ void Widget::HandleChildren(ReactImgui* view) {
 };
 
 void Fragment::Render(ReactImgui* view) {
+    ImGui::Text("Begin Fragment (ID: %d)", id);
     Widget::HandleChildren(view);
+    ImGui::Text("End Fragment (ID: %d)", id);
 };
 
 
 void SameLine::Render(ReactImgui* view) {
     // Special case
     if (view->hierarchy.contains(id)) {
-        size_t size = view->hierarchy[id].size() - 1;
+        size_t size = view->hierarchy[id].size();
 
         int i = 0;
         for (auto& childId : view->hierarchy[id]) {
@@ -45,9 +47,11 @@ void SameLine::Render(ReactImgui* view) {
             if (i < (size)) {
                 ImGui::SameLine();
             }
-            
+
             i++;
         }
+
+        ImGui::Text("(ID: %d)", id);
     }
 };
 

@@ -41,7 +41,6 @@ void ReactImgui::RenderWidgetById(int id) {
 
 void ReactImgui::RenderWidgets(int id) {
     if (this->widgets.contains(id)) {
-        // printf("Rendering widget #%d\n", id);
         RenderWidgetById(id);
     }
 
@@ -64,7 +63,7 @@ void ReactImgui::InitWidget(const json& widgetDef) {
     std::string type = widgetDef["type"].template get<std::string>();
     int id = widgetDef["id"].template get<int>();
 
-    hierarchy[id] = std::set<int>();
+    hierarchy[id] = std::vector<int>();
 
     if (type == "InputText") {
         InitInputText(widgetDef);
@@ -425,17 +424,19 @@ void ReactImgui::PatchWidget(int id, std::string widgetJsonAsString) {
     }
 };
 
-void ReactImgui::SetChildren(int id, std::set<int> childrenIds) {
+void ReactImgui::SetChildren(int id, std::vector<int> childrenIds) {
     hierarchy[id] = childrenIds;
 };
 
 void ReactImgui::AppendChild(int parentId, int childId) {
     if (hierarchy.contains(parentId)) {
-        hierarchy[parentId].insert(childId);
+        if ( std::find(hierarchy[parentId].begin(), hierarchy[parentId].end(), childId) == hierarchy[parentId].end() ) {
+            hierarchy[parentId].push_back(childId);
+        }
     }
 };
 
-std::set<int> ReactImgui::GetChildren(int id) {
+std::vector<int> ReactImgui::GetChildren(int id) {
     return hierarchy[id];
 };
 

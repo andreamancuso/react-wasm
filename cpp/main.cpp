@@ -181,7 +181,7 @@ class WasmRunner {
             view->PatchWidget(id, widgetJsonAsString);
         }
 
-        void setChildren(int id, std::set<int> childrenIds) {
+        void setChildren(int id, std::vector<int> childrenIds) {
             view->SetChildren(id, childrenIds);
         }
 
@@ -189,7 +189,7 @@ class WasmRunner {
             view->AppendChild(parentId, childId);
         }
 
-        std::set<int> getChildren(int id) {
+        std::vector<int> getChildren(int id) {
             return view->GetChildren(id);
         }
 
@@ -237,7 +237,7 @@ void patchWidget(int id, std::string widgetsJson) {
 }
 
 void setChildren(int id, std::string childrenIds) {
-    pRunner->setChildren(id, JsonToSet<int>(childrenIds));
+    pRunner->setChildren(id, JsonToVector<int>(childrenIds));
 }
 
 void appendChild(int parentId, int childId) {
@@ -245,7 +245,7 @@ void appendChild(int parentId, int childId) {
 }
 
 std::string getChildren(int id) {
-    return IntSetToJson(pRunner->getChildren(id)).dump();
+    return IntVectorToJson(pRunner->getChildren(id)).dump();
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
