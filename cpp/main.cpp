@@ -9,6 +9,7 @@
 
 #define IMGUI_USE_WCHAR32
 
+#include <set>
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
@@ -41,8 +42,26 @@ std::vector<T> JsonToVector(std::string data) {
     }
     return vec;
 }
- 
+
+template <typename T> 
+std::set<T> JsonToSet(std::string data) {
+    auto parsedData = json::parse(data);
+    std::set<T> set;
+    for (auto& [key, item] : parsedData.items()) {
+        set.insert(item.template get<T>());
+    }
+    return set;
+}
+
 json IntVectorToJson(std::vector<int> data) {
+    auto jsonArray = json::array();
+    for (auto& item : data) {
+        jsonArray.push_back(item);
+    }
+    return jsonArray;
+}
+
+json IntSetToJson(std::set<int> data) {
     auto jsonArray = json::array();
     for (auto& item : data) {
         jsonArray.push_back(item);
@@ -160,7 +179,7 @@ class WasmRunner {
             view->PatchWidget(id, widgetJsonAsString);
         }
 
-        void setChildren(int id, std::vector<int> childrenIds) {
+        void setChildren(int id, std::set<int> childrenIds) {
             view->SetChildren(id, childrenIds);
         }
 
@@ -168,7 +187,7 @@ class WasmRunner {
             view->AppendChild(parentId, childId);
         }
 
-        std::vector<int> getChildren(int id) {
+        std::set<int> getChildren(int id) {
             return view->GetChildren(id);
         }
 
@@ -216,7 +235,7 @@ void patchWidget(int id, std::string widgetsJson) {
 }
 
 void setChildren(int id, std::string childrenIds) {
-    pRunner->setChildren(id, JsonToVector<int>(childrenIds));
+    pRunner->setChildren(id, JsonToSet<int>(childrenIds));
 }
 
 void appendChild(int parentId, int childId) {
@@ -224,7 +243,7 @@ void appendChild(int parentId, int childId) {
 }
 
 std::string getChildren(int id) {
-    return IntVectorToJson(pRunner->getChildren(id)).dump();
+    return IntSetToJson(pRunner->getChildren(id)).dump();
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {

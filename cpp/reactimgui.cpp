@@ -53,11 +53,7 @@ void ReactImgui::RenderWidgets(int id) {
 void ReactImgui::RenderChildren(int id) {
     if (this->hierarchy.contains(id)) {
         if (this->hierarchy[id].size() > 0) {
-            // printf("About to render %lu children for widget #%d\n", this->hierarchy[id].size(), id);
-            auto childrenIds = this->hierarchy[id];
-
-            for (auto& childId : childrenIds) {
-                // printf("About to render child widget #%d of widget #%d\n", childId, id);
+            for (auto& childId : this->hierarchy[id]) {
                 this->RenderWidgets(childId);
             }
         }
@@ -428,15 +424,17 @@ void ReactImgui::PatchWidget(int id, std::string widgetJsonAsString) {
     }
 };
 
-void ReactImgui::SetChildren(int id, std::vector<int> childrenIds) {
+void ReactImgui::SetChildren(int id, std::set<int> childrenIds) {
     hierarchy[id] = childrenIds;
 };
 
 void ReactImgui::AppendChild(int parentId, int childId) {
-    hierarchy[parentId].push_back(childId);
+    // if (std::find(hierarchy[parentId].begin(), hierarchy[parentId].end(), childId) != hierarchy[parentId].end()) {
+        hierarchy[parentId].insert(childId);
+    // }
 };
 
-std::vector<int> ReactImgui::GetChildren(int id) {
+std::set<int> ReactImgui::GetChildren(int id) {
     return hierarchy[id];
 };
 

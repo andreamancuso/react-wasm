@@ -31,7 +31,7 @@ class ImGuiView : public View {
             ImGui::SetCurrentContext(imGuiCtx);
         }
 
-        void SetUp(std::string canvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) {
+        void SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) {
             IMGUI_CHECKVERSION();
 
             ImGui_ImplWGPU_InitInfo init_info;
@@ -44,7 +44,7 @@ class ImGuiView : public View {
             // Setup Platform/Renderer backends
             ImGui_ImplGlfw_InitForOther(glfwWindow, true);
         #ifdef __EMSCRIPTEN__
-            ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback(canvasSelector.c_str());
+            ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback(pCanvasSelector);
         #endif
         }
 

@@ -38,12 +38,15 @@ void SameLine::Render(ReactImgui* view) {
     if (view->hierarchy.contains(id)) {
         size_t size = view->hierarchy[id].size() - 1;
 
-        for (int index = 0; index < view->hierarchy[id].size(); ++index) {
-            view->RenderWidgets(view->hierarchy[id][index]);
+        int i = 0;
+        for (auto& childId : view->hierarchy[id]) {
+            view->RenderWidgets(childId);
 
-            if (index < (size)) {
+            if (i < (size)) {
                 ImGui::SameLine();
             }
+            
+            i++;
         }
     }
 };
