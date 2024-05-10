@@ -28,7 +28,7 @@ if (DEFINED EMSCRIPTEN)
 
     target_include_directories(reactImgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${DEPS}/imgui ${DEPS}/imgui/backends ${DEPS}/implot ${DEPS}/json/include ${DEPS}/wasm-glfw3-boilerplate)
 
-	set_target_properties(reactImgui PROPERTIES COMPILE_FLAGS "-pthread --embind-emit-tsd interface.d.ts -O0 -DIMGUI_DISABLE_FILE_FUNCTIONS -Wall -Wformat -s DISABLE_EXCEPTION_CATCHING=0")
-    set_target_properties(reactImgui PROPERTIES LINK_FLAGS "-O0 -pthread -lembind --embind-emit-tsd interface.d.ts -s ENVIRONMENT='web,worker' -s MODULARIZE=1 -s ALLOW_MEMORY_GROWTH=0 -s WASM=1 -s USE_GLFW=3 -s USE_WEBGPU=1 -s NO_FILESYSTEM=1 -s NO_EXIT_RUNTIME=0 -s STANDALONE_WASM=0 -s EXIT_RUNTIME=1 -s ASSERTIONS=1 -s STACK_OVERFLOW_CHECK=2 -s MIN_WEBGL_VERSION=2 -s MAX_WEBGL_VERSION=2 -s DISABLE_EXCEPTION_CATCHING=0 -sINITIAL_MEMORY=512Mb -s OFFSCREEN_FRAMEBUFFER=1 -sPROXY_TO_PTHREAD -s PTHREAD_POOL_SIZE=1")
+	set_target_properties(reactImgui PROPERTIES COMPILE_FLAGS " -O0 -DIMGUI_DISABLE_FILE_FUNCTIONS -Wall -Wformat -s DISABLE_EXCEPTION_CATCHING=0")
+    set_target_properties(reactImgui PROPERTIES LINK_FLAGS "-O0 -lembind --embind-emit-tsd interface.d.ts -s ENVIRONMENT='web,worker' -s MODULARIZE=1 -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s USE_GLFW=3 -s USE_WEBGPU=1 -s NO_FILESYSTEM=1 -s NO_EXIT_RUNTIME=0 -s STANDALONE_WASM=0 -s EXIT_RUNTIME=1 -s ASSERTIONS=1 -s STACK_OVERFLOW_CHECK=2 -s MIN_WEBGL_VERSION=2 -s MAX_WEBGL_VERSION=2 -s DISABLE_EXCEPTION_CATCHING=0 ")
     set_target_properties(reactImgui PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../ts/src/assets)
 endif()

@@ -68,8 +68,6 @@ class UIManager {
 
         const children = JSON.parse(this.wasmModule.getChildren(id));
 
-        // console.log(children);
-
         if (addChildReactTags.length > 0 && addAtIndices.length > 0) {
             addChildReactTags.forEach((addChildReactTag, index) => {
                 const addAtIndice = addAtIndices[index];
@@ -82,18 +80,13 @@ class UIManager {
             children.splice(removeAtIndices[0], 1);
         }
 
-        this.wasmModule.setChildren(id, children);
+        this.wasmModule.setChildren(id, JSON.stringify(children));
     }
 }
 
 class RCTEventEmitter {
     re;
     rt;
-
-    // init(receiveEvent, receiveTouches) {
-    //     re = receiveEvent;
-    //     rt = receiveTouches;
-    // }
 
     register({ receiveEvent, receiveTouches }) {
         this.re = receiveEvent;
@@ -124,16 +117,12 @@ module.exports = {
     },
     get ReactNativeViewConfigRegistry() {
         return {
-            customBubblingEventTypes: {
-                //     onChange: { registrationName: "onChange", phasedRegistrationNames: [] },
-            },
+            customBubblingEventTypes: {},
             customDirectEventTypes: {
                 onChange: { registrationName: "onChange" },
                 onClick: { registrationName: "onClick" },
             },
             get(elementType, ...unknownArgs) {
-                // console.log("ReactNativeViewConfigRegistry.get", elementType, unknownArgs);
-
                 switch (elementType) {
                     case "widget":
                         return {
@@ -158,8 +147,6 @@ module.exports = {
                             },
                         };
                 }
-
-                // console.log(elementType);
 
                 return {
                     validAttributes: [],

@@ -12,7 +12,6 @@
 #include <sstream>
 #include <emscripten.h>
 #include <emscripten/bind.h>
-#include <emscripten/val.h>
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"

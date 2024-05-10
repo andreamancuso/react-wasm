@@ -17,7 +17,6 @@
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/bind.h>
-#include <emscripten/val.h>
 #endif
 #include <nlohmann/json.hpp>
 
@@ -51,13 +50,6 @@ json IntVectorToJson(std::vector<int> data) {
     return jsonArray;
 }
 
-
-
-void OnMultipleNumericValuesChanged(int id, float* values, int size) {
-    // auto jsValue = ConvertArrayPointerToJsArray(values, size);
-    printf("OnMultipleNumericValuesChanged(%d, %d values)\n", id, size);
-}
-
 class WasmRunner {
     protected:
         GLWasm* glWasm;
@@ -67,23 +59,71 @@ class WasmRunner {
         WasmRunner() {}
 
         static void OnTextChanged(int id, std::string value) {
-            printf("OnTextChanged(%d, %s)\n", id, value.c_str());
+            EM_ASM_ARGS(
+                { Module.eventHandlers.onTextChange($0, UTF8ToString($1)); },
+                id,
+                value.c_str()
+            );
         }
 
         static void OnComboChanged(int id, int value) {
-            printf("OnComboChanged(%d, %d)\n", id, value);
+            EM_ASM_ARGS(
+                { Module.eventHandlers.onComboChange($0, $1); },
+                id,
+                value
+            );
         }
 
         static void OnNumericValueChanged(int id, int value) {
-            printf("OnNumericValueChanged(%d, %d)\n", id, value);
+            EM_ASM_ARGS(
+                { Module.eventHandlers.onNumericValueChange($0, $1); },
+                id,
+                value
+            );
         }
 
         static void OnBooleanValueChanged(int id, bool value) {
-            printf("OnBooleanValueChanged(%d)\n", id);
+            EM_ASM_ARGS(
+                { Module.eventHandlers.onBooleanValueChange($0, $1); },
+                id,
+                value
+            );
+        }
+
+        // todo: improve
+        static void OnMultipleNumericValuesChanged(int id, float* values, int numValues) {
+            if (numValues == 2) {
+                EM_ASM_ARGS(
+                    { 
+                        Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float')]);
+                    },
+                    id,
+                    values
+                );
+            } else if (numValues == 3) {
+                EM_ASM_ARGS(
+                    { 
+                        Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float')]);
+                    },
+                    id,
+                    values
+                );
+            } else if (numValues == 4) {
+                EM_ASM_ARGS(
+                    { 
+                        Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float'), getValue($1+12, 'float')]);
+                    },
+                    id,
+                    values
+                );
+            }
         }
 
         static void OnClick(int id) {
-            printf("OnClick(%d)\n", id);
+            EM_ASM_ARGS(
+                { Module.eventHandlers.onClick($0); },
+                id
+            );
         }
 
         void run(
@@ -92,6 +132,13 @@ class WasmRunner {
                 "ReactImgui", 
                 "ReactImgui"
             );
+            view->SetEventHandlers(
+                OnTextChanged,
+                OnComboChanged,
+                OnNumericValueChanged,
+                OnMultipleNumericValuesChanged,
+                OnBooleanValueChanged,
+                OnClick);
             glWasm = &GLWasm::GetInstance(view);
             glWasm->Init(canvasSelector);
         }
@@ -115,16 +162,6 @@ class WasmRunner {
 
         void setChildren(int id, std::vector<int> childrenIds) {
             view->SetChildren(id, childrenIds);
-        }
-
-        void setEventHandlers() {
-            view->SetEventHandlers(
-                OnTextChanged,
-                OnComboChanged,
-                OnNumericValueChanged,
-                OnMultipleNumericValuesChanged,
-                OnBooleanValueChanged,
-                OnClick);
         }
 
         std::vector<int> getChildren(int id) {
@@ -158,10 +195,6 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-void setEventHandlers() {
-    pRunner->setEventHandlers();
-}
-
 void _exit() {
     pRunner->exit();
 }
@@ -188,7 +221,6 @@ std::string getChildren(int id) {
 
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("exit", &_exit);
-    emscripten::function("setEventHandlers", &setEventHandlers);
     emscripten::function("resizeWindow", &resizeWindow);
     emscripten::function("setWidget", &setWidget);
     emscripten::function("patchWidget", &patchWidget);

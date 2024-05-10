@@ -12,7 +12,6 @@
 #include <sstream>
 #include <emscripten.h>
 #include <emscripten/bind.h>
-#include <emscripten/val.h>
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
@@ -232,14 +231,6 @@ void ReactImgui::SetEventHandlers(
     onMultiValueChange = onMultiValueChangeFn;
     onBooleanValueChange = onBooleanValueChangeFn;
     onClick = onClickFn;
-
-    printf("here!\n");
-
-    if (onClickFn == nullptr) {
-        printf("onClickfn is nullptr\n");
-    } else {
-        printf("onClickfn is set\n");
-    }
 
     Widget::onInputTextChange_ = onInputTextChangeFn;
 };

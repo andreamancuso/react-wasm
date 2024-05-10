@@ -13,7 +13,7 @@ export const ImGuiDemo = () => {
 
     const handleInputTextChanged = useCallback((event: any) => {
         if (event?.nativeEvent) {
-            setText(event?.nativeEvent.value);
+            setText(String(event?.nativeEvent.value));
         }
     }, []);
 

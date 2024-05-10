@@ -27,7 +27,7 @@ Module['ready'] = new Promise((resolve, reject) => {
   readyPromiseResolve = resolve;
   readyPromiseReject = reject;
 });
-["__emscripten_thread_init","__emscripten_thread_exit","__emscripten_thread_crashed","__emscripten_thread_mailbox_await","__emscripten_tls_init","_pthread_self","checkMailbox","__embind_initialize_bindings","establishStackSpace","invokeEntryPoint","PThread","getExceptionMessage","$incrementExceptionRefcount","$decrementExceptionRefcount","___indirect_function_table","__emscripten_proxy_main","___set_stack_limits","_main","onRuntimeInitialized"].forEach((prop) => {
+["getExceptionMessage","$incrementExceptionRefcount","$decrementExceptionRefcount","_memory","___indirect_function_table","___set_stack_limits","_main","onRuntimeInitialized"].forEach((prop) => {
   if (!Object.getOwnPropertyDescriptor(Module['ready'], prop)) {
     Object.defineProperty(Module['ready'], prop, {
       get: () => abort('You are getting ' + prop + ' on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js'),
@@ -67,14 +67,6 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 if (Module['ENVIRONMENT']) {
   throw new Error('Module.ENVIRONMENT has been deprecated. To force the environment, use the ENVIRONMENT compile-time option (for example, -sENVIRONMENT=web or -sENVIRONMENT=node)');
 }
-
-// Three configurations we can be running in:
-// 1) We could be the application main() thread running in the main JS UI thread. (ENVIRONMENT_IS_WORKER == false and ENVIRONMENT_IS_PTHREAD == false)
-// 2) We could be the application main() thread proxied to worker. (with Emscripten -sPROXY_TO_WORKER) (ENVIRONMENT_IS_WORKER == true, ENVIRONMENT_IS_PTHREAD == false)
-// 3) We could be an application pthread running in a worker. (ENVIRONMENT_IS_WORKER == true and ENVIRONMENT_IS_PTHREAD == true)
-
-// ENVIRONMENT_IS_PTHREAD=true will have been preset in worker.js. Make it false in the main runtime thread.
-var ENVIRONMENT_IS_PTHREAD = Module['ENVIRONMENT_IS_PTHREAD'] || false;
 
 // `/` should be present at the end if `scriptDirectory` is not empty
 var scriptDirectory = '';
@@ -278,9 +270,6 @@ var OPFS = 'OPFS is no longer included by default; build with -lopfs.js';
 
 var NODEFS = 'NODEFS is no longer included by default; build with -lnodefs.js';
 
-assert(
-  ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER || ENVIRONMENT_IS_NODE, 'Pthreads do not work in this environment yet (need Web Workers, or an alternative to them)');
-
 assert(!ENVIRONMENT_IS_NODE, 'node environment detected but not enabled at build time.  Add `node` to `-sENVIRONMENT` to enable.');
 
 assert(!ENVIRONMENT_IS_SHELL, 'shell environment detected but not enabled at build time.  Add `shell` to `-sENVIRONMENT` to enable.');
@@ -308,9 +297,6 @@ if (typeof WebAssembly != 'object') {
 // Wasm globals
 
 var wasmMemory;
-
-// For sending to workers.
-var wasmModule;
 
 //========================================
 // Runtime essentials
@@ -376,47 +362,9 @@ assert(!Module['STACK_SIZE'], 'STACK_SIZE can no longer be set at runtime.  Use 
 assert(typeof Int32Array != 'undefined' && typeof Float64Array !== 'undefined' && Int32Array.prototype.subarray != undefined && Int32Array.prototype.set != undefined,
        'JS engine does not provide full typed array support');
 
-// In non-standalone/normal mode, we create the memory here.
-// include: runtime_init_memory.js
-// Create the wasm memory. (Note: this only applies if IMPORTED_MEMORY is defined)
-
-var INITIAL_MEMORY = Module['INITIAL_MEMORY'] || 536870912;legacyModuleProp('INITIAL_MEMORY', 'INITIAL_MEMORY');
-
-assert(INITIAL_MEMORY >= 65536, 'INITIAL_MEMORY should be larger than STACK_SIZE, was ' + INITIAL_MEMORY + '! (STACK_SIZE=' + 65536 + ')');
-  
-// check for full engine support (use string 'subarray' to avoid closure compiler confusion)
-
-if (ENVIRONMENT_IS_PTHREAD) {
-  wasmMemory = Module['wasmMemory'];
-} else {
-
-  if (Module['wasmMemory']) {
-    wasmMemory = Module['wasmMemory'];
-  } else
-  {
-    wasmMemory = new WebAssembly.Memory({
-      'initial': INITIAL_MEMORY / 65536,
-      'maximum': INITIAL_MEMORY / 65536,
-      'shared': true,
-    });
-    if (!(wasmMemory.buffer instanceof SharedArrayBuffer)) {
-      err('requested a shared WebAssembly.Memory but the returned buffer is not a SharedArrayBuffer, indicating that while the browser has SharedArrayBuffer it does not have WebAssembly threads support - you may need to set a flag');
-      if (ENVIRONMENT_IS_NODE) {
-        err('(on node you may need: --experimental-wasm-threads --experimental-wasm-bulk-memory and/or recent version)');
-      }
-      throw Error('bad memory');
-    }
-  }
-
-}
-
-updateMemoryViews();
-
-// If the user provides an incorrect length, just use that length instead rather than providing the user to
-// specifically provide the memory length with Module['INITIAL_MEMORY'].
-INITIAL_MEMORY = wasmMemory.buffer.byteLength;
-assert(INITIAL_MEMORY % 65536 === 0);
-// end include: runtime_init_memory.js
+// If memory is defined in wasm, the user can't provide it, or set INITIAL_MEMORY
+assert(!Module['wasmMemory'], 'Use of `wasmMemory` detected.  Use -sIMPORTED_MEMORY to define wasmMemory externally');
+assert(!Module['INITIAL_MEMORY'], 'Detected runtime INITIAL_MEMORY setting.  Use -sIMPORTED_MEMORY to define wasmMemory dynamically');
 
 // include: runtime_stack_check.js
 // Initializes the stack cookie. Called at the startup of main and at the startup of each thread in pthreads mode.
@@ -477,7 +425,6 @@ var runtimeInitialized = false;
 var runtimeExited = false;
 
 function preRun() {
-  assert(!ENVIRONMENT_IS_PTHREAD); // PThreads reuse the runtime from the main thread.
   if (Module['preRun']) {
     if (typeof Module['preRun'] == 'function') Module['preRun'] = [Module['preRun']];
     while (Module['preRun'].length) {
@@ -491,8 +438,6 @@ function initRuntime() {
   assert(!runtimeInitialized);
   runtimeInitialized = true;
 
-  if (ENVIRONMENT_IS_PTHREAD) return;
-
   checkStackCookie();
 
   setStackLimits();
@@ -503,7 +448,6 @@ function initRuntime() {
 
 function preMain() {
   checkStackCookie();
-  if (ENVIRONMENT_IS_PTHREAD) return; // PThreads reuse the runtime from the main thread.
   
   callRuntimeCallbacks(__ATMAIN__);
 }
@@ -511,17 +455,14 @@ function preMain() {
 function exitRuntime() {
   assert(!runtimeExited);
   checkStackCookie();
-  if (ENVIRONMENT_IS_PTHREAD) return; // PThreads reuse the runtime from the main thread.
   ___funcs_on_exit(); // Native atexit() functions
   callRuntimeCallbacks(__ATEXIT__);
   flush_NO_FILESYSTEM()
-  PThread.terminateAllThreads();
   runtimeExited = true;
 }
 
 function postRun() {
   checkStackCookie();
-  if (ENVIRONMENT_IS_PTHREAD) return; // PThreads reuse the runtime from the main thread.
 
   if (Module['postRun']) {
     if (typeof Module['postRun'] == 'function') Module['postRun'] = [Module['postRun']];
@@ -845,7 +786,14 @@ function createWasm() {
 
     
 
-    registerTLSInit(wasmExports['_emscripten_tls_init']);
+    wasmMemory = wasmExports['memory'];
+    
+    assert(wasmMemory, 'memory not found in wasm exports');
+    // This assertion doesn't hold when emscripten is run in --post-link
+    // mode.
+    // TODO(sbc): Read INITIAL_MEMORY out of the wasm file in post-link mode.
+    //assert(wasmMemory.buffer.byteLength === 16777216);
+    updateMemoryViews();
 
     wasmTable = wasmExports['__indirect_function_table'];
     
@@ -853,8 +801,6 @@ function createWasm() {
 
     addOnInit(wasmExports['__wasm_call_ctors']);
 
-    // We now have the Wasm module loaded up, keep a reference to the compiled module so we can post it to the workers.
-    wasmModule = module;
     removeRunDependency('wasm-instantiate');
     return wasmExports;
   }
@@ -871,7 +817,9 @@ function createWasm() {
     // receiveInstance() will swap in the exports (to Module.asm) so they can be called
     assert(Module === trueModule, 'the Module object should not be replaced during async compilation - perhaps the order of HTML elements is wrong?');
     trueModule = null;
-    receiveInstance(result['instance'], result['module']);
+    // TODO: Due to Closure regression https://github.com/google/closure-compiler/issues/3193, the above line no longer optimizes out down to the following line.
+    // When the regression is fixed, can restore the above PTHREADS-enabled path.
+    receiveInstance(result['instance']);
   }
 
   // User shell pages can write their own Module.instantiateWasm = function(imports, successCallback) callback
@@ -1001,6 +949,18 @@ function dbg(...args) {
 // end include: runtime_debug.js
 // === Body ===
 
+var ASM_CONSTS = {
+  178020: ($0, $1) => { Module.eventHandlers.onTextChange($0, UTF8ToString($1)); },  
+ 178081: ($0, $1) => { Module.eventHandlers.onComboChange($0, $1); },  
+ 178129: ($0, $1) => { Module.eventHandlers.onNumericValueChange($0, $1); },  
+ 178184: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float')]); },  
+ 178285: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float')]); },  
+ 178411: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float'), getValue($1+12, 'float')]); },  
+ 178563: ($0, $1) => { Module.eventHandlers.onBooleanValueChange($0, $1); },  
+ 178618: ($0) => { Module.eventHandlers.onClick($0); }
+};
+
+
 // end include: preamble.js
 
   /** @constructor */
@@ -1009,439 +969,6 @@ function dbg(...args) {
       this.message = `Program terminated with exit(${status})`;
       this.status = status;
     }
-
-  
-  
-  var terminateWorker = (worker) => {
-      worker.terminate();
-      // terminate() can be asynchronous, so in theory the worker can continue
-      // to run for some amount of time after termination.  However from our POV
-      // the worker now dead and we don't want to hear from it again, so we stub
-      // out its message handler here.  This avoids having to check in each of
-      // the onmessage handlers if the message was coming from valid worker.
-      worker.onmessage = (e) => {
-        var cmd = e['data']['cmd'];
-        err(`received "${cmd}" command from terminated worker: ${worker.workerID}`);
-      };
-    };
-  
-  var killThread = (pthread_ptr) => {
-      assert(!ENVIRONMENT_IS_PTHREAD, 'Internal Error! killThread() can only ever be called from main application thread!');
-      assert(pthread_ptr, 'Internal Error! Null pthread_ptr in killThread!');
-      var worker = PThread.pthreads[pthread_ptr];
-      delete PThread.pthreads[pthread_ptr];
-      terminateWorker(worker);
-      __emscripten_thread_free_data(pthread_ptr);
-      // The worker was completely nuked (not just the pthread execution it was hosting), so remove it from running workers
-      // but don't put it back to the pool.
-      PThread.runningWorkers.splice(PThread.runningWorkers.indexOf(worker), 1); // Not a running Worker anymore.
-      worker.pthread_ptr = 0;
-    };
-  
-  var cancelThread = (pthread_ptr) => {
-      assert(!ENVIRONMENT_IS_PTHREAD, 'Internal Error! cancelThread() can only ever be called from main application thread!');
-      assert(pthread_ptr, 'Internal Error! Null pthread_ptr in cancelThread!');
-      var worker = PThread.pthreads[pthread_ptr];
-      worker.postMessage({ 'cmd': 'cancel' });
-    };
-  
-  var cleanupThread = (pthread_ptr) => {
-      assert(!ENVIRONMENT_IS_PTHREAD, 'Internal Error! cleanupThread() can only ever be called from main application thread!');
-      assert(pthread_ptr, 'Internal Error! Null pthread_ptr in cleanupThread!');
-      var worker = PThread.pthreads[pthread_ptr];
-      assert(worker);
-      PThread.returnWorkerToPool(worker);
-    };
-  
-  var zeroMemory = (address, size) => {
-      HEAPU8.fill(0, address, address + size);
-      return address;
-    };
-  
-  var spawnThread = (threadParams) => {
-      assert(!ENVIRONMENT_IS_PTHREAD, 'Internal Error! spawnThread() can only ever be called from main application thread!');
-      assert(threadParams.pthread_ptr, 'Internal error, no pthread ptr!');
-  
-      var worker = PThread.getNewWorker();
-      if (!worker) {
-        // No available workers in the PThread pool.
-        return 6;
-      }
-      assert(!worker.pthread_ptr, 'Internal error!');
-  
-      PThread.runningWorkers.push(worker);
-  
-      // Add to pthreads map
-      PThread.pthreads[threadParams.pthread_ptr] = worker;
-  
-      worker.pthread_ptr = threadParams.pthread_ptr;
-      var msg = {
-          'cmd': 'run',
-          'start_routine': threadParams.startRoutine,
-          'arg': threadParams.arg,
-          'pthread_ptr': threadParams.pthread_ptr,
-      };
-      // Ask the worker to start executing its pthread entry point function.
-      worker.postMessage(msg, threadParams.transferList);
-      return 0;
-    };
-  
-  
-  
-  var runtimeKeepaliveCounter = 0;
-  var keepRuntimeAlive = () => noExitRuntime || runtimeKeepaliveCounter > 0;
-  
-  
-  var withStackSave = (f) => {
-      var stack = stackSave();
-      var ret = f();
-      stackRestore(stack);
-      return ret;
-    };
-  
-  
-  var convertI32PairToI53Checked = (lo, hi) => {
-      assert(lo == (lo >>> 0) || lo == (lo|0)); // lo should either be a i32 or a u32
-      assert(hi === (hi|0));                    // hi should be a i32
-      return ((hi + 0x200000) >>> 0 < 0x400001 - !!lo) ? (lo >>> 0) + hi * 4294967296 : NaN;
-    };
-  
-  /** @type{function(number, (number|boolean), ...number)} */
-  var proxyToMainThread = (funcIndex, emAsmAddr, sync, ...callArgs) => {
-      // EM_ASM proxying is done by passing a pointer to the address of the EM_ASM
-      // contant as `emAsmAddr`.  JS library proxying is done by passing an index
-      // into `proxiedJSCallArgs` as `funcIndex`. If `emAsmAddr` is non-zero then
-      // `funcIndex` will be ignored.
-      // Additional arguments are passed after the first three are the actual
-      // function arguments.
-      // The serialization buffer contains the number of call params, and then
-      // all the args here.
-      // We also pass 'sync' to C separately, since C needs to look at it.
-      // Allocate a buffer, which will be copied by the C code.
-      return withStackSave(() => {
-        // First passed parameter specifies the number of arguments to the function.
-        // When BigInt support is enabled, we must handle types in a more complex
-        // way, detecting at runtime if a value is a BigInt or not (as we have no
-        // type info here). To do that, add a "prefix" before each value that
-        // indicates if it is a BigInt, which effectively doubles the number of
-        // values we serialize for proxying. TODO: pack this?
-        var serializedNumCallArgs = callArgs.length ;
-        var args = stackAlloc(serializedNumCallArgs * 8);
-        var b = ((args)>>3);
-        for (var i = 0; i < callArgs.length; i++) {
-          var arg = callArgs[i];
-          HEAPF64[b + i] = arg;
-        }
-        return __emscripten_run_on_main_thread_js(funcIndex, emAsmAddr, serializedNumCallArgs, args, sync);
-      });
-    };
-  
-  function _proc_exit(code) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(0, 0, 1, code);
-  
-      EXITSTATUS = code;
-      if (!keepRuntimeAlive()) {
-        PThread.terminateAllThreads();
-        Module['onExit']?.(code);
-        ABORT = true;
-      }
-      quit_(code, new ExitStatus(code));
-    
-  }
-  
-  
-  /** @suppress {duplicate } */
-  /** @param {boolean|number=} implicit */
-  var exitJS = (status, implicit) => {
-      EXITSTATUS = status;
-  
-      if (ENVIRONMENT_IS_PTHREAD) {
-        // implict exit can never happen on a pthread
-        assert(!implicit);
-        // When running in a pthread we propagate the exit back to the main thread
-        // where it can decide if the whole process should be shut down or not.
-        // The pthread may have decided not to exit its own runtime, for example
-        // because it runs a main loop, but that doesn't affect the main thread.
-        exitOnMainThread(status);
-        throw 'unwind';
-      }
-  
-      if (!keepRuntimeAlive()) {
-        exitRuntime();
-      }
-  
-      // if exit() was called explicitly, warn the user if the runtime isn't actually being shut down
-      if (keepRuntimeAlive() && !implicit) {
-        var msg = `program exited (with status: ${status}), but keepRuntimeAlive() is set (counter=${runtimeKeepaliveCounter}) due to an async operation, so halting execution but not exiting the runtime or preventing further async execution (you can use emscripten_force_exit, if you want to force a true shutdown)`;
-        readyPromiseReject(msg);
-        err(msg);
-      }
-  
-      _proc_exit(status);
-    };
-  var _exit = exitJS;
-  
-  var ptrToString = (ptr) => {
-      assert(typeof ptr === 'number');
-      // With CAN_ADDRESS_2GB or MEMORY64, pointers are already unsigned.
-      ptr >>>= 0;
-      return '0x' + ptr.toString(16).padStart(8, '0');
-    };
-  
-  var handleException = (e) => {
-      // Certain exception types we do not treat as errors since they are used for
-      // internal control flow.
-      // 1. ExitStatus, which is thrown by exit()
-      // 2. "unwind", which is thrown by emscripten_unwind_to_js_event_loop() and others
-      //    that wish to return to JS event loop.
-      if (e instanceof ExitStatus || e == 'unwind') {
-        return EXITSTATUS;
-      }
-      checkStackCookie();
-      if (e instanceof WebAssembly.RuntimeError) {
-        if (_emscripten_stack_get_current() <= 0) {
-          err('Stack overflow detected.  You can try increasing -sSTACK_SIZE (currently set to 65536)');
-        }
-      }
-      quit_(1, e);
-    };
-  
-  var PThread = {
-  unusedWorkers:[],
-  runningWorkers:[],
-  tlsInitFunctions:[],
-  pthreads:{
-  },
-  nextWorkerID:1,
-  debugInit() {
-        function pthreadLogPrefix() {
-          var t = 0;
-          if (runtimeInitialized && typeof _pthread_self != 'undefined'
-          && !runtimeExited
-          ) {
-            t = _pthread_self();
-          }
-          return 'w:' + (Module['workerID'] || 0) + ',t:' + ptrToString(t) + ': ';
-        }
-  
-        // Prefix all err()/dbg() messages with the calling thread ID.
-        var origDbg = dbg;
-        dbg = (...args) => origDbg(pthreadLogPrefix() + args.join(' '));
-      },
-  init() {
-        PThread.debugInit();
-        if (ENVIRONMENT_IS_PTHREAD
-          ) {
-          PThread.initWorker();
-        } else {
-          PThread.initMainThread();
-        }
-      },
-  initMainThread() {
-        var pthreadPoolSize = 1;
-        // Start loading up the Worker pool, if requested.
-        while (pthreadPoolSize--) {
-          PThread.allocateUnusedWorker();
-        }
-        // MINIMAL_RUNTIME takes care of calling loadWasmModuleToAllWorkers
-        // in postamble_minimal.js
-        addOnPreRun(() => {
-          addRunDependency('loading-workers')
-          PThread.loadWasmModuleToAllWorkers(() => removeRunDependency('loading-workers'));
-        });
-      },
-  initWorker() {
-        // worker.js is not compiled together with us, and must access certain
-        // things.
-        PThread['receiveObjectTransfer'] = PThread.receiveObjectTransfer;
-        PThread['threadInitTLS'] = PThread.threadInitTLS;
-        PThread['setExitStatus'] = PThread.setExitStatus;
-  
-        // The default behaviour for pthreads is always to exit once they return
-        // from their entry point (or call pthread_exit).  If we set noExitRuntime
-        // to true here on pthreads they would never complete and attempt to
-        // pthread_join to them would block forever.
-        // pthreads can still choose to set `noExitRuntime` explicitly, or
-        // call emscripten_unwind_to_js_event_loop to extend their lifetime beyond
-        // their main function.  See comment in src/worker.js for more.
-        noExitRuntime = false;
-      },
-  setExitStatus:(status) => EXITSTATUS = status,
-  terminateAllThreads__deps:["$terminateWorker"],
-  terminateAllThreads:() => {
-        assert(!ENVIRONMENT_IS_PTHREAD, 'Internal Error! terminateAllThreads() can only ever be called from main application thread!');
-        // Attempt to kill all workers.  Sadly (at least on the web) there is no
-        // way to terminate a worker synchronously, or to be notified when a
-        // worker in actually terminated.  This means there is some risk that
-        // pthreads will continue to be executing after `worker.terminate` has
-        // returned.  For this reason, we don't call `returnWorkerToPool` here or
-        // free the underlying pthread data structures.
-        for (var worker of PThread.runningWorkers) {
-          terminateWorker(worker);
-        }
-        for (var worker of PThread.unusedWorkers) {
-          terminateWorker(worker);
-        }
-        PThread.unusedWorkers = [];
-        PThread.runningWorkers = [];
-        PThread.pthreads = [];
-      },
-  returnWorkerToPool:(worker) => {
-        // We don't want to run main thread queued calls here, since we are doing
-        // some operations that leave the worker queue in an invalid state until
-        // we are completely done (it would be bad if free() ends up calling a
-        // queued pthread_create which looks at the global data structures we are
-        // modifying). To achieve that, defer the free() til the very end, when
-        // we are all done.
-        var pthread_ptr = worker.pthread_ptr;
-        delete PThread.pthreads[pthread_ptr];
-        // Note: worker is intentionally not terminated so the pool can
-        // dynamically grow.
-        PThread.unusedWorkers.push(worker);
-        PThread.runningWorkers.splice(PThread.runningWorkers.indexOf(worker), 1);
-        // Not a running Worker anymore
-        // Detach the worker from the pthread object, and return it to the
-        // worker pool as an unused worker.
-        worker.pthread_ptr = 0;
-  
-        // Finally, free the underlying (and now-unused) pthread structure in
-        // linear memory.
-        __emscripten_thread_free_data(pthread_ptr);
-      },
-  receiveObjectTransfer(data) {
-      },
-  threadInitTLS() {
-        // Call thread init functions (these are the _emscripten_tls_init for each
-        // module loaded.
-        PThread.tlsInitFunctions.forEach((f) => f());
-      },
-  loadWasmModuleToWorker:(worker) => new Promise((onFinishedLoading) => {
-        worker.onmessage = (e) => {
-          var d = e['data'];
-          var cmd = d['cmd'];
-  
-          // If this message is intended to a recipient that is not the main
-          // thread, forward it to the target thread.
-          if (d['targetThread'] && d['targetThread'] != _pthread_self()) {
-            var targetWorker = PThread.pthreads[d['targetThread']];
-            if (targetWorker) {
-              targetWorker.postMessage(d, d['transferList']);
-            } else {
-              err(`Internal error! Worker sent a message "${cmd}" to target pthread ${d['targetThread']}, but that thread no longer exists!`);
-            }
-            return;
-          }
-  
-          if (cmd === 'checkMailbox') {
-            checkMailbox();
-          } else if (cmd === 'spawnThread') {
-            spawnThread(d);
-          } else if (cmd === 'cleanupThread') {
-            cleanupThread(d['thread']);
-          } else if (cmd === 'killThread') {
-            killThread(d['thread']);
-          } else if (cmd === 'cancelThread') {
-            cancelThread(d['thread']);
-          } else if (cmd === 'loaded') {
-            worker.loaded = true;
-            onFinishedLoading(worker);
-          } else if (cmd === 'alert') {
-            alert(`Thread ${d['threadId']}: ${d['text']}`);
-          } else if (d.target === 'setimmediate') {
-            // Worker wants to postMessage() to itself to implement setImmediate()
-            // emulation.
-            worker.postMessage(d);
-          } else if (cmd === 'callHandler') {
-            Module[d['handler']](...d['args']);
-          } else if (cmd) {
-            // The received message looks like something that should be handled by this message
-            // handler, (since there is a e.data.cmd field present), but is not one of the
-            // recognized commands:
-            err(`worker sent an unknown command ${cmd}`);
-          }
-        };
-  
-        worker.onerror = (e) => {
-          var message = 'worker sent an error!';
-          if (worker.pthread_ptr) {
-            message = `Pthread ${ptrToString(worker.pthread_ptr)} sent an error!`;
-          }
-          err(`${message} ${e.filename}:${e.lineno}: ${e.message}`);
-          throw e;
-        };
-  
-        assert(wasmMemory instanceof WebAssembly.Memory, 'WebAssembly memory should have been loaded by now!');
-        assert(wasmModule instanceof WebAssembly.Module, 'WebAssembly Module should have been loaded by now!');
-  
-        // When running on a pthread, none of the incoming parameters on the module
-        // object are present. Proxy known handlers back to the main thread if specified.
-        var handlers = [];
-        var knownHandlers = [
-          'onExit',
-          'onAbort',
-          'print',
-          'printErr',
-        ];
-        for (var handler of knownHandlers) {
-          if (Module.hasOwnProperty(handler)) {
-            handlers.push(handler);
-          }
-        }
-  
-        worker.workerID = PThread.nextWorkerID++;
-  
-        // Ask the new worker to load up the Emscripten-compiled page. This is a heavy operation.
-        worker.postMessage({
-          'cmd': 'load',
-          'handlers': handlers,
-          // If the application main .js file was loaded from a Blob, then it is not possible
-          // to access the URL of the current script that could be passed to a Web Worker so that
-          // it could load up the same file. In that case, developer must either deliver the Blob
-          // object in Module['mainScriptUrlOrBlob'], or a URL to it, so that pthread Workers can
-          // independently load up the same main application file.
-          'urlOrBlob': Module['mainScriptUrlOrBlob']
-          ,
-          'wasmMemory': wasmMemory,
-          'wasmModule': wasmModule,
-          'workerID': worker.workerID,
-        });
-      }),
-  loadWasmModuleToAllWorkers(onMaybeReady) {
-        // Instantiation is synchronous in pthreads.
-        if (
-          ENVIRONMENT_IS_PTHREAD
-        ) {
-          return onMaybeReady();
-        }
-  
-        let pthreadPoolReady = Promise.all(PThread.unusedWorkers.map(PThread.loadWasmModuleToWorker));
-        pthreadPoolReady.then(onMaybeReady);
-      },
-  allocateUnusedWorker() {
-        var worker;
-        // If we're using module output and there's no explicit override, use bundler-friendly pattern.
-        if (!Module['locateFile']) {
-          worker = new Worker(new URL('reactImgui.worker.mjs', import.meta.url), {type: 'module'});
-        } else {
-        // Allow HTML module to configure the location where the 'worker.js' file will be loaded from,
-        // via Module.locateFile() function. If not specified, then the default URL 'worker.js' relative
-        // to the main html file is loaded.
-        var pthreadMainJs = locateFile('reactImgui.worker.mjs');
-        worker = new Worker(pthreadMainJs, {type: 'module'});
-      }
-      PThread.unusedWorkers.push(worker);
-      },
-  getNewWorker() {
-        if (PThread.unusedWorkers.length == 0) {
-  // PTHREAD_POOL_SIZE_STRICT should show a warning and, if set to level `2`, return from the function.
-          PThread.allocateUnusedWorker();
-          PThread.loadWasmModuleToWorker(PThread.unusedWorkers[0]);
-        }
-        return PThread.unusedWorkers.pop();
-      },
-  };
-  Module['PThread'] = PThread;
 
   var callRuntimeCallbacks = (callbacks) => {
       while (callbacks.length > 0) {
@@ -1453,50 +980,14 @@ function dbg(...args) {
   var decrementExceptionRefcount = (ptr) => ___cxa_decrement_exception_refcount(ptr);
 
   
-  var establishStackSpace = () => {
-      var pthread_ptr = _pthread_self();
-      var stackHigh = HEAPU32[(((pthread_ptr)+(52))>>2)];
-      var stackSize = HEAPU32[(((pthread_ptr)+(56))>>2)];
-      var stackLow = stackHigh - stackSize;
-      assert(stackHigh != 0);
-      assert(stackLow != 0);
-      assert(stackHigh > stackLow, 'stackHigh must be higher then stackLow');
-      // Set stack limits used by `emscripten/stack.h` function.  These limits are
-      // cached in wasm-side globals to make checks as fast as possible.
-      _emscripten_stack_set_limits(stackHigh, stackLow);
   
-      setStackLimits();
   
-      // Call inside wasm module to set up the stack frame for this pthread in wasm module scope
-      stackRestore(stackHigh);
-  
-      // Write the stack cookie last, after we have set up the proper bounds and
-      // current position of the stack.
-      writeStackCookie();
+  var withStackSave = (f) => {
+      var stack = stackSave();
+      var ret = f();
+      stackRestore(stack);
+      return ret;
     };
-  Module['establishStackSpace'] = establishStackSpace;
-
-  
-  
-  
-  
-  var runtimeKeepalivePop = () => {
-      assert(runtimeKeepaliveCounter > 0);
-      runtimeKeepaliveCounter -= 1;
-    };
-  
-  function exitOnMainThread(returnCode) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(1, 0, 0, returnCode);
-  
-      runtimeKeepalivePop();;
-      _exit(returnCode);
-    
-  }
-  
-
-  
-  
   
   
   var UTF8Decoder = typeof TextDecoder != 'undefined' ? new TextDecoder('utf8') : undefined;
@@ -1521,7 +1012,7 @@ function dbg(...args) {
       while (heapOrArray[endPtr] && !(endPtr >= endIdx)) ++endPtr;
   
       if (endPtr - idx > 16 && heapOrArray.buffer && UTF8Decoder) {
-        return UTF8Decoder.decode(heapOrArray.buffer instanceof SharedArrayBuffer ? heapOrArray.slice(idx, endPtr) : heapOrArray.subarray(idx, endPtr));
+        return UTF8Decoder.decode(heapOrArray.subarray(idx, endPtr));
       }
       var str = '';
       // If building with TextDecoder, we have already computed the string length
@@ -1612,57 +1103,13 @@ function dbg(...args) {
 
   var incrementExceptionRefcount = (ptr) => ___cxa_increment_exception_refcount(ptr);
 
-  
-  
-  
-  
-  var wasmTableMirror = [];
-  
-  var wasmTable;
-  var getWasmTableEntry = (funcPtr) => {
-      var func = wasmTableMirror[funcPtr];
-      if (!func) {
-        if (funcPtr >= wasmTableMirror.length) wasmTableMirror.length = funcPtr + 1;
-        wasmTableMirror[funcPtr] = func = wasmTable.get(funcPtr);
-      }
-      assert(wasmTable.get(funcPtr) == func, 'JavaScript-side Wasm function table mirror is out of date!');
-      return func;
-    };
-  var invokeEntryPoint = (ptr, arg) => {
-      // An old thread on this worker may have been canceled without returning the
-      // `runtimeKeepaliveCounter` to zero. Reset it now so the new thread won't
-      // be affected.
-      runtimeKeepaliveCounter = 0;
-  
-      // pthread entry points are always of signature 'void *ThreadMain(void *arg)'
-      // Native codebases sometimes spawn threads with other thread entry point
-      // signatures, such as void ThreadMain(void *arg), void *ThreadMain(), or
-      // void ThreadMain().  That is not acceptable per C/C++ specification, but
-      // x86 compiler ABI extensions enable that to work. If you find the
-      // following line to crash, either change the signature to "proper" void
-      // *ThreadMain(void *arg) form, or try linking with the Emscripten linker
-      // flag -sEMULATE_FUNCTION_POINTER_CASTS to add in emulation for this x86
-      // ABI extension.
-      var result = getWasmTableEntry(ptr)(arg);
-      checkStackCookie();
-      function finish(result) {
-        if (keepRuntimeAlive()) {
-          PThread.setExitStatus(result);
-        } else {
-          __emscripten_thread_exit(result);
-        }
-      }
-      finish(result);
-    };
-  Module['invokeEntryPoint'] = invokeEntryPoint;
-
   var noExitRuntime = Module['noExitRuntime'] || false;
 
-
-  var registerTLSInit = (tlsInitFunc) => PThread.tlsInitFunctions.push(tlsInitFunc);
-
-  var runtimeKeepalivePush = () => {
-      runtimeKeepaliveCounter += 1;
+  var ptrToString = (ptr) => {
+      assert(typeof ptr === 'number');
+      // With CAN_ADDRESS_2GB or MEMORY64, pointers are already unsigned.
+      ptr >>>= 0;
+      return '0x' + ptr.toString(16).padStart(8, '0');
     };
 
   var setStackLimits = () => {
@@ -1891,31 +1338,6 @@ function dbg(...args) {
 
   var ___cxa_uncaught_exceptions = () => uncaughtExceptionCount;
 
-  var ___emscripten_init_main_thread_js = (tb) => {
-      // Pass the thread address to the native code where they stored in wasm
-      // globals which act as a form of TLS. Global constructors trying
-      // to access this value will read the wrong value, but that is UB anyway.
-      __emscripten_thread_init(
-        tb,
-        /*is_main=*/!ENVIRONMENT_IS_WORKER,
-        /*is_runtime=*/1,
-        /*can_block=*/!ENVIRONMENT_IS_WEB,
-        /*default_stacksize=*/65536,
-        /*start_profiling=*/false,
-      );
-      PThread.threadInitTLS();
-    };
-
-  var ___emscripten_thread_cleanup = (thread) => {
-      // Called when a thread needs to be cleaned up so it can be reused.
-      // A thread is considered reusable when it either returns from its
-      // entry point, calls pthread_exit, or acts upon a cancellation.
-      // Detached threads are responsible for calling this themselves,
-      // otherwise pthread_join is responsible for calling this.
-      if (!ENVIRONMENT_IS_PTHREAD) cleanupThread(thread);
-      else postMessage({ 'cmd': 'cleanupThread', 'thread': thread });
-    };
-
   
   
   var ___handle_stack_overflow = (requested) => {
@@ -1924,62 +1346,6 @@ function dbg(...args) {
       abort(`stack overflow (Attempt to set SP to ${ptrToString(requested)}` +
             `, with stack limits [${ptrToString(end)} - ${ptrToString(base)}` +
             ']). If you require more stack space build with -sSTACK_SIZE=<bytes>');
-    };
-
-  
-  
-  
-  
-  
-  function pthreadCreateProxied(pthread_ptr, attr, startRoutine, arg) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(2, 0, 1, pthread_ptr, attr, startRoutine, arg);
-  return ___pthread_create_js(pthread_ptr, attr, startRoutine, arg)
-  }
-  
-  
-  var ___pthread_create_js = (pthread_ptr, attr, startRoutine, arg) => {
-      if (typeof SharedArrayBuffer == 'undefined') {
-        err('Current environment does not support SharedArrayBuffer, pthreads are not available!');
-        return 6;
-      }
-  
-      // List of JS objects that will transfer ownership to the Worker hosting the thread
-      var transferList = [];
-      var error = 0;
-  
-      // Synchronously proxy the thread creation to main thread if possible. If we
-      // need to transfer ownership of objects, then proxy asynchronously via
-      // postMessage.
-      if (ENVIRONMENT_IS_PTHREAD && (transferList.length === 0 || error)) {
-        return pthreadCreateProxied(pthread_ptr, attr, startRoutine, arg);
-      }
-  
-      // If on the main thread, and accessing Canvas/OffscreenCanvas failed, abort
-      // with the detected error.
-      if (error) return error;
-  
-      var threadParams = {
-        startRoutine,
-        pthread_ptr,
-        arg,
-        transferList,
-      };
-  
-      if (ENVIRONMENT_IS_PTHREAD) {
-        // The prepopulated pool of web workers that can host pthreads is stored
-        // in the main JS thread. Therefore if a pthread is attempting to spawn a
-        // new thread, the thread creation must be deferred to the main JS thread.
-        threadParams.cmd = 'spawnThread';
-        postMessage(threadParams, transferList);
-        // When we defer thread creation this way, we have no way to detect thread
-        // creation synchronously today, so we have to assume success and return 0.
-        return 0;
-      }
-  
-      // We are the main thread, so we have the pthread warmup pool in this
-      // thread and can fire off JS thread creation directly ourselves.
-      return spawnThread(threadParams);
     };
 
 
@@ -2550,6 +1916,18 @@ function dbg(...args) {
       return f(ptr, ...args);
     };
   
+  var wasmTableMirror = [];
+  
+  var wasmTable;
+  var getWasmTableEntry = (funcPtr) => {
+      var func = wasmTableMirror[funcPtr];
+      if (!func) {
+        if (funcPtr >= wasmTableMirror.length) wasmTableMirror.length = funcPtr + 1;
+        wasmTableMirror[funcPtr] = func = wasmTable.get(funcPtr);
+      }
+      assert(wasmTable.get(funcPtr) == func, 'JavaScript-side Wasm function table mirror is out of date!');
+      return func;
+    };
   
   var dynCall = (sig, ptr, args = []) => {
       // Without WASM_BIGINT support we cannot directly call function with i64 as
@@ -2958,7 +2336,7 @@ function dbg(...args) {
       endPtr = idx << 1;
   
       if (endPtr - ptr > 32 && UTF16Decoder)
-        return UTF16Decoder.decode(HEAPU8.slice(ptr, endPtr));
+        return UTF16Decoder.decode(HEAPU8.subarray(ptr, endPtr));
   
       // Fallback: decode without UTF16Decoder
       var str = '';
@@ -3145,131 +2523,54 @@ function dbg(...args) {
       });
     };
 
-  var nowIsMonotonic = 1;
-  var __emscripten_get_now_is_monotonic = () => nowIsMonotonic;
-
-  
-  
-  
-  
-  var maybeExit = () => {
-      if (runtimeExited) {
-        return;
-      }
-      if (!keepRuntimeAlive()) {
-        try {
-          if (ENVIRONMENT_IS_PTHREAD) __emscripten_thread_exit(EXITSTATUS);
-          else
-          _exit(EXITSTATUS);
-        } catch (e) {
-          handleException(e);
-        }
-      }
-    };
-  var callUserCallback = (func) => {
-      if (runtimeExited || ABORT) {
-        err('user callback triggered after runtime exited or application aborted.  Ignoring.');
-        return;
-      }
-      try {
-        func();
-        maybeExit();
-      } catch (e) {
-        handleException(e);
-      }
-    };
-  
-  
-  
-  var __emscripten_thread_mailbox_await = (pthread_ptr) => {
-      if (typeof Atomics.waitAsync === 'function') {
-        // Wait on the pthread's initial self-pointer field because it is easy and
-        // safe to access from sending threads that need to notify the waiting
-        // thread.
-        // TODO: How to make this work with wasm64?
-        var wait = Atomics.waitAsync(HEAP32, ((pthread_ptr)>>2), pthread_ptr);
-        assert(wait.async);
-        wait.value.then(checkMailbox);
-        var waitingAsync = pthread_ptr + 128;
-        Atomics.store(HEAP32, ((waitingAsync)>>2), 1);
-      }
-      // If `Atomics.waitAsync` is not implemented, then we will always fall back
-      // to postMessage and there is no need to do anything here.
-    };
-  Module['__emscripten_thread_mailbox_await'] = __emscripten_thread_mailbox_await;
-  
-  var checkMailbox = () => {
-      // Only check the mailbox if we have a live pthread runtime. We implement
-      // pthread_self to return 0 if there is no live runtime.
-      var pthread_ptr = _pthread_self();
-      if (pthread_ptr) {
-        // If we are using Atomics.waitAsync as our notification mechanism, wait
-        // for a notification before processing the mailbox to avoid missing any
-        // work that could otherwise arrive after we've finished processing the
-        // mailbox and before we're ready for the next notification.
-        __emscripten_thread_mailbox_await(pthread_ptr);
-        callUserCallback(__emscripten_check_mailbox);
-      }
-    };
-  Module['checkMailbox'] = checkMailbox;
-  
-  var __emscripten_notify_mailbox_postmessage = (targetThreadId, currThreadId, mainThreadId) => {
-      if (targetThreadId == currThreadId) {
-        setTimeout(checkMailbox);
-      } else if (ENVIRONMENT_IS_PTHREAD) {
-        postMessage({'targetThread' : targetThreadId, 'cmd' : 'checkMailbox'});
-      } else {
-        var worker = PThread.pthreads[targetThreadId];
-        if (!worker) {
-          err(`Cannot send message to thread with ID ${targetThreadId}, unknown thread ID!`);
-          return;
-        }
-        worker.postMessage({'cmd' : 'checkMailbox'});
-      }
-    };
-
-  
-  var proxiedJSCallArgs = [];
-  
-  var __emscripten_receive_on_main_thread_js = (funcIndex, emAsmAddr, callingThread, numCallArgs, args) => {
-      // Sometimes we need to backproxy events to the calling thread (e.g.
-      // HTML5 DOM events handlers such as
-      // emscripten_set_mousemove_callback()), so keep track in a globally
-      // accessible variable about the thread that initiated the proxying.
-      proxiedJSCallArgs.length = numCallArgs;
-      var b = ((args)>>3);
-      for (var i = 0; i < numCallArgs; i++) {
-        proxiedJSCallArgs[i] = HEAPF64[b + i];
-      }
-      // Proxied JS library funcs use funcIndex and EM_ASM functions use emAsmAddr
-      assert(!emAsmAddr);
-      var func = proxiedFunctionTable[funcIndex];
-      assert(!(funcIndex && emAsmAddr));
-      assert(func.length == numCallArgs, 'Call args mismatch in _emscripten_receive_on_main_thread_js');
-      PThread.currentProxiedOperationCallerThread = callingThread;
-      var rtn = func(...proxiedJSCallArgs);
-      PThread.currentProxiedOperationCallerThread = 0;
-      // Proxied functions can return any type except bigint.  All other types
-      // cooerce to f64/double (the return type of this function in C) but not
-      // bigint.
-      assert(typeof rtn != "bigint");
-      return rtn;
-    };
-
-
-  var __emscripten_thread_set_strongref = (thread) => {
-      // Called when a thread needs to be strongly referenced.
-      // Currently only used for:
-      // - keeping the "main" thread alive in PROXY_TO_PTHREAD mode;
-      // - crashed threads that needs to propagate the uncaught exception
-      //   back to the main thread.
-    };
-
   var _abort = () => {
       abort('native code called abort()');
     };
 
+  var readEmAsmArgsArray = [];
+  var readEmAsmArgs = (sigPtr, buf) => {
+      // Nobody should have mutated _readEmAsmArgsArray underneath us to be something else than an array.
+      assert(Array.isArray(readEmAsmArgsArray));
+      // The input buffer is allocated on the stack, so it must be stack-aligned.
+      assert(buf % 16 == 0);
+      readEmAsmArgsArray.length = 0;
+      var ch;
+      // Most arguments are i32s, so shift the buffer pointer so it is a plain
+      // index into HEAP32.
+      while (ch = HEAPU8[sigPtr++]) {
+        var chr = String.fromCharCode(ch);
+        var validChars = ['d', 'f', 'i', 'p'];
+        assert(validChars.includes(chr), `Invalid character ${ch}("${chr}") in readEmAsmArgs! Use only [${validChars}], and do not specify "v" for void return argument.`);
+        // Floats are always passed as doubles, so all types except for 'i'
+        // are 8 bytes and require alignment.
+        var wide = (ch != 105);
+        wide &= (ch != 112);
+        buf += wide && (buf % 8) ? 4 : 0;
+        readEmAsmArgsArray.push(
+          // Special case for pointers under wasm64 or CAN_ADDRESS_2GB mode.
+          ch == 112 ? HEAPU32[((buf)>>2)] :
+          ch == 105 ?
+            HEAP32[((buf)>>2)] :
+            HEAPF64[((buf)>>3)]
+        );
+        buf += wide ? 8 : 4;
+      }
+      return readEmAsmArgsArray;
+    };
+  var runEmAsmFunction = (code, sigPtr, argbuf) => {
+      var args = readEmAsmArgs(sigPtr, argbuf);
+      assert(ASM_CONSTS.hasOwnProperty(code), `No EM_ASM constant found at address ${code}.  The loaded WebAssembly file is likely out of sync with the generated JavaScript.`);
+      return ASM_CONSTS[code](...args);
+    };
+  var _emscripten_asm_const_int = (code, sigPtr, argbuf) => {
+      return runEmAsmFunction(code, sigPtr, argbuf);
+    };
+
   
+  var runtimeKeepaliveCounter = 0;
+  var runtimeKeepalivePush = () => {
+      runtimeKeepaliveCounter += 1;
+    };
   var _emscripten_set_main_loop_timing = (mode, value) => {
       Browser.mainLoop.timingMode = mode;
       Browser.mainLoop.timingValue = value;
@@ -3331,15 +2632,79 @@ function dbg(...args) {
     };
   
   var _emscripten_get_now;
-      // Pthreads need their clocks synchronized to the execution of the main
-      // thread, so, when using them, make sure to adjust all timings to the
-      // respective time origins.
-      _emscripten_get_now = () => performance.timeOrigin + performance.now();
+      // Modern environment where performance.now() is supported:
+      // N.B. a shorter form "_emscripten_get_now = performance.now;" is
+      // unfortunately not allowed even in current browsers (e.g. FF Nightly 75).
+      _emscripten_get_now = () => performance.now();
   ;
   
   
+  var keepRuntimeAlive = () => noExitRuntime || runtimeKeepaliveCounter > 0;
+  var _proc_exit = (code) => {
+      EXITSTATUS = code;
+      if (!keepRuntimeAlive()) {
+        Module['onExit']?.(code);
+        ABORT = true;
+      }
+      quit_(code, new ExitStatus(code));
+    };
+  
+  /** @suppress {duplicate } */
+  /** @param {boolean|number=} implicit */
+  var exitJS = (status, implicit) => {
+      EXITSTATUS = status;
+  
+      if (!keepRuntimeAlive()) {
+        exitRuntime();
+      }
+  
+      // if exit() was called explicitly, warn the user if the runtime isn't actually being shut down
+      if (keepRuntimeAlive() && !implicit) {
+        var msg = `program exited (with status: ${status}), but keepRuntimeAlive() is set (counter=${runtimeKeepaliveCounter}) due to an async operation, so halting execution but not exiting the runtime or preventing further async execution (you can use emscripten_force_exit, if you want to force a true shutdown)`;
+        readyPromiseReject(msg);
+        err(msg);
+      }
+  
+      _proc_exit(status);
+    };
+  var _exit = exitJS;
+  
+  var handleException = (e) => {
+      // Certain exception types we do not treat as errors since they are used for
+      // internal control flow.
+      // 1. ExitStatus, which is thrown by exit()
+      // 2. "unwind", which is thrown by emscripten_unwind_to_js_event_loop() and others
+      //    that wish to return to JS event loop.
+      if (e instanceof ExitStatus || e == 'unwind') {
+        return EXITSTATUS;
+      }
+      checkStackCookie();
+      if (e instanceof WebAssembly.RuntimeError) {
+        if (_emscripten_stack_get_current() <= 0) {
+          err('Stack overflow detected.  You can try increasing -sSTACK_SIZE (currently set to 65536)');
+        }
+      }
+      quit_(1, e);
+    };
+  
+  var maybeExit = () => {
+      if (runtimeExited) {
+        return;
+      }
+      if (!keepRuntimeAlive()) {
+        try {
+          _exit(EXITSTATUS);
+        } catch (e) {
+          handleException(e);
+        }
+      }
+    };
   
   
+  var runtimeKeepalivePop = () => {
+      assert(runtimeKeepaliveCounter > 0);
+      runtimeKeepaliveCounter -= 1;
+    };
   
     /**
      * @param {number=} arg
@@ -3455,6 +2820,19 @@ function dbg(...args) {
       }
     };
   
+  
+  var callUserCallback = (func) => {
+      if (runtimeExited || ABORT) {
+        err('user callback triggered after runtime exited or application aborted.  Ignoring.');
+        return;
+      }
+      try {
+        func();
+        maybeExit();
+      } catch (e) {
+        handleException(e);
+      }
+    };
   
   
   
@@ -3972,46 +3350,16 @@ function dbg(...args) {
     };
 
   
-  var _emscripten_check_blocking_allowed = () => {
-  
-      if (ENVIRONMENT_IS_WORKER) return; // Blocking in a worker/pthread is fine.
-  
-      warnOnce('Blocking on the main thread is very dangerous, see https://emscripten.org/docs/porting/pthreads.html#blocking-on-the-main-browser-thread');
-  
-    };
-
-  var _emscripten_date_now = () => Date.now();
-
-  var _emscripten_exit_with_live_runtime = () => {
-      runtimeKeepalivePush();
-      throw 'unwind';
-    };
-
-  
-  
-  function __emscripten_runtime_keepalive_clear() {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(4, 0, 1);
-  
+  var __emscripten_runtime_keepalive_clear = () => {
       noExitRuntime = false;
       runtimeKeepaliveCounter = 0;
-    
-  }
+    };
   
-  
-  
-  
-  function _emscripten_force_exit(status) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(3, 0, 1, status);
-  
+  var _emscripten_force_exit = (status) => {
       __emscripten_runtime_keepalive_clear();
       _exit(status);
-    
-  }
-  
+    };
 
-  
   var JSEvents = {
   removeAllEventListeners() {
         while (JSEvents.eventHandlers.length) {
@@ -4132,25 +3480,6 @@ function dbg(...args) {
         }
         return 0;
       },
-  getTargetThreadForEventCallback(targetThread) {
-        switch (targetThread) {
-          case 1:
-            // The event callback for the current event should be called on the
-            // main browser thread. (0 == don't proxy)
-            return 0;
-          case 2:
-            // The event callback for the current event should be backproxied to
-            // the thread that is registering the event.
-            // This can be 0 in the case that the caller uses
-            // EM_CALLBACK_THREAD_CONTEXT_CALLING_THREAD but on the main thread
-            // itself.
-            return PThread.currentProxiedOperationCallerThread;
-          default:
-            // The event callback for the current event should be proxied to the
-            // given specific thread.
-            return targetThread;
-        }
-      },
   getNodeNameForTarget(target) {
         if (!target) return '';
         if (target == window) return '#window';
@@ -4182,12 +3511,7 @@ function dbg(...args) {
     };
   
   var getBoundingClientRect = (e) => specialHTMLTargets.indexOf(e) < 0 ? e.getBoundingClientRect() : {'left':0,'top':0};
-  
-  
-  function _emscripten_get_element_css_size(target, width, height) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(5, 0, 1, target, width, height);
-  
+  var _emscripten_get_element_css_size = (target, width, height) => {
       target = findEventTarget(target);
       if (!target) return -4;
   
@@ -4196,25 +3520,85 @@ function dbg(...args) {
       HEAPF64[((height)>>3)] = rect.height;
   
       return 0;
-    
-  }
-  
+    };
 
+  var _emscripten_memcpy_js = (dest, src, num) => HEAPU8.copyWithin(dest, src, src + num);
 
   var getHeapMax = () =>
-      HEAPU8.length;
+      // Stay one Wasm page short of 4GB: while e.g. Chrome is able to allocate
+      // full 4GB Wasm memories, the size will wrap back to 0 bytes in Wasm side
+      // for any code that deals with heap sizes, which would require special
+      // casing all heap size related code to treat 0 specially.
+      2147483648;
   
-  var abortOnCannotGrowMemory = (requestedSize) => {
-      abort(`Cannot enlarge memory arrays to size ${requestedSize} bytes (OOM). Either (1) compile with -sINITIAL_MEMORY=X with X higher than the current value ${HEAP8.length}, (2) compile with -sALLOW_MEMORY_GROWTH which allows increasing the size at runtime, or (3) if you want malloc to return NULL (0) instead of this abort, compile with -sABORTING_MALLOC=0`);
+  var growMemory = (size) => {
+      var b = wasmMemory.buffer;
+      var pages = (size - b.byteLength + 65535) / 65536;
+      try {
+        // round size grow request up to wasm page size (fixed 64KB per spec)
+        wasmMemory.grow(pages); // .grow() takes a delta compared to the previous size
+        updateMemoryViews();
+        return 1 /*success*/;
+      } catch(e) {
+        err(`growMemory: Attempted to grow heap from ${b.byteLength} bytes to ${size} bytes, but got error: ${e}`);
+      }
+      // implicit 0 return to save code size (caller will cast "undefined" into 0
+      // anyhow)
     };
   var _emscripten_resize_heap = (requestedSize) => {
       var oldSize = HEAPU8.length;
       // With CAN_ADDRESS_2GB or MEMORY64, pointers are already unsigned.
       requestedSize >>>= 0;
-      abortOnCannotGrowMemory(requestedSize);
+      // With multithreaded builds, races can happen (another thread might increase the size
+      // in between), so return a failure, and let the caller retry.
+      assert(requestedSize > oldSize);
+  
+      // Memory resize rules:
+      // 1.  Always increase heap size to at least the requested size, rounded up
+      //     to next page multiple.
+      // 2a. If MEMORY_GROWTH_LINEAR_STEP == -1, excessively resize the heap
+      //     geometrically: increase the heap size according to
+      //     MEMORY_GROWTH_GEOMETRIC_STEP factor (default +20%), At most
+      //     overreserve by MEMORY_GROWTH_GEOMETRIC_CAP bytes (default 96MB).
+      // 2b. If MEMORY_GROWTH_LINEAR_STEP != -1, excessively resize the heap
+      //     linearly: increase the heap size by at least
+      //     MEMORY_GROWTH_LINEAR_STEP bytes.
+      // 3.  Max size for the heap is capped at 2048MB-WASM_PAGE_SIZE, or by
+      //     MAXIMUM_MEMORY, or by ASAN limit, depending on which is smallest
+      // 4.  If we were unable to allocate as much memory, it may be due to
+      //     over-eager decision to excessively reserve due to (3) above.
+      //     Hence if an allocation fails, cut down on the amount of excess
+      //     growth, in an attempt to succeed to perform a smaller allocation.
+  
+      // A limit is set for how much we can grow. We should not exceed that
+      // (the wasm binary specifies it, so if we tried, we'd fail anyhow).
+      var maxHeapSize = getHeapMax();
+      if (requestedSize > maxHeapSize) {
+        err(`Cannot enlarge memory, requested ${requestedSize} bytes, but the limit is ${maxHeapSize} bytes!`);
+        return false;
+      }
+  
+      var alignUp = (x, multiple) => x + (multiple - x % multiple) % multiple;
+  
+      // Loop through potential heap size increases. If we attempt a too eager
+      // reservation that fails, cut down on the attempted size and reserve a
+      // smaller bump instead. (max 3 times, chosen somewhat arbitrarily)
+      for (var cutDown = 1; cutDown <= 4; cutDown *= 2) {
+        var overGrownHeapSize = oldSize * (1 + 0.2 / cutDown); // ensure geometric growth
+        // but limit overreserving (default to capping at +96MB overgrowth at most)
+        overGrownHeapSize = Math.min(overGrownHeapSize, requestedSize + 100663296 );
+  
+        var newSize = Math.min(maxHeapSize, alignUp(Math.max(requestedSize, overGrownHeapSize), 65536));
+  
+        var replacement = growMemory(newSize);
+        if (replacement) {
+  
+          return true;
+        }
+      }
+      err(`Failed to grow the heap from ${oldSize} bytes to ${newSize} bytes, not enough memory!`);
+      return false;
     };
-
-  var _emscripten_runtime_keepalive_check = keepRuntimeAlive;
 
   
   
@@ -4245,16 +3629,13 @@ function dbg(...args) {
   
   
   var registerFullscreenChangeEventCallback = (target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) => {
-      targetThread = JSEvents.getTargetThreadForEventCallback(targetThread);
       if (!JSEvents.fullscreenChangeEvent) JSEvents.fullscreenChangeEvent = _malloc(280);
   
       var fullscreenChangeEventhandlerFunc = (e = event) => {
-        var fullscreenChangeEvent = targetThread ? _malloc(280) : JSEvents.fullscreenChangeEvent;
+        var fullscreenChangeEvent = JSEvents.fullscreenChangeEvent;
   
         fillFullscreenChangeEventData(fullscreenChangeEvent);
   
-        if (targetThread) __emscripten_run_callback_on_thread(targetThread, callbackfunc, eventTypeId, fullscreenChangeEvent, userData);
-        else
         if (getWasmTableEntry(callbackfunc)(eventTypeId, fullscreenChangeEvent, userData)) e.preventDefault();
       };
   
@@ -4269,12 +3650,7 @@ function dbg(...args) {
     };
   
   
-  
-  
-  function _emscripten_set_fullscreenchange_callback_on_thread(target, userData, useCapture, callbackfunc, targetThread) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(6, 0, 1, target, userData, useCapture, callbackfunc, targetThread);
-  
+  var _emscripten_set_fullscreenchange_callback_on_thread = (target, userData, useCapture, callbackfunc, targetThread) => {
       if (!JSEvents.fullscreenEnabled()) return -1;
       target = findEventTarget(target);
       if (!target) return -4;
@@ -4284,9 +3660,7 @@ function dbg(...args) {
       registerFullscreenChangeEventCallback(target, userData, useCapture, callbackfunc, 19, "webkitfullscreenchange", targetThread);
   
       return registerFullscreenChangeEventCallback(target, userData, useCapture, callbackfunc, 19, "fullscreenchange", targetThread);
-    
-  }
-  
+    };
 
   
   
@@ -4299,7 +3673,6 @@ function dbg(...args) {
   
   
   var registerUiEventCallback = (target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) => {
-      targetThread = JSEvents.getTargetThreadForEventCallback(targetThread);
       if (!JSEvents.uiEvent) JSEvents.uiEvent = _malloc(36);
   
       target = findEventTarget(target);
@@ -4317,7 +3690,7 @@ function dbg(...args) {
           // During a page unload 'body' can be null, with "Cannot read property 'clientWidth' of null" being thrown
           return;
         }
-        var uiEvent = targetThread ? _malloc(36) : JSEvents.uiEvent;
+        var uiEvent = JSEvents.uiEvent;
         HEAP32[((uiEvent)>>2)] = e.detail;
         HEAP32[(((uiEvent)+(4))>>2)] = b.clientWidth;
         HEAP32[(((uiEvent)+(8))>>2)] = b.clientHeight;
@@ -4327,8 +3700,6 @@ function dbg(...args) {
         HEAP32[(((uiEvent)+(24))>>2)] = outerHeight;
         HEAP32[(((uiEvent)+(28))>>2)] = pageXOffset;
         HEAP32[(((uiEvent)+(32))>>2)] = pageYOffset;
-        if (targetThread) __emscripten_run_callback_on_thread(targetThread, callbackfunc, eventTypeId, uiEvent, userData);
-        else
         if (getWasmTableEntry(callbackfunc)(eventTypeId, uiEvent, userData)) e.preventDefault();
       };
   
@@ -4341,14 +3712,8 @@ function dbg(...args) {
       };
       return JSEvents.registerOrRemoveHandler(eventHandler);
     };
-  
-  
-  function _emscripten_set_resize_callback_on_thread(target, userData, useCapture, callbackfunc, targetThread) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(7, 0, 1, target, userData, useCapture, callbackfunc, targetThread);
-  return registerUiEventCallback(target, userData, useCapture, callbackfunc, 10, "resize", targetThread)
-  }
-  
+  var _emscripten_set_resize_callback_on_thread = (target, userData, useCapture, callbackfunc, targetThread) =>
+      registerUiEventCallback(target, userData, useCapture, callbackfunc, 10, "resize", targetThread);
 
   
   
@@ -4384,19 +3749,16 @@ function dbg(...args) {
   
   
   var registerWheelEventCallback = (target, userData, useCapture, callbackfunc, eventTypeId, eventTypeString, targetThread) => {
-      targetThread = JSEvents.getTargetThreadForEventCallback(targetThread);
       if (!JSEvents.wheelEvent) JSEvents.wheelEvent = _malloc(104);
   
       // The DOM Level 3 events spec event 'wheel'
       var wheelHandlerFunc = (e = event) => {
-        var wheelEvent = targetThread ? _malloc(104) : JSEvents.wheelEvent; // This allocated block is passed as satellite data to the proxied function call, so the call frees up the data block when done.
+        var wheelEvent = JSEvents.wheelEvent;
         fillMouseEventData(wheelEvent, e, target);
         HEAPF64[(((wheelEvent)+(72))>>3)] = e["deltaX"];
         HEAPF64[(((wheelEvent)+(80))>>3)] = e["deltaY"];
         HEAPF64[(((wheelEvent)+(88))>>3)] = e["deltaZ"];
         HEAP32[(((wheelEvent)+(96))>>2)] = e["deltaMode"];
-        if (targetThread) __emscripten_run_callback_on_thread(targetThread, callbackfunc, eventTypeId, wheelEvent, userData);
-        else
         if (getWasmTableEntry(callbackfunc)(eventTypeId, wheelEvent, userData)) e.preventDefault();
       };
   
@@ -4411,12 +3773,7 @@ function dbg(...args) {
       return JSEvents.registerOrRemoveHandler(eventHandler);
     };
   
-  
-  
-  function _emscripten_set_wheel_callback_on_thread(target, userData, useCapture, callbackfunc, targetThread) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(8, 0, 1, target, userData, useCapture, callbackfunc, targetThread);
-  
+  var _emscripten_set_wheel_callback_on_thread = (target, userData, useCapture, callbackfunc, targetThread) => {
       target = findEventTarget(target);
       if (!target) return -4;
       if (typeof target.onwheel != 'undefined') {
@@ -4424,11 +3781,143 @@ function dbg(...args) {
       } else {
         return -1;
       }
-    
-  }
-  
+    };
 
+  var ENV = {
+  };
   
+  var getExecutableName = () => {
+      return thisProgram || './this.program';
+    };
+  var getEnvStrings = () => {
+      if (!getEnvStrings.strings) {
+        // Default values.
+        // Browser language detection #8751
+        var lang = ((typeof navigator == 'object' && navigator.languages && navigator.languages[0]) || 'C').replace('-', '_') + '.UTF-8';
+        var env = {
+          'USER': 'web_user',
+          'LOGNAME': 'web_user',
+          'PATH': '/',
+          'PWD': '/',
+          'HOME': '/home/web_user',
+          'LANG': lang,
+          '_': getExecutableName()
+        };
+        // Apply the user-provided values, if any.
+        for (var x in ENV) {
+          // x is a key in ENV; if ENV[x] is undefined, that means it was
+          // explicitly set to be so. We allow user code to do that to
+          // force variables with default values to remain unset.
+          if (ENV[x] === undefined) delete env[x];
+          else env[x] = ENV[x];
+        }
+        var strings = [];
+        for (var x in env) {
+          strings.push(`${x}=${env[x]}`);
+        }
+        getEnvStrings.strings = strings;
+      }
+      return getEnvStrings.strings;
+    };
+  
+  var stringToAscii = (str, buffer) => {
+      for (var i = 0; i < str.length; ++i) {
+        assert(str.charCodeAt(i) === (str.charCodeAt(i) & 0xff));
+        HEAP8[buffer++] = str.charCodeAt(i);
+      }
+      // Null-terminate the string
+      HEAP8[buffer] = 0;
+    };
+  var _environ_get = (__environ, environ_buf) => {
+      var bufSize = 0;
+      getEnvStrings().forEach((string, i) => {
+        var ptr = environ_buf + bufSize;
+        HEAPU32[(((__environ)+(i*4))>>2)] = ptr;
+        stringToAscii(string, ptr);
+        bufSize += string.length + 1;
+      });
+      return 0;
+    };
+
+  var _environ_sizes_get = (penviron_count, penviron_buf_size) => {
+      var strings = getEnvStrings();
+      HEAPU32[((penviron_count)>>2)] = strings.length;
+      var bufSize = 0;
+      strings.forEach((string) => bufSize += string.length + 1);
+      HEAPU32[((penviron_buf_size)>>2)] = bufSize;
+      return 0;
+    };
+
+
+  var SYSCALLS = {
+  varargs:undefined,
+  get() {
+        assert(SYSCALLS.varargs != undefined);
+        // the `+` prepended here is necessary to convince the JSCompiler that varargs is indeed a number.
+        var ret = HEAP32[((+SYSCALLS.varargs)>>2)];
+        SYSCALLS.varargs += 4;
+        return ret;
+      },
+  getp() { return SYSCALLS.get() },
+  getStr(ptr) {
+        var ret = UTF8ToString(ptr);
+        return ret;
+      },
+  };
+  var _fd_close = (fd) => {
+      abort('fd_close called without SYSCALLS_REQUIRE_FILESYSTEM');
+    };
+
+  var convertI32PairToI53Checked = (lo, hi) => {
+      assert(lo == (lo >>> 0) || lo == (lo|0)); // lo should either be a i32 or a u32
+      assert(hi === (hi|0));                    // hi should be a i32
+      return ((hi + 0x200000) >>> 0 < 0x400001 - !!lo) ? (lo >>> 0) + hi * 4294967296 : NaN;
+    };
+  function _fd_seek(fd,offset_low, offset_high,whence,newOffset) {
+    var offset = convertI32PairToI53Checked(offset_low, offset_high);;
+  
+    
+      return 70;
+    ;
+  }
+
+  var printCharBuffers = [null,[],[]];
+  
+  var printChar = (stream, curr) => {
+      var buffer = printCharBuffers[stream];
+      assert(buffer);
+      if (curr === 0 || curr === 10) {
+        (stream === 1 ? out : err)(UTF8ArrayToString(buffer, 0));
+        buffer.length = 0;
+      } else {
+        buffer.push(curr);
+      }
+    };
+  
+  var flush_NO_FILESYSTEM = () => {
+      // flush anything remaining in the buffers during shutdown
+      _fflush(0);
+      if (printCharBuffers[1].length) printChar(1, 10);
+      if (printCharBuffers[2].length) printChar(2, 10);
+    };
+  
+  
+  var _fd_write = (fd, iov, iovcnt, pnum) => {
+      // hack to support printf in SYSCALLS_REQUIRE_FILESYSTEM=0
+      var num = 0;
+      for (var i = 0; i < iovcnt; i++) {
+        var ptr = HEAPU32[((iov)>>2)];
+        var len = HEAPU32[(((iov)+(4))>>2)];
+        iov += 8;
+        for (var j = 0; j < len; j++) {
+          printChar(fd, HEAPU8[ptr+j]);
+        }
+        num += len;
+      }
+      HEAPU32[((pnum)>>2)] = num;
+      return 0;
+    };
+
   
   var webgl_enable_WEBGL_draw_instanced_base_vertex_base_instance = (ctx) =>
       // Closure is expected to be allowed to minify the '.dibvbi' property, so not accessing it quoted.
@@ -4489,8 +3978,7 @@ function dbg(...args) {
   textures:[],
   shaders:[],
   vaos:[],
-  contexts:{
-  },
+  contexts:[],
   offscreenCanvases:{
   },
   queries:[],
@@ -4537,10 +4025,6 @@ function dbg(...args) {
         return source;
       },
   createContext:(/** @type {HTMLCanvasElement} */ canvas, webGLContextAttributes) => {
-        // In proxied operation mode, rAF()/setTimeout() functions do not delimit
-        // frame boundaries, so can't have WebGL implementation try to detect when
-        // it's ok to discard contents of the rendered backbuffer.
-        if (webGLContextAttributes.renderViaOffscreenBackBuffer) webGLContextAttributes['preserveDrawingBuffer'] = true;
   
         // BUG: Workaround Safari WebGL issue: After successfully acquiring WebGL
         // context on a canvas, calling .getContext() will always return that
@@ -4569,229 +4053,9 @@ function dbg(...args) {
   
         return handle;
       },
-  enableOffscreenFramebufferAttributes:(webGLContextAttributes) => {
-        webGLContextAttributes.renderViaOffscreenBackBuffer = true;
-        webGLContextAttributes.preserveDrawingBuffer = true;
-      },
-  createOffscreenFramebuffer:(context) => {
-        var gl = context.GLctx;
-  
-        // Create FBO
-        var fbo = gl.createFramebuffer();
-        gl.bindFramebuffer(0x8D40 /*GL_FRAMEBUFFER*/, fbo);
-        context.defaultFbo = fbo;
-  
-        context.defaultFboForbidBlitFramebuffer = false;
-        if (gl.getContextAttributes().antialias) {
-          context.defaultFboForbidBlitFramebuffer = true;
-        }
-  
-        // Create render targets to the FBO
-        context.defaultColorTarget = gl.createTexture();
-        context.defaultDepthTarget = gl.createRenderbuffer();
-        // Size them up correctly (use the same mechanism when resizing on demand)
-        GL.resizeOffscreenFramebuffer(context);
-  
-        gl.bindTexture(0xDE1 /*GL_TEXTURE_2D*/, context.defaultColorTarget);
-        gl.texParameteri(0xDE1 /*GL_TEXTURE_2D*/, 0x2801 /*GL_TEXTURE_MIN_FILTER*/, 0x2600 /*GL_NEAREST*/);
-        gl.texParameteri(0xDE1 /*GL_TEXTURE_2D*/, 0x2800 /*GL_TEXTURE_MAG_FILTER*/, 0x2600 /*GL_NEAREST*/);
-        gl.texParameteri(0xDE1 /*GL_TEXTURE_2D*/, 0x2802 /*GL_TEXTURE_WRAP_S*/, 0x812F /*GL_CLAMP_TO_EDGE*/);
-        gl.texParameteri(0xDE1 /*GL_TEXTURE_2D*/, 0x2803 /*GL_TEXTURE_WRAP_T*/, 0x812F /*GL_CLAMP_TO_EDGE*/);
-        gl.texImage2D(0xDE1 /*GL_TEXTURE_2D*/, 0, 0x1908 /*GL_RGBA*/, gl.canvas.width, gl.canvas.height, 0, 0x1908 /*GL_RGBA*/, 0x1401 /*GL_UNSIGNED_BYTE*/, null);
-        gl.framebufferTexture2D(0x8D40 /*GL_FRAMEBUFFER*/, 0x8CE0 /*GL_COLOR_ATTACHMENT0*/, 0xDE1 /*GL_TEXTURE_2D*/, context.defaultColorTarget, 0);
-        gl.bindTexture(0xDE1 /*GL_TEXTURE_2D*/, null);
-  
-        // Create depth render target to the FBO
-        var depthTarget = gl.createRenderbuffer();
-        gl.bindRenderbuffer(0x8D41 /*GL_RENDERBUFFER*/, context.defaultDepthTarget);
-        gl.renderbufferStorage(0x8D41 /*GL_RENDERBUFFER*/, 0x81A5 /*GL_DEPTH_COMPONENT16*/, gl.canvas.width, gl.canvas.height);
-        gl.framebufferRenderbuffer(0x8D40 /*GL_FRAMEBUFFER*/, 0x8D00 /*GL_DEPTH_ATTACHMENT*/, 0x8D41 /*GL_RENDERBUFFER*/, context.defaultDepthTarget);
-        gl.bindRenderbuffer(0x8D41 /*GL_RENDERBUFFER*/, null);
-  
-        // Create blitter
-        var vertices = [
-          -1, -1,
-          -1,  1,
-           1, -1,
-           1,  1
-        ];
-        var vb = gl.createBuffer();
-        gl.bindBuffer(0x8892 /*GL_ARRAY_BUFFER*/, vb);
-        gl.bufferData(0x8892 /*GL_ARRAY_BUFFER*/, new Float32Array(vertices), 0x88E4 /*GL_STATIC_DRAW*/);
-        gl.bindBuffer(0x8892 /*GL_ARRAY_BUFFER*/, null);
-        context.blitVB = vb;
-  
-        var vsCode =
-          'attribute vec2 pos;' +
-          'varying lowp vec2 tex;' +
-          'void main() { tex = pos * 0.5 + vec2(0.5,0.5); gl_Position = vec4(pos, 0.0, 1.0); }';
-        var vs = gl.createShader(0x8B31 /*GL_VERTEX_SHADER*/);
-        gl.shaderSource(vs, vsCode);
-        gl.compileShader(vs);
-  
-        var fsCode =
-          'varying lowp vec2 tex;' +
-          'uniform sampler2D sampler;' +
-          'void main() { gl_FragColor = texture2D(sampler, tex); }';
-        var fs = gl.createShader(0x8B30 /*GL_FRAGMENT_SHADER*/);
-        gl.shaderSource(fs, fsCode);
-        gl.compileShader(fs);
-  
-        var blitProgram = gl.createProgram();
-        gl.attachShader(blitProgram, vs);
-        gl.attachShader(blitProgram, fs);
-        gl.linkProgram(blitProgram);
-        context.blitProgram = blitProgram;
-        context.blitPosLoc = gl.getAttribLocation(blitProgram, "pos");
-        gl.useProgram(blitProgram);
-        gl.uniform1i(gl.getUniformLocation(blitProgram, "sampler"), 0);
-        gl.useProgram(null);
-  
-        context.defaultVao = undefined;
-        if (gl.createVertexArray) {
-          context.defaultVao = gl.createVertexArray();
-          gl.bindVertexArray(context.defaultVao);
-          gl.enableVertexAttribArray(context.blitPosLoc);
-          gl.bindVertexArray(null);
-        }
-      },
-  resizeOffscreenFramebuffer:(context) => {
-        var gl = context.GLctx;
-  
-        // Resize color buffer
-        if (context.defaultColorTarget) {
-          var prevTextureBinding = gl.getParameter(0x8069 /*GL_TEXTURE_BINDING_2D*/);
-          gl.bindTexture(0xDE1 /*GL_TEXTURE_2D*/, context.defaultColorTarget);
-          gl.texImage2D(0xDE1 /*GL_TEXTURE_2D*/, 0, 0x1908 /*GL_RGBA*/, gl.drawingBufferWidth, gl.drawingBufferHeight, 0, 0x1908 /*GL_RGBA*/, 0x1401 /*GL_UNSIGNED_BYTE*/, null);
-          gl.bindTexture(0xDE1 /*GL_TEXTURE_2D*/, prevTextureBinding);
-        }
-  
-        // Resize depth buffer
-        if (context.defaultDepthTarget) {
-          var prevRenderBufferBinding = gl.getParameter(0x8CA7 /*GL_RENDERBUFFER_BINDING*/);
-          gl.bindRenderbuffer(0x8D41 /*GL_RENDERBUFFER*/, context.defaultDepthTarget);
-          gl.renderbufferStorage(0x8D41 /*GL_RENDERBUFFER*/, 0x81A5 /*GL_DEPTH_COMPONENT16*/, gl.drawingBufferWidth, gl.drawingBufferHeight); // TODO: Read context creation parameters for what type of depth and stencil to use
-          gl.bindRenderbuffer(0x8D41 /*GL_RENDERBUFFER*/, prevRenderBufferBinding);
-        }
-      },
-  blitOffscreenFramebuffer:(context) => {
-        var gl = context.GLctx;
-  
-        var prevScissorTest = gl.getParameter(0xC11 /*GL_SCISSOR_TEST*/);
-        if (prevScissorTest) gl.disable(0xC11 /*GL_SCISSOR_TEST*/);
-  
-        var prevFbo = gl.getParameter(0x8CA6 /*GL_FRAMEBUFFER_BINDING*/);
-  
-        if (gl.blitFramebuffer && !context.defaultFboForbidBlitFramebuffer) {
-          gl.bindFramebuffer(0x8CA8 /*GL_READ_FRAMEBUFFER*/, context.defaultFbo);
-          gl.bindFramebuffer(0x8CA9 /*GL_DRAW_FRAMEBUFFER*/, null);
-          gl.blitFramebuffer(0, 0, gl.canvas.width, gl.canvas.height,
-                             0, 0, gl.canvas.width, gl.canvas.height,
-                             0x4000 /*GL_COLOR_BUFFER_BIT*/, 0x2600/*GL_NEAREST*/);
-        }
-        else
-        {
-          gl.bindFramebuffer(0x8D40 /*GL_FRAMEBUFFER*/, null);
-  
-          var prevProgram = gl.getParameter(0x8B8D /*GL_CURRENT_PROGRAM*/);
-          gl.useProgram(context.blitProgram);
-  
-          var prevVB = gl.getParameter(0x8894 /*GL_ARRAY_BUFFER_BINDING*/);
-          gl.bindBuffer(0x8892 /*GL_ARRAY_BUFFER*/, context.blitVB);
-  
-          var prevActiveTexture = gl.getParameter(0x84E0 /*GL_ACTIVE_TEXTURE*/);
-          gl.activeTexture(0x84C0 /*GL_TEXTURE0*/);
-  
-          var prevTextureBinding = gl.getParameter(0x8069 /*GL_TEXTURE_BINDING_2D*/);
-          gl.bindTexture(0xDE1 /*GL_TEXTURE_2D*/, context.defaultColorTarget);
-  
-          var prevBlend = gl.getParameter(0xBE2 /*GL_BLEND*/);
-          if (prevBlend) gl.disable(0xBE2 /*GL_BLEND*/);
-  
-          var prevCullFace = gl.getParameter(0xB44 /*GL_CULL_FACE*/);
-          if (prevCullFace) gl.disable(0xB44 /*GL_CULL_FACE*/);
-  
-          var prevDepthTest = gl.getParameter(0xB71 /*GL_DEPTH_TEST*/);
-          if (prevDepthTest) gl.disable(0xB71 /*GL_DEPTH_TEST*/);
-  
-          var prevStencilTest = gl.getParameter(0xB90 /*GL_STENCIL_TEST*/);
-          if (prevStencilTest) gl.disable(0xB90 /*GL_STENCIL_TEST*/);
-  
-          function draw() {
-            gl.vertexAttribPointer(context.blitPosLoc, 2, 0x1406 /*GL_FLOAT*/, false, 0, 0);
-            gl.drawArrays(5/*GL_TRIANGLE_STRIP*/, 0, 4);
-          }
-  
-          if (context.defaultVao) {
-            // WebGL 2 or OES_vertex_array_object
-            var prevVAO = gl.getParameter(0x85B5 /*GL_VERTEX_ARRAY_BINDING*/);
-            gl.bindVertexArray(context.defaultVao);
-            draw();
-            gl.bindVertexArray(prevVAO);
-          }
-          else
-          {
-            var prevVertexAttribPointer = {
-              buffer: gl.getVertexAttrib(context.blitPosLoc, 0x889F /*GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING*/),
-              size: gl.getVertexAttrib(context.blitPosLoc, 0x8623 /*GL_VERTEX_ATTRIB_ARRAY_SIZE*/),
-              stride: gl.getVertexAttrib(context.blitPosLoc, 0x8624 /*GL_VERTEX_ATTRIB_ARRAY_STRIDE*/),
-              type: gl.getVertexAttrib(context.blitPosLoc, 0x8625 /*GL_VERTEX_ATTRIB_ARRAY_TYPE*/),
-              normalized: gl.getVertexAttrib(context.blitPosLoc, 0x886A /*GL_VERTEX_ATTRIB_ARRAY_NORMALIZED*/),
-              pointer: gl.getVertexAttribOffset(context.blitPosLoc, 0x8645 /*GL_VERTEX_ATTRIB_ARRAY_POINTER*/),
-            };
-            var maxVertexAttribs = gl.getParameter(0x8869 /*GL_MAX_VERTEX_ATTRIBS*/);
-            var prevVertexAttribEnables = [];
-            for (var i = 0; i < maxVertexAttribs; ++i) {
-              var prevEnabled = gl.getVertexAttrib(i, 0x8622 /*GL_VERTEX_ATTRIB_ARRAY_ENABLED*/);
-              var wantEnabled = i == context.blitPosLoc;
-              if (prevEnabled && !wantEnabled) {
-                gl.disableVertexAttribArray(i);
-              }
-              if (!prevEnabled && wantEnabled) {
-                gl.enableVertexAttribArray(i);
-              }
-              prevVertexAttribEnables[i] = prevEnabled;
-            }
-  
-            draw();
-  
-            for (var i = 0; i < maxVertexAttribs; ++i) {
-              var prevEnabled = prevVertexAttribEnables[i];
-              var nowEnabled = i == context.blitPosLoc;
-              if (prevEnabled && !nowEnabled) {
-                gl.enableVertexAttribArray(i);
-              }
-              if (!prevEnabled && nowEnabled) {
-                gl.disableVertexAttribArray(i);
-              }
-            }
-            gl.bindBuffer(0x8892 /*GL_ARRAY_BUFFER*/, prevVertexAttribPointer.buffer);
-            gl.vertexAttribPointer(context.blitPosLoc,
-                                   prevVertexAttribPointer.size,
-                                   prevVertexAttribPointer.type,
-                                   prevVertexAttribPointer.normalized,
-                                   prevVertexAttribPointer.stride,
-                                   prevVertexAttribPointer.offset);
-          }
-  
-          if (prevStencilTest) gl.enable(0xB90 /*GL_STENCIL_TEST*/);
-          if (prevDepthTest) gl.enable(0xB71 /*GL_DEPTH_TEST*/);
-          if (prevCullFace) gl.enable(0xB44 /*GL_CULL_FACE*/);
-          if (prevBlend) gl.enable(0xBE2 /*GL_BLEND*/);
-  
-          gl.bindTexture(0xDE1 /*GL_TEXTURE_2D*/, prevTextureBinding);
-          gl.activeTexture(prevActiveTexture);
-          gl.bindBuffer(0x8892 /*GL_ARRAY_BUFFER*/, prevVB);
-          gl.useProgram(prevProgram);
-        }
-        gl.bindFramebuffer(0x8D40 /*GL_FRAMEBUFFER*/, prevFbo);
-        if (prevScissorTest) gl.enable(0xC11 /*GL_SCISSOR_TEST*/);
-      },
   registerContext:(ctx, webGLContextAttributes) => {
-        // with pthreads a context is a location in memory with some synchronized
-        // data between threads
-        var handle = _malloc(8);
-        HEAPU32[(((handle)+(4))>>2)] = _pthread_self(); // the thread pointer of the thread that owns the control of the context
+        // without pthreads a context is just an integer ID
+        var handle = GL.getNewId(GL.contexts);
   
         var context = {
           handle,
@@ -4808,7 +4072,6 @@ function dbg(...args) {
           GL.initExtensions(context);
         }
   
-        if (webGLContextAttributes.renderViaOffscreenBackBuffer) GL.createOffscreenFramebuffer(context);
         return handle;
       },
   makeContextCurrent:(contextHandle) => {
@@ -4836,7 +4099,6 @@ function dbg(...args) {
         if (GL.contexts[contextHandle] && GL.contexts[contextHandle].GLctx.canvas) {
           GL.contexts[contextHandle].GLctx.canvas.GLctxObject = undefined;
         }
-        _free(GL.contexts[contextHandle].handle);
         GL.contexts[contextHandle] = null;
       },
   initExtensions:(context) => {
@@ -4883,190 +4145,6 @@ function dbg(...args) {
         });
       },
   };
-  var _emscripten_webgl_do_commit_frame = () => {
-      if (!GL.currentContext || !GL.currentContext.GLctx) {
-        return -3;
-      }
-  
-      if (GL.currentContext.defaultFbo) {
-        GL.blitOffscreenFramebuffer(GL.currentContext);
-        return 0;
-      }
-      if (!GL.currentContext.attributes.explicitSwapControl) {
-        return -3;
-      }
-      // We would do GL.currentContext.GLctx.commit(); here, but the current implementation
-      // in browsers has removed it - swap is implicit, so this function is a no-op for now
-      // (until/unless the spec changes).
-      return 0;
-    };
-
-  var ENV = {
-  };
-  
-  var getExecutableName = () => {
-      return thisProgram || './this.program';
-    };
-  var getEnvStrings = () => {
-      if (!getEnvStrings.strings) {
-        // Default values.
-        // Browser language detection #8751
-        var lang = ((typeof navigator == 'object' && navigator.languages && navigator.languages[0]) || 'C').replace('-', '_') + '.UTF-8';
-        var env = {
-          'USER': 'web_user',
-          'LOGNAME': 'web_user',
-          'PATH': '/',
-          'PWD': '/',
-          'HOME': '/home/web_user',
-          'LANG': lang,
-          '_': getExecutableName()
-        };
-        // Apply the user-provided values, if any.
-        for (var x in ENV) {
-          // x is a key in ENV; if ENV[x] is undefined, that means it was
-          // explicitly set to be so. We allow user code to do that to
-          // force variables with default values to remain unset.
-          if (ENV[x] === undefined) delete env[x];
-          else env[x] = ENV[x];
-        }
-        var strings = [];
-        for (var x in env) {
-          strings.push(`${x}=${env[x]}`);
-        }
-        getEnvStrings.strings = strings;
-      }
-      return getEnvStrings.strings;
-    };
-  
-  var stringToAscii = (str, buffer) => {
-      for (var i = 0; i < str.length; ++i) {
-        assert(str.charCodeAt(i) === (str.charCodeAt(i) & 0xff));
-        HEAP8[buffer++] = str.charCodeAt(i);
-      }
-      // Null-terminate the string
-      HEAP8[buffer] = 0;
-    };
-  
-  var _environ_get = 
-  function(__environ, environ_buf) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(9, 0, 1, __environ, environ_buf);
-  
-      var bufSize = 0;
-      getEnvStrings().forEach((string, i) => {
-        var ptr = environ_buf + bufSize;
-        HEAPU32[(((__environ)+(i*4))>>2)] = ptr;
-        stringToAscii(string, ptr);
-        bufSize += string.length + 1;
-      });
-      return 0;
-    
-  }
-  ;
-
-  
-  var _environ_sizes_get = 
-  function(penviron_count, penviron_buf_size) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(10, 0, 1, penviron_count, penviron_buf_size);
-  
-      var strings = getEnvStrings();
-      HEAPU32[((penviron_count)>>2)] = strings.length;
-      var bufSize = 0;
-      strings.forEach((string) => bufSize += string.length + 1);
-      HEAPU32[((penviron_buf_size)>>2)] = bufSize;
-      return 0;
-    
-  }
-  ;
-
-
-  var SYSCALLS = {
-  varargs:undefined,
-  get() {
-        assert(SYSCALLS.varargs != undefined);
-        // the `+` prepended here is necessary to convince the JSCompiler that varargs is indeed a number.
-        var ret = HEAP32[((+SYSCALLS.varargs)>>2)];
-        SYSCALLS.varargs += 4;
-        return ret;
-      },
-  getp() { return SYSCALLS.get() },
-  getStr(ptr) {
-        var ret = UTF8ToString(ptr);
-        return ret;
-      },
-  };
-  
-  
-  function _fd_close(fd) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(11, 0, 1, fd);
-  
-      abort('fd_close called without SYSCALLS_REQUIRE_FILESYSTEM');
-    
-  }
-  
-
-  
-  
-  function _fd_seek(fd,offset_low, offset_high,whence,newOffset) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(12, 0, 1, fd,offset_low, offset_high,whence,newOffset);
-  
-    var offset = convertI32PairToI53Checked(offset_low, offset_high);;
-  
-    
-      return 70;
-    ;
-  
-  }
-  
-
-  var printCharBuffers = [null,[],[]];
-  
-  var printChar = (stream, curr) => {
-      var buffer = printCharBuffers[stream];
-      assert(buffer);
-      if (curr === 0 || curr === 10) {
-        (stream === 1 ? out : err)(UTF8ArrayToString(buffer, 0));
-        buffer.length = 0;
-      } else {
-        buffer.push(curr);
-      }
-    };
-  
-  var flush_NO_FILESYSTEM = () => {
-      // flush anything remaining in the buffers during shutdown
-      _fflush(0);
-      if (printCharBuffers[1].length) printChar(1, 10);
-      if (printCharBuffers[2].length) printChar(2, 10);
-    };
-  
-  
-  
-  
-  function _fd_write(fd, iov, iovcnt, pnum) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(13, 0, 1, fd, iov, iovcnt, pnum);
-  
-      // hack to support printf in SYSCALLS_REQUIRE_FILESYSTEM=0
-      var num = 0;
-      for (var i = 0; i < iovcnt; i++) {
-        var ptr = HEAPU32[((iov)>>2)];
-        var len = HEAPU32[(((iov)+(4))>>2)];
-        iov += 8;
-        for (var j = 0; j < len; j++) {
-          printChar(fd, HEAPU8[ptr+j]);
-        }
-        num += len;
-      }
-      HEAPU32[((pnum)>>2)] = num;
-      return 0;
-    
-  }
-  
-
-  
   
   
   /** @constructor */
@@ -5126,14 +4204,7 @@ function dbg(...args) {
     };
   
   
-  
-  
-  function _emscripten_set_window_title(title) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(14, 0, 1, title);
-  return document.title = UTF8ToString(title)
-  }
-  
+  var _emscripten_set_window_title = (title) => document.title = UTF8ToString(title);
   
   
   var GLFW = {
@@ -5913,8 +4984,6 @@ function dbg(...args) {
               stencil: (GLFW.hints[0x00021006] > 0),   // GLFW_STENCIL_BITS
               alpha: (GLFW.hints[0x00021004] > 0)      // GLFW_ALPHA_BITS
             }
-            // TODO: Make GLFW explicitly aware of whether it is being proxied or not, and set these to true only when proxying is being performed.
-            GL.enableOffscreenFramebufferAttributes(contextAttributes);
             Module.ctx = Browser.createContext(Module['canvas'], true, true, contextAttributes);
           } else {
             Browser.init();
@@ -6922,14 +5991,7 @@ function dbg(...args) {
   'float32-filterable':"11",
   },
   };
-  
-  
-  function _wgpuAdapterRelease(id) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(15, 0, 1, id);
-  return WebGPU.mgrAdapter.release(id)
-  }
-  
+  var _wgpuAdapterRelease = (id) => WebGPU.mgrAdapter.release(id);
 
   
   
@@ -6937,12 +5999,7 @@ function dbg(...args) {
   
   
   
-  
-  
-  function _wgpuAdapterRequestDevice(adapterId, descriptor, callback, userdata) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(16, 0, 1, adapterId, descriptor, callback, userdata);
-  
+  var _wgpuAdapterRequestDevice = (adapterId, descriptor, callback, userdata) => {
       var adapter = WebGPU.mgrAdapter.get(adapterId);
   
       var desc = {};
@@ -7046,34 +6103,13 @@ function dbg(...args) {
           });
         });
       });
-    
-  }
-  
+    };
 
-  
-  
-  function _wgpuBindGroupLayoutRelease(id) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(17, 0, 1, id);
-  return WebGPU.mgrBindGroupLayout.release(id)
-  }
-  
+  var _wgpuBindGroupLayoutRelease = (id) => WebGPU.mgrBindGroupLayout.release(id);
 
-  
-  
-  function _wgpuBindGroupRelease(id) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(18, 0, 1, id);
-  return WebGPU.mgrBindGroup.release(id)
-  }
-  
+  var _wgpuBindGroupRelease = (id) => WebGPU.mgrBindGroup.release(id);
 
-  
-  
-  function _wgpuBufferDestroy(bufferId) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(19, 0, 1, bufferId);
-  
+  var _wgpuBufferDestroy = (bufferId) => {
       var bufferWrapper = WebGPU.mgrBuffer.objects[bufferId];
       assert(typeof bufferWrapper != "undefined");
       if (bufferWrapper.onUnmap) {
@@ -7084,26 +6120,12 @@ function dbg(...args) {
       }
   
       WebGPU.mgrBuffer.get(bufferId)["destroy"]();
-    
-  }
-  
+    };
+
+  var _wgpuBufferRelease = (id) => WebGPU.mgrBuffer.release(id);
 
   
-  
-  function _wgpuBufferRelease(id) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(20, 0, 1, id);
-  return WebGPU.mgrBuffer.release(id)
-  }
-  
-
-  
-  
-  
-  function _wgpuCommandEncoderBeginRenderPass(encoderId, descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(21, 0, 1, encoderId, descriptor);
-  
+  var _wgpuCommandEncoderBeginRenderPass = (encoderId, descriptor) => {
       assert(descriptor);
   
       function makeColorAttachment(caPtr) {
@@ -7212,34 +6234,20 @@ function dbg(...args) {
   
       var commandEncoder = WebGPU.mgrCommandEncoder.get(encoderId);
       return WebGPU.mgrRenderPassEncoder.create(commandEncoder["beginRenderPass"](desc));
-    
-  }
-  
+    };
 
-  
-  
-  function _wgpuCommandEncoderFinish(encoderId, descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(22, 0, 1, encoderId, descriptor);
-  
+  var _wgpuCommandEncoderFinish = (encoderId, descriptor) => {
       // TODO: Use the descriptor.
       var commandEncoder = WebGPU.mgrCommandEncoder.get(encoderId);
       return WebGPU.mgrCommandBuffer.create(commandEncoder["finish"]());
-    
-  }
-  
+    };
 
   var readI53FromI64 = (ptr) => {
       return HEAPU32[((ptr)>>2)] + HEAP32[(((ptr)+(4))>>2)] * 4294967296;
     };
   
   
-  
-  
-  function _wgpuDeviceCreateBindGroup(deviceId, descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(23, 0, 1, deviceId, descriptor);
-  
+  var _wgpuDeviceCreateBindGroup = (deviceId, descriptor) => {
       assert(descriptor);assert(HEAPU32[((descriptor)>>2)] === 0);
   
       function makeEntry(entryPtr) {
@@ -7300,17 +6308,10 @@ function dbg(...args) {
   
       var device = WebGPU.mgrDevice.get(deviceId);
       return WebGPU.mgrBindGroup.create(device["createBindGroup"](desc));
-    
-  }
-  
+    };
 
   
-  
-  
-  function _wgpuDeviceCreateBindGroupLayout(deviceId, descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(24, 0, 1, deviceId, descriptor);
-  
+  var _wgpuDeviceCreateBindGroupLayout = (deviceId, descriptor) => {
       assert(descriptor);assert(HEAPU32[((descriptor)>>2)] === 0);
   
       function makeBufferEntry(entryPtr) {
@@ -7408,17 +6409,10 @@ function dbg(...args) {
   
       var device = WebGPU.mgrDevice.get(deviceId);
       return WebGPU.mgrBindGroupLayout.create(device["createBindGroupLayout"](desc));
-    
-  }
-  
+    };
 
   
-  
-  
-  function _wgpuDeviceCreateBuffer(deviceId, descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(25, 0, 1, deviceId, descriptor);
-  
+  var _wgpuDeviceCreateBuffer = (deviceId, descriptor) => {
       assert(descriptor);assert(HEAPU32[((descriptor)>>2)] === 0);
   
       var mappedAtCreation = !!(HEAPU32[(((descriptor)+(24))>>2)]);
@@ -7440,17 +6434,10 @@ function dbg(...args) {
         bufferWrapper.onUnmap = [];
       }
       return id;
-    
-  }
-  
+    };
 
   
-  
-  
-  function _wgpuDeviceCreateCommandEncoder(deviceId, descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(26, 0, 1, deviceId, descriptor);
-  
+  var _wgpuDeviceCreateCommandEncoder = (deviceId, descriptor) => {
       var desc;
       if (descriptor) {
         assert(descriptor);assert(HEAPU32[((descriptor)>>2)] === 0);
@@ -7462,17 +6449,10 @@ function dbg(...args) {
       }
       var device = WebGPU.mgrDevice.get(deviceId);
       return WebGPU.mgrCommandEncoder.create(device["createCommandEncoder"](desc));
-    
-  }
-  
+    };
 
   
-  
-  
-  function _wgpuDeviceCreatePipelineLayout(deviceId, descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(27, 0, 1, deviceId, descriptor);
-  
+  var _wgpuDeviceCreatePipelineLayout = (deviceId, descriptor) => {
       assert(descriptor);assert(HEAPU32[((descriptor)>>2)] === 0);
       var bglCount = HEAPU32[(((descriptor)+(8))>>2)];
       var bglPtr = HEAPU32[(((descriptor)+(12))>>2)];
@@ -7490,17 +6470,10 @@ function dbg(...args) {
   
       var device = WebGPU.mgrDevice.get(deviceId);
       return WebGPU.mgrPipelineLayout.create(device["createPipelineLayout"](desc));
-    
-  }
-  
+    };
 
   
-  
-  
-  function generateRenderPipelineDesc(descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(29, 0, 1, descriptor);
-  
+  var generateRenderPipelineDesc = (descriptor) => {
       assert(descriptor);assert(HEAPU32[((descriptor)>>2)] === 0);
       function makePrimitiveState(rsPtr) {
         if (!rsPtr) return undefined;
@@ -7702,30 +6675,16 @@ function dbg(...args) {
       var labelPtr = HEAPU32[(((descriptor)+(4))>>2)];
       if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
       return desc;
-    
-  }
+    };
   
-  
-  
-  
-  function _wgpuDeviceCreateRenderPipeline(deviceId, descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(28, 0, 1, deviceId, descriptor);
-  
+  var _wgpuDeviceCreateRenderPipeline = (deviceId, descriptor) => {
       var desc = generateRenderPipelineDesc(descriptor);
       var device = WebGPU.mgrDevice.get(deviceId);
       return WebGPU.mgrRenderPipeline.create(device["createRenderPipeline"](desc));
-    
-  }
-  
+    };
 
   
-  
-  
-  function _wgpuDeviceCreateSampler(deviceId, descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(30, 0, 1, deviceId, descriptor);
-  
+  var _wgpuDeviceCreateSampler = (deviceId, descriptor) => {
       var desc;
       if (descriptor) {
         assert(descriptor);assert(HEAPU32[((descriptor)>>2)] === 0);
@@ -7755,17 +6714,10 @@ function dbg(...args) {
   
       var device = WebGPU.mgrDevice.get(deviceId);
       return WebGPU.mgrSampler.create(device["createSampler"](desc));
-    
-  }
-  
+    };
 
   
-  
-  
-  function _wgpuDeviceCreateShaderModule(deviceId, descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(31, 0, 1, deviceId, descriptor);
-  
+  var _wgpuDeviceCreateShaderModule = (deviceId, descriptor) => {
       assert(descriptor);
       var nextInChainPtr = HEAPU32[((descriptor)>>2)];
       assert(nextInChainPtr !== 0);
@@ -7783,8 +6735,7 @@ function dbg(...args) {
           var count = HEAPU32[(((nextInChainPtr)+(8))>>2)];
           var start = HEAPU32[(((nextInChainPtr)+(12))>>2)];
           var offset = ((start)>>2);
-          // Chrome can't currently handle a SharedArrayBuffer view here, so make a copy.
-          desc["code"] = HEAPU32.slice(offset, offset + count);
+          desc["code"] = HEAPU32.subarray(offset, offset + count);
           break;
         }
         case 6: {
@@ -7799,16 +6750,9 @@ function dbg(...args) {
   
       var device = WebGPU.mgrDevice.get(deviceId);
       return WebGPU.mgrShaderModule.create(device["createShaderModule"](desc));
-    
-  }
-  
+    };
 
-  
-  
-  function _wgpuDeviceCreateSwapChain(deviceId, surfaceId, descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(32, 0, 1, deviceId, surfaceId, descriptor);
-  
+  var _wgpuDeviceCreateSwapChain = (deviceId, surfaceId, descriptor) => {
       assert(descriptor);assert(HEAPU32[((descriptor)>>2)] === 0);
       var device = WebGPU.mgrDevice.get(deviceId);
       var context = WebGPU.mgrSurface.get(surfaceId);
@@ -7839,17 +6783,10 @@ function dbg(...args) {
       context["configure"](configuration);
   
       return WebGPU.mgrSwapChain.create(context);
-    
-  }
-  
+    };
 
   
-  
-  
-  function _wgpuDeviceCreateTexture(deviceId, descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(33, 0, 1, deviceId, descriptor);
-  
+  var _wgpuDeviceCreateTexture = (deviceId, descriptor) => {
       assert(descriptor);assert(HEAPU32[((descriptor)>>2)] === 0);
   
       var desc = {
@@ -7876,32 +6813,18 @@ function dbg(...args) {
   
       var device = WebGPU.mgrDevice.get(deviceId);
       return WebGPU.mgrTexture.create(device["createTexture"](desc));
-    
-  }
-  
+    };
 
-  
-  
-  function _wgpuDeviceGetQueue(deviceId) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(34, 0, 1, deviceId);
-  
+  var _wgpuDeviceGetQueue = (deviceId) => {
       var queueId = WebGPU.mgrDevice.objects[deviceId].queueId;
       assert(queueId, 'wgpuDeviceGetQueue: queue was missing or null');
       // Returns a new reference to the existing queue.
       WebGPU.mgrQueue.reference(queueId);
       return queueId;
-    
-  }
-  
+    };
 
   
-  
-  var _wgpuDeviceSetUncapturedErrorCallback = 
-  function(deviceId, callback, userdata) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(35, 0, 1, deviceId, callback, userdata);
-  
+  var _wgpuDeviceSetUncapturedErrorCallback = (deviceId, callback, userdata) => {
       var device = WebGPU.mgrDevice.get(deviceId);
       device["onuncapturederror"] = function(ev) {
         // This will skip the callback if the runtime is no longer alive.
@@ -7919,19 +6842,12 @@ function dbg(...args) {
           WebGPU.errorCallback(callback, type, ev.error.message, userdata);
         });
       };
-    
-  }
-  ;
+    };
 
   var findCanvasEventTarget = findEventTarget;
   
   
-  
-  
-  function _wgpuInstanceCreateSurface(instanceId, descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(36, 0, 1, instanceId, descriptor);
-  
+  var _wgpuInstanceCreateSurface = (instanceId, descriptor) => {
       assert(descriptor);
       assert(instanceId === 1, "WGPUInstance must be created by wgpuCreateInstance");
       var nextInChainPtr = HEAPU32[((descriptor)>>2)];
@@ -7952,21 +6868,14 @@ function dbg(...args) {
       if (labelPtr) context.surfaceLabelWebGPU = UTF8ToString(labelPtr);
   
       return WebGPU.mgrSurface.create(context);
-    
-  }
-  
+    };
 
   
   
   
   
   
-  
-  
-  function _wgpuInstanceRequestAdapter(instanceId, options, callback, userdata) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(37, 0, 1, instanceId, options, callback, userdata);
-  
+  var _wgpuInstanceRequestAdapter = (instanceId, options, callback, userdata) => {
       assert(instanceId === 1, "WGPUInstance must be created by wgpuCreateInstance");
   
       var opts;
@@ -8011,50 +6920,22 @@ function dbg(...args) {
           });
         });
       });
-    
-  }
-  
+    };
 
-  
-  
-  function _wgpuPipelineLayoutRelease(id) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(38, 0, 1, id);
-  return WebGPU.mgrPipelineLayout.release(id)
-  }
-  
+  var _wgpuPipelineLayoutRelease = (id) => WebGPU.mgrPipelineLayout.release(id);
 
-  
-  
-  function _wgpuQueueRelease(id) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(39, 0, 1, id);
-  return WebGPU.mgrQueue.release(id)
-  }
-  
+  var _wgpuQueueRelease = (id) => WebGPU.mgrQueue.release(id);
 
-  
-  
-  function _wgpuQueueSubmit(queueId, commandCount, commands) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(40, 0, 1, queueId, commandCount, commands);
-  
+  var _wgpuQueueSubmit = (queueId, commandCount, commands) => {
       assert(commands % 4 === 0);
       var queue = WebGPU.mgrQueue.get(queueId);
       var cmds = Array.from(HEAP32.subarray((((commands)>>2)), ((commands + commandCount * 4)>>2)),
         function(id) { return WebGPU.mgrCommandBuffer.get(id); });
       queue["submit"](cmds);
-    
-  }
-  
+    };
 
   
-  
-  
   function _wgpuQueueWriteBuffer(queueId,bufferId,bufferOffset_low, bufferOffset_high,data,size) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(41, 0, 1, queueId,bufferId,bufferOffset_low, bufferOffset_high,data,size);
-  
     var bufferOffset = convertI32PairToI53Checked(bufferOffset_low, bufferOffset_high);;
   
     
@@ -8065,18 +6946,10 @@ function dbg(...args) {
       var subarray = HEAPU8.subarray(data, data + size);
       queue["writeBuffer"](buffer, bufferOffset, subarray, 0, size);
     ;
-  
   }
-  
 
-  
-  
-  function _wgpuQueueWriteTexture(queueId,
-        destinationPtr, data, dataSize, dataLayoutPtr, writeSizePtr) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(42, 0, 1, queueId,
-        destinationPtr, data, dataSize, dataLayoutPtr, writeSizePtr);
-  
+  var _wgpuQueueWriteTexture = (queueId,
+        destinationPtr, data, dataSize, dataLayoutPtr, writeSizePtr) => {
       var queue = WebGPU.mgrQueue.get(queueId);
   
       var destination = WebGPU.makeImageCopyTexture(destinationPtr);
@@ -8086,40 +6959,19 @@ function dbg(...args) {
       // where Chromium makes a copy of the entire heap. crbug.com/1134457
       var subarray = HEAPU8.subarray(data, data + dataSize);
       queue["writeTexture"](destination, subarray, dataLayout, writeSize);
-    
-  }
-  
+    };
 
-  
-  
-  function _wgpuRenderPassEncoderDrawIndexed(passId, indexCount, instanceCount, firstIndex, baseVertex, firstInstance) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(43, 0, 1, passId, indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
-  
+  var _wgpuRenderPassEncoderDrawIndexed = (passId, indexCount, instanceCount, firstIndex, baseVertex, firstInstance) => {
       var pass = WebGPU.mgrRenderPassEncoder.get(passId);
       pass["drawIndexed"](indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
-    
-  }
-  
+    };
 
-  
-  
-  function _wgpuRenderPassEncoderEnd(encoderId) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(44, 0, 1, encoderId);
-  
+  var _wgpuRenderPassEncoderEnd = (encoderId) => {
       var encoder = WebGPU.mgrRenderPassEncoder.get(encoderId);
       encoder["end"]();
-    
-  }
-  
+    };
 
-  
-  
-  function _wgpuRenderPassEncoderSetBindGroup(passId, groupIndex, groupId, dynamicOffsetCount, dynamicOffsetsPtr) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(45, 0, 1, passId, groupIndex, groupId, dynamicOffsetCount, dynamicOffsetsPtr);
-  
+  var _wgpuRenderPassEncoderSetBindGroup = (passId, groupIndex, groupId, dynamicOffsetCount, dynamicOffsetsPtr) => {
       var pass = WebGPU.mgrRenderPassEncoder.get(passId);
       var group = WebGPU.mgrBindGroup.get(groupId);
       if (dynamicOffsetCount == 0) {
@@ -8131,30 +6983,16 @@ function dbg(...args) {
         }
         pass["setBindGroup"](groupIndex, group, offsets);
       }
-    
-  }
-  
+    };
 
-  
-  
-  function _wgpuRenderPassEncoderSetBlendConstant(passId, colorPtr) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(46, 0, 1, passId, colorPtr);
-  
+  var _wgpuRenderPassEncoderSetBlendConstant = (passId, colorPtr) => {
       var pass = WebGPU.mgrRenderPassEncoder.get(passId);
       var color = WebGPU.makeColor(colorPtr);
       pass["setBlendConstant"](color);
-    
-  }
-  
+    };
 
   
-  
-  
   function _wgpuRenderPassEncoderSetIndexBuffer(passId,bufferId,format,offset_low, offset_high,size_low, size_high) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(47, 0, 1, passId,bufferId,format,offset_low, offset_high,size_low, size_high);
-  
     var offset = convertI32PairToI53Checked(offset_low, offset_high);;
     var size = convertI32PairToI53Checked(size_low, size_high);;
   
@@ -8164,42 +7002,21 @@ function dbg(...args) {
       if (size == -1) size = undefined;
       pass["setIndexBuffer"](buffer, WebGPU.IndexFormat[format], offset, size);
     ;
-  
   }
-  
 
-  
-  
-  function _wgpuRenderPassEncoderSetPipeline(passId, pipelineId) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(48, 0, 1, passId, pipelineId);
-  
+  var _wgpuRenderPassEncoderSetPipeline = (passId, pipelineId) => {
       var pass = WebGPU.mgrRenderPassEncoder.get(passId);
       var pipeline = WebGPU.mgrRenderPipeline.get(pipelineId);
       pass["setPipeline"](pipeline);
-    
-  }
-  
+    };
 
-  
-  
-  function _wgpuRenderPassEncoderSetScissorRect(passId, x, y, w, h) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(49, 0, 1, passId, x, y, w, h);
-  
+  var _wgpuRenderPassEncoderSetScissorRect = (passId, x, y, w, h) => {
       var pass = WebGPU.mgrRenderPassEncoder.get(passId);
       pass["setScissorRect"](x, y, w, h);
-    
-  }
-  
+    };
 
   
-  
-  
   function _wgpuRenderPassEncoderSetVertexBuffer(passId,slot,bufferId,offset_low, offset_high,size_low, size_high) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(50, 0, 1, passId,slot,bufferId,offset_low, offset_high,size_low, size_high);
-  
     var offset = convertI32PairToI53Checked(offset_low, offset_high);;
     var size = convertI32PairToI53Checked(size_low, size_high);;
   
@@ -8209,98 +7026,35 @@ function dbg(...args) {
       if (size == -1) size = undefined;
       pass["setVertexBuffer"](slot, buffer, offset, size);
     ;
-  
   }
-  
 
-  
-  
-  function _wgpuRenderPassEncoderSetViewport(passId, x, y, w, h, minDepth, maxDepth) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(51, 0, 1, passId, x, y, w, h, minDepth, maxDepth);
-  
+  var _wgpuRenderPassEncoderSetViewport = (passId, x, y, w, h, minDepth, maxDepth) => {
       var pass = WebGPU.mgrRenderPassEncoder.get(passId);
       pass["setViewport"](x, y, w, h, minDepth, maxDepth);
-    
-  }
-  
+    };
 
-  
-  
-  function _wgpuRenderPipelineRelease(id) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(52, 0, 1, id);
-  return WebGPU.mgrRenderPipeline.release(id)
-  }
-  
+  var _wgpuRenderPipelineRelease = (id) => WebGPU.mgrRenderPipeline.release(id);
 
-  
-  
-  function _wgpuSamplerRelease(id) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(53, 0, 1, id);
-  return WebGPU.mgrSampler.release(id)
-  }
-  
+  var _wgpuSamplerRelease = (id) => WebGPU.mgrSampler.release(id);
 
-  
-  
-  function _wgpuShaderModuleRelease(id) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(54, 0, 1, id);
-  return WebGPU.mgrShaderModule.release(id)
-  }
-  
+  var _wgpuShaderModuleRelease = (id) => WebGPU.mgrShaderModule.release(id);
 
-  
-  
-  function _wgpuSurfaceGetPreferredFormat(surfaceId, adapterId) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(55, 0, 1, surfaceId, adapterId);
-  
+  var _wgpuSurfaceGetPreferredFormat = (surfaceId, adapterId) => {
       var format = navigator["gpu"]["getPreferredCanvasFormat"]();
       return WebGPU.Int_PreferredFormat[format];
-    
-  }
-  
+    };
 
-  
-  
-  function _wgpuSurfaceRelease(id) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(56, 0, 1, id);
-  return WebGPU.mgrSurface.release(id)
-  }
-  
+  var _wgpuSurfaceRelease = (id) => WebGPU.mgrSurface.release(id);
 
-  
-  
-  function _wgpuSwapChainGetCurrentTextureView(swapChainId) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(57, 0, 1, swapChainId);
-  
+  var _wgpuSwapChainGetCurrentTextureView = (swapChainId) => {
       var context = WebGPU.mgrSwapChain.get(swapChainId);
       return WebGPU.mgrTextureView.create(context["getCurrentTexture"]()["createView"]());
-    
-  }
-  
+    };
+
+  var _wgpuSwapChainRelease = (id) => WebGPU.mgrSwapChain.release(id);
 
   
-  
-  function _wgpuSwapChainRelease(id) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(58, 0, 1, id);
-  return WebGPU.mgrSwapChain.release(id)
-  }
-  
-
-  
-  
-  
-  function _wgpuTextureCreateView(textureId, descriptor) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(59, 0, 1, textureId, descriptor);
-  
+  var _wgpuTextureCreateView = (textureId, descriptor) => {
       var desc;
       if (descriptor) {
         assert(descriptor);assert(HEAPU32[((descriptor)>>2)] === 0);
@@ -8324,36 +7078,15 @@ function dbg(...args) {
   
       var texture = WebGPU.mgrTexture.get(textureId);
       return WebGPU.mgrTextureView.create(texture["createView"](desc));
-    
-  }
-  
+    };
 
-  
-  
-  function _wgpuTextureRelease(id) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(60, 0, 1, id);
-  return WebGPU.mgrTexture.release(id)
-  }
-  
+  var _wgpuTextureRelease = (id) => WebGPU.mgrTexture.release(id);
 
-  
-  
-  function _wgpuTextureViewRelease(id) {
-  if (ENVIRONMENT_IS_PTHREAD)
-    return proxyToMainThread(61, 0, 1, id);
-  return WebGPU.mgrTextureView.release(id)
-  }
-  
+  var _wgpuTextureViewRelease = (id) => WebGPU.mgrTextureView.release(id);
 
 
 
 
-
-
-
-
-PThread.init();;
 embind_init_charCodes();
 BindingError = Module['BindingError'] = class BindingError extends Error { constructor(message) { super(message); this.name = 'BindingError'; }};
 InternalError = Module['InternalError'] = class InternalError extends Error { constructor(message) { super(message); this.name = 'InternalError'; }};
@@ -8373,76 +7106,6 @@ UnboundTypeError = Module['UnboundTypeError'] = extendError(Error, 'UnboundTypeE
       var preloadedAudios = {};;
 var GLctx;;
 WebGPU.initManagers();;
-
-// proxiedFunctionTable specifies the list of functions that can be called
-// either synchronously or asynchronously from other threads in postMessage()d
-// or internally queued events. This way a pthread in a Worker can synchronously
-// access e.g. the DOM on the main thread.
-var proxiedFunctionTable = [
-  _proc_exit,
-  exitOnMainThread,
-  pthreadCreateProxied,
-  _emscripten_force_exit,
-  __emscripten_runtime_keepalive_clear,
-  _emscripten_get_element_css_size,
-  _emscripten_set_fullscreenchange_callback_on_thread,
-  _emscripten_set_resize_callback_on_thread,
-  _emscripten_set_wheel_callback_on_thread,
-  _environ_get,
-  _environ_sizes_get,
-  _fd_close,
-  _fd_seek,
-  _fd_write,
-  _emscripten_set_window_title,
-  _wgpuAdapterRelease,
-  _wgpuAdapterRequestDevice,
-  _wgpuBindGroupLayoutRelease,
-  _wgpuBindGroupRelease,
-  _wgpuBufferDestroy,
-  _wgpuBufferRelease,
-  _wgpuCommandEncoderBeginRenderPass,
-  _wgpuCommandEncoderFinish,
-  _wgpuDeviceCreateBindGroup,
-  _wgpuDeviceCreateBindGroupLayout,
-  _wgpuDeviceCreateBuffer,
-  _wgpuDeviceCreateCommandEncoder,
-  _wgpuDeviceCreatePipelineLayout,
-  _wgpuDeviceCreateRenderPipeline,
-  generateRenderPipelineDesc,
-  _wgpuDeviceCreateSampler,
-  _wgpuDeviceCreateShaderModule,
-  _wgpuDeviceCreateSwapChain,
-  _wgpuDeviceCreateTexture,
-  _wgpuDeviceGetQueue,
-  _wgpuDeviceSetUncapturedErrorCallback,
-  _wgpuInstanceCreateSurface,
-  _wgpuInstanceRequestAdapter,
-  _wgpuPipelineLayoutRelease,
-  _wgpuQueueRelease,
-  _wgpuQueueSubmit,
-  _wgpuQueueWriteBuffer,
-  _wgpuQueueWriteTexture,
-  _wgpuRenderPassEncoderDrawIndexed,
-  _wgpuRenderPassEncoderEnd,
-  _wgpuRenderPassEncoderSetBindGroup,
-  _wgpuRenderPassEncoderSetBlendConstant,
-  _wgpuRenderPassEncoderSetIndexBuffer,
-  _wgpuRenderPassEncoderSetPipeline,
-  _wgpuRenderPassEncoderSetScissorRect,
-  _wgpuRenderPassEncoderSetVertexBuffer,
-  _wgpuRenderPassEncoderSetViewport,
-  _wgpuRenderPipelineRelease,
-  _wgpuSamplerRelease,
-  _wgpuShaderModuleRelease,
-  _wgpuSurfaceGetPreferredFormat,
-  _wgpuSurfaceRelease,
-  _wgpuSwapChainGetCurrentTextureView,
-  _wgpuSwapChainRelease,
-  _wgpuTextureCreateView,
-  _wgpuTextureRelease,
-  _wgpuTextureViewRelease
-];
-
 function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
@@ -8464,13 +7127,7 @@ var wasmImports = {
   /** @export */
   __cxa_uncaught_exceptions: ___cxa_uncaught_exceptions,
   /** @export */
-  __emscripten_init_main_thread_js: ___emscripten_init_main_thread_js,
-  /** @export */
-  __emscripten_thread_cleanup: ___emscripten_thread_cleanup,
-  /** @export */
   __handle_stack_overflow: ___handle_stack_overflow,
-  /** @export */
-  __pthread_create_js: ___pthread_create_js,
   /** @export */
   __resumeException: ___resumeException,
   /** @export */
@@ -8500,35 +7157,19 @@ var wasmImports = {
   /** @export */
   _embind_register_void: __embind_register_void,
   /** @export */
-  _emscripten_get_now_is_monotonic: __emscripten_get_now_is_monotonic,
-  /** @export */
-  _emscripten_notify_mailbox_postmessage: __emscripten_notify_mailbox_postmessage,
-  /** @export */
-  _emscripten_receive_on_main_thread_js: __emscripten_receive_on_main_thread_js,
-  /** @export */
-  _emscripten_thread_mailbox_await: __emscripten_thread_mailbox_await,
-  /** @export */
-  _emscripten_thread_set_strongref: __emscripten_thread_set_strongref,
-  /** @export */
   abort: _abort,
   /** @export */
+  emscripten_asm_const_int: _emscripten_asm_const_int,
+  /** @export */
   emscripten_cancel_main_loop: _emscripten_cancel_main_loop,
-  /** @export */
-  emscripten_check_blocking_allowed: _emscripten_check_blocking_allowed,
-  /** @export */
-  emscripten_date_now: _emscripten_date_now,
-  /** @export */
-  emscripten_exit_with_live_runtime: _emscripten_exit_with_live_runtime,
   /** @export */
   emscripten_force_exit: _emscripten_force_exit,
   /** @export */
   emscripten_get_element_css_size: _emscripten_get_element_css_size,
   /** @export */
-  emscripten_get_now: _emscripten_get_now,
+  emscripten_memcpy_js: _emscripten_memcpy_js,
   /** @export */
   emscripten_resize_heap: _emscripten_resize_heap,
-  /** @export */
-  emscripten_runtime_keepalive_check: _emscripten_runtime_keepalive_check,
   /** @export */
   emscripten_set_fullscreenchange_callback_on_thread: _emscripten_set_fullscreenchange_callback_on_thread,
   /** @export */
@@ -8537,8 +7178,6 @@ var wasmImports = {
   emscripten_set_resize_callback_on_thread: _emscripten_set_resize_callback_on_thread,
   /** @export */
   emscripten_set_wheel_callback_on_thread: _emscripten_set_wheel_callback_on_thread,
-  /** @export */
-  emscripten_webgl_do_commit_frame: _emscripten_webgl_do_commit_frame,
   /** @export */
   environ_get: _environ_get,
   /** @export */
@@ -8692,8 +7331,6 @@ var wasmImports = {
   /** @export */
   invoke_viiiiiiiiiiiiiii: invoke_viiiiiiiiiiiiiii,
   /** @export */
-  memory: wasmMemory || Module['wasmMemory'],
-  /** @export */
   strftime_l: _strftime_l,
   /** @export */
   wgpuAdapterRelease: _wgpuAdapterRelease,
@@ -8794,31 +7431,16 @@ var ___cxa_free_exception = createExportWrapper('__cxa_free_exception');
 var _main = Module['_main'] = createExportWrapper('__main_argc_argv');
 var _malloc = createExportWrapper('malloc');
 var _free = createExportWrapper('free');
-var __emscripten_tls_init = Module['__emscripten_tls_init'] = createExportWrapper('_emscripten_tls_init');
-var _pthread_self = Module['_pthread_self'] = () => (_pthread_self = Module['_pthread_self'] = wasmExports['pthread_self'])();
-var __emscripten_proxy_main = Module['__emscripten_proxy_main'] = createExportWrapper('_emscripten_proxy_main');
-var _emscripten_stack_get_base = () => (_emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'])();
-var _emscripten_stack_get_end = () => (_emscripten_stack_get_end = wasmExports['emscripten_stack_get_end'])();
 var ___getTypeName = createExportWrapper('__getTypeName');
-var __embind_initialize_bindings = Module['__embind_initialize_bindings'] = createExportWrapper('_embind_initialize_bindings');
-var _emscripten_webgl_commit_frame = createExportWrapper('emscripten_webgl_commit_frame');
-var __emscripten_run_callback_on_thread = createExportWrapper('_emscripten_run_callback_on_thread');
 var ___funcs_on_exit = createExportWrapper('__funcs_on_exit');
-var __emscripten_thread_init = Module['__emscripten_thread_init'] = createExportWrapper('_emscripten_thread_init');
-var __emscripten_thread_crashed = Module['__emscripten_thread_crashed'] = createExportWrapper('_emscripten_thread_crashed');
-var _emscripten_main_thread_process_queued_calls = createExportWrapper('emscripten_main_thread_process_queued_calls');
 var _fflush = createExportWrapper('fflush');
-var _emscripten_main_runtime_thread_id = createExportWrapper('emscripten_main_runtime_thread_id');
-var __emscripten_run_on_main_thread_js = createExportWrapper('_emscripten_run_on_main_thread_js');
-var __emscripten_thread_free_data = createExportWrapper('_emscripten_thread_free_data');
-var __emscripten_thread_exit = Module['__emscripten_thread_exit'] = createExportWrapper('_emscripten_thread_exit');
-var __emscripten_check_mailbox = createExportWrapper('_emscripten_check_mailbox');
 var _memalign = createExportWrapper('memalign');
 var _setThrew = createExportWrapper('setThrew');
 var setTempRet0 = createExportWrapper('setTempRet0');
 var _emscripten_stack_init = () => (_emscripten_stack_init = wasmExports['emscripten_stack_init'])();
-var _emscripten_stack_set_limits = (a0, a1) => (_emscripten_stack_set_limits = wasmExports['emscripten_stack_set_limits'])(a0, a1);
 var _emscripten_stack_get_free = () => (_emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'])();
+var _emscripten_stack_get_base = () => (_emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'])();
+var _emscripten_stack_get_end = () => (_emscripten_stack_get_end = wasmExports['emscripten_stack_get_end'])();
 var stackSave = createExportWrapper('stackSave');
 var stackRestore = createExportWrapper('stackRestore');
 var stackAlloc = createExportWrapper('stackAlloc');
@@ -9259,10 +7881,6 @@ function invoke_jiiii(index,a1,a2,a3,a4) {
 // include: postamble.js
 // === Auto-generated postamble setup entry stuff ===
 
-Module['wasmMemory'] = wasmMemory;
-Module['keepRuntimeAlive'] = keepRuntimeAlive;
-Module['ExitStatus'] = ExitStatus;
-Module['PThread'] = PThread;
 var missingLibrarySymbols = [
   'writeI53ToI64',
   'writeI53ToI64Clamped',
@@ -9272,7 +7890,7 @@ var missingLibrarySymbols = [
   'readI53FromU64',
   'convertI32PairToI53',
   'convertU32PairToI53',
-  'growMemory',
+  'zeroMemory',
   'ydayFromDate',
   'inetPton4',
   'inetNtop4',
@@ -9285,7 +7903,7 @@ var missingLibrarySymbols = [
   'getCallstack',
   'emscriptenLog',
   'convertPCtoSourceLocation',
-  'readEmAsmArgs',
+  'runMainThreadEmAsm',
   'jstoi_q',
   'listenOnce',
   'autoResumeAudioContext',
@@ -9349,11 +7967,7 @@ var missingLibrarySymbols = [
   'fillBatteryEventData',
   'battery',
   'registerBatteryEventCallback',
-  'setCanvasElementSizeCallingThread',
-  'setCanvasElementSizeMainThread',
   'setCanvasElementSize',
-  'getCanvasSizeCallingThread',
-  'getCanvasSizeMainThread',
   'getCanvasElementSize',
   'jsStackTrace',
   'stackTrace',
@@ -9384,7 +7998,6 @@ var missingLibrarySymbols = [
   'emscriptenWebGLGetVertexAttrib',
   '__glGetActiveAttribOrUniform',
   'writeGLArray',
-  'emscripten_webgl_destroy_context_before_on_calling_thread',
   'registerWebGlEventCallback',
   'runAndAbortIfError',
   'SDL_unicode',
@@ -9458,6 +8071,7 @@ var unexportedSymbols = [
   'err',
   'callMain',
   'abort',
+  'wasmMemory',
   'wasmExports',
   'stackAlloc',
   'stackSave',
@@ -9469,10 +8083,9 @@ var unexportedSymbols = [
   'readI53FromI64',
   'convertI32PairToI53Checked',
   'ptrToString',
-  'zeroMemory',
   'exitJS',
   'getHeapMax',
-  'abortOnCannotGrowMemory',
+  'growMemory',
   'ENV',
   'setStackLimits',
   'MONTH_DAYS_REGULAR',
@@ -9491,12 +8104,15 @@ var unexportedSymbols = [
   'warnOnce',
   'UNWIND_CACHE',
   'readEmAsmArgsArray',
+  'readEmAsmArgs',
+  'runEmAsmFunction',
   'jstoi_s',
   'getExecutableName',
   'dynCallLegacy',
   'getDynCaller',
   'dynCall',
   'handleException',
+  'keepRuntimeAlive',
   'runtimeKeepalivePush',
   'runtimeKeepalivePop',
   'callUserCallback',
@@ -9540,6 +8156,7 @@ var unexportedSymbols = [
   'registerFullscreenChangeEventCallback',
   'currentFullscreenStrategy',
   'restoreOldWindowedStyle',
+  'ExitStatus',
   'getEnvStrings',
   'flush_NO_FILESYSTEM',
   'safeSetTimeout',
@@ -9578,17 +8195,6 @@ var unexportedSymbols = [
   'JsValStore',
   'allocateUTF8',
   'allocateUTF8OnStack',
-  'terminateWorker',
-  'killThread',
-  'cleanupThread',
-  'registerTLSInit',
-  'cancelThread',
-  'spawnThread',
-  'exitOnMainThread',
-  'proxyToMainThread',
-  'proxiedJSCallArgs',
-  'invokeEntryPoint',
-  'checkMailbox',
   'InternalError',
   'BindingError',
   'throwInternalError',
@@ -9660,11 +8266,7 @@ function callMain(args = []) {
   assert(runDependencies == 0, 'cannot call main when async dependencies remain! (listen on Module["onRuntimeInitialized"])');
   assert(__ATPRERUN__.length == 0, 'cannot call main when preRun functions remain to be called');
 
-  var entryFunction = __emscripten_proxy_main;
-
-  // With PROXY_TO_PTHREAD make sure we keep the runtime alive until the
-  // proxied main calls exit (see exitOnMainThread() for where Pop is called).
-  runtimeKeepalivePush();
+  var entryFunction = _main;
 
   args.unshift(thisProgram);
 
@@ -9694,8 +8296,6 @@ function stackCheckInit() {
   // This is normally called automatically during __wasm_call_ctors but need to
   // get these values before even running any of the ctors so we call it redundantly
   // here.
-  // See $establishStackSpace for the equivelent code that runs on a thread
-  assert(!ENVIRONMENT_IS_PTHREAD);
   _emscripten_stack_init();
   // TODO(sbc): Move writeStackCookie to native to to avoid this.
   writeStackCookie();
@@ -9707,18 +8307,7 @@ function run(args = arguments_) {
     return;
   }
 
-  if (!ENVIRONMENT_IS_PTHREAD)
     stackCheckInit();
-
-  if (ENVIRONMENT_IS_PTHREAD) {
-    // The promise resolve function typically gets called as part of the execution
-    // of `doRun` below. The workers/pthreads don't execute `doRun` so the
-    // creation promise can be resolved, marking the pthread-Module as initialized.
-    readyPromiseResolve(Module);
-    initRuntime();
-    startWorker(Module);
-    return;
-  }
 
   preRun();
 

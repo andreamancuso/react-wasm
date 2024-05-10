@@ -39,17 +39,18 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
     const [widgets, setWidgets] = useState<ImguiWidgetsFlat[]>([]);
 
-    const onTextChange = useCallback((id: string, value: string) => {
-        // console.log(id, value);
+    const onTextChange = useCallback(
+        (id: string, value: string) => {
+            const rootNodeID = id;
+            const topLevelType = "onChange";
+            const nativeEventParam = { value };
 
-        const rootNodeID = id;
-        const topLevelType = "onChange";
-        const nativeEventParam = { value };
+            rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
 
-        rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
-
-        // widgetRegistrationServiceRef.current.emitTextInputChangeEvent(id, value);
-    }, []);
+            // widgetRegistrationServiceRef.current.emitTextInputChangeEvent(id, value);
+        },
+        [wasmModule],
+    );
 
     const onComboChange = useCallback((id: string, value: number) => {
         const rootNodeID = id;
@@ -128,37 +129,19 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                 const moduleArg: any = {
                     canvas: canvasRef.current, // ?
                     arguments: [`#${canvasId}`],
+                    eventHandlers: {
+                        onTextChange,
+                        onComboChange,
+                        onNumericValueChange,
+                        onMultiValueChange,
+                        onBooleanValueChange,
+                        onClick,
+                    },
                 };
 
                 localModule = await getWasmModule(moduleArg);
 
-                localModule
-                    .setEventHandlers
-                    // onTextChange,
-                    // onComboChange,
-                    // onNumericValueChange,
-                    // onMultiValueChange,
-                    // onBooleanValueChange,
-                    // onClick,
-                    ();
-
-                // localWasmRunner = new localModule.WasmRunner(
-                //     onTextChange,
-                //     onComboChange,
-                //     onNumericValueChange,
-                //     onMultiValueChange,
-                //     onBooleanValueChange,
-                //     onClick,
-                // );
-
-                // localWasmRunner.run(`#${canvasId}`);
-
-                // widgetRegistrationServiceRef.current.setFonts(
-                //     JSON.parse(localWasmRunner.getAvailableFonts()),
-                // );
-
                 setWasmModule(localModule);
-                // setWasmRunner(localWasmRunner);
             };
 
             load();
