@@ -432,6 +432,10 @@ void ReactImgui::SetChildren(int id, std::vector<int> childrenIds) {
     hierarchy[id] = childrenIds;
 };
 
+void ReactImgui::AppendChild(int parentId, int childId) {
+    hierarchy[parentId].push_back(childId);
+};
+
 std::vector<int> ReactImgui::GetChildren(int id) {
     return hierarchy[id];
 };

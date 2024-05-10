@@ -3,9 +3,11 @@ import { useEffect, useMemo, useState, useRef, useCallback, PropsWithChildren } 
 // @ts-ignore
 // import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactNativeRenderer-dev.js";
 // @ts-ignore
-import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactNativeRenderer-prod.js";
+// import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactNativeRenderer-prod.js";
 // @ts-ignore
-import * as rnInterface from "../react-native/react-native/libraries/ReactPrivate/ReactNativePrivateInterface";
+import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactFabric-prod.js";
+// @ts-ignore
+import * as rnInterface from "../react-native/react-native/libraries/ReactPrivate/ReactNativePrivateInterfaceForFabric";
 import { v4 as uuidv4 } from "uuid";
 import debounce from "lodash.debounce";
 // @ts-ignore wasm?
@@ -208,7 +210,10 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
     useEffect(() => {
         if (wasmModule && !widgetsDefsRef.current) {
-            rnInterface.UIManager.init(wasmModule);
+            // rnInterface.UIManager.init(wasmModule);
+            console.log(rnInterface.nativeFabricUIManager, wasmModule);
+
+            rnInterface.nativeFabricUIManager.init(wasmModule);
 
             render(
                 <WidgetRegistrationServiceContext.Provider
@@ -218,7 +223,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                 </WidgetRegistrationServiceContext.Provider>,
                 0, // containerTag,
                 () => {
-                    // console.log("initialised");
+                    console.log("initialised");
                 },
             );
 

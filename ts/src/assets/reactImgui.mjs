@@ -950,14 +950,14 @@ function dbg(...args) {
 // === Body ===
 
 var ASM_CONSTS = {
-  178020: ($0, $1) => { Module.eventHandlers.onTextChange($0, UTF8ToString($1)); },  
- 178081: ($0, $1) => { Module.eventHandlers.onComboChange($0, $1); },  
- 178129: ($0, $1) => { Module.eventHandlers.onNumericValueChange($0, $1); },  
- 178184: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float')]); },  
- 178285: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float')]); },  
- 178411: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float'), getValue($1+12, 'float')]); },  
- 178563: ($0, $1) => { Module.eventHandlers.onBooleanValueChange($0, $1); },  
- 178618: ($0) => { Module.eventHandlers.onClick($0); }
+  178036: ($0, $1) => { Module.eventHandlers.onTextChange($0, UTF8ToString($1)); },  
+ 178097: ($0, $1) => { Module.eventHandlers.onComboChange($0, $1); },  
+ 178145: ($0, $1) => { Module.eventHandlers.onNumericValueChange($0, $1); },  
+ 178200: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float')]); },  
+ 178301: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float')]); },  
+ 178427: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float'), getValue($1+12, 'float')]); },  
+ 178579: ($0, $1) => { Module.eventHandlers.onBooleanValueChange($0, $1); },  
+ 178634: ($0) => { Module.eventHandlers.onClick($0); }
 };
 
 

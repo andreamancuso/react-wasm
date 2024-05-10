@@ -86,6 +86,8 @@ class ReactImgui : public ImPlotView {
 
         void SetChildren(int id, std::vector<int> childIds);
 
+        void AppendChild(int parentId, int childId);
+
         std::vector<int> GetChildren(int id);
 
         json GetAvailableFonts();

@@ -164,6 +164,10 @@ class WasmRunner {
             view->SetChildren(id, childrenIds);
         }
 
+        void appendChild(int parentId, int childId) {
+            view->AppendChild(parentId, childId);
+        }
+
         std::vector<int> getChildren(int id) {
             return view->GetChildren(id);
         }
@@ -215,6 +219,10 @@ void setChildren(int id, std::string childrenIds) {
     pRunner->setChildren(id, JsonToVector<int>(childrenIds));
 }
 
+void appendChild(int parentId, int childId) {
+    pRunner->appendChild(parentId, childId);
+}
+
 std::string getChildren(int id) {
     return IntVectorToJson(pRunner->getChildren(id)).dump();
 }
@@ -225,6 +233,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("setWidget", &setWidget);
     emscripten::function("patchWidget", &patchWidget);
     emscripten::function("setChildren", &setChildren);
+    emscripten::function("appendChild", &appendChild);
     emscripten::function("getChildren", &getChildren);
 
     // emscripten::class_<WasmRunner>("WasmRunner")
