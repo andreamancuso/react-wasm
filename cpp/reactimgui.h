@@ -10,7 +10,6 @@
 #include <cstring>
 #include <string>
 #include <sstream>
-#include <set>
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include "imgui.h"
