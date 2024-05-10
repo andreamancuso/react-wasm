@@ -9,19 +9,20 @@ const queue = new PQueue({ concurrency: 10 });
 // queue.on("completed", () => {
 //     console.log("job completed");
 // });
+const test = new Map();
 
 class NativeFabricUIManager {
     wasmModule;
+    dispatchEventFn;
 
     constructor() {}
 
     init(wasmModule) {
         this.wasmModule = wasmModule;
     }
-
-    removeRootView(containerTag) {
-        console.log("removeRootView", containerTag);
-    }
+    dispatchEvent = (rootNodeID, topLevelType, nativeEventParam) => {
+        this.dispatchEventFn(test.get(rootNodeID), topLevelType, nativeEventParam);
+    };
     createNode = (generatedId, uiViewClassName, requiresClone, payload, fiberNode) => {
         console.log("createNode", generatedId, uiViewClassName, requiresClone, payload, fiberNode);
 
@@ -34,7 +35,18 @@ class NativeFabricUIManager {
         // console.timeEnd("createView");
         // });
 
+        test.set(generatedId, fiberNode);
+
         return widget;
+    };
+    cloneNodeWithNewProps = (node, newProps) => {
+        console.log("cloneNodeWithNewProps", node, newProps);
+
+        return { ...node, newProps };
+    };
+    cloneNodeWithNewChildren = (node) => {
+        console.log("cloneNodeWithNewChildren", node);
+        return { ...node };
     };
     createChildSet(...args) {
         console.log("createChildSet", args);
@@ -55,105 +67,17 @@ class NativeFabricUIManager {
 
         this.wasmModule.setChildren(container, JSON.stringify(newChildSet.map(({ id }) => id)));
     };
-    createView(generatedId, uiViewClassName, rootContainerInstance, payload) {
-        // console.log(
-        //     "UIManager.createView",
-        //     generatedId,
-        //     uiViewClassName,
-        //     rootContainerInstance,
-        //     payload,
-        // );
-
-        queue.add(() => {
-            // console.time("createView");
-            const { children, type, id, ...props } = payload;
-            const widget = { ...props, id: generatedId, type };
-
-            this.wasmModule.setWidget(JSON.stringify(widget));
-            // console.timeEnd("createView");
-        });
-    }
-    updateView(generatedId, className, payload) {
-        // console.log("updateView", generatedId, className, payload);
-
-        queue.add(() => {
-            // console.time("updateView");
-            const { children, type, id, ...props } = payload;
-            this.wasmModule.patchWidget(generatedId, JSON.stringify(props));
-            // console.timeEnd("updateView");
-        });
-    }
-    setChildren(id, childrenIds) {
-        // console.log("UIManager.setChildren", id, childrenIds);
-
-        queue.add(() => {
-            // console.time("setChildren");
-            this.wasmModule.setChildren(id, JSON.stringify(childrenIds));
-            // console.timeEnd("setChildren");
-        });
-    }
-    manageChildren(
-        id,
-        moveFromIndices,
-        moveToIndices,
-        addChildReactTags,
-        addAtIndices,
-        removeAtIndices,
-    ) {
-        // console.log(
-        //     "manageChildren",
-        //     id,
-        //     moveFromIndices,
-        //     moveToIndices,
-        //     addChildReactTags,
-        //     addAtIndices,
-        //     removeAtIndices,
-        // );
-
-        // todo: this is seriously slow
-        queue.add(() => {
-            // console.time("manageChildren");
-            const children = JSON.parse(this.wasmModule.getChildren(id));
-
-            if (addChildReactTags.length > 0 && addAtIndices.length > 0) {
-                addChildReactTags.forEach((addChildReactTag, index) => {
-                    const addAtIndex = addAtIndices[index];
-
-                    children.splice(addAtIndex, 0, ...addChildReactTags);
-                });
-            }
-
-            if (removeAtIndices.length > 0) {
-                children.splice(removeAtIndices[0], 1);
-            }
-
-            this.wasmModule.setChildren(id, JSON.stringify(children));
-            // console.timeEnd("manageChildren");
-        });
-    }
-}
-
-class RCTEventEmitter {
-    re;
-    rt;
-
-    register = ({ receiveEvent, receiveTouches }) => {
-        this.re = receiveEvent;
-        this.rt = receiveTouches;
-    };
-
-    propagateEvent = (rootNodeID, topLevelType, nativeEventParam) => {
-        this.re(rootNodeID, topLevelType, nativeEventParam);
+    registerEventHandler = (dispatchEventFn) => {
+        this.dispatchEventFn = dispatchEventFn;
     };
 }
 
 const uiManager = new NativeFabricUIManager();
-const rctEventEmitter = new RCTEventEmitter();
 
 // flowlint unsafe-getters-setters:off
 module.exports = {
     createPublicInstance(current, renderLanes, workInProgress) {
-        // console.log("createPublicInstance", current, renderLanes, workInProgress);
+        console.log("createPublicInstance", current, renderLanes, workInProgress);
 
         return {};
     },
@@ -165,10 +89,6 @@ module.exports = {
     },
     get Platform() {
         return {};
-    },
-    get RCTEventEmitter() {
-        return {};
-        // return rctEventEmitter;
     },
     get ReactNativeViewConfigRegistry() {
         return {
@@ -238,7 +158,11 @@ module.exports = {
         return {};
     },
     get RawEventEmitter() {
-        return {};
+        return {
+            emit(...args) {
+                console.log(args);
+            },
+        };
     },
     get CustomEvent() {
         return {};

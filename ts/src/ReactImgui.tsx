@@ -7,6 +7,8 @@ import { useEffect, useMemo, useState, useRef, useCallback, PropsWithChildren } 
 // @ts-ignore
 import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactFabric-prod.js";
 // @ts-ignore
+// import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactFabric-dev.js";
+// @ts-ignore
 import * as rnInterface from "../react-native/react-native/libraries/ReactPrivate/ReactNativePrivateInterfaceForFabric";
 import { v4 as uuidv4 } from "uuid";
 import debounce from "lodash.debounce";
@@ -96,7 +98,8 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
         // console.log("changed boolean", id, value);
 
-        rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
+        // rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
+        rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, nativeEventParam);
         // setTimeout(() => {
         // widgetRegistrationServiceRef.current.emitBooleanValueChangeEvent(id, value);
         // }, 10);

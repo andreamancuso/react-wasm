@@ -164,13 +164,7 @@ int InputText::InputTextCb(ImGuiInputTextCallbackData* data)
 void Checkbox::Render(ReactImgui* view) {
     ImGui::PushID(id);
     if (ImGui::Checkbox(label.c_str(), &checked)) {
-        printf("before\n");
-        if (view->onBooleanValueChange != nullptr) {
-            view->onBooleanValueChange(id, checked);
-        } else {
-            
-        }
-        printf("after\n");
+        view->onBooleanValueChange(id, checked);
     }
     ImGui::PopID();
 };
