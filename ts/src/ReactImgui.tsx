@@ -49,7 +49,12 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
             const topLevelType = "onChange";
             const nativeEventParam = { value };
 
-            rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
+            // rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
+            rnInterface.nativeFabricUIManager.dispatchEvent(
+                rootNodeID,
+                topLevelType,
+                nativeEventParam,
+            );
 
             // widgetRegistrationServiceRef.current.emitTextInputChangeEvent(id, value);
         },
@@ -61,7 +66,8 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const topLevelType = "onChange";
         const nativeEventParam = { value };
 
-        rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
+        // rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
+        rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, nativeEventParam);
         // setTimeout(() => {
         // widgetRegistrationServiceRef.current.emitComboChangeEvent(id, value);
         // }, 10);
@@ -72,7 +78,8 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const topLevelType = "onChange";
         const nativeEventParam = { value };
 
-        rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
+        // rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
+        rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, nativeEventParam);
 
         // setTimeout(() => {
         // widgetRegistrationServiceRef.current.emitNumericValueChangeEvent(id, value);
@@ -84,8 +91,8 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const topLevelType = "onChange";
         const nativeEventParam = { values };
 
-        rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
-
+        // rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
+        rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, nativeEventParam);
         // setTimeout(() => {
         // widgetRegistrationServiceRef.current.emitMultiValueChangeEvent(id, values);
         // }, 10);
@@ -111,7 +118,10 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
         // console.log("clicked", id);
 
-        rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, { value: "clicked" });
+        // rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, { value: "clicked" });
+        rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, {
+            value: "clicked",
+        });
         // const nativeEventParam = { value };
         // setTimeout(() => {
         // widgetRegistrationServiceRef.current.emitClick(id);

@@ -64,6 +64,8 @@ void ReactImgui::InitWidget(const json& widgetDef) {
     std::string type = widgetDef["type"].template get<std::string>();
     int id = widgetDef["id"].template get<int>();
 
+    hierarchy[id] = std::set<int>();
+
     if (type == "InputText") {
         InitInputText(widgetDef);
     } else if (type == "Combo") {
@@ -420,7 +422,6 @@ void ReactImgui::PatchWidget(int id, std::string widgetJsonAsString) {
                 static_cast<TreeNode*>(pWidget)->label = widgetDef["label"].template get<std::string>();
             }
         }
-
     }
 };
 
@@ -429,9 +430,9 @@ void ReactImgui::SetChildren(int id, std::set<int> childrenIds) {
 };
 
 void ReactImgui::AppendChild(int parentId, int childId) {
-    // if (std::find(hierarchy[parentId].begin(), hierarchy[parentId].end(), childId) != hierarchy[parentId].end()) {
+    if (hierarchy.contains(parentId)) {
         hierarchy[parentId].insert(childId);
-    // }
+    }
 };
 
 std::set<int> ReactImgui::GetChildren(int id) {

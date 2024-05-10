@@ -42,11 +42,22 @@ class NativeFabricUIManager {
     cloneNodeWithNewProps = (node, newProps) => {
         console.log("cloneNodeWithNewProps", node, newProps);
 
-        return { ...node, newProps };
+        const newWidget = { ...node, ...newProps };
+
+        this.wasmModule.patchWidget(node.id, JSON.stringify(newWidget));
+
+        // console.log("cloneNodeWithNewProps", JSON.stringify(newWidget));
+
+        return newWidget;
     };
     cloneNodeWithNewChildren = (node) => {
         console.log("cloneNodeWithNewChildren", node);
-        return { ...node };
+
+        this.wasmModule.setChildren(node.id, JSON.stringify([]));
+
+        // return { ...node };
+
+        return node;
     };
     createChildSet(...args) {
         console.log("createChildSet", args);
@@ -63,7 +74,7 @@ class NativeFabricUIManager {
         this.wasmModule.appendChild(parent.id, child.id);
     };
     completeRoot = (container, newChildSet) => {
-        console.log("completeRoot", container, newChildSet);
+        // console.log("completeRoot", container, newChildSet);
 
         this.wasmModule.setChildren(container, JSON.stringify(newChildSet.map(({ id }) => id)));
     };
@@ -77,7 +88,7 @@ const uiManager = new NativeFabricUIManager();
 // flowlint unsafe-getters-setters:off
 module.exports = {
     createPublicInstance(current, renderLanes, workInProgress) {
-        console.log("createPublicInstance", current, renderLanes, workInProgress);
+        // console.log("createPublicInstance", current, renderLanes, workInProgress);
 
         return {};
     },

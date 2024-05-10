@@ -102,6 +102,8 @@ class WasmRunner {
         }
 
         static void OnBooleanValueChanged(int id, bool value) {
+            printf("OnBooleanValueChanged: %d %d\n", id, value);
+
             EM_ASM_ARGS(
                 { Module.eventHandlers.onBooleanValueChange($0, $1); },
                 id,
