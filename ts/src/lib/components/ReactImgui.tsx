@@ -1,14 +1,14 @@
 import * as React from "react";
 import { useEffect, useMemo, useState, useRef, useCallback, PropsWithChildren } from "react";
 import { v4 as uuidv4 } from "uuid";
+import debounce from "lodash.debounce";
 // @ts-ignore
 import ReactNativePrivateInterface from "src/lib/react-native/ReactNativePrivateInterface";
-import debounce from "lodash.debounce";
 // @ts-ignore wasm?
 import getWasmModule from "src/lib/wasm/reactImgui";
-import { MainModule, WasmExitStatus } from "src/wasm-app-types";
-import { Primitive } from "./ReactImgui/types";
+import { MainModule, WasmExitStatus } from "src/lib/wasm/wasm-app-types";
 import { ReactNativeWrapper } from "src/lib/components/ReactNativeWrapper";
+import { Primitive } from "src/lib/components/ReactImgui/types";
 
 export type MainComponentProps = PropsWithChildren & {
     containerRef?: React.RefObject<HTMLElement>;

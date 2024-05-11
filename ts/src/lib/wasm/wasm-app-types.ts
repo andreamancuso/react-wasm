@@ -1,5 +1,3 @@
-import { Primitive } from "./lib/components/ReactImgui/types";
-
 export type WasmExitStatus = {
     status: number;
 };
