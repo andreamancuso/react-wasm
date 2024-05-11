@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { ReactImgui } from "src/components/ReactImgui/components";
+import { ReactImgui } from "src/lib/components/ReactImgui/components";
 
 const options = [
     {

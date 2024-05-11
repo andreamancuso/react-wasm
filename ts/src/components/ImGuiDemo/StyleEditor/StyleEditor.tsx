@@ -1,4 +1,4 @@
-import { ReactImgui } from "src/components/ReactImgui/components";
+import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { BorderControl } from "src/components/ImGuiDemo/StyleEditor/BorderControl/BorderControl";
 import { FontSelector } from "src/components/ImGuiDemo/StyleEditor/FontSelector/FontSelector";
 import { FrameRounding } from "src/components/ImGuiDemo/StyleEditor/Sizes/Rounding/FrameRounding/FrameRounding";

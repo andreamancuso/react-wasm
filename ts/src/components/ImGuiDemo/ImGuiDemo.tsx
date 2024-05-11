@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { HelpMarker } from "src/components/ImGuiDemo/HelpMarker/HelpMarker";
-import { ReactImgui } from "src/components/ReactImgui/components";
+import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { UserGuide } from "src/components/ImGuiDemo/UserGuide/UserGuide";
 import { StyleEditor } from "src/components/ImGuiDemo/StyleEditor/StyleEditor";
 

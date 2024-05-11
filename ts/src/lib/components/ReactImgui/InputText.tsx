@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
+import { useWidgetEventManagement } from "src/lib/hooks/useWidgetEventManagement";
 import { WidgetFunctionComponent } from "./types";
 
 export type InputTextProps = {

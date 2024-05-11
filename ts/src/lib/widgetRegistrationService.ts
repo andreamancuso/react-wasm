@@ -1,4 +1,4 @@
-import { Primitive } from "../components/ReactImgui/types";
+import { Primitive } from "./components/ReactImgui/types";
 
 export class WidgetRegistrationService {
     private textChangeEventMap: Map<string, (value: string) => void>;

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
-import { WidgetFunctionComponent } from "./types";
+import { useWidgetEventManagement } from "src/lib/hooks/useWidgetEventManagement";
+import { SliderTypes, WidgetFunctionComponent } from "./types";
 
 type SliderProps = {
     label: string;
@@ -8,7 +8,7 @@ type SliderProps = {
     min?: number;
     max?: number;
     onChange?: (value: number) => void;
-    sliderType?: "default" | "angle";
+    sliderType?: SliderTypes;
 };
 
 export const Slider: WidgetFunctionComponent<SliderProps> = ({
@@ -18,7 +18,7 @@ export const Slider: WidgetFunctionComponent<SliderProps> = ({
     onChange,
     defaultValue,
     sliderType = "default",
-}) => {
+}: SliderProps) => {
     const [widgetId, widgetRegistrationService] = useWidgetEventManagement("numeric");
 
     useEffect(() => {

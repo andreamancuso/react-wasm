@@ -1,5 +1,5 @@
-import { MainComponent } from "../../ReactImgui";
-import { attachSubComponents } from "../../lib/attachSubComponents";
+import { MainComponent } from "../ReactImgui";
+import { attachSubComponents } from "../../attachSubComponents";
 import { BulletText } from "./BulletText";
 import { Button } from "./Button";
 import { Checkbox } from "./Checkbox";

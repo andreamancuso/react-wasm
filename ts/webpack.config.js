@@ -25,28 +25,15 @@ module.exports = [
         resolve: {
             extensions: [".ts", ".tsx", ".js", ".mjs", ".css"],
             modules: [path.resolve(__dirname, "./"), path.resolve(__dirname, "./node_modules/")],
-            alias: {
-                "@react-native": path.resolve(__dirname, "react-native/"),
-                "react-native": path.resolve(__dirname, "react-native/"),
-            },
         },
         module: {
             rules: [
                 {
-                    test: /\.(m?js|jsx|tsx|ts)$/,
+                    test: /\.(tsx|ts)$/,
                     include: [path.resolve(__dirname, "src")],
                     exclude: /node_modules/,
-                    use: {
-                        loader: "babel-loader",
-                        options: {
-                            presets: [
-                                ["@babel/preset-env", { targets: "defaults" }],
-                                "@babel/preset-typescript",
-                                ["@babel/preset-react", { runtime: "automatic" }],
-                            ],
-                            plugins: ["@babel/plugin-proposal-class-properties"],
-                        },
-                    },
+                    loader: "ts-loader",
+                    options: { transpileOnly: true },
                 },
                 {
                     test: /\.css$/i,
@@ -73,48 +60,46 @@ module.exports = [
             new webpack.HotModuleReplacementPlugin(),
         ],
     },
-    {
-        name: "fabric-worker",
-        target: "webworker",
-        mode: "development",
-        entry: path.resolve(__dirname, "./src/fabric-worker.ts"),
-        output: {
-            path: path.resolve(__dirname, "dist"),
-            filename: "fabric-worker.js",
-        },
-        resolve: {
-            extensions: [".ts", ".tsx", ".js", ".jsx", ".mjs"],
-            modules: [path.resolve(__dirname, "./"), path.resolve(__dirname, "./node_modules/")],
-        },
-        module: {
-            rules: [
-                {
-                    test: /\.(m?js|jsx|tsx|ts)$/,
-                    include: [path.resolve(__dirname, "src")],
-                    exclude: /node_modules/,
-                    use: {
-                        loader: "babel-loader",
-                        options: {
-                            presets: [
-                                ["@babel/preset-env", { targets: "defaults" }],
-                                "@babel/preset-typescript",
-                                ["@babel/preset-react", { runtime: "automatic" }],
-                            ],
-                            plugins: ["@babel/plugin-proposal-class-properties"],
-                        },
-                    },
-                },
-                {
-                    test: /\.(ico|icns|eot|woff|woff2|jpe?g|png)$/,
-                    // exclude: [path.resolve(__dirname, "react-native")],
-                    use: [
-                        {
-                            // loader: "asset/inline",
-                            loader: "url-loader",
-                        },
-                    ],
-                },
-            ],
-        },
-    },
+    // {
+    //     name: "fabric-worker",
+    //     target: "webworker",
+    //     mode: "development",
+    //     entry: path.resolve(__dirname, "./src/fabric-worker.ts"),
+    //     output: {
+    //         path: path.resolve(__dirname, "dist"),
+    //         filename: "fabric-worker.js",
+    //     },
+    //     resolve: {
+    //         extensions: [".ts", ".tsx", ".js", ".jsx", ".mjs"],
+    //         modules: [path.resolve(__dirname, "./"), path.resolve(__dirname, "./node_modules/")],
+    //     },
+    //     module: {
+    //         rules: [
+    //             {
+    //                 test: /\.(m?js|jsx|tsx|ts)$/,
+    //                 include: [path.resolve(__dirname, "src")],
+    //                 exclude: /node_modules/,
+    //                 use: {
+    //                     loader: "babel-loader",
+    //                     options: {
+    //                         presets: [
+    //                             ["@babel/preset-env", { targets: "defaults" }],
+    //                             "@babel/preset-typescript",
+    //                             ["@babel/preset-react", { runtime: "automatic" }],
+    //                         ],
+    //                         plugins: ["@babel/plugin-proposal-class-properties"],
+    //                     },
+    //                 },
+    //             },
+    //             {
+    //                 test: /\.(ico|icns|eot|woff|woff2|jpe?g|png)$/,
+    //                 use: [
+    //                     {
+    //                         loader: "url-loader",
+    //                     },
+    //                 ],
+    //             },
+    //         ],
+    //     },
+    // },
 ];

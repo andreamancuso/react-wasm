@@ -1,4 +1,4 @@
-import NativeFabricUIManager from "./nativeFabricUiManager";
+import NativeFabricUIManager from "./nativeFabricUiManager.mjs";
 
 const uiManager = new NativeFabricUIManager();
 

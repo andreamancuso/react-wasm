@@ -47,7 +47,7 @@ const runner = async () => {
     var React = require("react"),
     Scheduler = require("scheduler");
 
-    export const ReactFabricProd = (ReactNativePrivateInterface) => {
+    export default (ReactNativePrivateInterface) => {
 
         const obj = {};
 

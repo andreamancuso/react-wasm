@@ -1,6 +1,6 @@
 import { FunctionComponent, JSXElementConstructor, ReactElement } from "react";
 import { ReactImgui } from "./components";
-import { MainComponentProps } from "../../ReactImgui";
+import { MainComponentProps } from "../ReactImgui";
 
 export type Primitive = string | number | boolean;
 
@@ -8,6 +8,7 @@ export type Vec2 = {
     x: number;
     y: number;
 };
+export type SliderTypes = "default" | "angle";
 
 export type WidgetPropsMap = {
     Unknown: {};
@@ -32,6 +33,7 @@ export type WidgetPropsMap = {
         // todo: What about `fmt` ?
         text: string;
     };
+    Separator: {};
     SeparatorText: {
         label: string;
     };
@@ -51,7 +53,7 @@ export type WidgetPropsMap = {
         defaultValue?: number;
     };
     Slider: {
-        sliderType: "default" | "angle";
+        sliderType: SliderTypes;
         label?: string;
         defaultValue?: number;
         min?: number;
@@ -126,11 +128,11 @@ export type ReactElementWidget<
     ? { [L in keyof Omit<P, "children">]: P[L] } & {
           id: string;
           type: K;
-          children?: WidgetReactElementsFlat | WidgetReactElementsFlat[] | Element | undefined;
+          children?: WidgetReactNode;
       } & { onChange?: any; onClick?: any }
     : { [L in keyof Omit<P, "children">]: P[L] } & {
           type: K;
-          children?: WidgetReactElementsFlat | WidgetReactElementsFlat[] | Element | undefined;
+          children?: WidgetReactNode;
       };
 
 type ReactElementWidgets = {

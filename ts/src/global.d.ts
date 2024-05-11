@@ -1,4 +1,4 @@
-import { ReactElementWidgetsFlat } from "./components/ReactImgui/types";
+import { ReactElementWidgetsFlat } from "./lib/components/ReactImgui/types";
 
 export {};
 

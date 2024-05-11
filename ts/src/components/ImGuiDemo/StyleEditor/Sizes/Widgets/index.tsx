@@ -7,7 +7,7 @@ import { SeparatorTextBorderSize } from "src/components/ImGuiDemo/StyleEditor/Si
 import { SeparatorTextAlign } from "src/components/ImGuiDemo/StyleEditor/Sizes/Widgets/SeparatorTextAlign/SeparatorTextAlign";
 import { SeparatorTextPadding } from "src/components/ImGuiDemo/StyleEditor/Sizes/Widgets/SeparatorTextPadding/SeparatorTextPadding";
 import { LogSliderDeadzone } from "src/components/ImGuiDemo/StyleEditor/Sizes/Widgets/LogSliderDeadzone/LogSliderDeadzone";
-import { ReactImgui } from "src/components/ReactImgui/components";
+import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { HelpMarker } from "src/components/ImGuiDemo/HelpMarker/HelpMarker";
 
 export const Widgets = () => {

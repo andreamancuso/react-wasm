@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import { ReactImgui } from "src/components/ReactImgui/components";
-import { useWidgetRegistrationService } from "src/hooks/useWidgetRegistrationService";
+import { ReactImgui } from "src/lib/components/ReactImgui/components";
+import { useWidgetRegistrationService } from "src/lib/hooks/useWidgetRegistrationService";
 
 export const BorderControl = () => {
     const service = useWidgetRegistrationService();

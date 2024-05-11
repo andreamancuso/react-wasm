@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
-import { ReactImgui } from "src/components/ReactImgui/components";
-import { useWidgetRegistrationService } from "src/hooks/useWidgetRegistrationService";
-import { Primitive } from "src/components/ReactImgui/types";
+import { ReactImgui } from "src/lib/components/ReactImgui/components";
+import { useWidgetRegistrationService } from "src/lib/hooks/useWidgetRegistrationService";
+import { Primitive } from "src/lib/components/ReactImgui/types";
 
 export const SeparatorTextPadding = () => {
     const service = useWidgetRegistrationService();

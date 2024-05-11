@@ -3,12 +3,12 @@ import { useEffect, useRef, PropsWithChildren } from "react";
 // @ts-ignore
 import { render } from "src/lib/react-native/";
 // @ts-ignore
-import ReactFabricProdInitialiser from "./lib/react-native/ReactFabric-prod";
+import ReactFabricProdInitialiser from "src/lib/react-native/ReactFabric-prod";
 // @ts-ignore
-import ReactNativePrivateInterface from "./lib/react-native/ReactNativePrivateInterface";
-import { WidgetRegistrationServiceContext } from "./contexts/widgetRegistrationServiceContext";
-import { WidgetRegistrationService } from "./lib/widgetRegistrationService";
-import { MainModule } from "./wasm-app-types";
+import ReactNativePrivateInterface from "src/lib/react-native/ReactNativePrivateInterface";
+import { WidgetRegistrationServiceContext } from "src/lib/contexts/widgetRegistrationServiceContext";
+import { WidgetRegistrationService } from "src/lib/widgetRegistrationService";
+import { MainModule } from "src/wasm-app-types";
 
 const ReactFabricProd = ReactFabricProdInitialiser(ReactNativePrivateInterface);
 
