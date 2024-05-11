@@ -4,6 +4,7 @@
     "version": "0.0.0",
     "scripts": {
         "start": "webpack serve",
+        "build:workers": "webpack --config-name fabric-worker",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "emcmake": "cd ../cpp && emcmake cmake .",
         "cmake": "cd ../cpp && cmake --build . --target reactImgui"

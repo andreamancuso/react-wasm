@@ -1,26 +1,16 @@
 import * as React from "react";
 import { useEffect, useMemo, useState, useRef, useCallback, PropsWithChildren } from "react";
-// @ts-ignore
-// import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactNativeRenderer-dev.js";
-// @ts-ignore
-// import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactNativeRenderer-prod.js";
+import { v4 as uuidv4 } from "uuid";
 // @ts-ignore
 import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactFabric-prod.js";
 // @ts-ignore
-// import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactFabric-dev.js";
-// @ts-ignore
 import * as rnInterface from "../react-native/react-native/libraries/ReactPrivate/ReactNativePrivateInterfaceForFabric";
-import { v4 as uuidv4 } from "uuid";
 import debounce from "lodash.debounce";
 // @ts-ignore wasm?
-import getWasmModule from "./assets/reactImgui";
-import { WidgetRegistrationServiceContext } from "./contexts/widgetRegistrationServiceContext";
-
-import { MainModule, WasmExitStatus } from "./wasm-app-types";
-// import { render } from "./renderer/renderer";
-import { WidgetRegistrationService } from "./lib/widgetRegistrationService";
-import { resolveWidgets } from "./lib/resolveWidgets";
-import { ImguiWidgetsFlat, JSXWidgetNodesFlat, Primitive } from "./components/ReactImgui/types";
+import getWasmModule from "src/assets/reactImgui";
+import { MainModule, WasmExitStatus } from "src/wasm-app-types";
+import { Primitive } from "./components/ReactImgui/types";
+import { ReactNativeWrapper } from "src/ReactNativeWrapper";
 
 export type MainComponentProps = PropsWithChildren & {
     containerRef?: React.RefObject<HTMLElement>;
@@ -30,18 +20,11 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
     containerRef,
     children,
 }: MainComponentProps) => {
-    // const widgetRegistrationService = useWidgetRegistrationService();
-
-    const widgetRegistrationServiceRef = useRef(new WidgetRegistrationService());
-    // const container = useRef<any>();
-    const widgetsDefsRef = useRef<any>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const isWasmModuleLoading = useRef(false);
     const [wasmModule, setWasmModule] = useState<MainModule | undefined>();
-    // const [wasmRunner, setWasmRunner] = useState<WasmRunner | undefined>();
-
-    const [widgets, setWidgets] = useState<ImguiWidgetsFlat[]>([]);
+    // const [widgets, setWidgets] = useState<ImguiWidgetsFlat[]>([]);
 
     const onTextChange = useCallback(
         (id: string, value: string) => {
@@ -49,14 +32,11 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
             const topLevelType = "onChange";
             const nativeEventParam = { value };
 
-            // rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
             rnInterface.nativeFabricUIManager.dispatchEvent(
                 rootNodeID,
                 topLevelType,
                 nativeEventParam,
             );
-
-            // widgetRegistrationServiceRef.current.emitTextInputChangeEvent(id, value);
         },
         [wasmModule],
     );
@@ -66,11 +46,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const topLevelType = "onChange";
         const nativeEventParam = { value };
 
-        // rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
         rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, nativeEventParam);
-        // setTimeout(() => {
-        // widgetRegistrationServiceRef.current.emitComboChangeEvent(id, value);
-        // }, 10);
     }, []);
 
     const onNumericValueChange = useCallback((id: string, value: number) => {
@@ -78,12 +54,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const topLevelType = "onChange";
         const nativeEventParam = { value };
 
-        // rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
         rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, nativeEventParam);
-
-        // setTimeout(() => {
-        // widgetRegistrationServiceRef.current.emitNumericValueChangeEvent(id, value);
-        // }, 10);
     }, []);
 
     const onMultiValueChange = useCallback((id: string, values: Primitive[]) => {
@@ -91,11 +62,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const topLevelType = "onChange";
         const nativeEventParam = { values };
 
-        // rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
         rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, nativeEventParam);
-        // setTimeout(() => {
-        // widgetRegistrationServiceRef.current.emitMultiValueChangeEvent(id, values);
-        // }, 10);
     }, []);
 
     const onBooleanValueChange = useCallback((id: string, value: boolean) => {
@@ -103,33 +70,16 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const topLevelType = "onChange";
         const nativeEventParam = { value };
 
-        // console.log("changed boolean", id, value);
-
-        // rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, nativeEventParam);
         rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, nativeEventParam);
-        // setTimeout(() => {
-        // widgetRegistrationServiceRef.current.emitBooleanValueChangeEvent(id, value);
-        // }, 10);
     }, []);
 
     const onClick = useCallback((id: string) => {
         const rootNodeID = id;
         const topLevelType = "onClick";
 
-        // console.log("clicked", id);
-
-        // rnInterface.RCTEventEmitter.propagateEvent(rootNodeID, topLevelType, { value: "clicked" });
         rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, {
             value: "clicked",
         });
-        // const nativeEventParam = { value };
-        // setTimeout(() => {
-        // widgetRegistrationServiceRef.current.emitClick(id);
-        // }, 10);
-    }, []);
-
-    const setWidgetsProxy = useCallback((rawWidgetTree: JSXWidgetNodesFlat[]) => {
-        setWidgets(resolveWidgets(rawWidgetTree));
     }, []);
 
     const canvasId = useMemo(() => `canvas-${uuidv4()}`, []);
@@ -164,7 +114,6 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
             return () => {
                 if (localModule) {
                     try {
-                        // localWasmRunner.delete();
                         localModule.exit();
                     } catch (error) {
                         if ((error as WasmExitStatus).status !== 0) {
@@ -196,7 +145,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                 );
             }
         }
-    }, [wasmModule, widgets]);
+    }, [wasmModule]);
 
     useEffect(() => {
         if (wasmModule && containerRef?.current) {
@@ -219,47 +168,9 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         }
     }, [wasmModule, containerRef]);
 
-    // console.log(widgets);
-
-    useEffect(() => {
-        if (wasmModule && !widgetsDefsRef.current) {
-            // rnInterface.UIManager.init(wasmModule);
-            // console.log(rnInterface.nativeFabricUIManager, wasmModule);
-
-            rnInterface.nativeFabricUIManager.init(wasmModule);
-
-            render(
-                <WidgetRegistrationServiceContext.Provider
-                    value={widgetRegistrationServiceRef.current}
-                >
-                    {children}
-                </WidgetRegistrationServiceContext.Provider>,
-                0, // containerTag,
-                () => {
-                    console.log("initialised");
-                },
-                1,
-            );
-
-            // AppRegistry.registerComponent("");
-
-            // widgetsDefsRef.current = render(
-            //     <WidgetRegistrationServiceContext.Provider
-            //         value={widgetRegistrationServiceRef.current}
-            //     >
-            //         {children}
-            //     </WidgetRegistrationServiceContext.Provider>,
-            //     { container: setWidgetsProxy },
-            // );
-        }
-    }, [wasmModule, widgetsDefsRef]);
-
     return (
         <>
-            {/* <div id="rootEl" ref={widgetsDefsRef}></div> */}
-            {/* <div>
-                <pre>{JSON.stringify(widgetsDefsRef.current?.innerHTML)}</pre>
-            </div> */}
+            <ReactNativeWrapper wasmModule={wasmModule}>{children}</ReactNativeWrapper>
             <canvas ref={canvasRef} id={canvasId} />
         </>
     );
