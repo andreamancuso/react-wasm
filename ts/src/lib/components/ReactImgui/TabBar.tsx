@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useWidgetEventManagement } from "src/lib/hooks/useWidgetEventManagement";
+import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
 import { PropsWithChildren, WidgetFunctionComponent, WidgetReactElement } from "./types";
 import { TabItem } from "./TabItem";
 

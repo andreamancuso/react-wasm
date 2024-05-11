@@ -1,12 +1,12 @@
 import * as React from "react";
 import { useEffect, useRef, PropsWithChildren } from "react";
 // @ts-ignore
-import ReactFabricProdInitialiser from "src/lib/react-native/ReactFabric-prod";
+import ReactFabricProdInitialiser from "../react-native/ReactFabric-prod";
 // @ts-ignore
-import ReactNativePrivateInterface from "src/lib/react-native/ReactNativePrivateInterface";
-import { WidgetRegistrationServiceContext } from "src/lib/contexts/widgetRegistrationServiceContext";
-import { WidgetRegistrationService } from "src/lib/widgetRegistrationService";
-import { MainModule } from "src/lib/wasm/wasm-app-types";
+import ReactNativePrivateInterface from "../react-native/ReactNativePrivateInterface";
+import { WidgetRegistrationServiceContext } from "../contexts/widgetRegistrationServiceContext";
+import { WidgetRegistrationService } from "../widgetRegistrationService";
+import { MainModule } from "../wasm/wasm-app-types";
 
 const ReactFabricProd = ReactFabricProdInitialiser(ReactNativePrivateInterface);
 

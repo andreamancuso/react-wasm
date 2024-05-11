@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { useWidgetEventManagement } from "src/lib/hooks/useWidgetEventManagement";
+import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
 import { WidgetFunctionComponent } from "./types";
 
 type ButtonProps = {

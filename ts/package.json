@@ -1,7 +1,8 @@
 {
-    "name": "react-imgui",
+    "name": "@react-wasm/imgui",
     "private": true,
-    "version": "0.0.0",
+    "version": "0.1.0",
+    "main": "build/index.js",
     "scripts": {
         "postinstall": "ts-node ./scripts/postinstall.ts",
         "start": "webpack serve",

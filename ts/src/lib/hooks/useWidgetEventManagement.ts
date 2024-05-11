@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { WidgetRegistrationService } from "src/lib/widgetRegistrationService";
-import { useWidgetRegistrationService } from "src/lib/hooks/useWidgetRegistrationService";
+import { WidgetRegistrationService } from "../widgetRegistrationService";
+import { useWidgetRegistrationService } from "../hooks/useWidgetRegistrationService";
 
 export const useWidgetEventManagement = (
     type?: "text" | "combo" | "numeric" | "boolean" | "multi",

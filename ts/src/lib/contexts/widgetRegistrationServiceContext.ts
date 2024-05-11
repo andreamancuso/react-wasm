@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { WidgetRegistrationService } from "src/lib/widgetRegistrationService";
+import { WidgetRegistrationService } from "../widgetRegistrationService";
 
 export const WidgetRegistrationServiceContext = createContext<WidgetRegistrationService | null>(
     null,

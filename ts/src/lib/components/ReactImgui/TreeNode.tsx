@@ -1,4 +1,4 @@
-import { useWidgetEventManagement } from "src/lib/hooks/useWidgetEventManagement";
+import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
 import { WidgetFunctionComponent, PropsWithChildren } from "./types";
 
 export type TreeNodeProps = PropsWithChildren & {
