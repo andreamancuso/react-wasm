@@ -3,8 +3,9 @@
     "private": true,
     "version": "0.1.0",
     "main": "build/index.js",
+    "type": "module",
     "scripts": {
-        "postinstall": "ts-node ./scripts/postinstall.ts",
+        "postinstall": "node --loader ts-node/esm ./scripts/postinstall.ts",
         "start": "webpack serve",
         "build:workers": "webpack --config-name fabric-worker",
         "build:library": "webpack --config build.webpack.config.js",
@@ -49,6 +50,7 @@
         "@types/react": "^18.2.66",
         "@types/react-dom": "^18.2.22",
         "@types/react-reconciler": "^0",
+        "@types/scheduler": "^0.23.0",
         "@types/uuid": "^9",
         "@types/webpack": "^5.28.5",
         "@types/webpack-dev-server": "^4.7.2",

@@ -1,5 +1,5 @@
-var React = require("react"),
-    Scheduler = require("scheduler");
+import * as React from "react";
+import Scheduler from "scheduler";
 
 export default (ReactNativePrivateInterface) => {
     const obj = {};

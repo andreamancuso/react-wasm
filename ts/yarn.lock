@@ -2397,6 +2397,7 @@ __metadata:
     "@types/react": "npm:^18.2.66"
     "@types/react-dom": "npm:^18.2.22"
     "@types/react-reconciler": "npm:^0"
+    "@types/scheduler": "npm:^0.23.0"
     "@types/uuid": "npm:^9"
     "@types/webpack": "npm:^5.28.5"
     "@types/webpack-dev-server": "npm:^4.7.2"
@@ -2853,6 +2854,13 @@ __metadata:
   version: 0.12.2
   resolution: "@types/retry@npm:0.12.2"
   checksum: 10c0/07481551a988cc90b423351919928b9ddcd14e3f5591cac3ab950851bb20646e55a10e89141b38bc3093d2056d4df73700b22ff2612976ac86a6367862381884
+  languageName: node
+  linkType: hard
+
+"@types/scheduler@npm:^0.23.0":
+  version: 0.23.0
+  resolution: "@types/scheduler@npm:0.23.0"
+  checksum: 10c0/5cf7f2ba3732b74877559eb20b19f95fcd0a20c17dcb20e75a7ca7c7369cd455aeb2d406b3ff5a38168a9750da3bad78dd20d96d11118468b78f4959b8e56090
   languageName: node
   linkType: hard
 

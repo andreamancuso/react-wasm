@@ -10,6 +10,12 @@ import { MainModule, WasmExitStatus } from "../wasm/wasm-app-types";
 import { ReactNativeWrapper } from "../components/ReactNativeWrapper";
 import { Primitive } from "../components/ReactImgui/types";
 
+// getWasmModule.preRun = () => {
+//     ENV.MY_FILE_ROOT = "/usr/lib/test";
+// };
+
+// console.log(getWasmModule);
+
 export type MainComponentProps = PropsWithChildren & {
     containerRef?: React.RefObject<HTMLElement>;
 };
@@ -107,6 +113,11 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                 const moduleArg: any = {
                     canvas: canvasRef.current, // ?
                     arguments: [`#${canvasId}`],
+                    // locateFile: (path: any, scriptDirectory: any) => {
+                    //     console.log(path, scriptDirectory);
+
+                    //     return `${scriptDirectory}/lib/wasm/${path}`;
+                    // },
                     eventHandlers: {
                         onTextChange,
                         onComboChange,

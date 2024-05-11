@@ -44,8 +44,8 @@ const runner = async () => {
         reactFabricProdContents = reactFabricProdContents.replaceAll("exports.", "obj.");
 
         reactFabricProdContents = `
-    var React = require("react"),
-    Scheduler = require("scheduler");
+    import * as React from "react";
+    import Scheduler from "scheduler";
 
     export default (ReactNativePrivateInterface) => {
 
