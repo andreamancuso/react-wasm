@@ -1,6 +1,6 @@
+import { FunctionComponent, JSXElementConstructor, ReactElement } from "react";
 import { ReactImgui } from "./components";
 import { MainComponentProps } from "../../ReactImgui";
-import { FunctionComponent, JSXElementConstructor, ReactElement } from "react";
 
 export type Primitive = string | number | boolean;
 

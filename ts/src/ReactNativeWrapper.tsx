@@ -1,12 +1,16 @@
 import * as React from "react";
 import { useEffect, useRef, PropsWithChildren } from "react";
 // @ts-ignore
-import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactFabric-prod.js";
+import { render } from "src/lib/react-native/";
 // @ts-ignore
-import * as rnInterface from "../react-native/react-native/libraries/ReactPrivate/ReactNativePrivateInterfaceForFabric";
+import ReactFabricProdInitialiser from "./lib/react-native/ReactFabric-prod";
+// @ts-ignore
+import ReactNativePrivateInterface from "./lib/react-native/ReactNativePrivateInterface";
 import { WidgetRegistrationServiceContext } from "./contexts/widgetRegistrationServiceContext";
 import { WidgetRegistrationService } from "./lib/widgetRegistrationService";
 import { MainModule } from "./wasm-app-types";
+
+const ReactFabricProd = ReactFabricProdInitialiser(ReactNativePrivateInterface);
 
 export type ReactNativeWrapperProps = PropsWithChildren & {
     wasmModule?: MainModule;
@@ -23,9 +27,10 @@ export const ReactNativeWrapper: React.ComponentType<ReactNativeWrapperProps> = 
         if (wasmModule && !initialisedRef.current) {
             initialisedRef.current = true;
 
-            rnInterface.nativeFabricUIManager.init(wasmModule);
+            // todo: inject via Context
+            ReactNativePrivateInterface.nativeFabricUIManager.init(wasmModule);
 
-            render(
+            ReactFabricProd.render(
                 <WidgetRegistrationServiceContext.Provider
                     value={widgetRegistrationServiceRef.current}
                 >

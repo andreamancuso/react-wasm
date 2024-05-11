@@ -49,24 +49,6 @@ module.exports = [
                     },
                 },
                 {
-                    test: /\.(js)$/,
-                    include: [path.resolve(__dirname, "react-native")],
-                    exclude: /node_modules/,
-                    use: {
-                        loader: "babel-loader",
-                        options: {
-                            presets: ["@babel/preset-env"],
-                            plugins: [
-                                "babel-plugin-syntax-hermes-parser",
-                                "@babel/plugin-transform-react-jsx",
-                                "@babel/plugin-transform-flow-strip-types",
-                                "@babel/plugin-proposal-class-properties",
-                                "@babel/plugin-transform-modules-commonjs",
-                            ],
-                        },
-                    },
-                },
-                {
                     test: /\.css$/i,
                     use: [MiniCssExtractPlugin.loader, "css-loader"],
                 },

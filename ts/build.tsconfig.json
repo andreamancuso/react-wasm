@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2022",
+        "sourceMap": true,
+        "declaration": true,
+        "outDir": "./build",
+        "jsx": "react-jsx",
+        "skipLibCheck": true,
+        "transpileOnly": true
+    },
+    "include": [
+        "src/**/*"
+    ]
+}

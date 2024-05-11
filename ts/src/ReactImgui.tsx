@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 // @ts-ignore
 import { render } from "../react-native/react-native/libraries/Renderer/implementations/ReactFabric-prod.js";
 // @ts-ignore
-import * as rnInterface from "../react-native/react-native/libraries/ReactPrivate/ReactNativePrivateInterfaceForFabric";
+import ReactNativePrivateInterface from "./lib/react-native/ReactNativePrivateInterface";
 import debounce from "lodash.debounce";
 // @ts-ignore wasm?
 import getWasmModule from "src/assets/reactImgui";
@@ -24,7 +24,6 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
     const isWasmModuleLoading = useRef(false);
     const [wasmModule, setWasmModule] = useState<MainModule | undefined>();
-    // const [widgets, setWidgets] = useState<ImguiWidgetsFlat[]>([]);
 
     const onTextChange = useCallback(
         (id: string, value: string) => {
@@ -32,7 +31,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
             const topLevelType = "onChange";
             const nativeEventParam = { value };
 
-            rnInterface.nativeFabricUIManager.dispatchEvent(
+            ReactNativePrivateInterface.nativeFabricUIManager.dispatchEvent(
                 rootNodeID,
                 topLevelType,
                 nativeEventParam,
@@ -46,7 +45,11 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const topLevelType = "onChange";
         const nativeEventParam = { value };
 
-        rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, nativeEventParam);
+        ReactNativePrivateInterface.nativeFabricUIManager.dispatchEvent(
+            rootNodeID,
+            topLevelType,
+            nativeEventParam,
+        );
     }, []);
 
     const onNumericValueChange = useCallback((id: string, value: number) => {
@@ -54,7 +57,11 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const topLevelType = "onChange";
         const nativeEventParam = { value };
 
-        rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, nativeEventParam);
+        ReactNativePrivateInterface.nativeFabricUIManager.dispatchEvent(
+            rootNodeID,
+            topLevelType,
+            nativeEventParam,
+        );
     }, []);
 
     const onMultiValueChange = useCallback((id: string, values: Primitive[]) => {
@@ -62,7 +69,11 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const topLevelType = "onChange";
         const nativeEventParam = { values };
 
-        rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, nativeEventParam);
+        ReactNativePrivateInterface.nativeFabricUIManager.dispatchEvent(
+            rootNodeID,
+            topLevelType,
+            nativeEventParam,
+        );
     }, []);
 
     const onBooleanValueChange = useCallback((id: string, value: boolean) => {
@@ -70,14 +81,18 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         const topLevelType = "onChange";
         const nativeEventParam = { value };
 
-        rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, nativeEventParam);
+        ReactNativePrivateInterface.nativeFabricUIManager.dispatchEvent(
+            rootNodeID,
+            topLevelType,
+            nativeEventParam,
+        );
     }, []);
 
     const onClick = useCallback((id: string) => {
         const rootNodeID = id;
         const topLevelType = "onClick";
 
-        rnInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, {
+        ReactNativePrivateInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, {
             value: "clicked",
         });
     }, []);

@@ -9,8 +9,6 @@ export const BorderControl = () => {
     const [popupBorder, setPopupBorder] = useState(true);
 
     const handleWindowBorderChanged = useCallback((event: any) => {
-        console.log(event.nativeEvent.value);
-
         if (event.nativeEvent) {
             setWindowBorder(event.nativeEvent.value);
         }

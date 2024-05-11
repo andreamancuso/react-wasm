@@ -950,14 +950,14 @@ function dbg(...args) {
 // === Body ===
 
 var ASM_CONSTS = {
-  177636: ($0, $1) => { Module.eventHandlers.onTextChange($0, UTF8ToString($1)); },  
- 177697: ($0, $1) => { Module.eventHandlers.onComboChange($0, $1); },  
- 177745: ($0, $1) => { Module.eventHandlers.onNumericValueChange($0, $1); },  
- 177800: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float')]); },  
- 177901: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float')]); },  
- 178027: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float'), getValue($1+12, 'float')]); },  
- 178179: ($0, $1) => { Module.eventHandlers.onBooleanValueChange($0, $1); },  
- 178234: ($0) => { Module.eventHandlers.onClick($0); }
+  177604: ($0, $1) => { Module.eventHandlers.onTextChange($0, UTF8ToString($1)); },  
+ 177665: ($0, $1) => { Module.eventHandlers.onComboChange($0, $1); },  
+ 177713: ($0, $1) => { Module.eventHandlers.onNumericValueChange($0, $1); },  
+ 177768: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float')]); },  
+ 177869: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float')]); },  
+ 177995: ($0, $1) => { Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float'), getValue($1+12, 'float')]); },  
+ 178147: ($0, $1) => { Module.eventHandlers.onBooleanValueChange($0, $1); },  
+ 178202: ($0) => { Module.eventHandlers.onClick($0); }
 };
 
 
@@ -2638,476 +2638,6 @@ var ASM_CONSTS = {
       _emscripten_get_now = () => performance.now();
   ;
   
-  var webgl_enable_WEBGL_draw_instanced_base_vertex_base_instance = (ctx) =>
-      // Closure is expected to be allowed to minify the '.dibvbi' property, so not accessing it quoted.
-      !!(ctx.dibvbi = ctx.getExtension('WEBGL_draw_instanced_base_vertex_base_instance'));
-  
-  var webgl_enable_WEBGL_multi_draw_instanced_base_vertex_base_instance = (ctx) => {
-      // Closure is expected to be allowed to minify the '.mdibvbi' property, so not accessing it quoted.
-      return !!(ctx.mdibvbi = ctx.getExtension('WEBGL_multi_draw_instanced_base_vertex_base_instance'));
-    };
-  
-  var webgl_enable_WEBGL_multi_draw = (ctx) => {
-      // Closure is expected to be allowed to minify the '.multiDrawWebgl' property, so not accessing it quoted.
-      return !!(ctx.multiDrawWebgl = ctx.getExtension('WEBGL_multi_draw'));
-    };
-  
-  var getEmscriptenSupportedExtensions = (ctx) => {
-      // Restrict the list of advertised extensions to those that we actually
-      // support.
-      var supportedExtensions = [
-        // WebGL 2 extensions
-        'EXT_color_buffer_float',
-        'EXT_conservative_depth',
-        'EXT_disjoint_timer_query_webgl2',
-        'EXT_texture_norm16',
-        'NV_shader_noperspective_interpolation',
-        'WEBGL_clip_cull_distance',
-        // WebGL 1 and WebGL 2 extensions
-        'EXT_color_buffer_half_float',
-        'EXT_depth_clamp',
-        'EXT_float_blend',
-        'EXT_texture_compression_bptc',
-        'EXT_texture_compression_rgtc',
-        'EXT_texture_filter_anisotropic',
-        'KHR_parallel_shader_compile',
-        'OES_texture_float_linear',
-        'WEBGL_blend_func_extended',
-        'WEBGL_compressed_texture_astc',
-        'WEBGL_compressed_texture_etc',
-        'WEBGL_compressed_texture_etc1',
-        'WEBGL_compressed_texture_s3tc',
-        'WEBGL_compressed_texture_s3tc_srgb',
-        'WEBGL_debug_renderer_info',
-        'WEBGL_debug_shaders',
-        'WEBGL_lose_context',
-        'WEBGL_multi_draw',
-      ];
-      // .getSupportedExtensions() can return null if context is lost, so coerce to empty array.
-      return (ctx.getSupportedExtensions() || []).filter(ext => supportedExtensions.includes(ext));
-    };
-  
-  
-  var GL = {
-  counter:1,
-  buffers:[],
-  programs:[],
-  framebuffers:[],
-  renderbuffers:[],
-  textures:[],
-  shaders:[],
-  vaos:[],
-  contexts:[],
-  offscreenCanvases:{
-  },
-  queries:[],
-  samplers:[],
-  transformFeedbacks:[],
-  syncs:[],
-  stringCache:{
-  },
-  stringiCache:{
-  },
-  unpackAlignment:4,
-  recordError:(errorCode) => {
-        if (!GL.lastError) {
-          GL.lastError = errorCode;
-        }
-      },
-  getNewId:(table) => {
-        var ret = GL.counter++;
-        for (var i = table.length; i < ret; i++) {
-          table[i] = null;
-        }
-        return ret;
-      },
-  genObject:(n, buffers, createFunction, objectTable
-        ) => {
-        for (var i = 0; i < n; i++) {
-          var buffer = GLctx[createFunction]();
-          var id = buffer && GL.getNewId(objectTable);
-          if (buffer) {
-            buffer.name = id;
-            objectTable[id] = buffer;
-          } else {
-            GL.recordError(0x502 /* GL_INVALID_OPERATION */);
-          }
-          HEAP32[(((buffers)+(i*4))>>2)] = id;
-        }
-      },
-  getSource:(shader, count, string, length) => {
-        var source = '';
-        for (var i = 0; i < count; ++i) {
-          var len = length ? HEAPU32[(((length)+(i*4))>>2)] : undefined;
-          source += UTF8ToString(HEAPU32[(((string)+(i*4))>>2)], len);
-        }
-        return source;
-      },
-  createContext:(/** @type {HTMLCanvasElement} */ canvas, webGLContextAttributes) => {
-        // In proxied operation mode, rAF()/setTimeout() functions do not delimit
-        // frame boundaries, so can't have WebGL implementation try to detect when
-        // it's ok to discard contents of the rendered backbuffer.
-        if (webGLContextAttributes.renderViaOffscreenBackBuffer) webGLContextAttributes['preserveDrawingBuffer'] = true;
-  
-        // BUG: Workaround Safari WebGL issue: After successfully acquiring WebGL
-        // context on a canvas, calling .getContext() will always return that
-        // context independent of which 'webgl' or 'webgl2'
-        // context version was passed. See:
-        //   https://bugs.webkit.org/show_bug.cgi?id=222758
-        // and:
-        //   https://github.com/emscripten-core/emscripten/issues/13295.
-        // TODO: Once the bug is fixed and shipped in Safari, adjust the Safari
-        // version field in above check.
-        if (!canvas.getContextSafariWebGL2Fixed) {
-          canvas.getContextSafariWebGL2Fixed = canvas.getContext;
-          /** @type {function(this:HTMLCanvasElement, string, (Object|null)=): (Object|null)} */
-          function fixedGetContext(ver, attrs) {
-            var gl = canvas.getContextSafariWebGL2Fixed(ver, attrs);
-            return ((ver == 'webgl') == (gl instanceof WebGLRenderingContext)) ? gl : null;
-          }
-          canvas.getContext = fixedGetContext;
-        }
-  
-        var ctx = canvas.getContext("webgl2", webGLContextAttributes);
-  
-        if (!ctx) return 0;
-  
-        var handle = GL.registerContext(ctx, webGLContextAttributes);
-  
-        return handle;
-      },
-  enableOffscreenFramebufferAttributes:(webGLContextAttributes) => {
-        webGLContextAttributes.renderViaOffscreenBackBuffer = true;
-        webGLContextAttributes.preserveDrawingBuffer = true;
-      },
-  createOffscreenFramebuffer:(context) => {
-        var gl = context.GLctx;
-  
-        // Create FBO
-        var fbo = gl.createFramebuffer();
-        gl.bindFramebuffer(0x8D40 /*GL_FRAMEBUFFER*/, fbo);
-        context.defaultFbo = fbo;
-  
-        context.defaultFboForbidBlitFramebuffer = false;
-        if (gl.getContextAttributes().antialias) {
-          context.defaultFboForbidBlitFramebuffer = true;
-        }
-  
-        // Create render targets to the FBO
-        context.defaultColorTarget = gl.createTexture();
-        context.defaultDepthTarget = gl.createRenderbuffer();
-        // Size them up correctly (use the same mechanism when resizing on demand)
-        GL.resizeOffscreenFramebuffer(context);
-  
-        gl.bindTexture(0xDE1 /*GL_TEXTURE_2D*/, context.defaultColorTarget);
-        gl.texParameteri(0xDE1 /*GL_TEXTURE_2D*/, 0x2801 /*GL_TEXTURE_MIN_FILTER*/, 0x2600 /*GL_NEAREST*/);
-        gl.texParameteri(0xDE1 /*GL_TEXTURE_2D*/, 0x2800 /*GL_TEXTURE_MAG_FILTER*/, 0x2600 /*GL_NEAREST*/);
-        gl.texParameteri(0xDE1 /*GL_TEXTURE_2D*/, 0x2802 /*GL_TEXTURE_WRAP_S*/, 0x812F /*GL_CLAMP_TO_EDGE*/);
-        gl.texParameteri(0xDE1 /*GL_TEXTURE_2D*/, 0x2803 /*GL_TEXTURE_WRAP_T*/, 0x812F /*GL_CLAMP_TO_EDGE*/);
-        gl.texImage2D(0xDE1 /*GL_TEXTURE_2D*/, 0, 0x1908 /*GL_RGBA*/, gl.canvas.width, gl.canvas.height, 0, 0x1908 /*GL_RGBA*/, 0x1401 /*GL_UNSIGNED_BYTE*/, null);
-        gl.framebufferTexture2D(0x8D40 /*GL_FRAMEBUFFER*/, 0x8CE0 /*GL_COLOR_ATTACHMENT0*/, 0xDE1 /*GL_TEXTURE_2D*/, context.defaultColorTarget, 0);
-        gl.bindTexture(0xDE1 /*GL_TEXTURE_2D*/, null);
-  
-        // Create depth render target to the FBO
-        var depthTarget = gl.createRenderbuffer();
-        gl.bindRenderbuffer(0x8D41 /*GL_RENDERBUFFER*/, context.defaultDepthTarget);
-        gl.renderbufferStorage(0x8D41 /*GL_RENDERBUFFER*/, 0x81A5 /*GL_DEPTH_COMPONENT16*/, gl.canvas.width, gl.canvas.height);
-        gl.framebufferRenderbuffer(0x8D40 /*GL_FRAMEBUFFER*/, 0x8D00 /*GL_DEPTH_ATTACHMENT*/, 0x8D41 /*GL_RENDERBUFFER*/, context.defaultDepthTarget);
-        gl.bindRenderbuffer(0x8D41 /*GL_RENDERBUFFER*/, null);
-  
-        // Create blitter
-        var vertices = [
-          -1, -1,
-          -1,  1,
-           1, -1,
-           1,  1
-        ];
-        var vb = gl.createBuffer();
-        gl.bindBuffer(0x8892 /*GL_ARRAY_BUFFER*/, vb);
-        gl.bufferData(0x8892 /*GL_ARRAY_BUFFER*/, new Float32Array(vertices), 0x88E4 /*GL_STATIC_DRAW*/);
-        gl.bindBuffer(0x8892 /*GL_ARRAY_BUFFER*/, null);
-        context.blitVB = vb;
-  
-        var vsCode =
-          'attribute vec2 pos;' +
-          'varying lowp vec2 tex;' +
-          'void main() { tex = pos * 0.5 + vec2(0.5,0.5); gl_Position = vec4(pos, 0.0, 1.0); }';
-        var vs = gl.createShader(0x8B31 /*GL_VERTEX_SHADER*/);
-        gl.shaderSource(vs, vsCode);
-        gl.compileShader(vs);
-  
-        var fsCode =
-          'varying lowp vec2 tex;' +
-          'uniform sampler2D sampler;' +
-          'void main() { gl_FragColor = texture2D(sampler, tex); }';
-        var fs = gl.createShader(0x8B30 /*GL_FRAGMENT_SHADER*/);
-        gl.shaderSource(fs, fsCode);
-        gl.compileShader(fs);
-  
-        var blitProgram = gl.createProgram();
-        gl.attachShader(blitProgram, vs);
-        gl.attachShader(blitProgram, fs);
-        gl.linkProgram(blitProgram);
-        context.blitProgram = blitProgram;
-        context.blitPosLoc = gl.getAttribLocation(blitProgram, "pos");
-        gl.useProgram(blitProgram);
-        gl.uniform1i(gl.getUniformLocation(blitProgram, "sampler"), 0);
-        gl.useProgram(null);
-  
-        context.defaultVao = undefined;
-        if (gl.createVertexArray) {
-          context.defaultVao = gl.createVertexArray();
-          gl.bindVertexArray(context.defaultVao);
-          gl.enableVertexAttribArray(context.blitPosLoc);
-          gl.bindVertexArray(null);
-        }
-      },
-  resizeOffscreenFramebuffer:(context) => {
-        var gl = context.GLctx;
-  
-        // Resize color buffer
-        if (context.defaultColorTarget) {
-          var prevTextureBinding = gl.getParameter(0x8069 /*GL_TEXTURE_BINDING_2D*/);
-          gl.bindTexture(0xDE1 /*GL_TEXTURE_2D*/, context.defaultColorTarget);
-          gl.texImage2D(0xDE1 /*GL_TEXTURE_2D*/, 0, 0x1908 /*GL_RGBA*/, gl.drawingBufferWidth, gl.drawingBufferHeight, 0, 0x1908 /*GL_RGBA*/, 0x1401 /*GL_UNSIGNED_BYTE*/, null);
-          gl.bindTexture(0xDE1 /*GL_TEXTURE_2D*/, prevTextureBinding);
-        }
-  
-        // Resize depth buffer
-        if (context.defaultDepthTarget) {
-          var prevRenderBufferBinding = gl.getParameter(0x8CA7 /*GL_RENDERBUFFER_BINDING*/);
-          gl.bindRenderbuffer(0x8D41 /*GL_RENDERBUFFER*/, context.defaultDepthTarget);
-          gl.renderbufferStorage(0x8D41 /*GL_RENDERBUFFER*/, 0x81A5 /*GL_DEPTH_COMPONENT16*/, gl.drawingBufferWidth, gl.drawingBufferHeight); // TODO: Read context creation parameters for what type of depth and stencil to use
-          gl.bindRenderbuffer(0x8D41 /*GL_RENDERBUFFER*/, prevRenderBufferBinding);
-        }
-      },
-  blitOffscreenFramebuffer:(context) => {
-        var gl = context.GLctx;
-  
-        var prevScissorTest = gl.getParameter(0xC11 /*GL_SCISSOR_TEST*/);
-        if (prevScissorTest) gl.disable(0xC11 /*GL_SCISSOR_TEST*/);
-  
-        var prevFbo = gl.getParameter(0x8CA6 /*GL_FRAMEBUFFER_BINDING*/);
-  
-        if (gl.blitFramebuffer && !context.defaultFboForbidBlitFramebuffer) {
-          gl.bindFramebuffer(0x8CA8 /*GL_READ_FRAMEBUFFER*/, context.defaultFbo);
-          gl.bindFramebuffer(0x8CA9 /*GL_DRAW_FRAMEBUFFER*/, null);
-          gl.blitFramebuffer(0, 0, gl.canvas.width, gl.canvas.height,
-                             0, 0, gl.canvas.width, gl.canvas.height,
-                             0x4000 /*GL_COLOR_BUFFER_BIT*/, 0x2600/*GL_NEAREST*/);
-        }
-        else
-        {
-          gl.bindFramebuffer(0x8D40 /*GL_FRAMEBUFFER*/, null);
-  
-          var prevProgram = gl.getParameter(0x8B8D /*GL_CURRENT_PROGRAM*/);
-          gl.useProgram(context.blitProgram);
-  
-          var prevVB = gl.getParameter(0x8894 /*GL_ARRAY_BUFFER_BINDING*/);
-          gl.bindBuffer(0x8892 /*GL_ARRAY_BUFFER*/, context.blitVB);
-  
-          var prevActiveTexture = gl.getParameter(0x84E0 /*GL_ACTIVE_TEXTURE*/);
-          gl.activeTexture(0x84C0 /*GL_TEXTURE0*/);
-  
-          var prevTextureBinding = gl.getParameter(0x8069 /*GL_TEXTURE_BINDING_2D*/);
-          gl.bindTexture(0xDE1 /*GL_TEXTURE_2D*/, context.defaultColorTarget);
-  
-          var prevBlend = gl.getParameter(0xBE2 /*GL_BLEND*/);
-          if (prevBlend) gl.disable(0xBE2 /*GL_BLEND*/);
-  
-          var prevCullFace = gl.getParameter(0xB44 /*GL_CULL_FACE*/);
-          if (prevCullFace) gl.disable(0xB44 /*GL_CULL_FACE*/);
-  
-          var prevDepthTest = gl.getParameter(0xB71 /*GL_DEPTH_TEST*/);
-          if (prevDepthTest) gl.disable(0xB71 /*GL_DEPTH_TEST*/);
-  
-          var prevStencilTest = gl.getParameter(0xB90 /*GL_STENCIL_TEST*/);
-          if (prevStencilTest) gl.disable(0xB90 /*GL_STENCIL_TEST*/);
-  
-          function draw() {
-            gl.vertexAttribPointer(context.blitPosLoc, 2, 0x1406 /*GL_FLOAT*/, false, 0, 0);
-            gl.drawArrays(5/*GL_TRIANGLE_STRIP*/, 0, 4);
-          }
-  
-          if (context.defaultVao) {
-            // WebGL 2 or OES_vertex_array_object
-            var prevVAO = gl.getParameter(0x85B5 /*GL_VERTEX_ARRAY_BINDING*/);
-            gl.bindVertexArray(context.defaultVao);
-            draw();
-            gl.bindVertexArray(prevVAO);
-          }
-          else
-          {
-            var prevVertexAttribPointer = {
-              buffer: gl.getVertexAttrib(context.blitPosLoc, 0x889F /*GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING*/),
-              size: gl.getVertexAttrib(context.blitPosLoc, 0x8623 /*GL_VERTEX_ATTRIB_ARRAY_SIZE*/),
-              stride: gl.getVertexAttrib(context.blitPosLoc, 0x8624 /*GL_VERTEX_ATTRIB_ARRAY_STRIDE*/),
-              type: gl.getVertexAttrib(context.blitPosLoc, 0x8625 /*GL_VERTEX_ATTRIB_ARRAY_TYPE*/),
-              normalized: gl.getVertexAttrib(context.blitPosLoc, 0x886A /*GL_VERTEX_ATTRIB_ARRAY_NORMALIZED*/),
-              pointer: gl.getVertexAttribOffset(context.blitPosLoc, 0x8645 /*GL_VERTEX_ATTRIB_ARRAY_POINTER*/),
-            };
-            var maxVertexAttribs = gl.getParameter(0x8869 /*GL_MAX_VERTEX_ATTRIBS*/);
-            var prevVertexAttribEnables = [];
-            for (var i = 0; i < maxVertexAttribs; ++i) {
-              var prevEnabled = gl.getVertexAttrib(i, 0x8622 /*GL_VERTEX_ATTRIB_ARRAY_ENABLED*/);
-              var wantEnabled = i == context.blitPosLoc;
-              if (prevEnabled && !wantEnabled) {
-                gl.disableVertexAttribArray(i);
-              }
-              if (!prevEnabled && wantEnabled) {
-                gl.enableVertexAttribArray(i);
-              }
-              prevVertexAttribEnables[i] = prevEnabled;
-            }
-  
-            draw();
-  
-            for (var i = 0; i < maxVertexAttribs; ++i) {
-              var prevEnabled = prevVertexAttribEnables[i];
-              var nowEnabled = i == context.blitPosLoc;
-              if (prevEnabled && !nowEnabled) {
-                gl.enableVertexAttribArray(i);
-              }
-              if (!prevEnabled && nowEnabled) {
-                gl.disableVertexAttribArray(i);
-              }
-            }
-            gl.bindBuffer(0x8892 /*GL_ARRAY_BUFFER*/, prevVertexAttribPointer.buffer);
-            gl.vertexAttribPointer(context.blitPosLoc,
-                                   prevVertexAttribPointer.size,
-                                   prevVertexAttribPointer.type,
-                                   prevVertexAttribPointer.normalized,
-                                   prevVertexAttribPointer.stride,
-                                   prevVertexAttribPointer.offset);
-          }
-  
-          if (prevStencilTest) gl.enable(0xB90 /*GL_STENCIL_TEST*/);
-          if (prevDepthTest) gl.enable(0xB71 /*GL_DEPTH_TEST*/);
-          if (prevCullFace) gl.enable(0xB44 /*GL_CULL_FACE*/);
-          if (prevBlend) gl.enable(0xBE2 /*GL_BLEND*/);
-  
-          gl.bindTexture(0xDE1 /*GL_TEXTURE_2D*/, prevTextureBinding);
-          gl.activeTexture(prevActiveTexture);
-          gl.bindBuffer(0x8892 /*GL_ARRAY_BUFFER*/, prevVB);
-          gl.useProgram(prevProgram);
-        }
-        gl.bindFramebuffer(0x8D40 /*GL_FRAMEBUFFER*/, prevFbo);
-        if (prevScissorTest) gl.enable(0xC11 /*GL_SCISSOR_TEST*/);
-      },
-  registerContext:(ctx, webGLContextAttributes) => {
-        // without pthreads a context is just an integer ID
-        var handle = GL.getNewId(GL.contexts);
-  
-        var context = {
-          handle,
-          attributes: webGLContextAttributes,
-          version: webGLContextAttributes.majorVersion,
-          GLctx: ctx
-        };
-  
-        // Store the created context object so that we can access the context
-        // given a canvas without having to pass the parameters again.
-        if (ctx.canvas) ctx.canvas.GLctxObject = context;
-        GL.contexts[handle] = context;
-        if (typeof webGLContextAttributes.enableExtensionsByDefault == 'undefined' || webGLContextAttributes.enableExtensionsByDefault) {
-          GL.initExtensions(context);
-        }
-  
-        if (webGLContextAttributes.renderViaOffscreenBackBuffer) GL.createOffscreenFramebuffer(context);
-        return handle;
-      },
-  makeContextCurrent:(contextHandle) => {
-  
-        // Active Emscripten GL layer context object.
-        GL.currentContext = GL.contexts[contextHandle];
-        // Active WebGL context object.
-        Module.ctx = GLctx = GL.currentContext?.GLctx;
-        return !(contextHandle && !GLctx);
-      },
-  getContext:(contextHandle) => {
-        return GL.contexts[contextHandle];
-      },
-  deleteContext:(contextHandle) => {
-        if (GL.currentContext === GL.contexts[contextHandle]) {
-          GL.currentContext = null;
-        }
-        if (typeof JSEvents == 'object') {
-          // Release all JS event handlers on the DOM element that the GL context is
-          // associated with since the context is now deleted.
-          JSEvents.removeAllHandlersOnTarget(GL.contexts[contextHandle].GLctx.canvas);
-        }
-        // Make sure the canvas object no longer refers to the context object so
-        // there are no GC surprises.
-        if (GL.contexts[contextHandle] && GL.contexts[contextHandle].GLctx.canvas) {
-          GL.contexts[contextHandle].GLctx.canvas.GLctxObject = undefined;
-        }
-        GL.contexts[contextHandle] = null;
-      },
-  initExtensions:(context) => {
-        // If this function is called without a specific context object, init the
-        // extensions of the currently active context.
-        context ||= GL.currentContext;
-  
-        if (context.initExtensionsDone) return;
-        context.initExtensionsDone = true;
-  
-        var GLctx = context.GLctx;
-  
-        // Detect the presence of a few extensions manually, ction GL interop
-        // layer itself will need to know if they exist.
-  
-        // Extensions that are available from WebGL >= 2 (no-op if called on a WebGL 1 context active)
-        webgl_enable_WEBGL_draw_instanced_base_vertex_base_instance(GLctx);
-        webgl_enable_WEBGL_multi_draw_instanced_base_vertex_base_instance(GLctx);
-  
-        // On WebGL 2, EXT_disjoint_timer_query is replaced with an alternative
-        // that's based on core APIs, and exposes only the queryCounterEXT()
-        // entrypoint.
-        if (context.version >= 2) {
-          GLctx.disjointTimerQueryExt = GLctx.getExtension("EXT_disjoint_timer_query_webgl2");
-        }
-  
-        // However, Firefox exposes the WebGL 1 version on WebGL 2 as well and
-        // thus we look for the WebGL 1 version again if the WebGL 2 version
-        // isn't present. https://bugzilla.mozilla.org/show_bug.cgi?id=1328882
-        if (context.version < 2 || !GLctx.disjointTimerQueryExt)
-        {
-          GLctx.disjointTimerQueryExt = GLctx.getExtension("EXT_disjoint_timer_query");
-        }
-  
-        webgl_enable_WEBGL_multi_draw(GLctx);
-  
-        getEmscriptenSupportedExtensions(GLctx).forEach((ext) => {
-          // WEBGL_lose_context, WEBGL_debug_renderer_info and WEBGL_debug_shaders
-          // are not enabled by default.
-          if (!ext.includes('lose_context') && !ext.includes('debug')) {
-            // Call .getExtension() to enable that extension permanently.
-            GLctx.getExtension(ext);
-          }
-        });
-      },
-  };
-  
-  /** @suppress {duplicate } */
-  var _emscripten_webgl_do_commit_frame = () => {
-      if (!GL.currentContext || !GL.currentContext.GLctx) {
-        return -3;
-      }
-  
-      if (GL.currentContext.defaultFbo) {
-        GL.blitOffscreenFramebuffer(GL.currentContext);
-        return 0;
-      }
-      if (!GL.currentContext.attributes.explicitSwapControl) {
-        return -3;
-      }
-      // We would do GL.currentContext.GLctx.commit(); here, but the current implementation
-      // in browsers has removed it - swap is implicit, so this function is a no-op for now
-      // (until/unless the spec changes).
-      return 0;
-    };
-  var _emscripten_webgl_commit_frame = _emscripten_webgl_do_commit_frame;
-  
   
   var keepRuntimeAlive = () => noExitRuntime || runtimeKeepaliveCounter > 0;
   var _proc_exit = (code) => {
@@ -3252,11 +2782,6 @@ var ASM_CONSTS = {
   
         // Signal GL rendering layer that processing of a new frame is about to start. This helps it optimize
         // VBO double-buffering and reduce GPU stalls.
-  
-        // If the current GL context is an OffscreenCanvas, but it was initialized with implicit swap mode, perform the swap on behalf of the user.
-        if (typeof GL != 'undefined' && GL.currentContext && !GL.currentContextIsProxied && !GL.currentContext.attributes.explicitSwapControl && GL.currentContext.GLctx.commit) {
-          GL.currentContext.GLctx.commit();
-        }
   
         if (Browser.mainLoop.method === 'timeout' && Module.ctx) {
           warnOnce('Looks like you are rendering without using requestAnimationFrame for the main loop. You should use 0 for the frame rate in emscripten_set_main_loop in order to use requestAnimationFrame, as that can greatly improve your frame rates!');
@@ -4394,6 +3919,232 @@ var ASM_CONSTS = {
     };
 
   
+  var webgl_enable_WEBGL_draw_instanced_base_vertex_base_instance = (ctx) =>
+      // Closure is expected to be allowed to minify the '.dibvbi' property, so not accessing it quoted.
+      !!(ctx.dibvbi = ctx.getExtension('WEBGL_draw_instanced_base_vertex_base_instance'));
+  
+  var webgl_enable_WEBGL_multi_draw_instanced_base_vertex_base_instance = (ctx) => {
+      // Closure is expected to be allowed to minify the '.mdibvbi' property, so not accessing it quoted.
+      return !!(ctx.mdibvbi = ctx.getExtension('WEBGL_multi_draw_instanced_base_vertex_base_instance'));
+    };
+  
+  var webgl_enable_WEBGL_multi_draw = (ctx) => {
+      // Closure is expected to be allowed to minify the '.multiDrawWebgl' property, so not accessing it quoted.
+      return !!(ctx.multiDrawWebgl = ctx.getExtension('WEBGL_multi_draw'));
+    };
+  
+  var getEmscriptenSupportedExtensions = (ctx) => {
+      // Restrict the list of advertised extensions to those that we actually
+      // support.
+      var supportedExtensions = [
+        // WebGL 2 extensions
+        'EXT_color_buffer_float',
+        'EXT_conservative_depth',
+        'EXT_disjoint_timer_query_webgl2',
+        'EXT_texture_norm16',
+        'NV_shader_noperspective_interpolation',
+        'WEBGL_clip_cull_distance',
+        // WebGL 1 and WebGL 2 extensions
+        'EXT_color_buffer_half_float',
+        'EXT_depth_clamp',
+        'EXT_float_blend',
+        'EXT_texture_compression_bptc',
+        'EXT_texture_compression_rgtc',
+        'EXT_texture_filter_anisotropic',
+        'KHR_parallel_shader_compile',
+        'OES_texture_float_linear',
+        'WEBGL_blend_func_extended',
+        'WEBGL_compressed_texture_astc',
+        'WEBGL_compressed_texture_etc',
+        'WEBGL_compressed_texture_etc1',
+        'WEBGL_compressed_texture_s3tc',
+        'WEBGL_compressed_texture_s3tc_srgb',
+        'WEBGL_debug_renderer_info',
+        'WEBGL_debug_shaders',
+        'WEBGL_lose_context',
+        'WEBGL_multi_draw',
+      ];
+      // .getSupportedExtensions() can return null if context is lost, so coerce to empty array.
+      return (ctx.getSupportedExtensions() || []).filter(ext => supportedExtensions.includes(ext));
+    };
+  
+  
+  var GL = {
+  counter:1,
+  buffers:[],
+  programs:[],
+  framebuffers:[],
+  renderbuffers:[],
+  textures:[],
+  shaders:[],
+  vaos:[],
+  contexts:[],
+  offscreenCanvases:{
+  },
+  queries:[],
+  samplers:[],
+  transformFeedbacks:[],
+  syncs:[],
+  stringCache:{
+  },
+  stringiCache:{
+  },
+  unpackAlignment:4,
+  recordError:(errorCode) => {
+        if (!GL.lastError) {
+          GL.lastError = errorCode;
+        }
+      },
+  getNewId:(table) => {
+        var ret = GL.counter++;
+        for (var i = table.length; i < ret; i++) {
+          table[i] = null;
+        }
+        return ret;
+      },
+  genObject:(n, buffers, createFunction, objectTable
+        ) => {
+        for (var i = 0; i < n; i++) {
+          var buffer = GLctx[createFunction]();
+          var id = buffer && GL.getNewId(objectTable);
+          if (buffer) {
+            buffer.name = id;
+            objectTable[id] = buffer;
+          } else {
+            GL.recordError(0x502 /* GL_INVALID_OPERATION */);
+          }
+          HEAP32[(((buffers)+(i*4))>>2)] = id;
+        }
+      },
+  getSource:(shader, count, string, length) => {
+        var source = '';
+        for (var i = 0; i < count; ++i) {
+          var len = length ? HEAPU32[(((length)+(i*4))>>2)] : undefined;
+          source += UTF8ToString(HEAPU32[(((string)+(i*4))>>2)], len);
+        }
+        return source;
+      },
+  createContext:(/** @type {HTMLCanvasElement} */ canvas, webGLContextAttributes) => {
+  
+        // BUG: Workaround Safari WebGL issue: After successfully acquiring WebGL
+        // context on a canvas, calling .getContext() will always return that
+        // context independent of which 'webgl' or 'webgl2'
+        // context version was passed. See:
+        //   https://bugs.webkit.org/show_bug.cgi?id=222758
+        // and:
+        //   https://github.com/emscripten-core/emscripten/issues/13295.
+        // TODO: Once the bug is fixed and shipped in Safari, adjust the Safari
+        // version field in above check.
+        if (!canvas.getContextSafariWebGL2Fixed) {
+          canvas.getContextSafariWebGL2Fixed = canvas.getContext;
+          /** @type {function(this:HTMLCanvasElement, string, (Object|null)=): (Object|null)} */
+          function fixedGetContext(ver, attrs) {
+            var gl = canvas.getContextSafariWebGL2Fixed(ver, attrs);
+            return ((ver == 'webgl') == (gl instanceof WebGLRenderingContext)) ? gl : null;
+          }
+          canvas.getContext = fixedGetContext;
+        }
+  
+        var ctx = canvas.getContext("webgl2", webGLContextAttributes);
+  
+        if (!ctx) return 0;
+  
+        var handle = GL.registerContext(ctx, webGLContextAttributes);
+  
+        return handle;
+      },
+  registerContext:(ctx, webGLContextAttributes) => {
+        // without pthreads a context is just an integer ID
+        var handle = GL.getNewId(GL.contexts);
+  
+        var context = {
+          handle,
+          attributes: webGLContextAttributes,
+          version: webGLContextAttributes.majorVersion,
+          GLctx: ctx
+        };
+  
+        // Store the created context object so that we can access the context
+        // given a canvas without having to pass the parameters again.
+        if (ctx.canvas) ctx.canvas.GLctxObject = context;
+        GL.contexts[handle] = context;
+        if (typeof webGLContextAttributes.enableExtensionsByDefault == 'undefined' || webGLContextAttributes.enableExtensionsByDefault) {
+          GL.initExtensions(context);
+        }
+  
+        return handle;
+      },
+  makeContextCurrent:(contextHandle) => {
+  
+        // Active Emscripten GL layer context object.
+        GL.currentContext = GL.contexts[contextHandle];
+        // Active WebGL context object.
+        Module.ctx = GLctx = GL.currentContext?.GLctx;
+        return !(contextHandle && !GLctx);
+      },
+  getContext:(contextHandle) => {
+        return GL.contexts[contextHandle];
+      },
+  deleteContext:(contextHandle) => {
+        if (GL.currentContext === GL.contexts[contextHandle]) {
+          GL.currentContext = null;
+        }
+        if (typeof JSEvents == 'object') {
+          // Release all JS event handlers on the DOM element that the GL context is
+          // associated with since the context is now deleted.
+          JSEvents.removeAllHandlersOnTarget(GL.contexts[contextHandle].GLctx.canvas);
+        }
+        // Make sure the canvas object no longer refers to the context object so
+        // there are no GC surprises.
+        if (GL.contexts[contextHandle] && GL.contexts[contextHandle].GLctx.canvas) {
+          GL.contexts[contextHandle].GLctx.canvas.GLctxObject = undefined;
+        }
+        GL.contexts[contextHandle] = null;
+      },
+  initExtensions:(context) => {
+        // If this function is called without a specific context object, init the
+        // extensions of the currently active context.
+        context ||= GL.currentContext;
+  
+        if (context.initExtensionsDone) return;
+        context.initExtensionsDone = true;
+  
+        var GLctx = context.GLctx;
+  
+        // Detect the presence of a few extensions manually, ction GL interop
+        // layer itself will need to know if they exist.
+  
+        // Extensions that are available from WebGL >= 2 (no-op if called on a WebGL 1 context active)
+        webgl_enable_WEBGL_draw_instanced_base_vertex_base_instance(GLctx);
+        webgl_enable_WEBGL_multi_draw_instanced_base_vertex_base_instance(GLctx);
+  
+        // On WebGL 2, EXT_disjoint_timer_query is replaced with an alternative
+        // that's based on core APIs, and exposes only the queryCounterEXT()
+        // entrypoint.
+        if (context.version >= 2) {
+          GLctx.disjointTimerQueryExt = GLctx.getExtension("EXT_disjoint_timer_query_webgl2");
+        }
+  
+        // However, Firefox exposes the WebGL 1 version on WebGL 2 as well and
+        // thus we look for the WebGL 1 version again if the WebGL 2 version
+        // isn't present. https://bugzilla.mozilla.org/show_bug.cgi?id=1328882
+        if (context.version < 2 || !GLctx.disjointTimerQueryExt)
+        {
+          GLctx.disjointTimerQueryExt = GLctx.getExtension("EXT_disjoint_timer_query");
+        }
+  
+        webgl_enable_WEBGL_multi_draw(GLctx);
+  
+        getEmscriptenSupportedExtensions(GLctx).forEach((ext) => {
+          // WEBGL_lose_context, WEBGL_debug_renderer_info and WEBGL_debug_shaders
+          // are not enabled by default.
+          if (!ext.includes('lose_context') && !ext.includes('debug')) {
+            // Call .getExtension() to enable that extension permanently.
+            GLctx.getExtension(ext);
+          }
+        });
+      },
+  };
   
   
   /** @constructor */
@@ -5233,8 +4984,6 @@ var ASM_CONSTS = {
               stencil: (GLFW.hints[0x00021006] > 0),   // GLFW_STENCIL_BITS
               alpha: (GLFW.hints[0x00021004] > 0)      // GLFW_ALPHA_BITS
             }
-            // TODO: Make GLFW explicitly aware of whether it is being proxied or not, and set these to true only when proxying is being performed.
-            GL.enableOffscreenFramebufferAttributes(contextAttributes);
             Module.ctx = Browser.createContext(Module['canvas'], true, true, contextAttributes);
           } else {
             Browser.init();
@@ -7095,28 +6844,7 @@ var ASM_CONSTS = {
       };
     };
 
-  
-  var findCanvasEventTarget = (target) => {
-      target = maybeCStringToJsString(target);
-  
-      // When compiling with OffscreenCanvas support and looking up a canvas to target,
-      // we first look up if the target Canvas has been transferred to OffscreenCanvas use.
-      // These transfers are represented/tracked by GL.offscreenCanvases object, which contain
-      // the OffscreenCanvas element for each regular Canvas element that has been transferred.
-  
-      // Note that each pthread/worker have their own set of GL.offscreenCanvases. That is,
-      // when an OffscreenCanvas is transferred from a pthread/main thread to another pthread,
-      // it will move in the GL.offscreenCanvases array between threads. Hence GL.offscreenCanvases
-      // represents the set of OffscreenCanvases owned by the current calling thread.
-  
-      // First check out the list of OffscreenCanvases by CSS selector ID ('#myCanvasID')
-      return GL.offscreenCanvases[target.substr(1)] // Remove '#' prefix
-      // If not found, if one is querying by using DOM tag name selector 'canvas', grab the first
-      // OffscreenCanvas that we can find.
-       || (target == 'canvas' && Object.keys(GL.offscreenCanvases)[0])
-      // If that is not found either, query via the regular DOM selector.
-       || document.querySelector(target);
-    };
+  var findCanvasEventTarget = findEventTarget;
   
   
   var _wgpuInstanceCreateSurface = (instanceId, descriptor) => {
