@@ -5,7 +5,7 @@
     "main": "build/index.js",
     "type": "module",
     "scripts": {
-        "postinstall": "node --loader ts-node/esm ./scripts/postinstall.ts",
+        "postinstall": "tsx ./scripts/postinstall.ts",
         "start": "webpack serve",
         "build:workers": "webpack --config-name fabric-worker",
         "build:library": "webpack --config build.webpack.config.js",
@@ -73,6 +73,7 @@
         "rimraf": "^5.0.6",
         "ts-loader": "^9.5.1",
         "ts-node": "^10.9.2",
+        "tsx": "^4.9.5",
         "typescript": "^5.4.5",
         "url-loader": "^4.1.1",
         "webpack": "^5.91.0",
