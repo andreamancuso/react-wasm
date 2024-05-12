@@ -1,8 +1,13 @@
 {
     "name": "@react-wasm/dear-imgui",
-    "private": true,
     "version": "0.1.0",
     "main": "dist/index.js",
+    "homepage": "https://github.com/andreamancuso/react-wasm#readme",
+    "license": "MIT",
+    "author": {
+        "name": "Andrea Mancuso",
+        "url": "https://github.com/andreamancuso"
+    },
     "scripts": {
         "postinstall": "tsx ./scripts/postinstall.ts",
         "start": "webpack serve",
