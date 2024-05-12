@@ -5,7 +5,7 @@ import debounce from "lodash.debounce";
 // @ts-ignore
 import ReactNativePrivateInterface from "../react-native/ReactNativePrivateInterface";
 // @ts-ignore wasm?
-import getWasmModule from "../wasm/reactImgui.mjs";
+import getWasmModule from "../wasm/reactDearImgui.mjs";
 import { MainModule, WasmExitStatus } from "../wasm/wasm-app-types";
 import { ReactNativeWrapper } from "../components/ReactNativeWrapper";
 import { Primitive } from "../components/ReactImgui/types";
@@ -24,8 +24,6 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
     containerRef,
     children,
 }: MainComponentProps) => {
-    console.log(useRef, React);
-
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const isWasmModuleLoading = useRef(false);

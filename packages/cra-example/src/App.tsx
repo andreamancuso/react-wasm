@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { ReactImgui } from '@react-wasm/imgui';
+import { ReactImgui } from '@react-wasm/dear-imgui';
 
 import "./App.css";
 

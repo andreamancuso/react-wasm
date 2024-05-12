@@ -2752,9 +2752,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-wasm/imgui@workspace:.":
+"@react-wasm/dear-imgui@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@react-wasm/imgui@workspace:."
+  resolution: "@react-wasm/dear-imgui@workspace:."
   dependencies:
     "@babel/core": "npm:^7.24.5"
     "@babel/plugin-proposal-class-properties": "npm:^7.18.6"

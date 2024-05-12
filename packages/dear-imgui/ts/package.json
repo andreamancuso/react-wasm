@@ -1,5 +1,5 @@
 {
-    "name": "@react-wasm/imgui",
+    "name": "@react-wasm/dear-imgui",
     "private": true,
     "version": "0.1.0",
     "main": "dist/index.js",
@@ -13,7 +13,7 @@
         "copy-wasm-to-build-folder": "cpy --flat ./src/lib/wasm/*.wasm dist/",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "emcmake": "cd ../cpp && emcmake cmake .",
-        "cmake": "cd ../cpp && cmake --build . --target reactImgui"
+        "cmake": "cd ../cpp && cmake --build . --target reactDearImgui"
     },
     "tsup": {
         "entry": [
