@@ -1,1 +1,3 @@
-export * from "./widgetRegistrationServiceContext";
+import { WidgetRegistrationServiceContext } from "./widgetRegistrationServiceContext";
+
+export { WidgetRegistrationServiceContext };

@@ -1,20 +1,22 @@
 {
     "compilerOptions": {
-        "module": "ESNext",
+        "module": "CommonJS",
         "target": "es2022",
         "lib": ["ES2022", "ScriptHost", "DOM"],
         "moduleResolution": "Node",
         "esModuleInterop": true,
         "skipDefaultLibCheck": true,
-        "sourceMap": true,
+        "sourceMap": false,
         "declaration": true,
         "baseUrl": "./",
-        "outDir": "./build",
+        "declarationDir": "./dist",
+        "declarationMap": true,
         "jsx": "react-jsx",
         "skipLibCheck": true,
         "noEmit": false,
+        "emitDeclarationOnly": true,
         "allowJs": true
     },
-    "include": ["./src/lib", "./src/global.d.ts"],
+    "include": ["./src/lib/**/*", "./src/global.d.ts"],
     "exclude": ["node_modules"]
 }

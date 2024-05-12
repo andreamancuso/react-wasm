@@ -1,21 +1,21 @@
 [submodule "deps/wasm-glfw3-boilerplate"]
-	path = cpp/deps/wasm-glfw3-boilerplate
+	path = packages/dear-imgui/cpp/deps/wasm-glfw3-boilerplate
 	url = https://github.com/andreamancuso/wasm-glfw3-boilerplate
 [submodule "deps/imgui"]
-	path = cpp/deps/imgui
+	path = packages/dear-imgui/cpp/deps/imgui
 	url = https://github.com/ocornut/imgui.git
 [submodule "deps/json"]
-	path = cpp/deps/json
+	path = packages/dear-imgui/cpp/deps/json
 	url = https://github.com/nlohmann/json.git
 [submodule "deps/implot"]
-	path = cpp/deps/implot
+	path = packages/dear-imgui/cpp/deps/implot
 	url = https://github.com/epezent/implot.git
 [submodule "deps/emscripten"]
-	path = cpp/deps/emscripten
+	path = packages/dear-imgui/cpp/deps/emscripten
 	url = https://github.com/emscripten-core/emscripten.git
 [submodule "deps/glfw"]
-	path = cpp/deps/glfw
+	path = packages/dear-imgui/cpp/deps/glfw
 	url = https://github.com/glfw/glfw.git
 [submodule "deps/OpenGL-Registry"]
-	path = cpp/deps/OpenGL-Registry
+	path = packages/dear-imgui/cpp/deps/OpenGL-Registry
 	url = https://github.com/KhronosGroup/OpenGL-Registry.git

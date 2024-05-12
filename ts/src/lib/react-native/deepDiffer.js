@@ -71,4 +71,4 @@ const deepDiffer = function (one, two, maxDepthOrOptions = -1, maybeOptions) {
 };
 
 deepDiffer.unstable_setLogListeners = unstable_setLogListeners;
-module.exports = deepDiffer;
+export default deepDiffer;

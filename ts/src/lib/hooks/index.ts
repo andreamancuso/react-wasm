@@ -1,2 +1,4 @@
-export * from "./useWidgetEventManagement";
-export * from "./useWidgetRegistrationService";
+import { useWidgetEventManagement } from "./useWidgetEventManagement";
+import { useWidgetRegistrationService } from "./useWidgetRegistrationService";
+
+export { useWidgetEventManagement, useWidgetRegistrationService };
