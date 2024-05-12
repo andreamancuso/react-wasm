@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
         "target": "ES2022",
-        "module": "CommonJS",
+        "module": "Node16",
         "lib": ["ES2022", "ScriptHost", "DOM"],
-        "moduleResolution": "Node",
+        "moduleResolution": "Node16",
         "esModuleInterop": true,
         "skipLibCheck": true,
         "skipDefaultLibCheck": true,
