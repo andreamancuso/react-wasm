@@ -35,7 +35,7 @@ Perhaps there are other options I could/should have considered. Feel free to let
 
 ### Current
 
-- [Dear Imgui](https://github.com/andreamancuso/react-wasm/dear-imgui) (work in progress)
+- [Dear Imgui](https://github.com/andreamancuso/react-wasm/dear-imgui) (work in progress) Browser support: latest Chrome and Edge only presently.
 
 ### Future
 

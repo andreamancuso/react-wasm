@@ -1,5 +1,7 @@
 # React bindings for Dear ImGui (and ImPlot)
 
+Please note: only latest Chrome and Edge are currently supported.
+
 ## Building instructions
 
 The repo ships with a pre-generated WASM file and related .mjs file. You may want to make changes and build new WASM files. Please follow these instructions. Feel free to create an issue if you experience any difficulties. If you are a Linux or Mac user and manage to get it working on your local environment, please feel free to share your findings.
