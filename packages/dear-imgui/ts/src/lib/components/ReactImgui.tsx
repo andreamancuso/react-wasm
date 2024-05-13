@@ -128,9 +128,13 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                     },
                 };
 
-                localModule = await getWasmModule(moduleArg);
+                try {
+                    localModule = await getWasmModule(moduleArg);
 
-                setWasmModule(localModule);
+                    setWasmModule(localModule);
+                } catch (exception) {
+                    console.log("Unable to initialize the WASM correctly", exception);
+                }
             };
 
             load();
@@ -163,10 +167,14 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
     useEffect(() => {
         if (wasmModule) {
             if (containerRef?.current) {
-                wasmModule.resizeWindow(
-                    containerRef.current.clientWidth,
-                    containerRef.current.clientHeight - 62,
-                );
+                try {
+                    wasmModule.resizeWindow(
+                        containerRef.current.clientWidth,
+                        containerRef.current.clientHeight - 62,
+                    );
+                } catch (exception) {
+                    console.log("Unable to set initial window size");
+                }
             }
         }
     }, [wasmModule]);
@@ -176,10 +184,14 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
             const resizeObserver = new ResizeObserver(
                 debounce(() => {
                     if (containerRef.current) {
-                        wasmModule.resizeWindow(
-                            containerRef.current.clientWidth,
-                            containerRef.current.clientHeight - 62,
-                        );
+                        try {
+                            wasmModule.resizeWindow(
+                                containerRef.current.clientWidth,
+                                containerRef.current.clientHeight - 62,
+                            );
+                        } catch (exception) {
+                            console.log("Unable to resize window");
+                        }
                     }
                 }, 20),
             );
@@ -194,7 +206,9 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
     return (
         <>
-            <ReactNativeWrapper wasmModule={wasmModule}>{children}</ReactNativeWrapper>
+            {wasmModule && (
+                <ReactNativeWrapper wasmModule={wasmModule}>{children}</ReactNativeWrapper>
+            )}
             <canvas ref={canvasRef} id={canvasId} />
         </>
     );

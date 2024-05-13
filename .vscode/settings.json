@@ -1,5 +1,5 @@
 {
-    "cmake.sourceDirectory": "C:/dev/react-imgui/src/cpp",
+    "cmake.sourceDirectory": "C:/dev/react-imgui/src/packages/dear-imgui/cpp",
     "cmake.configureOnOpen": true,
     "files.associations": {
         "gl2ext.h": "c",
@@ -116,8 +116,8 @@
         "*.inc": "cpp",
         "__config": "cpp"
     },
-    "prettier.prettierPath": "./ts/node_modules/prettier",
-    "prettier.configPath": "./ts/.prettierrc.json",
+    "prettier.prettierPath": "./packages/dear-imgui/ts/node_modules/prettier",
+    "prettier.configPath": "./packages/dear-imgui/ts/.prettierrc.json",
     "[cpp]": {
         "editor.formatOnSave": false
     },
