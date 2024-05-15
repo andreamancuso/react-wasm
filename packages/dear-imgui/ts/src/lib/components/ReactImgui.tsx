@@ -4,11 +4,9 @@ import { v4 as uuidv4 } from "uuid";
 import debounce from "lodash.debounce";
 // @ts-ignore
 import ReactNativePrivateInterface from "../react-native/ReactNativePrivateInterface";
-// @ts-ignore wasm?
-import getWasmModule from "../wasm/reactDearImgui.mjs";
 import { MainModule, WasmExitStatus } from "../wasm/wasm-app-types";
 import { ReactNativeWrapper } from "../components/ReactNativeWrapper";
-import { Primitive } from "../components/ReactImgui/types";
+import { useDearImguiWasm } from "../hooks";
 
 // getWasmModule.preRun = () => {
 //     ENV.MY_FILE_ROOT = "/usr/lib/test";
@@ -18,90 +16,22 @@ import { Primitive } from "../components/ReactImgui/types";
 
 export type MainComponentProps = PropsWithChildren & {
     containerRef?: React.RefObject<HTMLElement>;
+    getWasmModule: any;
 };
 
 export const MainComponent: React.ComponentType<MainComponentProps> = ({
     containerRef,
     children,
+    getWasmModule,
 }: MainComponentProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const isWasmModuleLoading = useRef(false);
     const [wasmModule, setWasmModule] = useState<MainModule | undefined>();
 
-    const onTextChange = useCallback(
-        (id: string, value: string) => {
-            const rootNodeID = id;
-            const topLevelType = "onChange";
-            const nativeEventParam = { value };
-
-            ReactNativePrivateInterface.nativeFabricUIManager.dispatchEvent(
-                rootNodeID,
-                topLevelType,
-                nativeEventParam,
-            );
-        },
-        [wasmModule],
-    );
-
-    const onComboChange = useCallback((id: string, value: number) => {
-        const rootNodeID = id;
-        const topLevelType = "onChange";
-        const nativeEventParam = { value };
-
-        ReactNativePrivateInterface.nativeFabricUIManager.dispatchEvent(
-            rootNodeID,
-            topLevelType,
-            nativeEventParam,
-        );
-    }, []);
-
-    const onNumericValueChange = useCallback((id: string, value: number) => {
-        const rootNodeID = id;
-        const topLevelType = "onChange";
-        const nativeEventParam = { value };
-
-        ReactNativePrivateInterface.nativeFabricUIManager.dispatchEvent(
-            rootNodeID,
-            topLevelType,
-            nativeEventParam,
-        );
-    }, []);
-
-    const onMultiValueChange = useCallback((id: string, values: Primitive[]) => {
-        const rootNodeID = id;
-        const topLevelType = "onChange";
-        const nativeEventParam = { values };
-
-        ReactNativePrivateInterface.nativeFabricUIManager.dispatchEvent(
-            rootNodeID,
-            topLevelType,
-            nativeEventParam,
-        );
-    }, []);
-
-    const onBooleanValueChange = useCallback((id: string, value: boolean) => {
-        const rootNodeID = id;
-        const topLevelType = "onChange";
-        const nativeEventParam = { value };
-
-        ReactNativePrivateInterface.nativeFabricUIManager.dispatchEvent(
-            rootNodeID,
-            topLevelType,
-            nativeEventParam,
-        );
-    }, []);
-
-    const onClick = useCallback((id: string) => {
-        const rootNodeID = id;
-        const topLevelType = "onClick";
-
-        ReactNativePrivateInterface.nativeFabricUIManager.dispatchEvent(rootNodeID, topLevelType, {
-            value: "clicked",
-        });
-    }, []);
-
     const canvasId = useMemo(() => `canvas-${uuidv4()}`, []);
+
+    const { eventHandlers } = useDearImguiWasm(ReactNativePrivateInterface);
 
     useEffect(() => {
         if (canvasRef.current && !isWasmModuleLoading.current) {
@@ -118,19 +48,16 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
                     //     return `${scriptDirectory}/lib/wasm/${path}`;
                     // },
-                    eventHandlers: {
-                        onTextChange,
-                        onComboChange,
-                        onNumericValueChange,
-                        onMultiValueChange,
-                        onBooleanValueChange,
-                        onClick,
-                    },
+                    eventHandlers,
                 };
 
-                localModule = await getWasmModule(moduleArg);
+                try {
+                    localModule = await getWasmModule(moduleArg);
 
-                setWasmModule(localModule);
+                    setWasmModule(localModule);
+                } catch (exception) {
+                    console.log("Unable to initialize the WASM correctly", exception);
+                }
             };
 
             load();
@@ -149,24 +76,19 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         } else {
             return () => {};
         }
-    }, [
-        canvasId,
-        canvasRef,
-        onTextChange,
-        onComboChange,
-        onNumericValueChange,
-        onBooleanValueChange,
-        onMultiValueChange,
-        onClick,
-    ]);
+    }, [canvasId, canvasRef]);
 
     useEffect(() => {
         if (wasmModule) {
             if (containerRef?.current) {
-                wasmModule.resizeWindow(
-                    containerRef.current.clientWidth,
-                    containerRef.current.clientHeight - 62,
-                );
+                try {
+                    wasmModule.resizeWindow(
+                        containerRef.current.clientWidth,
+                        containerRef.current.clientHeight - 62,
+                    );
+                } catch (exception) {
+                    console.log("Unable to set initial window size");
+                }
             }
         }
     }, [wasmModule]);
@@ -176,10 +98,14 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
             const resizeObserver = new ResizeObserver(
                 debounce(() => {
                     if (containerRef.current) {
-                        wasmModule.resizeWindow(
-                            containerRef.current.clientWidth,
-                            containerRef.current.clientHeight - 62,
-                        );
+                        try {
+                            wasmModule.resizeWindow(
+                                containerRef.current.clientWidth,
+                                containerRef.current.clientHeight - 62,
+                            );
+                        } catch (exception) {
+                            console.log("Unable to resize window");
+                        }
                     }
                 }, 20),
             );
@@ -194,7 +120,9 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
     return (
         <>
-            <ReactNativeWrapper wasmModule={wasmModule}>{children}</ReactNativeWrapper>
+            {wasmModule && (
+                <ReactNativeWrapper wasmModule={wasmModule}>{children}</ReactNativeWrapper>
+            )}
             <canvas ref={canvasRef} id={canvasId} />
         </>
     );

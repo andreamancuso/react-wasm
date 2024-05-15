@@ -1,7 +1,10 @@
 {
     "name": "@react-wasm/dear-imgui",
-    "version": "0.1.0",
+    "version": "0.1.28",
     "main": "dist/index.js",
+    "files": [
+        "dist/*"
+    ],
     "homepage": "https://github.com/andreamancuso/react-wasm#readme",
     "license": "MIT",
     "author": {
@@ -9,13 +12,13 @@
         "url": "https://github.com/andreamancuso"
     },
     "scripts": {
-        "postinstall": "tsx ./scripts/postinstall.ts",
+        "extract-rn-fabric-renderer": "tsx ./scripts/postinstall.ts",
         "start": "webpack serve",
         "build:workers": "webpack --config-name fabric-worker",
         "build:library": "rimraf ./build && yarn tsup && yarn copy-wasm-to-build-folder",
         "tsc": "tsc --project ./tsconfig-build.json",
-        "tsup": "tsup --format cjs --legacy-output --external react,react-dom",
-        "copy-wasm-to-build-folder": "cpy --flat ./src/lib/wasm/*.wasm dist/",
+        "tsup": "tsup --format cjs --external react,react-dom",
+        "copy-wasm-to-build-folder": "cpy --flat ./src/lib/wasm/reactDearImgui.* dist/",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "emcmake": "cd ../cpp && emcmake cmake .",
         "cmake": "cd ../cpp && cmake --build . --target reactDearImgui"
@@ -40,9 +43,11 @@
         "metro-runtime": "^0.80.9",
         "nullthrows": "^1.1.1",
         "p-queue": "^8.0.1",
+        "prettier": "3.2.5",
         "pretty-format": "^29.7.0",
         "promise": "^8.3.0",
         "stacktrace-parser": "^0.1.10",
+        "tsx": "^4.9.5",
         "uuid": "^9.0.1",
         "whatwg-fetch": "^3.6.20"
     },
@@ -85,13 +90,11 @@
         "html-webpack-plugin": "^5.6.0",
         "inline-source-map": "^0.6.3",
         "mini-css-extract-plugin": "^2.9.0",
-        "prettier": "3.2.5",
         "react-native": "^0.74.1",
         "rimraf": "^5.0.6",
         "ts-loader": "^9.5.1",
         "ts-node": "^10.9.2",
         "tsup": "^8.0.2",
-        "tsx": "^4.9.5",
         "typescript": "^5.4.5",
         "url-loader": "^4.1.1",
         "webpack": "^5.91.0",

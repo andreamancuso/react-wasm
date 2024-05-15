@@ -37,7 +37,7 @@ Perhaps there are other options I could/should have considered. Feel free to let
 
 - [Dear Imgui](https://github.com/andreamancuso/react-wasm/dear-imgui) (work in progress) Browser support: latest Chrome and Edge only presently.
 
-![React Dear Imgui screenshot 1](/screenshots/dear-imgui/react-wasm-dear-imgui-s1.png?raw=true)blob:https://github.com/6c0f3611-68a0-4f65-b90f-ac2bd0bcd7af
+![React Dear Imgui screenshot 1](/screenshots/dear-imgui/react-wasm-dear-imgui-s1.png?raw=true)
 
 ![React Dear Imgui screenshot 2](/screenshots/dear-imgui/react-wasm-dear-imgui-s0.png?raw=true)
 
