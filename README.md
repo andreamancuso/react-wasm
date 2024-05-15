@@ -4,7 +4,7 @@
 
 I've always found WebAssembly very interesting conceptually but I never really needed to use it - until relatively recently.
 
-I invested quite a bit of time and effort into figuring out how [WebAssembly](https://webassembly.org/) and [Emscripten](https://emscripten.org/index.html) work. I eventually managed to compile the [Dear ImGui](https://github.com/ocornut/imgui) emscripten  example and modified it to suit my requirements. Given my lack of experience with C/C++, I can tell you that this has been far from being a straightforward process. I have eventually realized that someone else out there might benefit from this experience of mine.
+I invested quite a bit of time and effort into figuring out how [WebAssembly](https://webassembly.org/) and [Emscripten](https://emscripten.org/index.html) work. I eventually managed to compile the [Dear ImGui](https://github.com/ocornut/imgui) emscripten example and modified it to suit my requirements. Given my lack of experience with C/C++, I can tell you that this has been far from being a straightforward process. I have eventually realized that someone else out there might benefit from this experience of mine.
 
 As I write these paragraphs, I realise that, despite accomplishing a few small initial goals, there is still lot to do. I hope you find these libraries useful, if anything just to get yourself acquainted with WebAssembly, C/C++ (and soon Rust).
 
@@ -35,7 +35,7 @@ Perhaps there are other options I could/should have considered. Feel free to let
 
 ### Current
 
-- [Dear Imgui](https://github.com/andreamancuso/react-wasm/dear-imgui) (work in progress) Browser support: latest Chrome and Edge only presently.
+-   [Dear Imgui](https://github.com/andreamancuso/react-wasm/dear-imgui) (work in progress) Browser support: latest Chrome and Edge only presently.
 
 ![React Dear Imgui screenshot 1](/screenshots/dear-imgui/react-wasm-dear-imgui-s1.png?raw=true)
 
@@ -45,10 +45,10 @@ Perhaps there are other options I could/should have considered. Feel free to let
 
 ![React Dear Imgui screenshot 4](/screenshots/dear-imgui/screenshot-react-wasm-dear-imgui-sample-code.png?raw=true)
 
-
+![React Dear Imgui Electron demo](/screenshots/dear-imgui/electron-demo.png?raw=true)
 
 ### Future
 
-- egui
+-   egui
 
 Would you like to help add support for a GUI library of your choice? Let's discuss.
