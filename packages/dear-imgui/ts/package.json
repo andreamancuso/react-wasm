@@ -1,7 +1,10 @@
 {
     "name": "@react-wasm/dear-imgui",
-    "version": "0.1.9",
+    "version": "0.1.28",
     "main": "dist/index.js",
+    "files": [
+        "dist/*"
+    ],
     "homepage": "https://github.com/andreamancuso/react-wasm#readme",
     "license": "MIT",
     "author": {
@@ -9,13 +12,13 @@
         "url": "https://github.com/andreamancuso"
     },
     "scripts": {
-        "postinstall": "tsx ./scripts/postinstall.ts",
+        "extract-rn-fabric-renderer": "tsx ./scripts/postinstall.ts",
         "start": "webpack serve",
         "build:workers": "webpack --config-name fabric-worker",
         "build:library": "rimraf ./build && yarn tsup && yarn copy-wasm-to-build-folder",
         "tsc": "tsc --project ./tsconfig-build.json",
         "tsup": "tsup --format cjs --external react,react-dom",
-        "copy-wasm-to-build-folder": "cpy --flat ./src/lib/wasm/*.wasm dist/",
+        "copy-wasm-to-build-folder": "cpy --flat ./src/lib/wasm/reactDearImgui.* dist/",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "emcmake": "cd ../cpp && emcmake cmake .",
         "cmake": "cd ../cpp && cmake --build . --target reactDearImgui"

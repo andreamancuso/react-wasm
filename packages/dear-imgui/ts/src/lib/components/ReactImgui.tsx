@@ -4,8 +4,6 @@ import { v4 as uuidv4 } from "uuid";
 import debounce from "lodash.debounce";
 // @ts-ignore
 import ReactNativePrivateInterface from "../react-native/ReactNativePrivateInterface";
-// @ts-ignore wasm?
-import getWasmModule from "../wasm/reactDearImgui.mjs";
 import { MainModule, WasmExitStatus } from "../wasm/wasm-app-types";
 import { ReactNativeWrapper } from "../components/ReactNativeWrapper";
 import { useDearImguiWasm } from "../hooks";
@@ -18,11 +16,13 @@ import { useDearImguiWasm } from "../hooks";
 
 export type MainComponentProps = PropsWithChildren & {
     containerRef?: React.RefObject<HTMLElement>;
+    getWasmModule: any;
 };
 
 export const MainComponent: React.ComponentType<MainComponentProps> = ({
     containerRef,
     children,
+    getWasmModule,
 }: MainComponentProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 

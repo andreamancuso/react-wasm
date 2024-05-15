@@ -1,7 +1,8 @@
-// import * as React from "react";
 import { useRef } from "react";
 import { ReactImgui } from "./lib/components/ReactImgui/components";
-import { ImGuiDemo } from "./components/ImGuiDemo/ImGuiDemo";
+// @ts-ignore
+import getWasmModule from "./lib/wasm/reactDearImgui.mjs";
+import { ImGuiDemo } from "./lib";
 
 import "./App.css";
 
@@ -10,7 +11,7 @@ function App() {
 
     return (
         <div id="app" ref={containerRef}>
-            <ReactImgui containerRef={containerRef}>
+            <ReactImgui getWasmModule={getWasmModule} containerRef={containerRef}>
                 <ImGuiDemo />
             </ReactImgui>
         </div>
