@@ -29,10 +29,7 @@ using json = nlohmann::json;
 class Widget;
 
 class ReactImgui : public ImPlotView {
-    typedef std::function<void(const json&)> rendererFunction;
-
     private:
-
         std::unordered_map<int, std::unique_ptr<Widget>> widgets;
 
         void InitWidget(const json& widgetDef);
@@ -47,7 +44,6 @@ class ReactImgui : public ImPlotView {
     public:
         std::unordered_map<int, std::vector<int>> hierarchy;
 
-        std::unordered_map<std::string, rendererFunction> rendererFunctionMap;
         std::unordered_map<int, std::unique_ptr<char[]>> floatFormatChars;
 
         OnTextChangedCallback onInputTextChange;
