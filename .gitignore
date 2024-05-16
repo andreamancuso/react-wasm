@@ -140,3 +140,5 @@ dist
 .yarn
 
 .tsup
+
+.vscode
