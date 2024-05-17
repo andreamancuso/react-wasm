@@ -11,24 +11,24 @@
 
 class ImGuiView : public View {
     protected:
-        WGPUColor clearColor;
+        WGPUColor m_clearColor;
 
-        ImGuiContext* imGuiCtx;
+        ImGuiContext* m_imGuiCtx;
 
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove;
+        ImGuiWindowFlags m_window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove;
 
     public:
         ImGuiView(const char* newWindowId, const char* newGlWindowTitle) : View(newWindowId, newGlWindowTitle) {
-            imGuiCtx = ImGui::CreateContext();
+            m_imGuiCtx = ImGui::CreateContext();
 
             ImVec4 v4 = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-            clearColor = { v4.x * v4.w, v4.y * v4.w, v4.z * v4.w, v4.w };
+            m_clearColor = { v4.x * v4.w, v4.y * v4.w, v4.z * v4.w, v4.w };
         }
 
         WGPUColor GetClearColor();
 
         void SetCurrentContext() {
-            ImGui::SetCurrentContext(imGuiCtx);
+            ImGui::SetCurrentContext(m_imGuiCtx);
         }
 
         void SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) {
@@ -58,7 +58,7 @@ class ImGuiView : public View {
         }
 
         void CleanUp() {
-            ImGui::DestroyContext(imGuiCtx);
+            ImGui::DestroyContext(m_imGuiCtx);
 
             ImGui_ImplWGPU_Shutdown();
             ImGui_ImplGlfw_Shutdown();

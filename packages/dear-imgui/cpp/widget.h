@@ -29,16 +29,16 @@ class ReactImgui;
 
 class Widget {
     public:
-        int id;
-        std::string type;
-        bool handlesChildrenWithinRenderMethod;
+        int m_id;
+        std::string m_type;
+        bool m_handlesChildrenWithinRenderMethod;
 
         inline static OnTextChangedCallback onInputTextChange_;
 
         Widget(int id) {
-            this->id = id;
-            this->type = "Unknown";
-            this->handlesChildrenWithinRenderMethod = false;
+            m_id = id;
+            m_type = "Unknown";
+            m_handlesChildrenWithinRenderMethod = false;
         }
 
         void HandleChildren(ReactImgui* view);
@@ -48,11 +48,11 @@ class Widget {
 
 class Fragment final : public Widget {
     public:
-        std::string label;
+        std::string m_label;
 
         Fragment(int id) : Widget(id) {
-            this->type = "Fragment";
-            this->handlesChildrenWithinRenderMethod = true;
+            m_type = "Fragment";
+            m_handlesChildrenWithinRenderMethod = true;
         }
 
         void Render(ReactImgui* view);
@@ -61,8 +61,8 @@ class Fragment final : public Widget {
 class SameLine final : public Widget {
     public:
         SameLine(int id) : Widget(id) {
-            this->type = "SameLine";
-            this->handlesChildrenWithinRenderMethod = true;
+            m_type = "SameLine";
+            m_handlesChildrenWithinRenderMethod = true;
         }
 
         void Render(ReactImgui* view);
@@ -78,8 +78,8 @@ class Separator final : public Widget {
 class Indent final : public Widget {
     public:
         Indent(int id) : Widget(id) {
-            this->type = "Indent";
-            this->handlesChildrenWithinRenderMethod = true;
+            m_type = "Indent";
+            m_handlesChildrenWithinRenderMethod = true;
         }
 
         void Render(ReactImgui* view);
@@ -89,7 +89,7 @@ class Indent final : public Widget {
 class Unindent final : public Widget {
     public:
         Unindent(int id) : Widget(id) {
-            this->type = "Unindent";
+            m_type = "Unindent";
         }
 
         void Render(ReactImgui* view);
@@ -97,11 +97,11 @@ class Unindent final : public Widget {
 
 class SeparatorText final : public Widget {
     public:
-        std::string label;
+        std::string m_label;
 
         SeparatorText(int id, std::string label) : Widget(id) {
-            this->type = "SeparatorText";
-            this->label = label;
+            m_type = "SeparatorText";
+            m_label = label;
         }
 
         void Render(ReactImgui* view);
@@ -109,11 +109,11 @@ class SeparatorText final : public Widget {
 
 class BulletText final : public Widget {
     public:
-        std::string text;
+        std::string m_text;
 
         BulletText(int id, std::string text) : Widget(id) {
-            this->type = "BulletText";
-            this->text = text;
+            m_type = "BulletText";
+            m_text = text;
         }
 
         void Render(ReactImgui* view);
@@ -121,11 +121,11 @@ class BulletText final : public Widget {
 
 class UnformattedText final : public Widget {
     public:
-        std::string text;
+        std::string m_text;
 
         UnformattedText(int id, std::string text) : Widget(id) {
-            this->type = "UnformattedText";
-            this->text = text;
+            m_type = "UnformattedText";
+            m_text = text;
         }
 
         void Render(ReactImgui* view);
@@ -133,11 +133,11 @@ class UnformattedText final : public Widget {
 
 class DisabledText final : public Widget {
     public:
-        std::string text;
+        std::string m_text;
 
         DisabledText(int id, std::string text) : Widget(id) {
-            this->type = "DisabledText";
-            this->text = text;
+            m_type = "DisabledText";
+            m_text = text;
         }
 
         void Render(ReactImgui* view);
@@ -146,8 +146,8 @@ class DisabledText final : public Widget {
 class TabBar final : public Widget {
     public:
         TabBar(int id) : Widget(id) {
-            this->type = "TabBar";
-            this->handlesChildrenWithinRenderMethod = true;
+            m_type = "TabBar";
+            m_handlesChildrenWithinRenderMethod = true;
         }
 
         void Render(ReactImgui* view);
@@ -155,12 +155,12 @@ class TabBar final : public Widget {
 
 class TabItem final : public Widget {
     public:
-        std::string label;
+        std::string m_label;
 
         TabItem(int id, std::string label) : Widget(id) {
-            this->type = "TabItem";
-            this->handlesChildrenWithinRenderMethod = true;
-            this->label = label;
+            m_type = "TabItem";
+            m_handlesChildrenWithinRenderMethod = true;
+            m_label = label;
         }
 
         void Render(ReactImgui* view);
@@ -168,12 +168,12 @@ class TabItem final : public Widget {
 
 class CollapsingHeader final : public Widget {
     public:
-        std::string label;
+        std::string m_label;
 
         CollapsingHeader(int id, std::string label) : Widget(id) {
-            this->type = "CollapsingHeader";
-            this->handlesChildrenWithinRenderMethod = true;
-            this->label = label;
+            m_type = "CollapsingHeader";
+            m_handlesChildrenWithinRenderMethod = true;
+            m_label = label;
         }
 
         void Render(ReactImgui* view);
@@ -181,12 +181,12 @@ class CollapsingHeader final : public Widget {
 
 class TextWrap final : public Widget {
     public:
-        double width;
+        double m_width;
 
         TextWrap(int id, double width) : Widget(id) {
-            this->type = "TextWrap";
-            this->handlesChildrenWithinRenderMethod = true;
-            this->width = width;
+            m_type = "TextWrap";
+            m_handlesChildrenWithinRenderMethod = true;
+            m_width = width;
         }
 
         void Render(ReactImgui* view);
@@ -195,8 +195,8 @@ class TextWrap final : public Widget {
 class ItemTooltip final : public Widget {
     public:
         ItemTooltip(int id) : Widget(id) {
-            this->type = "ItemTooltip";
-            this->handlesChildrenWithinRenderMethod = true;
+            m_type = "ItemTooltip";
+            m_handlesChildrenWithinRenderMethod = true;
         }
 
         void Render(ReactImgui* view);
@@ -204,12 +204,12 @@ class ItemTooltip final : public Widget {
 
 class TreeNode final : public Widget {
     public:
-        std::string label;
+        std::string m_label;
 
         TreeNode(int id, std::string label) : Widget(id) {
-            this->type = "TreeNode";
-            this->handlesChildrenWithinRenderMethod = true;
-            this->label = label;
+            m_type = "TreeNode";
+            m_handlesChildrenWithinRenderMethod = true;
+            m_label = label;
         }
 
         void Render(ReactImgui* view);
@@ -218,17 +218,17 @@ class TreeNode final : public Widget {
 class Combo final : public Widget {
     protected:
         Combo(int id, std::string label, int defaultValue, const json& options) : Widget(id) {
-            this->type = "Combo";
-            this->selectedIndex = defaultValue;
-            this->label = label;
-            this->itemsSeparatedByZeros = Combo::getItemsSeparatedByZeros(options);
+            m_type = "Combo";
+            m_selectedIndex = defaultValue;
+            m_label = label;
+            m_itemsSeparatedByZeros = Combo::getItemsSeparatedByZeros(options);
         }
         
         Combo(int id, std::string label, int defaultValue, std::string optionsList) : Widget(id) {
-            this->type = "Combo";
-            this->selectedIndex = defaultValue;
-            this->label = label;
-            this->itemsSeparatedByZeros = Combo::getItemsSeparatedByZeros(optionsList);
+            m_type = "Combo";
+            m_selectedIndex = defaultValue;
+            m_label = label;
+            m_itemsSeparatedByZeros = Combo::getItemsSeparatedByZeros(optionsList);
         }
 
         /**
@@ -296,9 +296,9 @@ class Combo final : public Widget {
         }
 
     public:
-        int selectedIndex;
-        std::string label;
-        std::unique_ptr<char[]> itemsSeparatedByZeros; // Relevant for 'basic' combo only
+        int m_selectedIndex;
+        std::string m_label;
+        std::unique_ptr<char[]> m_itemsSeparatedByZeros; // Relevant for 'basic' combo only
 
         static std::unique_ptr<Combo> makeComboWidget(int id, std::string label, int defaultValue, const json& options) {
             Combo instance(id, label, defaultValue, options);
@@ -320,18 +320,18 @@ class InputText final : public Widget {
         static int InputTextCb(ImGuiInputTextCallbackData* data);
 
         InputText(int id, std::string defaultValue, std::string label) : Widget(id) {
-            this->type = "InputText";
-            this->bufferPointer = std::make_unique<char[]>(100);
-            this->defaultValue = defaultValue;
-            this->label = label;
+            m_type = "InputText";
+            m_bufferPointer = std::make_unique<char[]>(100);
+            m_defaultValue = defaultValue;
+            m_label = label;
 
-            strncpy(this->bufferPointer.get(), defaultValue.c_str(), 99);
+            strncpy(m_bufferPointer.get(), defaultValue.c_str(), 99);
         }
 
     public:
-        std::unique_ptr<char[]> bufferPointer;
-        std::string defaultValue;
-        std::string label;
+        std::unique_ptr<char[]> m_bufferPointer;
+        std::string m_defaultValue;
+        std::string m_label;
 
         inline static std::unique_ptr<InputText> makeInputTextWidget(int id, std::string defaultValue, std::string label) {
             InputText instance(id, defaultValue, label);
@@ -344,14 +344,14 @@ class InputText final : public Widget {
 class Checkbox final : public Widget {
     protected:
         Checkbox(int id, std::string label, bool defaultChecked) : Widget(id) {
-            this->type = "Checkbox";
-            this->checked = defaultChecked;
-            this->label = label;
+            m_type = "Checkbox";
+            m_checked = defaultChecked;
+            m_label = label;
         }
 
     public:
-        bool checked;
-        std::string label;
+        bool m_checked;
+        std::string m_label;
 
         inline static std::unique_ptr<Checkbox> makeCheckboxWidget(int id, std::string label, bool defaultChecked) {
             Checkbox instance(id, label, defaultChecked);
@@ -364,12 +364,12 @@ class Checkbox final : public Widget {
 class Button final : public Widget {
     protected:
         Button(int id, std::string label) : Widget(id) {
-            this->type = "Button";
-            this->label = label;
+            m_type = "Button";
+            m_label = label;
         }
 
     public:
-        std::string label;
+        std::string m_label;
 
         inline static std::unique_ptr<Button> makeButtonWidget(int id, std::string label) {
             Button instance(id, label);
@@ -382,20 +382,20 @@ class Button final : public Widget {
 class Slider final : public Widget {
     protected:
         Slider(int id, std::string label, float defaultValue, float min, float max, std::string sliderType) : Widget(id) {
-            this->type = "Slider";
-            this->type = sliderType;
-            this->label = label;
-            this->value = defaultValue;
-            this->min = min;
-            this->max = max;
+            m_type = "Slider";
+            m_sliderType = sliderType;
+            m_label = label;
+            m_value = defaultValue;
+            m_min = min;
+            m_max = max;
         }
 
     public:
-        std::string type;
-        float value;
-        float min;
-        float max;
-        std::string label;
+        std::string m_sliderType;
+        float m_value;
+        float m_min;
+        float m_max;
+        std::string m_label;
 
         inline static std::unique_ptr<Slider> makeSliderWidget(int id, std::string label, float defaultValue, float min, float max, std::string sliderType) {
             Slider instance(id, label, defaultValue, min, max, sliderType);
@@ -408,28 +408,28 @@ class Slider final : public Widget {
 class MultiSlider final : public Widget {
     protected:
         MultiSlider(int id, std::string label, float min, float max, int numValues, int decimalDigits) : Widget(id) {
-            this->type = "MultiSlider";
-            this->label = label;
-            this->numValues = numValues;
-            this->values = std::make_unique<float[]>(numValues);
-            this->min = min;
-            this->max = max;
-            this->decimalDigits = decimalDigits;
+            m_type = "MultiSlider";
+            m_label = label;
+            m_numValues = numValues;
+            m_values = std::make_unique<float[]>(numValues);
+            m_min = min;
+            m_max = max;
+            m_decimalDigits = decimalDigits;
         }
 
     public:
-        std::unique_ptr<float[]> values;
-        float min;
-        float max;
-        int numValues;
-        int decimalDigits;
-        std::string label;
+        std::unique_ptr<float[]> m_values;
+        float m_min;
+        float m_max;
+        int m_numValues;
+        int m_decimalDigits;
+        std::string m_label;
 
         static std::unique_ptr<MultiSlider> makeMultiSliderWidget(int id, std::string label, float min, float max, int numValues, int decimalDigits, const json& defaultValues) {
             MultiSlider instance(id, label, min, max, numValues, decimalDigits);
 
             for (auto& [key, item] : defaultValues.items()) {
-                instance.values[stoi(key)] = item.template get<float>();
+                instance.m_values[stoi(key)] = item.template get<float>();
             }
 
             return std::make_unique<MultiSlider>(std::move(instance));
