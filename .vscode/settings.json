@@ -1,5 +1,5 @@
 {
-    "cmake.sourceDirectory": "C:/dev/react-imgui/src/packages/dear-imgui/cpp",
+    "cmake.sourceDirectory": "C:/u-blox/gallery/ubx/ulogr/react-imgui/cpp",
     "cmake.configureOnOpen": true,
     "files.associations": {
         "gl2ext.h": "c",

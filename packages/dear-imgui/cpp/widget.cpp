@@ -25,23 +25,23 @@
 using json = nlohmann::json;
 
 void Widget::HandleChildren(ReactImgui* view) {
-    view->RenderChildren(id);
+    view->RenderChildren(m_id);
 };
 
 void Fragment::Render(ReactImgui* view) {
-    // ImGui::Text("Begin Fragment (ID: %d)", id);
+    // ImGui::Text("Begin Fragment (ID: %d)", m_id);
     Widget::HandleChildren(view);
-    // ImGui::Text("End Fragment (ID: %d)", id);
+    // ImGui::Text("End Fragment (ID: %d)", m_id);
 };
 
 
 void SameLine::Render(ReactImgui* view) {
     // Special case
-    if (view->hierarchy.contains(id)) {
-        size_t size = view->hierarchy[id].size() - 1;
+    if (view->m_hierarchy.contains(m_id)) {
+        size_t size = view->m_hierarchy[m_id].size() - 1;
 
         int i = 0;
-        for (auto& childId : view->hierarchy[id]) {
+        for (auto& childId : view->m_hierarchy[m_id]) {
             view->RenderWidgets(childId);
 
             if (i < (size)) {
@@ -51,7 +51,7 @@ void SameLine::Render(ReactImgui* view) {
             i++;
         }
 
-        // ImGui::Text("(ID: %d)", id);
+        // ImGui::Text("(ID: %d)", m_id);
     }
 };
 
@@ -70,23 +70,23 @@ void Unindent::Render(ReactImgui* view) {
 };
 
 void SeparatorText::Render(ReactImgui* view) {
-    ImGui::SeparatorText(label.c_str());
+    ImGui::SeparatorText(m_label.c_str());
 };
 
 void BulletText::Render(ReactImgui* view) {
-    ImGui::BulletText(text.c_str());
+    ImGui::BulletText(m_text.c_str());
 };
 
 void UnformattedText::Render(ReactImgui* view) {
-    ImGui::TextUnformatted(text.c_str());
+    ImGui::TextUnformatted(m_text.c_str());
 };
 
 void DisabledText::Render(ReactImgui* view) {
-    ImGui::TextDisabled(text.c_str());
+    ImGui::TextDisabled(m_text.c_str());
 };
 
 void TabBar::Render(ReactImgui* view) {
-    ImGui::PushID(id);
+    ImGui::PushID(m_id);
     // todo: double-check if we need to pass a proper id here?
     if (ImGui::BeginTabBar("", ImGuiTabBarFlags_None)) {
         Widget::HandleChildren(view);
@@ -96,8 +96,8 @@ void TabBar::Render(ReactImgui* view) {
 };
 
 void TabItem::Render(ReactImgui* view) {
-    ImGui::PushID(id);
-    if (ImGui::BeginTabItem(label.c_str())) {
+    ImGui::PushID(m_id);
+    if (ImGui::BeginTabItem(m_label.c_str())) {
         Widget::HandleChildren(view);
         ImGui::EndTabItem();
     }
@@ -105,15 +105,15 @@ void TabItem::Render(ReactImgui* view) {
 };
 
 void CollapsingHeader::Render(ReactImgui* view) {
-    ImGui::PushID(id);
-    if (ImGui::CollapsingHeader(label.c_str())) {
+    ImGui::PushID(m_id);
+    if (ImGui::CollapsingHeader(m_label.c_str())) {
         Widget::HandleChildren(view);
     }
     ImGui::PopID();
 };
 
 void TextWrap::Render(ReactImgui* view) {
-    ImGui::PushTextWrapPos(width);
+    ImGui::PushTextWrapPos(m_width);
     
     Widget::HandleChildren(view);
 
@@ -129,8 +129,8 @@ void ItemTooltip::Render(ReactImgui* view) {
 };
 
 void TreeNode::Render(ReactImgui* view) {
-    ImGui::PushID(id);
-    if (ImGui::TreeNode(label.c_str())) {
+    ImGui::PushID(m_id);
+    if (ImGui::TreeNode(m_label.c_str())) {
         Widget::HandleChildren(view);
 
         ImGui::TreePop();
@@ -140,16 +140,16 @@ void TreeNode::Render(ReactImgui* view) {
 };
 
 void Combo::Render(ReactImgui* view) {
-    ImGui::PushID(id);
-    if (ImGui::Combo(label.c_str(), &selectedIndex, itemsSeparatedByZeros.get())) {
-        view->onComboChange(id, selectedIndex);
+    ImGui::PushID(m_id);
+    if (ImGui::Combo(m_label.c_str(), &m_selectedIndex, m_itemsSeparatedByZeros.get())) {
+        view->m_onComboChange(m_id, m_selectedIndex);
     }
     ImGui::PopID();
 };
 
 void InputText::Render(ReactImgui* view) {
-    ImGui::PushID(id);
-    ImGui::InputText(label.c_str(), bufferPointer.get(), 100, inputTextFlags, InputTextCb, (void*)this);
+    ImGui::PushID(m_id);
+    ImGui::InputText(m_label.c_str(), m_bufferPointer.get(), 100, inputTextFlags, InputTextCb, (void*)this);
     ImGui::PopID();
 };
 
@@ -159,56 +159,56 @@ int InputText::InputTextCb(ImGuiInputTextCallbackData* data)
         auto pInputText = reinterpret_cast<InputText*>(data->UserData);
 
         std::string value = data->Buf;
-        Widget::onInputTextChange_(pInputText->id, value);
+        Widget::onInputTextChange_(pInputText->m_id, value);
     }
 
     return 0;
 };
 
 void Checkbox::Render(ReactImgui* view) {
-    ImGui::PushID(id);
-    if (ImGui::Checkbox(label.c_str(), &checked)) {
-        view->onBooleanValueChange(id, checked);
+    ImGui::PushID(m_id);
+    if (ImGui::Checkbox(m_label.c_str(), &m_checked)) {
+        view->m_onBooleanValueChange(m_id, m_checked);
     }
     ImGui::PopID();
 };
 
 void Button::Render(ReactImgui* view) {
-    ImGui::PushID(id);
-    if (ImGui::Button(label.c_str())) {
-        view->onClick(id);
+    ImGui::PushID(m_id);
+    if (ImGui::Button(m_label.c_str())) {
+        view->m_onClick(m_id);
     }
     ImGui::PopID();
 };
 
 void Slider::Render(ReactImgui* view) {
-    ImGui::PushID(id);
-    if (type == "angle") {
-        if (ImGui::SliderAngle(label.c_str(), &value, min, max, "%.0f")) {
-            view->onNumericValueChange(id, value);
+    ImGui::PushID(m_id);
+    if (m_type == "angle") {
+        if (ImGui::SliderAngle(m_label.c_str(), &m_value, m_min, m_max, "%.0f")) {
+            view->m_onNumericValueChange(m_id, m_value);
         }
     } else {
-        if (ImGui::SliderFloat(label.c_str(), &value, min, max, "%.0f")) {
-            view->onNumericValueChange(id, value);
+        if (ImGui::SliderFloat(m_label.c_str(), &m_value, m_min, m_max, "%.0f")) {
+            view->m_onNumericValueChange(m_id, m_value);
         }
     }
     ImGui::PopID();
 };
 
 void MultiSlider::Render(ReactImgui* view) {
-    ImGui::PushID(id);
+    ImGui::PushID(m_id);
 
-    if (this->numValues == 2) {
-        if (ImGui::SliderFloat2(this->label.c_str(), this->values.get(), this->min, this->max, view->floatFormatChars[this->decimalDigits].get())) {
-            view->onMultiValueChange(this->id, this->values.get(), this->numValues);
+    if (m_numValues == 2) {
+        if (ImGui::SliderFloat2(m_label.c_str(), m_values.get(), m_min, m_max, view->m_floatFormatChars[m_decimalDigits].get())) {
+            view->m_onMultiValueChange(m_id, m_values.get(), m_numValues);
         }
-    } else if (this->numValues == 3) {
-        if (ImGui::SliderFloat3(this->label.c_str(), values.get(), this->min, this->max, view->floatFormatChars[this->decimalDigits].get())) {
-            view->onMultiValueChange(this->id, this->values.get(), this->numValues);
+    } else if (m_numValues == 3) {
+        if (ImGui::SliderFloat3(m_label.c_str(), m_values.get(), m_min, m_max, view->m_floatFormatChars[m_decimalDigits].get())) {
+            view->m_onMultiValueChange(m_id, m_values.get(), m_numValues);
         }
-    } else if (this->numValues == 4) {
-        if (ImGui::SliderFloat4(this->label.c_str(), values.get(), this->min, this->max, view->floatFormatChars[this->decimalDigits].get())) {
-            view->onMultiValueChange(this->id, this->values.get(), this->numValues);
+    } else if (m_numValues == 4) {
+        if (ImGui::SliderFloat4(m_label.c_str(), m_values.get(), m_min, m_max, view->m_floatFormatChars[m_decimalDigits].get())) {
+            view->m_onMultiValueChange(m_id, m_values.get(), m_numValues);
         }
     }
 

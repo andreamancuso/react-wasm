@@ -7,11 +7,11 @@
 
 class ImPlotView : public ImGuiView {
     protected:
-        ImPlotContext* imPlotCtx;
+        ImPlotContext* m_imPlotCtx;
 
     public:
         ImPlotView(const char* newWindowId, const char* newGlWindowTitle) : ImGuiView(newWindowId, newGlWindowTitle) {
-            imPlotCtx = ImPlot::CreateContext();
+            m_imPlotCtx = ImPlot::CreateContext();
         }
 
         void SetCurrentContext();

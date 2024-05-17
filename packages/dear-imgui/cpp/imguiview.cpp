@@ -9,5 +9,5 @@
 
 
 WGPUColor ImGuiView::GetClearColor() {
-    return clearColor;
+    return m_clearColor;
 };

@@ -4,12 +4,12 @@
 #include "./implotview.h"
 
 void ImPlotView::SetCurrentContext() {
-    ImGui::SetCurrentContext(imGuiCtx);
-    ImPlot::SetCurrentContext(imPlotCtx);
+    ImGui::SetCurrentContext(m_imGuiCtx);
+    ImPlot::SetCurrentContext(m_imPlotCtx);
 };
 
 void ImPlotView::CleanUp() {
     ImGuiView::CleanUp();
 
-    ImPlot::DestroyContext(imPlotCtx);
+    ImPlot::DestroyContext(m_imPlotCtx);
 };

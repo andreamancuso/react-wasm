@@ -30,7 +30,7 @@ class Widget;
 
 class ReactImgui : public ImPlotView {
     private:
-        std::unordered_map<int, std::unique_ptr<Widget>> widgets;
+        std::unordered_map<int, std::unique_ptr<Widget>> m_widgets;
 
         void InitWidget(const json& widgetDef);
         void InitButton(const json& val);
@@ -42,16 +42,16 @@ class ReactImgui : public ImPlotView {
         void SetUpFloatFormatChars();
 
     public:
-        std::unordered_map<int, std::vector<int>> hierarchy;
+        std::unordered_map<int, std::vector<int>> m_hierarchy;
 
-        std::unordered_map<int, std::unique_ptr<char[]>> floatFormatChars;
+        std::unordered_map<int, std::unique_ptr<char[]>> m_floatFormatChars;
 
-        OnTextChangedCallback onInputTextChange;
-        OnComboChangedCallback onComboChange;
-        OnNumericValueChangedCallback onNumericValueChange;
-        OnMultipleNumericValuesChangedCallback onMultiValueChange;
-        OnBooleanValueChangedCallback onBooleanValueChange;
-        OnClickCallback onClick;
+        OnTextChangedCallback m_onInputTextChange;
+        OnComboChangedCallback m_onComboChange;
+        OnNumericValueChangedCallback m_onNumericValueChange;
+        OnMultipleNumericValuesChangedCallback m_onMultiValueChange;
+        OnBooleanValueChangedCallback m_onBooleanValueChange;
+        OnClickCallback m_onClick;
 
         ReactImgui(
             const char* newWindowId, 
