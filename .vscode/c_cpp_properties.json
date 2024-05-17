@@ -3,11 +3,13 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/cpp/**",
-                "${workspaceFolder}/cpp/deps",
-                "${workspaceFolder}/cpp/deps/emscripten/system/include",
-                "${workspaceFolder}/cpp/deps/glfw/include",
-                "${workspaceFolder}/cpp/deps/OpenGL-Registry/api"
+                "${workspaceFolder}/packages/dear-imgui/cpp/**",
+                "${workspaceFolder}/packages/dear-imgui/cpp/deps",
+                "${workspaceFolder}/packages/dear-imgui/cpp/deps/emscripten/system/include",
+                "${workspaceFolder}/packages/dear-imgui/cpp/deps/glfw/include",
+                "${workspaceFolder}/packages/dear-imgui/cpp/deps/OpenGL-Registry/api",
+                "${workspaceFolder}/packages/dear-imgui/cpp/deps/wasm-glfw3-boilerplate",
+                "${workspaceFolder}/packages/dear-imgui/cpp/deps/emscripten/system/include"
             ],
             "defines": [
                 "_DEBUG",

@@ -71,8 +71,8 @@ json IntSetToJson(std::set<int> data) {
 
 class WasmRunner {
     protected:
-        GLWasm* glWasm;
-        ReactImgui* view;
+        GLWasm* m_glWasm;
+        ReactImgui* m_view;
 
     public:
         WasmRunner() {}
@@ -147,19 +147,19 @@ class WasmRunner {
 
         void run(
                 std::string canvasSelector) {
-            view = new ReactImgui(
+            m_view = new ReactImgui(
                 "ReactImgui", 
                 "ReactImgui"
             );
-            view->SetEventHandlers(
+            m_view->SetEventHandlers(
                 OnTextChanged,
                 OnComboChanged,
                 OnNumericValueChanged,
                 OnMultipleNumericValuesChanged,
                 OnBooleanValueChanged,
                 OnClick);
-            glWasm = &GLWasm::GetInstance(view);
-            glWasm->Init(canvasSelector);
+            m_glWasm = &GLWasm::GetInstance(m_view);
+            m_glWasm->Init(canvasSelector);
         }
 
         void exit() {
@@ -168,44 +168,32 @@ class WasmRunner {
         }
 
         void resizeWindow(int width, int height) {
-            glWasm->SetWindowSize(width, height);
+            m_glWasm->SetWindowSize(width, height);
         }
 
         void setWidget(std::string widgetJsonAsString) {
-            view->SetWidget(widgetJsonAsString);
+            m_view->SetWidget(widgetJsonAsString);
         }
 
         void patchWidget(int id, std::string widgetJsonAsString) {
-            view->PatchWidget(id, widgetJsonAsString);
+            m_view->PatchWidget(id, widgetJsonAsString);
         }
 
         void setChildren(int id, std::vector<int> childrenIds) {
-            view->SetChildren(id, childrenIds);
+            m_view->SetChildren(id, childrenIds);
         }
 
         void appendChild(int parentId, int childId) {
-            view->AppendChild(parentId, childId);
+            m_view->AppendChild(parentId, childId);
         }
 
         std::vector<int> getChildren(int id) {
-            return view->GetChildren(id);
+            return m_view->GetChildren(id);
         }
 
         std::string getAvailableFonts() {
-            return view->GetAvailableFonts().dump();
+            return m_view->GetAvailableFonts().dump();
         }
-
-        // void appendChartData(double x, double y)  {
-        //     view->AppendData(x, y);
-        // }
-
-        // void setAxesDecimalPlaces(int x, int y)  {
-        //     view->SetAxesDecimalDigits(x, y);
-        // }
-
-        // void resetChartData() {
-        //     view->ResetData();
-        // }
 };
 
 static std::unique_ptr<WasmRunner> pRunner = std::make_unique<WasmRunner>();
