@@ -8,7 +8,7 @@ rust-version = "1.76"
 
 [package.metadata.docs.rs]
 all-features = true
-targets = ["x86_64-pc-windows-gnu", "wasm32-unknown-unknown"]
+targets = ["wasm32-unknown-unknown"]
 
 [dependencies]
 egui = "0.27.0"
@@ -19,16 +19,9 @@ eframe = { version = "0.27.0", default-features = false, features = [
     "persistence",   # Enable restoring app state when restarting the app.
 ] }
 log = "0.4"
-
 # You only need serde if you want app persistence:
 serde = { version = "1", features = ["derive"] }
-
-# native:
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-env_logger = "0.10"
-
-# web:
-[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2.92"
 wasm-bindgen-futures = "0.4"
 
 
