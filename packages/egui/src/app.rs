@@ -1,3 +1,39 @@
+
+pub struct Widget<T> {
+    id: u32,
+    widget_type: String,
+    props: T
+}
+
+struct ButtonProps {
+    label: String
+}
+
+trait Render {
+    fn render(&self) -> ();
+}
+
+trait ButtonWidget: Render + Button {}
+
+trait Button {
+    fn render(self) -> ();
+    fn new(widget_id: u32, label: &str) -> Widget<ButtonProps>;
+}
+
+impl Button for Widget<ButtonProps> {
+    fn render(self) {}
+
+    fn new(widget_id: u32, label: &str) -> Widget<ButtonProps> {
+        Widget{
+            id: widget_id,
+            widget_type: "Unknown".parse().unwrap(),
+            props: (ButtonProps {
+                label: label.to_string()
+            }),
+        }
+    }
+}
+
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
