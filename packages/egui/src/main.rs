@@ -1,15 +1,8 @@
 #![warn(clippy::all, rust_2018_idioms)]
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-use std::sync::RwLock;
-use std::collections::HashMap;
-
-static WIDGETS: RwLock<Option<HashMap<u32, eframe_template::Widget>>> = RwLock::new(None);
-
 // When compiling to web using trunk:
 fn main() {
-    *WIDGETS.write().unwrap() = Some(HashMap::new());
-
     // Redirect `log` message to `console.log` and friends:
     eframe::WebLogger::init(log::LevelFilter::Debug).ok();
 
