@@ -1,6 +1,6 @@
 # React bindings for Dear ImGui (and ImPlot)
 
-Please note: only latest Chrome and Edge are currently supported.
+Please note that only Chrome and Edge are currently supported. Firefox Nightlies should also work but no testing has been carried out on them.
 
 ## Building instructions
 
@@ -17,26 +17,55 @@ Tested with:
 
 ### Setup
 
+#### Emscripten
+
 -   Run `git submodule update --init --recursive` to retrieve all dependencies in the `deps` folder
 -   Install emsdk:
-    - `git clone https://github.com/emscripten-core/emsdk.git`
-    - `cd emsdk`
-    - `./emsdk install 3.1.54`
-    - `./emsdk activate 3.1.54`
+    -   `git clone https://github.com/emscripten-core/emsdk.git`
+    -   `cd emsdk`
+    -   `./emsdk install 3.1.54`
+    -   `./emsdk activate 3.1.54`
 -   Install Ninja and add it to `%PATH%`
 
+#### Node
+
+Install the latest [Node.js](https://nodejs.org) v20 (LTS at the time of writing). It is highly recommended to use [Node Version Manager](https://github.com/coreybutler/nvm-windows)
+
+#### Yarn
+
+Follow these instructions: https://yarnpkg.com/getting-started/install
+
+#### React and other dependencies
+
+-   `cd react-wasm/packages/dear-imgui/ts`
+-   `yarn add -P react@18.2.0 react-dom@18.2.0`
 
 ## Building
 
 -   Open a Windows CLI (not PowerShell)
 -   Run `<emsdk-dir>/emsdk_env.bat` (if you haven't done so already)
--   `cd react-imgui/src/cpp`
--   Build the WASM:
+-   `cd react-wasm/packages/dear-imgui/`
+-   Build the WASM, either via Yarn:
     -   `cd ts`
     -   `yarn`
     -   `yarn emcmake`
     -   `yarn cmake`
+-   or directly via CMake:
+    -   `cd cpp`
+    -   `emcmake cmake .` (one time only)
+    -   `cmake --build . --target reactDearImgui`
+
+## Verifying
+
+-   `cd react-wasm/packages/dear-imgui/ts`
+-   `yarn start`
+
+Your default browser will open, the URL should http://localhost:3000
+
+Please note, not all browsers are currently supported.
 
 ## Notes
 
 Terminating the WASM process throws an `ExitStatus` exception - this is expected, so long as the status is `0` then it's all good.
+
+`Pthread` support was recently added. At the time of writing this causes Webpack to issue a warning on startup. The warning can be dismissed by clicking on the close (X) button. Enabling the `-s STRICT` linker flag should fix it, however this currently introduces our issues.
