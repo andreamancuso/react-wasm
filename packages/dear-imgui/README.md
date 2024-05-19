@@ -14,6 +14,8 @@ Tested with:
 -   emscripten 3.1.54, follow these instructions https://emscripten.org/docs/getting_started/downloads.html
 -   CMake 3.29.1, download it from https://github.com/Kitware/CMake/releases
 -   ninja 1.12.0, download it from https://github.com/ninja-build/ninja/releases
+-   Node.js v20 (LTS) download it from https://nodejs.org/dist/v20.13.1/node-v20.13.1-x64.msi or install via [Node Version Manager](https://github.com/coreybutler/nvm-windows)
+-   Yarn, follow these instructions https://yarnpkg.com/getting-started/install
 
 ### Setup
 
@@ -26,14 +28,6 @@ Tested with:
     -   `./emsdk install 3.1.54`
     -   `./emsdk activate 3.1.54`
 -   Install Ninja and add it to `%PATH%`
-
-#### Node
-
-Install the latest [Node.js](https://nodejs.org) v20 (LTS at the time of writing). It is highly recommended to use [Node Version Manager](https://github.com/coreybutler/nvm-windows)
-
-#### Yarn
-
-Follow these instructions: https://yarnpkg.com/getting-started/install
 
 #### React and other dependencies
 
