@@ -2,6 +2,7 @@
 
 mod app;
 
+use serde::{Serialize, Deserialize};
 use std::any::Any;
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -10,14 +11,15 @@ pub use app::TemplateApp;
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
 
-#[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
-}
-
-
 static mut REACT_EGUI: Mutex<Option<ReactEgui>> = Mutex::new(None);
 
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(a: &str);
+}
+
+#[wasm_bindgen]
 pub unsafe fn init_react_egui() {
     let mut m = REACT_EGUI.lock().unwrap();
 
@@ -25,10 +27,13 @@ pub unsafe fn init_react_egui() {
 }
 
 #[wasm_bindgen]
-pub fn greet(name: &str) {
-    alert(&format!("Hello, {}!", name));
-}
+pub unsafe fn add_widget(raw_widget_def: String) {
+    let mut m = REACT_EGUI.lock().unwrap_throw();
 
+    if (m.is_some()) {
+        m.as_ref().unwrap_throw().add_widget(raw_widget_def);
+    }
+}
 
 pub struct Widget<T> {
     id: u64,
@@ -50,21 +55,29 @@ impl ReactEgui {
     }
 
     pub fn add_widget(&self, raw_widget_def: String) {
+        log("a\n");
+
         let widget_def: Value = serde_json::from_str(&*raw_widget_def).unwrap();
 
         if widget_def.is_object() && widget_def["type"].is_string() {
+            log("b\n");
             let maybe_widget_type = widget_def["type"].as_str();
             let maybe_widget_id = widget_def["id"].as_u64();
 
             if maybe_widget_id.is_some() && maybe_widget_type.is_some() {
+                log("c\n");
                 let widget_id = maybe_widget_id.unwrap();
 
                 if maybe_widget_type == Option::from("Button") {
+                    log("d\n");
                     let label = widget_def["label"].as_str();
 
                     if label.is_some() {
+                        log("e\n");
                         // self.widgets.write().unwrap().insert(1, Button::new(widget_id, label.unwrap()));
                         self.widgets.write().unwrap().insert(widget_id, widget_id);
+
+                        log("f\n");
                     }
                 }
             }
