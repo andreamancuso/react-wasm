@@ -10,6 +10,10 @@ rust-version = "1.76"
 all-features = true
 targets = ["wasm32-unknown-unknown"]
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+
 [dependencies]
 egui = "0.27.0"
 eframe = { version = "0.27.0", default-features = false, features = [
