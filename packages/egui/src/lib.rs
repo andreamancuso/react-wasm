@@ -36,7 +36,7 @@ pub struct ReactEgui<T: Render + Send + ?Sized> {
     pub widgets: HashMap<&'static u64, Box<T>>,
 }
 
-impl<T> ReactEgui<T>
+impl<T: ?Sized> ReactEgui<T>
     where T: Render + Send {
 
     pub fn new() -> ReactEgui<T> {
@@ -57,7 +57,7 @@ impl<T> ReactEgui<T>
 
             if maybe_widget_id.is_some() && maybe_widget_type.is_some() {
                 log("c\n");
-                let widget_id = maybe_widget_id.unwrap();
+                let widget_id = &maybe_widget_id.unwrap();
 
                 if maybe_widget_type == Option::from("Button") {
                     log("d\n");
@@ -65,7 +65,7 @@ impl<T> ReactEgui<T>
 
                     if label.is_some() {
                         log("e\n");
-                        self.widgets.insert(widget_id, Box::new(Button::new(widget_id, label.unwrap())));
+                        self.widgets.insert(widget_id, Box::new(Button::new(*widget_id, label.unwrap())));
 
                         log("f\n");
                     }
