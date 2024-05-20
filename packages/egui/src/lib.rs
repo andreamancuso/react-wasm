@@ -5,15 +5,19 @@ mod app;
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::{Arc, Mutex};
+use eframe::Frame;
+use egui::Context;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 pub use app::TemplateApp;
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
+use std::borrow::Cow;
+use std::borrow::Borrow;
 use erased_serde::serialize_trait_object;
 
 
-static REACT_EGUI: Lazy<Arc<Mutex<HashMap<u64, Box<dyn Render + Send>>>>> = Lazy::new(|| {
+pub static REACT_EGUI: Lazy<Arc<Mutex<HashMap<u64, Box<dyn Render + Send>>>>> = Lazy::new(|| {
     Arc::new(Mutex::new(HashMap::new()))
 });
 
@@ -24,8 +28,51 @@ extern "C" {
 }
 
 #[wasm_bindgen]
+pub fn init_egui() {
+    // Redirect `log` message to `console.log` and friends:
+    eframe::WebLogger::init(log::LevelFilter::Debug).ok();
+
+    let web_options = eframe::WebOptions::default();
+
+    wasm_bindgen_futures::spawn_local(async {
+        eframe::WebRunner::new()
+            .start(
+                "the_canvas_id", // hardcode it
+                web_options,
+                Box::new(|cc| Box::new(crate::App::new(cc))),
+            )
+            .await
+            .expect("failed to start eframe");
+    });
+}
+
+pub struct App {
+    
+}
+
+impl App {
+    pub fn new(_cc: &eframe::CreationContext<'_>) -> App {
+        App{
+            
+        }
+    }
+}
+
+impl eframe::App for App {
+    fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
+        let m = REACT_EGUI.lock().unwrap_throw();
+
+        egui::CentralPanel::default().show(ctx, |ui| {
+            for (_k, v) in m.iter() {
+                v.render(ui)
+            }
+        });
+    }
+}
+
+#[wasm_bindgen]
 pub fn get_content() -> String {
-    let mut m = REACT_EGUI.lock().unwrap_throw();
+    let m = REACT_EGUI.lock().unwrap_throw();
 
     return serde_json::to_string(&m.deref()).unwrap();
 }
@@ -46,10 +93,9 @@ pub fn add_widget(raw_widget_def: String) {
 
             match widget_type {
                 "Button" => {
-                    let label = widget_def["label"].as_str();
-
-                    if label.is_some() {
-                        m.insert(widget_id, Box::new(Button::new(widget_id, label.unwrap())));
+                    if widget_def["label"].is_string() {
+                        // let hello = widget_def.get("label").to_owned();
+                        m.insert(widget_id, Box::new(Button::new(widget_id, widget_def["label"].as_str().unwrap().to_owned())));
                     }
                 }
                 "InputText" => {
@@ -70,7 +116,7 @@ pub fn add_widget(raw_widget_def: String) {
 // ----------------
 
 pub trait Render: erased_serde::Serialize {
-    fn render(&self);
+    fn render(&self, ui: &mut egui::Ui);
 }
 
 #[derive(Serialize, Deserialize)]
@@ -80,17 +126,17 @@ pub struct Button {
 }
 //
 impl Button {
-    pub fn new(id: u64, label: &str) -> Button {
+    pub fn new(id: u64, label: String) -> Button {
         Button{
             id,
-            label: label.parse().unwrap()
+            label
         }
     }
 }
 //
 impl Render for Button {
-    fn render(&self) {
-
+    fn render(&self, ui: &mut egui::Ui) {
+        let _ = ui.button(self.label.as_str());
     }
 }
 
@@ -113,7 +159,7 @@ impl InputText {
 }
 
 impl Render for InputText {
-    fn render(&self) {
+    fn render(&self, ui: &mut egui::Ui) {
 
     }
 }
