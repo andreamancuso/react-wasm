@@ -1,8 +1,6 @@
 import { useRef } from "react";
-import { ReactImgui } from "./lib/components/ReactEgui/components";
-// @ts-ignore
-import getWasmModule from "./lib/wasm/reactDearImgui.mjs";
-import { ImGuiDemo } from "./lib";
+import { ReactEgui } from "./lib/components/ReactEgui/components";
+import * as Module from "./lib/wasm/eframe_template";
 
 import "./App.css";
 
@@ -11,9 +9,9 @@ function App() {
 
     return (
         <div id="app" ref={containerRef}>
-            <ReactImgui getWasmModule={getWasmModule} containerRef={containerRef}>
-                <ImGuiDemo />
-            </ReactImgui>
+            <ReactEgui Module={Module} containerRef={containerRef}>
+                <ReactEgui.Button label="Hello, world!" />
+            </ReactEgui>
         </div>
     );
 }

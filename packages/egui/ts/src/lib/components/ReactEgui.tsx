@@ -9,13 +9,13 @@ import { useEguiWasm } from "../hooks";
 
 export type MainComponentProps = PropsWithChildren & {
     containerRef?: React.RefObject<HTMLElement>;
-    getWasmModule: any;
+    Module: any;
 };
 
 export const MainComponent: React.ComponentType<MainComponentProps> = ({
     containerRef,
     children,
-    getWasmModule,
+    Module,
 }: MainComponentProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -24,7 +24,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
     const canvasId = useMemo(() => `canvas-${uuidv4()}`, []);
 
-    const { eventHandlers } = useEguiWasm(ReactNativePrivateInterface);
+    // const { eventHandlers } = useEguiWasm(ReactNativePrivateInterface);
 
     useEffect(() => {
         if (canvasRef.current && !isWasmModuleLoading.current) {
@@ -33,19 +33,8 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
             let localModule: any;
 
             const load = async () => {
-                const moduleArg: any = {
-                    canvas: canvasRef.current, // ?
-                    arguments: [`#${canvasId}`],
-                    // locateFile: (path: any, scriptDirectory: any) => {
-                    //     console.log(path, scriptDirectory);
-
-                    //     return `${scriptDirectory}/lib/wasm/${path}`;
-                    // },
-                    eventHandlers,
-                };
-
                 try {
-                    localModule = await getWasmModule(moduleArg);
+                    localModule = await Module();
 
                     setWasmModule(localModule);
                 } catch (exception) {

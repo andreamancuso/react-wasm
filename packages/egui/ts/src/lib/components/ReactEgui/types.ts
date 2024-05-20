@@ -4,12 +4,6 @@ import { MainComponentProps } from "../ReactEgui";
 
 export type Primitive = string | number | boolean;
 
-export type Vec2 = {
-    x: number;
-    y: number;
-};
-export type SliderTypes = "default" | "angle";
-
 export type WidgetPropsMap = {
     InputText: { defaultValue?: string; label?: string };
     Button: {
