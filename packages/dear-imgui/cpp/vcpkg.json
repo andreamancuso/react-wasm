@@ -1,0 +1,22 @@
+{
+    "name": "reactDearImgui",
+    "version-string": "1.0.0",
+    "vcpkg-configuration": {
+        "overlay-ports": [
+            "./vcpkg-overlay-ports/imgui"
+        ]
+    },
+    "dependencies": [
+        "nlohmann-json",
+        {
+            "name": "imgui",
+            "features": [
+                "glfw-binding",
+                "opengl3-binding",
+                "wgpu-binding"
+            ]
+        },
+        "implot",
+        "opengl-registry"
+    ]
+}

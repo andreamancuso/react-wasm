@@ -46,8 +46,8 @@ Tested with:
     -   `yarn cmake`
 -   or directly via CMake:
     -   `cd cpp`
-    -   `emcmake cmake .` (one time only)
-    -   `cmake --build . --target reactDearImgui`
+    -   `cmake -B build -S .`
+    -   `cmake --build ./build --target reactDearImgui`
 
 ## Verifying
 
