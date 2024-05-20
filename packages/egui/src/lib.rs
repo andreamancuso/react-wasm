@@ -2,16 +2,16 @@
 
 mod app;
 
-use serde::{Serialize, Deserialize};
-use std::any::Any;
 use std::collections::HashMap;
 use std::sync::Mutex;
-use std::sync::{RwLock};
+use once_cell::sync::Lazy;
 pub use app::TemplateApp;
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
 
-static mut REACT_EGUI: Mutex<Option<ReactEgui>> = Mutex::new(None);
+static REACT_EGUI: Lazy<Mutex<Box<ReactEgui<dyn Render + Send>>>> = Lazy::new(|| {
+    Mutex::new(Box::new(ReactEgui::new()))
+});
 
 #[wasm_bindgen]
 extern "C" {
@@ -20,41 +20,32 @@ extern "C" {
 }
 
 #[wasm_bindgen]
-pub unsafe fn init_react_egui() {
-    let mut m = REACT_EGUI.lock().unwrap();
-
-    let _ = m.insert(ReactEgui::new());
-}
-
-#[wasm_bindgen]
 pub unsafe fn add_widget(raw_widget_def: String) {
     let mut m = REACT_EGUI.lock().unwrap_throw();
 
-    if (m.is_some()) {
-        m.as_ref().unwrap_throw().add_widget(raw_widget_def);
-    }
+    m.add_widget(raw_widget_def);
 }
 
-pub struct Widget<T> {
-    id: u64,
-    widget_type: String,
-    props: Option<T>
+// ----------------
+
+pub trait Render {
+    fn render(&self);
 }
 
-impl Widget<()> {}
-
-pub struct ReactEgui {
-    pub widgets: RwLock<HashMap<u64, u64>>
+pub struct ReactEgui<T: Render + Send + ?Sized> {
+    pub widgets: HashMap<&'static u64, Box<T>>,
 }
 
-impl ReactEgui {
-    pub fn new() -> ReactEgui {
+impl<T> ReactEgui<T>
+    where T: Render + Send {
+
+    pub fn new() -> ReactEgui<T> {
         ReactEgui{
-            widgets: RwLock::new(HashMap::new())
+            widgets: HashMap::new()
         }
     }
 
-    pub fn add_widget(&self, raw_widget_def: String) {
+    pub fn add_widget(&mut self, raw_widget_def: String) {
         log("a\n");
 
         let widget_def: Value = serde_json::from_str(&*raw_widget_def).unwrap();
@@ -74,8 +65,7 @@ impl ReactEgui {
 
                     if label.is_some() {
                         log("e\n");
-                        // self.widgets.write().unwrap().insert(1, Button::new(widget_id, label.unwrap()));
-                        self.widgets.write().unwrap().insert(widget_id, widget_id);
+                        self.widgets.insert(widget_id, Box::new(Button::new(widget_id, label.unwrap())));
 
                         log("f\n");
                     }
@@ -83,34 +73,51 @@ impl ReactEgui {
             }
         }
     }
+
+    pub fn render(&self) {
+
+    }
 }
 
-
-struct ButtonProps {
-    label: String
+pub struct Button {
+    pub id: u64,
+    pub label: String,
 }
 
-trait Render {
-    fn render(&self) -> ();
-}
-
-trait ButtonWidget: Render + Button {}
-
-trait Button {
-    fn render(self) -> ();
-    fn new(widget_id: u64, label: &str) -> Widget<ButtonProps>;
-}
-
-impl Button for Widget<ButtonProps> {
-    fn render(self) {}
-
-    fn new(widget_id: u64, label: &str) -> Widget<ButtonProps> {
-        Widget{
-            id: widget_id,
-            widget_type: "Unknown".parse().unwrap(),
-            props: Option::from(ButtonProps {
-                label: label.to_string()
-            }),
+impl Button {
+    pub fn new(id: u64, label: &str) -> Button {
+        Button{
+            id,
+            label: label.parse().unwrap()
         }
+    }
+}
+
+impl Render for Button {
+    fn render(&self) {
+
+    }
+}
+
+pub struct InputText {
+    pub id: u64,
+    pub value: String,
+}
+
+impl InputText {
+    fn new(id: u64, value: &str) -> InputText {
+        InputText{
+            id,
+            value: value.parse().unwrap()
+        }
+    }
+    fn set_value(mut self, value: &str) -> () {
+        self.value = value.parse().unwrap();
+    }
+}
+
+impl Render for InputText {
+    fn render(&self) {
+
     }
 }
