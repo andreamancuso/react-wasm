@@ -27,6 +27,7 @@ serde-wasm-bindgen = "0.6.5"
 log = "0.4"
 # You only need serde if you want app persistence:
 serde = { version = "1", features = ["derive"] }
+erased-serde = "0.4.5"
 wasm-bindgen = "0.2.92"
 wasm-bindgen-futures = "0.4"
 once_cell = "1.19.0"

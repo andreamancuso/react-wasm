@@ -3,14 +3,18 @@
 mod app;
 
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::ops::Deref;
+use std::sync::{Arc, Mutex};
 use once_cell::sync::Lazy;
+use serde::{Deserialize, Serialize};
 pub use app::TemplateApp;
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
+use erased_serde::serialize_trait_object;
 
-static REACT_EGUI: Lazy<Mutex<Box<ReactEgui<dyn Render + Send>>>> = Lazy::new(|| {
-    Mutex::new(Box::new(ReactEgui::new()))
+
+static REACT_EGUI: Lazy<Arc<Mutex<HashMap<u64, Box<dyn Render + Send>>>>> = Lazy::new(|| {
+    Arc::new(Mutex::new(HashMap::new()))
 });
 
 #[wasm_bindgen]
@@ -20,70 +24,61 @@ extern "C" {
 }
 
 #[wasm_bindgen]
-pub unsafe fn add_widget(raw_widget_def: String) {
+pub fn get_content() -> String {
     let mut m = REACT_EGUI.lock().unwrap_throw();
 
-    m.add_widget(raw_widget_def);
+    return serde_json::to_string(&m.deref()).unwrap();
 }
 
-// ----------------
+#[wasm_bindgen]
+pub fn add_widget(raw_widget_def: String) {
+    let mut m = REACT_EGUI.lock().unwrap_throw();
 
-pub trait Render {
-    fn render(&self);
-}
+    let widget_def: Value = serde_json::from_str(&*raw_widget_def).unwrap();
 
-pub struct ReactEgui<T: Render + Send + ?Sized> {
-    pub widgets: HashMap<&'static u64, Box<T>>,
-}
+    if widget_def.is_object() && widget_def["type"].is_string() {
+        let maybe_widget_type = widget_def["type"].as_str();
+        let maybe_widget_id = widget_def["id"].as_u64();
 
-impl<T: ?Sized> ReactEgui<T>
-    where T: Render + Send {
+        if maybe_widget_id.is_some() && maybe_widget_type.is_some() {
+            let widget_id = maybe_widget_id.unwrap();
+            let widget_type = maybe_widget_type.unwrap();
 
-    pub fn new() -> ReactEgui<T> {
-        ReactEgui{
-            widgets: HashMap::new()
-        }
-    }
-
-    pub fn add_widget(&mut self, raw_widget_def: String) {
-        log("a\n");
-
-        let widget_def: Value = serde_json::from_str(&*raw_widget_def).unwrap();
-
-        if widget_def.is_object() && widget_def["type"].is_string() {
-            log("b\n");
-            let maybe_widget_type = widget_def["type"].as_str();
-            let maybe_widget_id = widget_def["id"].as_u64();
-
-            if maybe_widget_id.is_some() && maybe_widget_type.is_some() {
-                log("c\n");
-                let widget_id = &maybe_widget_id.unwrap();
-
-                if maybe_widget_type == Option::from("Button") {
-                    log("d\n");
+            match widget_type {
+                "Button" => {
                     let label = widget_def["label"].as_str();
 
                     if label.is_some() {
-                        log("e\n");
-                        self.widgets.insert(widget_id, Box::new(Button::new(*widget_id, label.unwrap())));
-
-                        log("f\n");
+                        m.insert(widget_id, Box::new(Button::new(widget_id, label.unwrap())));
                     }
+                }
+                "InputText" => {
+                    let value = widget_def["value"].as_str();
+
+                    if value.is_some() {
+                        m.insert(widget_id, Box::new(InputText::new(widget_id, value)));
+                    }
+                }
+                &_ => {
+                    log(format!("Unrecognised type: {}", widget_type).as_str());
                 }
             }
         }
     }
-
-    pub fn render(&self) {
-
-    }
 }
 
+// ----------------
+
+pub trait Render: erased_serde::Serialize {
+    fn render(&self);
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct Button {
     pub id: u64,
     pub label: String,
 }
-
+//
 impl Button {
     pub fn new(id: u64, label: &str) -> Button {
         Button{
@@ -92,23 +87,24 @@ impl Button {
         }
     }
 }
-
+//
 impl Render for Button {
     fn render(&self) {
 
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct InputText {
     pub id: u64,
     pub value: String,
 }
 
 impl InputText {
-    fn new(id: u64, value: &str) -> InputText {
+    fn new(id: u64, value: Option<&str>) -> InputText {
         InputText{
             id,
-            value: value.parse().unwrap()
+            value: value.unwrap_or_default().parse().unwrap()
         }
     }
     fn set_value(mut self, value: &str) -> () {
@@ -121,3 +117,5 @@ impl Render for InputText {
 
     }
 }
+
+serialize_trait_object!(Render);
