@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import init, { add_widget, get_content } from "eframe_template";
+import init, { add_widget, get_content, init_egui } from "eframe_template";
 
 // eslint-disable-next-line import/first
 import "./App.css";
@@ -17,6 +17,7 @@ function App() {
 
             init().then(() => {
                 setWasmInitialised(true);
+                init_egui();
             });
         }
     }, []);
@@ -56,6 +57,7 @@ function App() {
                     </div>
                 </>
             )}
+            <canvas id="the_canvas_id" />
         </div>
     );
 }
