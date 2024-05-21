@@ -33,9 +33,9 @@ Perhaps there are other options I could/should have considered. Feel free to let
 
 ## Bindings
 
-### Current
+### Dear Imgui
 
--   [Dear Imgui](https://github.com/andreamancuso/react-wasm/dear-imgui) (work in progress) Browser support: latest Chrome and Edge only presently.
+[Dear Imgui](https://github.com/andreamancuso/react-wasm/dear-imgui) (work in progress) Browser support: latest Chrome and Edge only presently.
 
 ![React Dear Imgui screenshot 1](/screenshots/dear-imgui/react-wasm-dear-imgui-s1.png?raw=true)
 
@@ -47,8 +47,12 @@ Perhaps there are other options I could/should have considered. Feel free to let
 
 ![React Dear Imgui Electron demo](/screenshots/dear-imgui/electron-demo.png?raw=true)
 
-### Future
+### egui
 
--   egui
+-   [egui](https://github.com/emilk/egui) (work in progress) Browser support: Chrome, Firefox, Edge
+
+![egui hello world](/screenshots/egui/egui-hello-world.png?raw=true)
+
+## Other/future bindings
 
 Would you like to help add support for a GUI library of your choice? Let's discuss.
