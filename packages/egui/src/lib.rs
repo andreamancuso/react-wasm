@@ -55,34 +55,30 @@ impl App {
         App{}
     }
 
-    pub fn render_widget_by_id(&mut self, id: u64, ui: &mut egui::Ui) {
-        let mut m = WIDGETS.lock().unwrap_throw();
-        if m.get(&id).is_some() {
-            m.get_mut(&id).unwrap().render(ui);
+    pub fn render_widget_by_id(&mut self, w: &mut HashMap<u64, Box<dyn Render + Send>>, id: u64, ui: &mut egui::Ui) {
+        if w.get(&id).is_some() {
+            w.get_mut(&id).unwrap().render(ui);
         }
     }
 
-    pub fn render_widgets(&mut self, id: Option<u64>, ui: &mut egui::Ui) {
-        let m = WIDGETS.lock().unwrap_throw();
+    pub fn render_widgets(&mut self, w: &mut HashMap<u64, Box<dyn Render + Send>>, h: &HashMap<u64, Vec<u64>>, id: Option<u64>, ui: &mut egui::Ui) {
         let normalized_id = id.or(Some(0)).unwrap();
 
-        if m.get(&normalized_id).is_some() {
-            self.render_widget_by_id(normalized_id, ui);
+        if w.get(&normalized_id).is_some() {
+            self.render_widget_by_id(w, normalized_id, ui);
         }
 
-        if m.get(&normalized_id).is_none() {
+        if w.get(&normalized_id).is_none() {
             // render_children?
-            self.render_children(normalized_id, ui);
+            self.render_children(w, h, normalized_id, ui);
         }
     }
 
-    pub fn render_children(&mut self, id: u64, ui: &mut egui::Ui) {
-        let m = HIERARCHY.lock().unwrap_throw();
-
-        if m.get(&id).is_some() {
-            if !m.get(&id).unwrap().is_empty() {
-                for val in m.get(&id).unwrap().iter() {
-                    self.render_widgets(Some(*val), ui);
+    pub fn render_children(&mut self, w: &mut HashMap<u64, Box<dyn Render + Send>>, h: &HashMap<u64, Vec<u64>>, id: u64, ui: &mut egui::Ui) {
+        if h.get(&id).is_some() {
+            if !h.get(&id).unwrap().is_empty() {
+                for val in h.get(&id).unwrap().iter() {
+                    self.render_widgets(w, h, Some(*val), ui);
                 }
             }
         }
@@ -91,12 +87,11 @@ impl App {
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
-        let mut m = WIDGETS.lock().unwrap_throw();
+        let mut w = WIDGETS.lock().unwrap_throw();
+        let h = HIERARCHY.lock().unwrap_throw();
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            for val in m.values_mut() {
-                val.render(ui);
-            }
+            self.render_widgets(&mut *w, h.deref(), None, ui);
         });
     }
 }
@@ -110,6 +105,18 @@ pub fn append_child(parent_id: u64, child_id: u64) -> () {
     if children.is_some() {
         // todo: ensure child_id isn't already present...
         children.unwrap().push(child_id);
+    }
+}
+
+#[wasm_bindgen]
+pub fn set_children(parent_id: u64, raw_children_ids: String) -> () {
+    let mut m = HIERARCHY.lock().unwrap_throw();
+
+    let children_ids: Value = serde_json::from_str(&*raw_children_ids).unwrap();
+
+    if children_ids.is_array() {
+        // Convert array of JSON Value instances into Vec<u64>
+        m.insert(parent_id, children_ids.as_array().unwrap().iter().map(|x| x.as_u64().unwrap()).collect());
     }
 }
 

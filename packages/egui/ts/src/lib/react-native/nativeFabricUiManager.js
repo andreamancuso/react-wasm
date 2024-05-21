@@ -74,7 +74,7 @@ export default class {
         if (this.cloningNode) {
             this.cloningNode.childrenIds.push(child.id);
         } else {
-            // this.wasmModule.appendChild(parent.id, child.id);
+            this.wasmModule.append_child(parent.id, child.id);
         }
     };
     completeRoot = (container, newChildSet) => {
@@ -84,13 +84,13 @@ export default class {
         if (this.cloningNode) {
             const cloningNodeId = this.cloningNode.id;
             const payload = JSON.stringify(this.cloningNode.childrenIds);
-            // this.wasmModule.setChildren(cloningNodeId, payload);
+            this.wasmModule.set_children(BigInt(cloningNodeId), payload);
             this.cloningNode = null;
         }
 
         const payload = JSON.stringify(newChildSet.map(({ id }) => id));
 
-        // this.wasmModule.setChildren(container, payload);
+        this.wasmModule.set_children(BigInt(container), payload);
     };
     registerEventHandler = (dispatchEventFn) => {
         this.dispatchEventFn = dispatchEventFn;
