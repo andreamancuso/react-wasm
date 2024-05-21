@@ -24,6 +24,8 @@ export const ReactNativeWrapper: React.ComponentType<ReactNativeWrapperProps> = 
         if (wasmModule && !initialisedRef.current) {
             initialisedRef.current = true;
 
+            console.log("init");
+
             // todo: inject via Context
             ReactNativePrivateInterface.nativeFabricUIManager.init(wasmModule);
 

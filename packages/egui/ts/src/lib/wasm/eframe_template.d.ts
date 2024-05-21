@@ -10,14 +10,14 @@ export function get_content(): string;
 /**
 * @param {string} raw_widget_def
 */
-export function add_widget(raw_widget_def: string): void;
+export function set_widget(raw_widget_def: string): void;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly get_content: (a: number) => void;
-  readonly add_widget: (a: number, b: number) => void;
+  readonly set_widget: (a: number, b: number) => void;
   readonly init_egui: () => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;

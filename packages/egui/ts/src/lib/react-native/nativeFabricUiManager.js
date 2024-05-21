@@ -25,7 +25,9 @@ export default class {
         const { children, type, id, ...props } = payload;
         const widget = { ...props, id: generatedId, type };
 
-        this.wasmModule.setWidget(JSON.stringify(widget));
+        console.log(JSON.stringify(widget));
+
+        this.wasmModule.set_widget(JSON.stringify(widget));
 
         this.fiberNodesMap.set(generatedId, fiberNode);
 
@@ -33,7 +35,7 @@ export default class {
     };
     cloneNodeWithNewProps = (node, newProps) => {
         const newWidget = { ...node, ...newProps };
-        this.wasmModule.patchWidget(node.id, JSON.stringify(newWidget));
+        // this.wasmModule.patchWidget(node.id, JSON.stringify(newWidget));
 
         return newWidget;
     };
@@ -44,10 +46,10 @@ export default class {
     cloneNodeWithNewChildren = (node) => {
         // todo: yikes
         if (this.cloningNode) {
-            this.wasmModule.setChildren(
-                this.cloningNode.id,
-                JSON.stringify(this.cloningNode.childrenIds),
-            );
+            // this.wasmModule.setChildren(
+            //     this.cloningNode.id,
+            //     JSON.stringify(this.cloningNode.childrenIds),
+            // );
         }
 
         this.cloningNode = { id: node.id, childrenIds: [] };
@@ -72,7 +74,7 @@ export default class {
         if (this.cloningNode) {
             this.cloningNode.childrenIds.push(child.id);
         } else {
-            this.wasmModule.appendChild(parent.id, child.id);
+            // this.wasmModule.appendChild(parent.id, child.id);
         }
     };
     completeRoot = (container, newChildSet) => {
@@ -82,13 +84,13 @@ export default class {
         if (this.cloningNode) {
             const cloningNodeId = this.cloningNode.id;
             const payload = JSON.stringify(this.cloningNode.childrenIds);
-            this.wasmModule.setChildren(cloningNodeId, payload);
+            // this.wasmModule.setChildren(cloningNodeId, payload);
             this.cloningNode = null;
         }
 
         const payload = JSON.stringify(newChildSet.map(({ id }) => id));
 
-        this.wasmModule.setChildren(container, payload);
+        // this.wasmModule.setChildren(container, payload);
     };
     registerEventHandler = (dispatchEventFn) => {
         this.dispatchEventFn = dispatchEventFn;

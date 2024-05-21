@@ -9,12 +9,10 @@ use eframe::Frame;
 use egui::Context;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-pub use app::TemplateApp;
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
-use std::borrow::Cow;
-use std::borrow::Borrow;
 use erased_serde::serialize_trait_object;
+use std::borrow::Borrow;
 
 
 pub static REACT_EGUI: Lazy<Arc<Mutex<HashMap<u64, Box<dyn Render + Send>>>>> = Lazy::new(|| {
@@ -78,7 +76,7 @@ pub fn get_content() -> String {
 }
 
 #[wasm_bindgen]
-pub fn add_widget(raw_widget_def: String) {
+pub fn set_widget(raw_widget_def: String) {
     let mut m = REACT_EGUI.lock().unwrap_throw();
 
     let widget_def: Value = serde_json::from_str(&*raw_widget_def).unwrap();
@@ -94,8 +92,8 @@ pub fn add_widget(raw_widget_def: String) {
             match widget_type {
                 "Button" => {
                     if widget_def["label"].is_string() {
-                        // let hello = widget_def.get("label").to_owned();
-                        m.insert(widget_id, Box::new(Button::new(widget_id, widget_def["label"].as_str().unwrap().to_owned())));
+                        // m.insert(widget_id, Box::new(Button::new(widget_id, widget_def["label"].as_str().unwrap().to_owned())));
+                        m.insert(widget_id, Box::new(Button::new(widget_id, None)));
                     }
                 }
                 "InputText" => {
@@ -122,11 +120,11 @@ pub trait Render: erased_serde::Serialize {
 #[derive(Serialize, Deserialize)]
 pub struct Button {
     pub id: u64,
-    pub label: String,
+    pub label: Option<String>,
 }
 //
 impl Button {
-    pub fn new(id: u64, label: String) -> Button {
+    pub fn new(id: u64, label: Option<String>) -> Button {
         Button{
             id,
             label
@@ -136,7 +134,12 @@ impl Button {
 //
 impl Render for Button {
     fn render(&self, ui: &mut egui::Ui) {
-        let _ = ui.button(self.label.as_str());
+        // if self.label.is_some() {
+        //     let str = self.label.unwrap().as_str();
+        //     let _ = ui.button(str.as_ref());
+        // } else {
+            let _ = ui.button("Test");
+        // }
     }
 }
 

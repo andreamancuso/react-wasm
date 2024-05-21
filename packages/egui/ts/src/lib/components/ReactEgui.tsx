@@ -6,23 +6,25 @@ import { v4 as uuidv4 } from "uuid";
 import ReactNativePrivateInterface from "../react-native/ReactNativePrivateInterface";
 import { ReactNativeWrapper } from "./ReactNativeWrapper";
 import { useEguiWasm } from "../hooks";
+import { InitOutput } from "../wasm/eframe_template";
 
 export type MainComponentProps = PropsWithChildren & {
     containerRef?: React.RefObject<HTMLElement>;
-    Module: any;
+    initWasmModule: () => Promise<InitOutput>;
 };
 
 export const MainComponent: React.ComponentType<MainComponentProps> = ({
     containerRef,
     children,
-    Module,
+    initWasmModule,
 }: MainComponentProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const isWasmModuleLoading = useRef(false);
-    const [wasmModule, setWasmModule] = useState<any | undefined>();
+    const [wasmModule, setWasmModule] = useState<InitOutput | undefined>();
 
-    const canvasId = useMemo(() => `canvas-${uuidv4()}`, []);
+    // const canvasId = useMemo(() => `canvas-${uuidv4()}`, []);
+    const canvasId = "the_canvas_id";
 
     // const { eventHandlers } = useEguiWasm(ReactNativePrivateInterface);
 
@@ -30,13 +32,19 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         if (canvasRef.current && !isWasmModuleLoading.current) {
             isWasmModuleLoading.current = true;
 
-            let localModule: any;
+            let localModule: InitOutput;
 
             const load = async () => {
                 try {
-                    localModule = await Module();
+                    // @ts-ignore
+                    localModule = await initWasmModule.initWasmModule();
+                    // @ts-ignore
+                    initWasmModule.init_egui();
 
-                    setWasmModule(localModule);
+                    setTimeout(() => {
+                        // @ts-ignore
+                        setWasmModule(initWasmModule);
+                    }, 2000);
                 } catch (exception) {
                     console.log("Unable to initialize the WASM correctly", exception);
                 }
@@ -44,36 +52,36 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
             load();
 
-            return () => {
-                if (localModule) {
-                    try {
-                        localModule.exit();
-                    } catch (error) {
-                        if ((error as any).status !== 0) {
-                            // TODO: report error?
-                        }
-                    }
-                }
-            };
+            // return () => {
+            //     if (localModule) {
+            //         try {
+            //             localModule.exit();
+            //         } catch (error) {
+            //             if ((error as any).status !== 0) {
+            //                 // TODO: report error?
+            //             }
+            //         }
+            //     }
+            // };
         } else {
             return () => {};
         }
     }, [canvasId, canvasRef]);
 
-    useEffect(() => {
-        if (wasmModule) {
-            if (containerRef?.current) {
-                try {
-                    wasmModule.resizeWindow(
-                        containerRef.current.clientWidth,
-                        containerRef.current.clientHeight - 62,
-                    );
-                } catch (exception) {
-                    console.log("Unable to set initial window size");
-                }
-            }
-        }
-    }, [wasmModule]);
+    // useEffect(() => {
+    //     if (wasmModule) {
+    //         if (containerRef?.current) {
+    //             try {
+    //                 wasmModule.resizeWindow(
+    //                     containerRef.current.clientWidth,
+    //                     containerRef.current.clientHeight - 62,
+    //                 );
+    //             } catch (exception) {
+    //                 console.log("Unable to set initial window size");
+    //             }
+    //         }
+    //     }
+    // }, [wasmModule]);
 
     // useEffect(() => {
     //     if (wasmModule && containerRef?.current) {
