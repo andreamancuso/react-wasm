@@ -16,7 +16,10 @@ use std::borrow::Borrow;
 use erased_serde::serialize_trait_object;
 
 
-pub static REACT_EGUI: Lazy<Arc<Mutex<HashMap<u64, Box<dyn Render + Send>>>>> = Lazy::new(|| {
+pub static WIDGETS: Lazy<Arc<Mutex<HashMap<u64, Box<dyn Render + Send>>>>> = Lazy::new(|| {
+    Arc::new(Mutex::new(HashMap::new()))
+});
+pub static HIERARCHY: Lazy<Arc<Mutex<HashMap<u64, Vec<u64>>>>> = Lazy::new(|| {
     Arc::new(Mutex::new(HashMap::new()))
 });
 
@@ -45,21 +48,50 @@ pub fn init_egui() {
     });
 }
 
-pub struct App {
-    
-}
+pub struct App {}
 
 impl App {
     pub fn new(_cc: &eframe::CreationContext<'_>) -> App {
-        App{
-            
+        App{}
+    }
+
+    pub fn render_widget_by_id(&mut self, id: u64, ui: &mut egui::Ui) {
+        let mut m = WIDGETS.lock().unwrap_throw();
+        if m.get(&id).is_some() {
+            m.get_mut(&id).unwrap().render(ui);
+        }
+    }
+
+    pub fn render_widgets(&mut self, id: Option<u64>, ui: &mut egui::Ui) {
+        let m = WIDGETS.lock().unwrap_throw();
+        let normalized_id = id.or(Some(0)).unwrap();
+
+        if m.get(&normalized_id).is_some() {
+            self.render_widget_by_id(normalized_id, ui);
+        }
+
+        if m.get(&normalized_id).is_none() {
+            // render_children?
+            self.render_children(normalized_id, ui);
+        }
+    }
+
+    pub fn render_children(&mut self, id: u64, ui: &mut egui::Ui) {
+        let m = HIERARCHY.lock().unwrap_throw();
+
+        if m.get(&id).is_some() {
+            if !m.get(&id).unwrap().is_empty() {
+                for val in m.get(&id).unwrap().iter() {
+                    self.render_widgets(Some(*val), ui);
+                }
+            }
         }
     }
 }
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
-        let mut m = REACT_EGUI.lock().unwrap_throw();
+        let mut m = WIDGETS.lock().unwrap_throw();
 
         egui::CentralPanel::default().show(ctx, |ui| {
             for val in m.values_mut() {
@@ -70,15 +102,27 @@ impl eframe::App for App {
 }
 
 #[wasm_bindgen]
+pub fn append_child(parent_id: u64, child_id: u64) -> () {
+    let mut m = HIERARCHY.lock().unwrap_throw();
+
+    let children = m.get_mut(&parent_id);
+
+    if children.is_some() {
+        // todo: ensure child_id isn't already present...
+        children.unwrap().push(child_id);
+    }
+}
+
+#[wasm_bindgen]
 pub fn get_content() -> String {
-    let m = REACT_EGUI.lock().unwrap_throw();
+    let m = WIDGETS.lock().unwrap_throw();
 
     return serde_json::to_string(&m.deref()).unwrap();
 }
 
 #[wasm_bindgen]
 pub fn set_widget(raw_widget_def: String) {
-    let mut m = REACT_EGUI.lock().unwrap_throw();
+    let mut m = WIDGETS.lock().unwrap_throw();
 
     let widget_def: Value = serde_json::from_str(&*raw_widget_def).unwrap();
 

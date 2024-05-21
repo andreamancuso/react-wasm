@@ -4,6 +4,11 @@
 */
 export function init_egui(): void;
 /**
+* @param {bigint} parent_id
+* @param {bigint} child_id
+*/
+export function append_child(parent_id: bigint, child_id: bigint): void;
+/**
 * @returns {string}
 */
 export function get_content(): string;
@@ -16,6 +21,7 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
+  readonly append_child: (a: number, b: number) => void;
   readonly get_content: (a: number) => void;
   readonly set_widget: (a: number, b: number) => void;
   readonly init_egui: () => void;
