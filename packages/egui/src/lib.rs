@@ -12,7 +12,6 @@ use serde::{Deserialize, Serialize};
 pub use app::TemplateApp;
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
-use std::borrow::Cow;
 use std::borrow::Borrow;
 use erased_serde::serialize_trait_object;
 
@@ -60,11 +59,11 @@ impl App {
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
-        let m = REACT_EGUI.lock().unwrap_throw();
+        let mut m = REACT_EGUI.lock().unwrap_throw();
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            for (_k, v) in m.iter() {
-                v.render(ui)
+            for val in m.values_mut() {
+                val.render(ui);
             }
         });
     }
@@ -94,14 +93,14 @@ pub fn set_widget(raw_widget_def: String) {
             match widget_type {
                 "Button" => {
                     if widget_def["label"].is_string() {
-                        m.insert(widget_id, Box::new(Button::new(widget_id, widget_def["label"].as_str().unwrap().to_owned())));
+                        m.insert(widget_id, Box::new(Button::new(widget_id, widget_def["label"].as_str().unwrap())));
                     }
                 }
                 "InputText" => {
-                    let value = widget_def["value"].as_str();
+                    let default_value = widget_def["defaultValue"].as_str();
 
-                    if value.is_some() {
-                        m.insert(widget_id, Box::new(InputText::new(widget_id, value)));
+                    if default_value.is_some() {
+                        m.insert(widget_id, Box::new(InputText::new(widget_id, default_value)));
                     }
                 }
                 &_ => {
@@ -115,7 +114,7 @@ pub fn set_widget(raw_widget_def: String) {
 // ----------------
 
 pub trait Render: erased_serde::Serialize {
-    fn render(&self, ui: &mut egui::Ui);
+    fn render(&mut self, ui: &mut egui::Ui);
 }
 
 #[derive(Serialize, Deserialize)]
@@ -125,16 +124,16 @@ pub struct Button {
 }
 //
 impl Button {
-    pub fn new(id: u64, label: String) -> Button {
+    pub fn new(id: u64, label: &str) -> Button {
         Button{
             id,
-            label
+            label: label.parse().unwrap()
         }
     }
 }
 //
 impl Render for Button {
-    fn render(&self, ui: &mut egui::Ui) {
+    fn render(&mut self, ui: &mut egui::Ui) {
         let _ = ui.button(self.label.as_str());
     }
 }
@@ -158,8 +157,8 @@ impl InputText {
 }
 
 impl Render for InputText {
-    fn render(&self, ui: &mut egui::Ui) {
-
+    fn render(&mut self, ui: &mut egui::Ui) {
+        ui.text_edit_singleline(&mut self.value);
     }
 }
 

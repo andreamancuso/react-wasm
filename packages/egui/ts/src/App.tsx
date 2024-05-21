@@ -17,6 +17,7 @@ function App() {
         <div id="app" ref={containerRef}>
             <ReactEgui initWasmModule={module} containerRef={containerRef}>
                 <ReactEgui.Button label="Hello, world!" />
+                <ReactEgui.InputText defaultValue="Hello, world!" />
             </ReactEgui>
         </div>
     );

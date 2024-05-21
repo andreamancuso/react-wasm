@@ -25,6 +25,8 @@ export default class {
         const { children, type, id, ...props } = payload;
         const widget = { ...props, id: generatedId, type };
 
+        console.log(JSON.stringify(widget));
+
         this.wasmModule.set_widget(JSON.stringify(widget));
 
         this.fiberNodesMap.set(generatedId, fiberNode);

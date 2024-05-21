@@ -41,10 +41,8 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                     // @ts-ignore
                     initWasmModule.init_egui();
 
-                    setTimeout(() => {
-                        // @ts-ignore
-                        setWasmModule(initWasmModule);
-                    }, 2000);
+                    // @ts-ignore
+                    setWasmModule(initWasmModule);
                 } catch (exception) {
                     console.log("Unable to initialize the WASM correctly", exception);
                 }
