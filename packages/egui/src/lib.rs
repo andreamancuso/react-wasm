@@ -9,10 +9,12 @@ use eframe::Frame;
 use egui::Context;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
+pub use app::TemplateApp;
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
-use erased_serde::serialize_trait_object;
+use std::borrow::Cow;
 use std::borrow::Borrow;
+use erased_serde::serialize_trait_object;
 
 
 pub static REACT_EGUI: Lazy<Arc<Mutex<HashMap<u64, Box<dyn Render + Send>>>>> = Lazy::new(|| {
@@ -92,8 +94,7 @@ pub fn set_widget(raw_widget_def: String) {
             match widget_type {
                 "Button" => {
                     if widget_def["label"].is_string() {
-                        // m.insert(widget_id, Box::new(Button::new(widget_id, widget_def["label"].as_str().unwrap().to_owned())));
-                        m.insert(widget_id, Box::new(Button::new(widget_id, None)));
+                        m.insert(widget_id, Box::new(Button::new(widget_id, widget_def["label"].as_str().unwrap().to_owned())));
                     }
                 }
                 "InputText" => {
@@ -120,11 +121,11 @@ pub trait Render: erased_serde::Serialize {
 #[derive(Serialize, Deserialize)]
 pub struct Button {
     pub id: u64,
-    pub label: Option<String>,
+    pub label: String,
 }
 //
 impl Button {
-    pub fn new(id: u64, label: Option<String>) -> Button {
+    pub fn new(id: u64, label: String) -> Button {
         Button{
             id,
             label
@@ -134,12 +135,7 @@ impl Button {
 //
 impl Render for Button {
     fn render(&self, ui: &mut egui::Ui) {
-        // if self.label.is_some() {
-        //     let str = self.label.unwrap().as_str();
-        //     let _ = ui.button(str.as_ref());
-        // } else {
-            let _ = ui.button("Test");
-        // }
+        let _ = ui.button(self.label.as_str());
     }
 }
 
