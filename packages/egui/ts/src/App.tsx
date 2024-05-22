@@ -11,6 +11,7 @@ import initWasmModule, {
 
 import "./App.css";
 
+// todo: improve this
 const module: any = {
     initWasmModule,
     set_widget,

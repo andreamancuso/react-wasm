@@ -1,6 +1,6 @@
 {
     "name": "@react-wasm/egui",
-    "version": "0.0.1",
+    "version": "0.0.1-canary-001",
     "main": "dist/index.js",
     "files": [
         "dist/*"
@@ -17,7 +17,7 @@
         "build:library": "rimraf ./build && yarn tsup && yarn copy-wasm-to-build-folder",
         "tsc": "tsc --project ./tsconfig-build.json",
         "tsup": "tsup --format cjs --external react,react-dom",
-        "copy-wasm-to-build-folder": "cpy --flat ./src/lib/wasm/reactDearImgui.* dist/",
+        "copy-wasm-to-build-folder": "cpy --flat ./src/lib/wasm/*.js ./src/lib/wasm/*.wasm ./src/lib/wasm/*.d.ts dist/",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
     },
     "tsup": {
