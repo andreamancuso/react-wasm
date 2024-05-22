@@ -46,10 +46,10 @@ export default class {
     cloneNodeWithNewChildren = (node) => {
         // todo: yikes
         if (this.cloningNode) {
-            // this.wasmModule.setChildren(
-            //     this.cloningNode.id,
-            //     JSON.stringify(this.cloningNode.childrenIds),
-            // );
+            this.wasmModule.set_children(
+                this.cloningNode.id,
+                JSON.stringify(this.cloningNode.childrenIds),
+            );
         }
 
         this.cloningNode = { id: node.id, childrenIds: [] };
@@ -84,13 +84,13 @@ export default class {
         if (this.cloningNode) {
             const cloningNodeId = this.cloningNode.id;
             const payload = JSON.stringify(this.cloningNode.childrenIds);
-            this.wasmModule.set_children(BigInt(cloningNodeId), payload);
+            this.wasmModule.set_children(cloningNodeId, payload);
             this.cloningNode = null;
         }
 
         const payload = JSON.stringify(newChildSet.map(({ id }) => id));
 
-        this.wasmModule.set_children(BigInt(container), payload);
+        this.wasmModule.set_children(container, payload);
     };
     registerEventHandler = (dispatchEventFn) => {
         this.dispatchEventFn = dispatchEventFn;

@@ -4,19 +4,23 @@
 */
 export function init_egui(): void;
 /**
-* @param {bigint} parent_id
-* @param {bigint} child_id
+* @param {number} parent_id
+* @param {number} child_id
 */
-export function append_child(parent_id: bigint, child_id: bigint): void;
+export function append_child(parent_id: number, child_id: number): void;
 /**
-* @param {bigint} parent_id
+* @param {number} parent_id
 * @param {string} raw_children_ids
 */
-export function set_children(parent_id: bigint, raw_children_ids: string): void;
+export function set_children(parent_id: number, raw_children_ids: string): void;
 /**
 * @returns {string}
 */
-export function get_content(): string;
+export function get_widgets(): string;
+/**
+* @returns {string}
+*/
+export function get_hierarchy(): string;
 /**
 * @param {string} raw_widget_def
 */
@@ -28,7 +32,8 @@ export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly append_child: (a: number, b: number) => void;
   readonly set_children: (a: number, b: number, c: number) => void;
-  readonly get_content: (a: number) => void;
+  readonly get_widgets: (a: number) => void;
+  readonly get_hierarchy: (a: number) => void;
   readonly set_widget: (a: number, b: number) => void;
   readonly init_egui: () => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;

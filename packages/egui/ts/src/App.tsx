@@ -1,6 +1,13 @@
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { ReactEgui } from "./lib/components/ReactEgui/components";
-import initWasmModule, { set_widget, init_egui, set_children } from "./lib/wasm/eframe_template";
+import initWasmModule, {
+    set_widget,
+    init_egui,
+    set_children,
+    append_child,
+    get_hierarchy,
+    get_widgets,
+} from "./lib/wasm/eframe_template";
 
 import "./App.css";
 
@@ -9,21 +16,21 @@ const module: any = {
     set_widget,
     set_children,
     init_egui,
+    append_child,
+    get_hierarchy,
+    get_widgets,
 };
 
 function App() {
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // const arr = useMemo(() => Array.from({ length: 1000 }), []);
-
     return (
         <div id="app" ref={containerRef}>
             <ReactEgui initWasmModule={module} containerRef={containerRef}>
-                <ReactEgui.InputText defaultValue="Hello, world!" />
-                <ReactEgui.Button label="Hello, world!" />
-                {/* {arr.map((_, index) => (
-                    <ReactEgui.InputText key={index} defaultValue="Hello, world!" />
-                ))} */}
+                <ReactEgui.Horizontal>
+                    <ReactEgui.InputText defaultValue="Hello, world!" />
+                    <ReactEgui.Button label="Hello, world!" />
+                </ReactEgui.Horizontal>
             </ReactEgui>
         </div>
     );

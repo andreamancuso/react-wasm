@@ -43,6 +43,13 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
                     // @ts-ignore
                     setWasmModule(initWasmModule);
+
+                    // setTimeout(() => {
+                    //     // @ts-ignore
+                    //     console.log(initWasmModule.get_widgets());
+                    //     // @ts-ignore
+                    //     console.log(initWasmModule.get_hierarchy());
+                    // }, 1000);
                 } catch (exception) {
                     console.log("Unable to initialize the WASM correctly", exception);
                 }

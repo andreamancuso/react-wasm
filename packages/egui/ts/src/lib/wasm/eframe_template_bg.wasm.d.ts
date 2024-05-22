@@ -3,7 +3,8 @@
 export const memory: WebAssembly.Memory;
 export function append_child(a: number, b: number): void;
 export function set_children(a: number, b: number, c: number): void;
-export function get_content(a: number): void;
+export function get_widgets(a: number): void;
+export function get_hierarchy(a: number): void;
 export function set_widget(a: number, b: number): void;
 export function init_egui(): void;
 export function __wbindgen_malloc(a: number, b: number): number;

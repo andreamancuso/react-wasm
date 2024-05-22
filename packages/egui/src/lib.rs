@@ -3,23 +3,23 @@
 mod app;
 
 use std::collections::HashMap;
-use std::ops::Deref;
+use std::ops::{Deref};
 use std::sync::{Arc, Mutex};
 use eframe::Frame;
-use egui::Context;
+use egui::{Context};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-pub use app::TemplateApp;
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
-use std::borrow::Borrow;
 use erased_serde::serialize_trait_object;
 
+type Widgets = HashMap<u32, Box<dyn Render + Send>>;
+type Hierarchy = HashMap<u32, Vec<u32>>;
 
-pub static WIDGETS: Lazy<Arc<Mutex<HashMap<u64, Box<dyn Render + Send>>>>> = Lazy::new(|| {
+pub static WIDGETS: Lazy<Arc<Mutex<Widgets>>> = Lazy::new(|| {
     Arc::new(Mutex::new(HashMap::new()))
 });
-pub static HIERARCHY: Lazy<Arc<Mutex<HashMap<u64, Vec<u64>>>>> = Lazy::new(|| {
+pub static HIERARCHY: Lazy<Arc<Mutex<Hierarchy>>> = Lazy::new(|| {
     Arc::new(Mutex::new(HashMap::new()))
 });
 
@@ -55,30 +55,43 @@ impl App {
         App{}
     }
 
-    pub fn render_widget_by_id(&mut self, w: &mut HashMap<u64, Box<dyn Render + Send>>, id: u64, ui: &mut egui::Ui) {
-        if w.get(&id).is_some() {
-            w.get_mut(&id).unwrap().render(ui);
+    pub fn render_widget_by_id(&mut self, widgets: &mut Widgets, hierarchy: &Hierarchy, ui: &mut egui::Ui, id: u32) {
+        if widgets.get(&id).is_some() {
+            let widget = widgets.get_mut(&id).unwrap();
+
+            match widget.get_type().as_str() {
+                "Horizontal" => {
+                    ui.horizontal(|ui| {
+                        self.render_children(widgets, hierarchy, ui, id);
+                    });
+                }
+                &_ => {
+                    widget.render(ui);
+                }
+            }
         }
     }
 
-    pub fn render_widgets(&mut self, w: &mut HashMap<u64, Box<dyn Render + Send>>, h: &HashMap<u64, Vec<u64>>, id: Option<u64>, ui: &mut egui::Ui) {
+    pub fn render_widgets(&mut self, widgets: &mut Widgets, hierarchy: &Hierarchy, ui: &mut egui::Ui, id: Option<u32>) {
         let normalized_id = id.or(Some(0)).unwrap();
 
-        if w.get(&normalized_id).is_some() {
-            self.render_widget_by_id(w, normalized_id, ui);
+        if widgets.get(&normalized_id).is_some() {
+            self.render_widget_by_id(widgets, hierarchy, ui, normalized_id);
         }
 
-        if w.get(&normalized_id).is_none() {
+        if widgets.get(&normalized_id).is_none() {
             // render_children?
-            self.render_children(w, h, normalized_id, ui);
+            self.render_children(widgets, hierarchy, ui, normalized_id);
         }
     }
 
-    pub fn render_children(&mut self, w: &mut HashMap<u64, Box<dyn Render + Send>>, h: &HashMap<u64, Vec<u64>>, id: u64, ui: &mut egui::Ui) {
-        if h.get(&id).is_some() {
-            if !h.get(&id).unwrap().is_empty() {
-                for val in h.get(&id).unwrap().iter() {
-                    self.render_widgets(w, h, Some(*val), ui);
+    pub fn render_children(&mut self, w: &mut Widgets, hierarchy: &Hierarchy, ui: &mut egui::Ui, id: u32) {
+        if hierarchy.get(&id).is_some() {
+            let children_ids = hierarchy.get(&id).unwrap();
+
+            if !children_ids.is_empty() {
+                for val in children_ids.iter() {
+                    self.render_widgets(w, hierarchy, ui, Some(*val));
                 }
             }
         }
@@ -87,17 +100,17 @@ impl App {
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
-        let mut w = WIDGETS.lock().unwrap_throw();
-        let h = HIERARCHY.lock().unwrap_throw();
+        let mut widgets = WIDGETS.lock().unwrap_throw();
+        let hierarchy = HIERARCHY.lock().unwrap_throw();
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            self.render_widgets(&mut *w, h.deref(), None, ui);
+            self.render_widgets(&mut widgets, hierarchy.deref(), ui, None);
         });
     }
 }
 
 #[wasm_bindgen]
-pub fn append_child(parent_id: u64, child_id: u64) -> () {
+pub fn append_child(parent_id: u32, child_id: u32) -> () {
     let mut m = HIERARCHY.lock().unwrap_throw();
 
     let children = m.get_mut(&parent_id);
@@ -108,26 +121,35 @@ pub fn append_child(parent_id: u64, child_id: u64) -> () {
         if !vec.contains(&child_id) {
             vec.push(child_id);
         }
+    } else {
+        m.insert(parent_id, vec![child_id]);
     }
 }
 
 #[wasm_bindgen]
-pub fn set_children(parent_id: u64, raw_children_ids: String) -> () {
+pub fn set_children(parent_id: u32, raw_children_ids: String) -> () {
     let mut m = HIERARCHY.lock().unwrap_throw();
 
     let children_ids: Value = serde_json::from_str(&*raw_children_ids).unwrap();
 
     if children_ids.is_array() {
-        // Convert array of JSON Value instances into Vec<u64>
-        m.insert(parent_id, children_ids.as_array().unwrap().iter().map(|x| x.as_u64().unwrap()).collect());
+        // Convert array of JSON Value instances into Vec<u32>
+        m.insert(parent_id, children_ids.as_array().unwrap().iter().map(|x| x.as_u64().unwrap() as u32).collect());
     }
 }
 
 #[wasm_bindgen]
-pub fn get_content() -> String {
+pub fn get_widgets() -> String {
     let m = WIDGETS.lock().unwrap_throw();
 
     return serde_json::to_string(&m.deref()).unwrap();
+}
+
+#[wasm_bindgen]
+pub fn get_hierarchy() -> String {
+    let h = HIERARCHY.lock().unwrap_throw();
+
+    return serde_json::to_string(&h.deref()).unwrap();
 }
 
 #[wasm_bindgen]
@@ -141,7 +163,7 @@ pub fn set_widget(raw_widget_def: String) {
         let maybe_widget_id = widget_def["id"].as_u64();
 
         if maybe_widget_id.is_some() && maybe_widget_type.is_some() {
-            let widget_id = maybe_widget_id.unwrap();
+            let widget_id = maybe_widget_id.unwrap() as u32;
             let widget_type = maybe_widget_type.unwrap();
 
             match widget_type {
@@ -157,6 +179,9 @@ pub fn set_widget(raw_widget_def: String) {
                         m.insert(widget_id, Box::new(InputText::new(widget_id, default_value)));
                     }
                 }
+                "Horizontal" => {
+                    m.insert(widget_id, Box::new(Horizontal::new(widget_id)));
+                }
                 &_ => {
                     log(format!("Unrecognised type: {}", widget_type).as_str());
                 }
@@ -169,16 +194,18 @@ pub fn set_widget(raw_widget_def: String) {
 
 pub trait Render: erased_serde::Serialize {
     fn render(&mut self, ui: &mut egui::Ui);
+
+    fn get_type(&self) -> String;
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Button {
-    pub id: u64,
+    pub id: u32,
     pub label: String,
 }
 //
 impl Button {
-    pub fn new(id: u64, label: &str) -> Button {
+    pub fn new(id: u32, label: &str) -> Button {
         Button{
             id,
             label: label.parse().unwrap()
@@ -190,16 +217,20 @@ impl Render for Button {
     fn render(&mut self, ui: &mut egui::Ui) {
         let _ = ui.button(self.label.as_str());
     }
+
+    fn get_type(&self) -> String {
+        return "Button".parse().unwrap();
+    }
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct InputText {
-    pub id: u64,
+    pub id: u32,
     pub value: String,
 }
 
 impl InputText {
-    fn new(id: u64, value: Option<&str>) -> InputText {
+    fn new(id: u32, value: Option<&str>) -> InputText {
         InputText{
             id,
             value: value.unwrap_or_default().parse().unwrap()
@@ -213,6 +244,31 @@ impl InputText {
 impl Render for InputText {
     fn render(&mut self, ui: &mut egui::Ui) {
         ui.text_edit_singleline(&mut self.value);
+    }
+
+    fn get_type(&self) -> String {
+        return "InputText".parse().unwrap();
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+struct Horizontal {
+    pub id: u32
+}
+
+impl Horizontal {
+    fn new(id: u32) -> Horizontal {
+        Horizontal{
+           id
+        }
+    }
+}
+
+impl Render for Horizontal {
+    fn render(&mut self, _ui: &mut egui::Ui) {}
+
+    fn get_type(&self) -> String {
+        return "Horizontal".parse().unwrap();
     }
 }
 
