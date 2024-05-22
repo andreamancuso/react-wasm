@@ -103,8 +103,11 @@ pub fn append_child(parent_id: u64, child_id: u64) -> () {
     let children = m.get_mut(&parent_id);
 
     if children.is_some() {
-        // todo: ensure child_id isn't already present...
-        children.unwrap().push(child_id);
+        let vec = children.unwrap();
+
+        if !vec.contains(&child_id) {
+            vec.push(child_id);
+        }
     }
 }
 
