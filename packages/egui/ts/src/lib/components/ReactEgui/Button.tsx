@@ -1,4 +1,3 @@
-import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
 import { WidgetFunctionComponent } from "./types";
 
 type ButtonProps = {
@@ -8,7 +7,5 @@ type ButtonProps = {
 };
 
 export const Button: WidgetFunctionComponent<ButtonProps> = ({ label, onClick }) => {
-    const [widgetId, widgetRegistrationService] = useWidgetEventManagement();
-
-    return <widget type="Button" label={label} id={widgetId.current} onClick={onClick} />;
+    return <widget type="Button" label={label} onClick={onClick} />;
 };

@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
 import { WidgetFunctionComponent } from "./types";
 
 export type InputTextProps = {
@@ -13,21 +11,7 @@ export const InputText: WidgetFunctionComponent<InputTextProps> = ({
     defaultValue,
     label,
 }) => {
-    const [widgetId, widgetRegistrationService] = useWidgetEventManagement("text");
-
-    useEffect(() => {
-        if (onChange) {
-            widgetRegistrationService.onTextInputChange(widgetId.current, onChange);
-        }
-    }, [onChange]);
-
     return (
-        <widget
-            type="InputText"
-            id={widgetId.current}
-            defaultValue={defaultValue}
-            label={label}
-            onChange={onChange}
-        />
+        <widget type="InputText" defaultValue={defaultValue} label={label} onChange={onChange} />
     );
 };

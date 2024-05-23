@@ -10,13 +10,14 @@ export type WidgetPropsMap = {
     Button: {
         label: string;
     };
+    CollapsingHeader: { label: string };
 };
 
 type WidgetKeys = keyof WidgetPropsMap;
 
 type ReactEguiType = typeof ReactEgui;
 
-type WidgetsRequiringId = "InputText" | "Button";
+type WidgetsWithEvents = "InputText" | "Button" | "CollapsingHeader";
 
 export type WidgetReactNode =
     | WidgetReactElementsFlat
@@ -41,9 +42,8 @@ export type ReactEguiTypeKeys = Exclude<
 export type ReactElementWidget<
     K extends WidgetKeys,
     P extends WidgetPropsMapFlat = WidgetPropsMapFlat,
-> = K extends WidgetsRequiringId
+> = K extends WidgetsWithEvents
     ? { [L in keyof Omit<P, "children">]: P[L] } & {
-          id: string;
           type: K;
           children?: WidgetReactNode;
       } & { onChange?: any; onClick?: any }
@@ -61,9 +61,8 @@ export type ReactElementWidgetsFlat = ReactElementWidgets[keyof ReactElementWidg
 export type EguiWidget<
     K extends WidgetKeys,
     P extends WidgetPropsMapFlat = WidgetPropsMapFlat,
-> = K extends WidgetsRequiringId
+> = K extends WidgetsWithEvents
     ? { [L in keyof Omit<P, "children">]: P[L] } & {
-          id: string;
           type: K;
           children?: EguiWidget<WidgetKeys>[];
       }
@@ -91,22 +90,13 @@ export type WidgetFunctionComponent<P = {}> = FunctionComponent<P> & {
 export type JSXWidgetNode<
     K extends WidgetKeys,
     P extends WidgetPropsMapFlat = WidgetPropsMapFlat,
-> = K extends WidgetsRequiringId
-    ? {
-          type: "widget";
-          props: {
-              id: string;
-              type: K;
-          } & P;
-          children?: JSXWidgetNodesFlat[];
-      }
-    : {
-          type: "widget";
-          props: {
-              type: K;
-          } & P;
-          children?: JSXWidgetNodesFlat[];
-      };
+> = {
+    type: "widget";
+    props: {
+        type: K;
+    } & P;
+    children?: JSXWidgetNodesFlat[];
+};
 
 type JSXWidgetNodes = {
     [K in WidgetKeys]: JSXWidgetNode<K, WidgetPropsMap[K]>;
