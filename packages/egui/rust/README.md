@@ -23,4 +23,4 @@ Rust Rover settings:
 -   add a WSL (Ubuntu 22.04) target; you will need to specify paths to both `rustc` and `cargo` (typically found in `/home/<user>/.cargo/bin/rustc` and `/home/<user>/.cargo/bin/cargo`); **IMPORTANT**: `Project default target` should be `Local machine` otherwise Rust Rover will pass a `--distribution` cli parameter to cargo, resulting in an error
 -   Ensure the correct toolchain is selected (v1.76)
 
-Finally, create a `wasm-pack` Run configuration ensuring the command is `build --target web`
+Finally, create a `wasm-pack` Run configuration ensuring the command is `build --target web --out-dir ../ts/src/lib/wasm` (add `--dev` for a dev build)
