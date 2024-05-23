@@ -26,7 +26,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
     // const canvasId = useMemo(() => `canvas-${uuidv4()}`, []);
     const canvasId = "the_canvas_id";
 
-    // const { eventHandlers } = useEguiWasm(ReactNativePrivateInterface);
+    const { eventHandlers } = useEguiWasm(ReactNativePrivateInterface);
 
     useEffect(() => {
         if (canvasRef.current && !isWasmModuleLoading.current) {
@@ -39,10 +39,17 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                     // @ts-ignore
                     localModule = await initWasmModule.initWasmModule();
                     // @ts-ignore
-                    initWasmModule.init_egui();
+                    initWasmModule.init_egui(eventHandlers.on_click);
 
                     // @ts-ignore
                     setWasmModule(initWasmModule);
+
+                    // setTimeout(() => {
+                    //     // @ts-ignore
+                    //     console.log(initWasmModule.get_widgets());
+                    //     // @ts-ignore
+                    //     console.log(initWasmModule.get_hierarchy());
+                    // }, 1000);
                 } catch (exception) {
                     console.log("Unable to initialize the WASM correctly", exception);
                 }
@@ -65,46 +72,6 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
             return () => {};
         }
     }, [canvasId, canvasRef]);
-
-    // useEffect(() => {
-    //     if (wasmModule) {
-    //         if (containerRef?.current) {
-    //             try {
-    //                 wasmModule.resizeWindow(
-    //                     containerRef.current.clientWidth,
-    //                     containerRef.current.clientHeight - 62,
-    //                 );
-    //             } catch (exception) {
-    //                 console.log("Unable to set initial window size");
-    //             }
-    //         }
-    //     }
-    // }, [wasmModule]);
-
-    // useEffect(() => {
-    //     if (wasmModule && containerRef?.current) {
-    //         const resizeObserver = new ResizeObserver(
-    //             debounce(() => {
-    //                 if (containerRef.current) {
-    //                     try {
-    //                         wasmModule.resizeWindow(
-    //                             containerRef.current.clientWidth,
-    //                             containerRef.current.clientHeight - 62,
-    //                         );
-    //                     } catch (exception) {
-    //                         console.log("Unable to resize window");
-    //                     }
-    //                 }
-    //             }, 20),
-    //         );
-
-    //         resizeObserver.observe(containerRef.current);
-
-    //         return () => resizeObserver.disconnect(); // clean up
-    //     } else {
-    //         return () => {};
-    //     }
-    // }, [wasmModule, containerRef]);
 
     return (
         <>

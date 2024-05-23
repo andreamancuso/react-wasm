@@ -5,6 +5,7 @@ import { MainComponentProps } from "../ReactEgui";
 export type Primitive = string | number | boolean;
 
 export type WidgetPropsMap = {
+    Horizontal: {};
     InputText: { defaultValue?: string; label?: string };
     Button: {
         label: string;

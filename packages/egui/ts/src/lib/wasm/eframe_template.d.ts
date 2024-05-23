@@ -1,22 +1,27 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
+* @param {any} on_click
 */
-export function init_egui(): void;
+export function init_egui(on_click: any): void;
 /**
-* @param {bigint} parent_id
-* @param {bigint} child_id
+* @param {number} parent_id
+* @param {number} child_id
 */
-export function append_child(parent_id: bigint, child_id: bigint): void;
+export function append_child(parent_id: number, child_id: number): void;
 /**
-* @param {bigint} parent_id
+* @param {number} parent_id
 * @param {string} raw_children_ids
 */
-export function set_children(parent_id: bigint, raw_children_ids: string): void;
+export function set_children(parent_id: number, raw_children_ids: string): void;
 /**
 * @returns {string}
 */
-export function get_content(): string;
+export function get_widgets(): string;
+/**
+* @returns {string}
+*/
+export function get_hierarchy(): string;
 /**
 * @param {string} raw_widget_def
 */
@@ -26,19 +31,20 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
+  readonly init_egui: (a: number) => void;
   readonly append_child: (a: number, b: number) => void;
   readonly set_children: (a: number, b: number, c: number) => void;
-  readonly get_content: (a: number) => void;
+  readonly get_widgets: (a: number) => void;
+  readonly get_hierarchy: (a: number) => void;
   readonly set_widget: (a: number, b: number) => void;
-  readonly init_egui: () => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_export_2: WebAssembly.Table;
-  readonly wasm_bindgen__convert__closures__invoke0_mut__h59e20da8356977db: (a: number, b: number) => void;
+  readonly _dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__ha16edc2a9a2a2c97: (a: number, b: number) => void;
+  readonly _dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h8adb8f78896a0e1e: (a: number, b: number, c: number) => void;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
-  readonly wasm_bindgen__convert__closures__invoke0_mut__h4de0ebe8f2ef70bd: (a: number, b: number, c: number) => void;
-  readonly wasm_bindgen__convert__closures__invoke1_mut__hfff52bc338b5d8a2: (a: number, b: number, c: number) => void;
-  readonly _dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h739a2aa1b0b5e66f: (a: number, b: number, c: number) => void;
+  readonly _dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h5058125a0c5fb5d1: (a: number, b: number, c: number) => void;
+  readonly _dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h19fcf7ddf5e13222: (a: number, b: number, c: number) => void;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_exn_store: (a: number) => void;
 }

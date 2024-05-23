@@ -1,15 +1,13 @@
-import { ReactImgui } from "./components/ReactEgui/components";
+import { ReactEgui } from "./components/ReactEgui/components";
 import { ReactNativeWrapper } from "./components/ReactNativeWrapper";
-import { useWidgetEventManagement, useWidgetRegistrationService, useDearImguiWasm } from "./hooks";
+import { useWidgetEventManagement, useWidgetRegistrationService, useEguiWasm } from "./hooks";
 import { WidgetRegistrationServiceContext } from "./contexts";
-import { ImGuiDemo } from "./components/ImGuiDemo/ImGuiDemo";
 
 export {
-    ReactImgui,
+    ReactEgui,
     ReactNativeWrapper,
     useWidgetEventManagement,
     useWidgetRegistrationService,
-    useDearImguiWasm,
+    useEguiWasm,
     WidgetRegistrationServiceContext,
-    ImGuiDemo,
 };
