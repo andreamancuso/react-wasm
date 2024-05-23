@@ -28,7 +28,6 @@ export const InputText: WidgetFunctionComponent<InputTextProps> = ({
             defaultValue={defaultValue}
             label={label}
             onChange={onChange}
-            // onChangeText={onChange}
         />
     );
 };

@@ -29,11 +29,18 @@ function App() {
         console.log("click!");
     }, []);
 
+    const handleInputTextChange = useCallback((event: any) => {
+        console.log("changed text:", event.nativeEvent.value);
+    }, []);
+
     return (
         <div id="app" ref={containerRef}>
             <ReactEgui initWasmModule={module} containerRef={containerRef}>
                 <ReactEgui.Horizontal>
-                    <ReactEgui.InputText defaultValue="Hello, world!" />
+                    <ReactEgui.InputText
+                        onChange={handleInputTextChange}
+                        defaultValue="Hello, world!"
+                    />
                     <ReactEgui.Button onClick={handleClick} label="Hello, world!" />
                 </ReactEgui.Horizontal>
             </ReactEgui>

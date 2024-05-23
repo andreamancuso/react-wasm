@@ -14,7 +14,6 @@ use serde_json::{Value};
 use erased_serde::serialize_trait_object;
 use js_sys::Function;
 
-// type OnClickFn = &'static fn(u32) -> Result<JsValue, JsValue>;
 type Widgets = HashMap<u32, Box<dyn Render + Send>>;
 type Hierarchy = HashMap<u32, Vec<u32>>;
 
@@ -26,68 +25,36 @@ pub static HIERARCHY: Lazy<Arc<Mutex<Hierarchy>>> = Lazy::new(|| {
     Arc::new(Mutex::new(HashMap::new()))
 });
 
-// pub static EVENT_HANDLERS: Lazy<Arc<Mutex<EventHandlers>>> = Lazy::new(|| {
-//     Arc::new(Mutex::new(HashMap::new()))
-// });
-
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     fn log(a: &str);
 }
 
-// pub fn with_stdout(f: &Function) {
-//     let _ = f.call1(&JsValue::NULL, &JsValue::from_str("Hello world!"));
-// }
-
-// pub struct EventHandlers {
-//     on_click: Box<dyn Fn(u32) -> Result<JsValue, JsValue>>,
-//     on_change: Box<dyn Fn(u32) -> Result<JsValue, JsValue>>
-// }
-//
-// impl EventHandlers {
-//     pub fn new(on_click: Box<dyn Fn(u32) -> Result<JsValue, JsValue>>, on_change: Box<dyn Fn(u32) -> Result<JsValue, JsValue>>) -> EventHandlers {
-//         EventHandlers{
-//             on_click,
-//             on_change
-//         }
-//     }
-// }
-
-// #[wasm_bindgen]
-// pub struct EventHandlers {
-//     on_click: js_sys::Function,
-//     on_change: js_sys::Function,
-// }
-//
-// impl EventHandlers {
-//     #[wasm_bindgen(static_method_of = EventHandlers)]
-//     pub fn new(on_click: js_sys::Function, on_change: js_sys::Function) -> EventHandlers {
-//         EventHandlers {
-//             on_click,
-//             on_change
-//         }
-//     }
-// }
-
 pub struct EventHandlers {
-    on_click: Box<JsValue>
+    on_click: JsValue,
+    on_text_change: JsValue
 }
 
 impl EventHandlers {
-    pub fn new(on_click: Box<JsValue>) -> EventHandlers {
+    pub fn new(on_click: JsValue, on_text_change: JsValue) -> EventHandlers {
         EventHandlers{
-            on_click
+            on_click,
+            on_text_change
         }
     }
 
     pub fn on_click(&self, id: u32) {
         self.on_click.unchecked_ref::<Function>().call1(&JsValue::NULL, &JsValue::from(id)).unwrap();
     }
+
+    pub fn on_text_change(&self, id: u32, value: String) {
+        self.on_text_change.unchecked_ref::<Function>().call2(&JsValue::NULL, &JsValue::from(id), &JsValue::from(value)).unwrap();
+    }
 }
 
 #[wasm_bindgen]
-pub fn init_egui(on_click: JsValue) {
+pub fn init_egui(on_click: JsValue, on_text_change: JsValue) {
     // Redirect `log` message to `console.log` and friends:
     eframe::WebLogger::init(log::LevelFilter::Debug).ok();
 
@@ -100,7 +67,7 @@ pub fn init_egui(on_click: JsValue) {
                 web_options,
                 Box::new(|cc| Box::new(
                     crate::App::new(
-                        EventHandlers::new(Box::new(on_click)),
+                        EventHandlers::new(on_click, on_text_change),
                         cc
                         )
                     )
@@ -310,7 +277,9 @@ impl InputText {
 
 impl Render for InputText {
     fn render(&mut self, ui: &mut egui::Ui, app: &App) {
-        ui.text_edit_singleline(&mut self.value);
+        if ui.text_edit_singleline(&mut self.value).changed() {
+            app.event_handlers.on_text_change(self.id, self.value.clone());
+        }
     }
 
     fn get_type(&self) -> String {

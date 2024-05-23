@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { Primitive } from "../components/ReactImgui/types";
 
 export const useDearImguiWasm = (ReactNativePrivateInterface: any) => {
-    const onTextChange = useCallback((id: string, value: string) => {
+    const onTextChange = useCallback((id: number, value: string) => {
         const rootNodeID = id;
         const topLevelType = "onChange";
         const nativeEventParam = { value };
@@ -14,7 +14,7 @@ export const useDearImguiWasm = (ReactNativePrivateInterface: any) => {
         );
     }, []);
 
-    const onComboChange = useCallback((id: string, value: number) => {
+    const onComboChange = useCallback((id: number, value: number) => {
         const rootNodeID = id;
         const topLevelType = "onChange";
         const nativeEventParam = { value };
@@ -26,7 +26,7 @@ export const useDearImguiWasm = (ReactNativePrivateInterface: any) => {
         );
     }, []);
 
-    const onNumericValueChange = useCallback((id: string, value: number) => {
+    const onNumericValueChange = useCallback((id: number, value: number) => {
         const rootNodeID = id;
         const topLevelType = "onChange";
         const nativeEventParam = { value };
@@ -38,7 +38,7 @@ export const useDearImguiWasm = (ReactNativePrivateInterface: any) => {
         );
     }, []);
 
-    const onMultiValueChange = useCallback((id: string, values: Primitive[]) => {
+    const onMultiValueChange = useCallback((id: number, values: Primitive[]) => {
         const rootNodeID = id;
         const topLevelType = "onChange";
         const nativeEventParam = { values };
@@ -50,7 +50,7 @@ export const useDearImguiWasm = (ReactNativePrivateInterface: any) => {
         );
     }, []);
 
-    const onBooleanValueChange = useCallback((id: string, value: boolean) => {
+    const onBooleanValueChange = useCallback((id: number, value: boolean) => {
         const rootNodeID = id;
         const topLevelType = "onChange";
         const nativeEventParam = { value };
@@ -62,7 +62,7 @@ export const useDearImguiWasm = (ReactNativePrivateInterface: any) => {
         );
     }, []);
 
-    const onClick = useCallback((id: string) => {
+    const onClick = useCallback((id: number) => {
         const rootNodeID = id;
         const topLevelType = "onClick";
 
