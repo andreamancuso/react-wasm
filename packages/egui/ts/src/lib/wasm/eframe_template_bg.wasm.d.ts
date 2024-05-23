@@ -6,7 +6,7 @@ export function set_children(a: number, b: number, c: number): void;
 export function get_widgets(a: number): void;
 export function get_hierarchy(a: number): void;
 export function set_widget(a: number, b: number): void;
-export function init_egui(a: number, b: number): void;
+export function init_egui(a: number, b: number, c: number): void;
 export function __wbindgen_malloc(a: number, b: number): number;
 export function __wbindgen_realloc(a: number, b: number, c: number, d: number): number;
 export const __wbindgen_export_2: WebAssembly.Table;

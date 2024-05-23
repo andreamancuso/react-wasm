@@ -3,8 +3,9 @@
 /**
 * @param {any} on_click
 * @param {any} on_text_change
+* @param {any} on_bool_value_change
 */
-export function init_egui(on_click: any, on_text_change: any): void;
+export function init_egui(on_click: any, on_text_change: any, on_bool_value_change: any): void;
 /**
 * @param {number} parent_id
 * @param {number} child_id
@@ -37,7 +38,7 @@ export interface InitOutput {
   readonly get_widgets: (a: number) => void;
   readonly get_hierarchy: (a: number) => void;
   readonly set_widget: (a: number, b: number) => void;
-  readonly init_egui: (a: number, b: number) => void;
+  readonly init_egui: (a: number, b: number, c: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_export_2: WebAssembly.Table;

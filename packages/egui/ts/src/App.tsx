@@ -33,16 +33,25 @@ function App() {
         console.log("changed text:", event.nativeEvent.value);
     }, []);
 
+    const handleCollapsingHeaderChange = useCallback((event: any) => {
+        console.log("changed collapsing header state:", event.nativeEvent.value);
+    }, []);
+
     return (
         <div id="app" ref={containerRef}>
             <ReactEgui initWasmModule={module} containerRef={containerRef}>
-                <ReactEgui.Horizontal>
-                    <ReactEgui.InputText
-                        onChange={handleInputTextChange}
-                        defaultValue="Hello, world!"
-                    />
-                    <ReactEgui.Button onClick={handleClick} label="Hello, world!" />
-                </ReactEgui.Horizontal>
+                <ReactEgui.CollapsingHeader
+                    onChange={handleCollapsingHeaderChange}
+                    label="Click to reveal contents"
+                >
+                    <ReactEgui.Horizontal>
+                        <ReactEgui.InputText
+                            onChange={handleInputTextChange}
+                            defaultValue="Hello, world!"
+                        />
+                        <ReactEgui.Button onClick={handleClick} label="Hello, world!" />
+                    </ReactEgui.Horizontal>
+                </ReactEgui.CollapsingHeader>
             </ReactEgui>
         </div>
     );

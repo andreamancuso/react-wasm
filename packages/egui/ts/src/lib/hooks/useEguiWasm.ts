@@ -77,7 +77,7 @@ export const useEguiWasm = (ReactNativePrivateInterface: any) => {
             onComboChange,
             onNumericValueChange,
             onMultiValueChange,
-            onBooleanValueChange,
+            on_bool_value_change: onBooleanValueChange,
             on_click: onClick,
         },
     };

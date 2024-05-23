@@ -33,14 +33,16 @@ extern "C" {
 
 pub struct EventHandlers {
     on_click: JsValue,
-    on_text_change: JsValue
+    on_text_change: JsValue,
+    on_bool_value_change: JsValue
 }
 
 impl EventHandlers {
-    pub fn new(on_click: JsValue, on_text_change: JsValue) -> EventHandlers {
+    pub fn new(on_click: JsValue, on_text_change: JsValue, on_bool_value_change: JsValue) -> EventHandlers {
         EventHandlers{
             on_click,
-            on_text_change
+            on_text_change,
+            on_bool_value_change
         }
     }
 
@@ -51,10 +53,14 @@ impl EventHandlers {
     pub fn on_text_change(&self, id: u32, value: String) {
         self.on_text_change.unchecked_ref::<Function>().call2(&JsValue::NULL, &JsValue::from(id), &JsValue::from(value)).unwrap();
     }
+
+    pub fn on_bool_value_change(&self, id: u32, value: bool) {
+        self.on_bool_value_change.unchecked_ref::<Function>().call2(&JsValue::NULL, &JsValue::from(id), &JsValue::from(value)).unwrap();
+    }
 }
 
 #[wasm_bindgen]
-pub fn init_egui(on_click: JsValue, on_text_change: JsValue) {
+pub fn init_egui(on_click: JsValue, on_text_change: JsValue, on_bool_value_change: JsValue) {
     // Redirect `log` message to `console.log` and friends:
     eframe::WebLogger::init(log::LevelFilter::Debug).ok();
 
@@ -67,7 +73,7 @@ pub fn init_egui(on_click: JsValue, on_text_change: JsValue) {
                 web_options,
                 Box::new(|cc| Box::new(
                     crate::App::new(
-                        EventHandlers::new(on_click, on_text_change),
+                        EventHandlers::new(on_click, on_text_change, on_bool_value_change),
                         cc
                         )
                     )
@@ -88,19 +94,38 @@ impl App {
     }
 
     pub fn render_widget_by_id(&mut self, widgets: &mut Widgets, hierarchy: &Hierarchy, ui: &mut egui::Ui, id: u32) {
-        if widgets.get(&id).is_some() {
-            let widget = widgets.get_mut(&id).unwrap();
+        if widgets.contains_key(&id) {
+            ui.push_id(id, |ui| {
+                match widgets.get(&id).unwrap_throw().get_type() {
+                    "Horizontal" => {
+                        ui.horizontal(|ui| {
+                            self.render_children(widgets, hierarchy, ui, id);
+                        });
+                    }
+                    "CollapsingHeader" => {
+                        // todo: not sure which of the two approaches to take, bearing in mind that CollapsingState is the most flexible of the two
+                        // egui::CollapsingHeader::new(widgets.get(&id).unwrap_throw().get_label())
+                        //     .enabled(false)
+                        //     .show(ui, |ui| {
+                        //         self.render_children(widgets, hierarchy, ui, id);
+                        //     });
 
-            match widget.get_type().as_str() {
-                "Horizontal" => {
-                    ui.horizontal(|ui| {
-                        self.render_children(widgets, hierarchy, ui, id);
-                    });
+                        let collapsing_header_id = ui.make_persistent_id(id);
+                        let collapsing_state = egui::collapsing_header::CollapsingState::load_with_default_open(ui.ctx(), collapsing_header_id, true);
+
+                        collapsing_state.show_header(ui, |ui| {
+                                ui.label(widgets.get(&id).unwrap_throw().get_label()).clicked(); // you can put checkboxes or whatever here
+                            })
+                            .body(|ui| {
+                                self.render_children(widgets, hierarchy, ui, id);
+                            })
+                        ;
+                    }
+                    &_ => {
+                        widgets.get_mut(&id).unwrap().render(ui, self);
+                    }
                 }
-                &_ => {
-                    widget.render(ui, self);
-                }
-            }
+            });
         }
     }
 
@@ -214,6 +239,11 @@ pub fn set_widget(raw_widget_def: String) {
                 "Horizontal" => {
                     m.insert(widget_id, Box::new(Horizontal::new(widget_id)));
                 }
+                "CollapsingHeader" => {
+                    if widget_def["label"].is_string() {
+                        m.insert(widget_id, Box::new(CollapsingHeader::new(widget_id, widget_def["label"].as_str().unwrap())));
+                    }
+                }
                 &_ => {
                     log(format!("Unrecognised type: {}", widget_type).as_str());
                 }
@@ -227,20 +257,24 @@ pub fn set_widget(raw_widget_def: String) {
 pub trait Render: erased_serde::Serialize {
     fn render(&mut self, ui: &mut egui::Ui, app: &App);
 
-    fn get_type(&self) -> String;
+    fn get_type(&self) -> &str;
+
+    fn get_label(&self) -> &str;
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Button {
     pub id: u32,
     pub label: String,
+    pub widget_type: String
 }
 //
 impl Button {
     pub fn new(id: u32, label: &str) -> Button {
         Button{
             id,
-            label: label.parse().unwrap()
+            label: String::from(label),
+            widget_type: String::from("Button")
         }
     }
 }
@@ -252,8 +286,12 @@ impl Render for Button {
         }
     }
 
-    fn get_type(&self) -> String {
-        return "Button".parse().unwrap();
+    fn get_type(&self) -> &str {
+        return self.widget_type.as_str();
+    }
+
+    fn get_label(&self) -> &str {
+        return "";
     }
 }
 
@@ -261,17 +299,19 @@ impl Render for Button {
 pub struct InputText {
     pub id: u32,
     pub value: String,
+    pub widget_type: String
 }
 
 impl InputText {
     fn new(id: u32, value: Option<&str>) -> InputText {
         InputText{
             id,
-            value: value.unwrap_or_default().parse().unwrap()
+            value: String::from(value.unwrap_or_default()),
+            widget_type: String::from("InputText")
         }
     }
     fn set_value(mut self, value: &str) -> () {
-        self.value = value.parse().unwrap();
+        self.value = String::from(value);
     }
 }
 
@@ -282,20 +322,26 @@ impl Render for InputText {
         }
     }
 
-    fn get_type(&self) -> String {
-        return "InputText".parse().unwrap();
+    fn get_type(&self) -> &str {
+        return self.widget_type.as_str();
+    }
+
+    fn get_label(&self) -> &str {
+        return "";
     }
 }
 
 #[derive(Serialize, Deserialize)]
 struct Horizontal {
-    pub id: u32
+    pub id: u32,
+    pub widget_type: String
 }
 
 impl Horizontal {
     fn new(id: u32) -> Horizontal {
         Horizontal{
-           id
+            id,
+            widget_type: String::from("Horizontal")
         }
     }
 }
@@ -303,8 +349,39 @@ impl Horizontal {
 impl Render for Horizontal {
     fn render(&mut self, _ui: &mut egui::Ui, app: &App) {}
 
-    fn get_type(&self) -> String {
-        return "Horizontal".parse().unwrap();
+    fn get_type(&self) -> &str { return self.widget_type.as_str(); }
+
+    fn get_label(&self) -> &str {
+        return "";
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+struct CollapsingHeader {
+    pub id: u32,
+    pub label: String,
+    pub widget_type: String
+}
+
+impl CollapsingHeader {
+    pub fn new(id: u32, label: &str) -> CollapsingHeader {
+        CollapsingHeader{
+            id,
+            label: String::from(label),
+            widget_type: String::from("CollapsingHeader")
+        }
+    }
+}
+
+impl Render for CollapsingHeader {
+    fn render(&mut self, _ui: &mut egui::Ui, app: &App) {}
+
+    fn get_type(&self) -> &str {
+        return self.widget_type.as_str();
+    }
+
+    fn get_label(&self) -> &str {
+        return &self.label;
     }
 }
 
