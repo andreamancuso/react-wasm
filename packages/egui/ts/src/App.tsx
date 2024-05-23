@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import { ReactEgui } from "./lib/components/ReactEgui/components";
 import initWasmModule, {
     set_widget,
@@ -25,12 +25,16 @@ const module: any = {
 function App() {
     const containerRef = useRef<HTMLDivElement>(null);
 
+    const handleClick = useCallback(() => {
+        console.log("click!");
+    }, []);
+
     return (
         <div id="app" ref={containerRef}>
             <ReactEgui initWasmModule={module} containerRef={containerRef}>
                 <ReactEgui.Horizontal>
                     <ReactEgui.InputText defaultValue="Hello, world!" />
-                    <ReactEgui.Button label="Hello, world!" />
+                    <ReactEgui.Button onClick={handleClick} label="Hello, world!" />
                 </ReactEgui.Horizontal>
             </ReactEgui>
         </div>

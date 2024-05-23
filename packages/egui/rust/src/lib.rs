@@ -6,14 +6,13 @@ use std::collections::HashMap;
 use std::ops::{Deref};
 use std::sync::{Arc, Mutex};
 use eframe::Frame;
-use eframe::web_sys::js_sys::Function;
 use egui::{Context};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
 use erased_serde::serialize_trait_object;
-use wasm_bindgen::prelude::*;
+use js_sys::Function;
 
 // type OnClickFn = &'static fn(u32) -> Result<JsValue, JsValue>;
 type Widgets = HashMap<u32, Box<dyn Render + Send>>;
@@ -71,30 +70,28 @@ extern "C" {
 //     }
 // }
 
-#[wasm_bindgen]
-pub struct VecU32 {
-    xs: Vec<u32>,
+pub struct EventHandlers {
+    on_click: Box<JsValue>
 }
 
-#[wasm_bindgen]
-impl VecU32 {
-    pub fn each(&self, f: &js_sys::Function) {
-        let this = JsValue::null();
-        for &x in &self.xs {
-            let x = JsValue::from(x);
-            let _ = f.call1(&this, &x);
+impl EventHandlers {
+    pub fn new(on_click: Box<JsValue>) -> EventHandlers {
+        EventHandlers{
+            on_click
         }
+    }
+
+    pub fn on_click(&self, id: u32) {
+        self.on_click.unchecked_ref::<Function>().call1(&JsValue::NULL, &JsValue::from(id)).unwrap();
     }
 }
 
 #[wasm_bindgen]
-pub fn init_egui(event_handlers: VecU32) {
+pub fn init_egui(on_click: JsValue) {
     // Redirect `log` message to `console.log` and friends:
     eframe::WebLogger::init(log::LevelFilter::Debug).ok();
 
     let web_options = eframe::WebOptions::default();
-
-    // let a = OwningRef::new(Box::new(on_click));
 
     wasm_bindgen_futures::spawn_local(async {
         eframe::WebRunner::new()
@@ -103,7 +100,11 @@ pub fn init_egui(event_handlers: VecU32) {
                 web_options,
                 Box::new(|cc| Box::new(
                     crate::App::new(
-                        cc))),
+                        EventHandlers::new(Box::new(on_click)),
+                        cc
+                        )
+                    )
+                ),
             )
             .await
             .expect("failed to start eframe");
@@ -111,12 +112,12 @@ pub fn init_egui(event_handlers: VecU32) {
 }
 
 pub struct App {
-    // event_handlers: EventHandlers
+    event_handlers: EventHandlers
 }
 
 impl App {
-    pub fn new(_cc: &eframe::CreationContext<'_>) -> App {
-        App{  }
+    pub fn new(event_handlers: EventHandlers, _cc: &eframe::CreationContext<'_>) -> App {
+        App{ event_handlers }
     }
 
     pub fn render_widget_by_id(&mut self, widgets: &mut Widgets, hierarchy: &Hierarchy, ui: &mut egui::Ui, id: u32) {
@@ -130,7 +131,7 @@ impl App {
                     });
                 }
                 &_ => {
-                    widget.render(ui);
+                    widget.render(ui, self);
                 }
             }
         }
@@ -257,7 +258,7 @@ pub fn set_widget(raw_widget_def: String) {
 // ----------------
 
 pub trait Render: erased_serde::Serialize {
-    fn render(&mut self, ui: &mut egui::Ui);
+    fn render(&mut self, ui: &mut egui::Ui, app: &App);
 
     fn get_type(&self) -> String;
 }
@@ -278,8 +279,10 @@ impl Button {
 }
 //
 impl Render for Button {
-    fn render(&mut self, ui: &mut egui::Ui) {
-        let _ = ui.button(self.label.as_str());
+    fn render(&mut self, ui: &mut egui::Ui, app: &App) {
+        if ui.button(self.label.as_str()).clicked() {
+            app.event_handlers.on_click(self.id);
+        }
     }
 
     fn get_type(&self) -> String {
@@ -306,7 +309,7 @@ impl InputText {
 }
 
 impl Render for InputText {
-    fn render(&mut self, ui: &mut egui::Ui) {
+    fn render(&mut self, ui: &mut egui::Ui, app: &App) {
         ui.text_edit_singleline(&mut self.value);
     }
 
@@ -329,7 +332,7 @@ impl Horizontal {
 }
 
 impl Render for Horizontal {
-    fn render(&mut self, _ui: &mut egui::Ui) {}
+    fn render(&mut self, _ui: &mut egui::Ui, app: &App) {}
 
     fn get_type(&self) -> String {
         return "Horizontal".parse().unwrap();

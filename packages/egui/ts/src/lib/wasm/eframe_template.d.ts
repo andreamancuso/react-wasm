@@ -1,9 +1,9 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
-* @param {VecU32} event_handlers
+* @param {any} on_click
 */
-export function init_egui(event_handlers: VecU32): void;
+export function init_egui(on_click: any): void;
 /**
 * @param {number} parent_id
 * @param {number} child_id
@@ -26,22 +26,11 @@ export function get_hierarchy(): string;
 * @param {string} raw_widget_def
 */
 export function set_widget(raw_widget_def: string): void;
-/**
-*/
-export class VecU32 {
-  free(): void;
-/**
-* @param {Function} f
-*/
-  each(f: Function): void;
-}
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly __wbg_vecu32_free: (a: number) => void;
-  readonly vecu32_each: (a: number, b: number) => void;
   readonly init_egui: (a: number) => void;
   readonly append_child: (a: number, b: number) => void;
   readonly set_children: (a: number, b: number, c: number) => void;

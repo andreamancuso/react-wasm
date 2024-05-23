@@ -1,8 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
-export function __wbg_vecu32_free(a: number): void;
-export function vecu32_each(a: number, b: number): void;
 export function init_egui(a: number): void;
 export function append_child(a: number, b: number): void;
 export function set_children(a: number, b: number, c: number): void;

@@ -284,30 +284,11 @@ function __wbg_adapter_37(arg0, arg1, arg2) {
     wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h19fcf7ddf5e13222(arg0, arg1, addHeapObject(arg2));
 }
 
-let stack_pointer = 128;
-
-function addBorrowedObject(obj) {
-    if (stack_pointer == 1) throw new Error('out of js stack');
-    heap[--stack_pointer] = obj;
-    return stack_pointer;
-}
-
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-    return instance.ptr;
-}
 /**
-* @param {VecU32} event_handlers
+* @param {any} on_click
 */
-export function init_egui(event_handlers) {
-    _assertClass(event_handlers, VecU32);
-    if (event_handlers.__wbg_ptr === 0) {
-        throw new Error('Attempt to use a moved value');
-    }
-    var ptr0 = event_handlers.__destroy_into_raw();
-    wasm.init_egui(ptr0);
+export function init_egui(on_click) {
+    wasm.init_egui(addHeapObject(on_click));
 }
 
 /**
@@ -385,42 +366,6 @@ function handleError(f, args) {
         return f.apply(this, args);
     } catch (e) {
         wasm.__wbindgen_exn_store(addHeapObject(e));
-    }
-}
-
-const VecU32Finalization = (typeof FinalizationRegistry === 'undefined')
-    ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_vecu32_free(ptr >>> 0));
-/**
-*/
-export class VecU32 {
-
-    constructor() {
-        throw new Error('cannot invoke `new` directly');
-    }
-
-    __destroy_into_raw() {
-        const ptr = this.__wbg_ptr;
-        this.__wbg_ptr = 0;
-        VecU32Finalization.unregister(this);
-        return ptr;
-    }
-
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_vecu32_free(ptr);
-    }
-    /**
-    * @param {Function} f
-    */
-    each(f) {
-        try {
-            if (this.__wbg_ptr == 0) throw new Error('Attempt to use a moved value');
-            _assertNum(this.__wbg_ptr);
-            wasm.vecu32_each(this.__wbg_ptr, addBorrowedObject(f));
-        } finally {
-            heap[stack_pointer++] = undefined;
-        }
     }
 }
 
@@ -1573,19 +1518,19 @@ function __wbg_get_imports() {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper2828 = function() { return logError(function (arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper2812 = function() { return logError(function (arg0, arg1, arg2) {
         const ret = makeMutClosure(arg0, arg1, 325, __wbg_adapter_28);
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbindgen_closure_wrapper2830 = function() { return logError(function (arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper2814 = function() { return logError(function (arg0, arg1, arg2) {
         const ret = makeMutClosure(arg0, arg1, 329, __wbg_adapter_31);
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbindgen_closure_wrapper2832 = function() { return logError(function (arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper2816 = function() { return logError(function (arg0, arg1, arg2) {
         const ret = makeMutClosure(arg0, arg1, 327, __wbg_adapter_34);
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbindgen_closure_wrapper3568 = function() { return logError(function (arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper3552 = function() { return logError(function (arg0, arg1, arg2) {
         const ret = makeMutClosure(arg0, arg1, 426, __wbg_adapter_37);
         return addHeapObject(ret);
     }, arguments) };
