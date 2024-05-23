@@ -39,7 +39,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                     // @ts-ignore
                     localModule = await initWasmModule.initWasmModule();
                     // @ts-ignore
-                    initWasmModule.init_egui(eventHandlers.on_click);
+                    initWasmModule.init_egui(eventHandlers.on_click, eventHandlers.on_text_change);
 
                     // @ts-ignore
                     setWasmModule(initWasmModule);
