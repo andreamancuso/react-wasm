@@ -6,22 +6,30 @@ use std::collections::HashMap;
 use std::ops::{Deref};
 use std::sync::{Arc, Mutex};
 use eframe::Frame;
+use eframe::web_sys::js_sys::Function;
 use egui::{Context};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
 use erased_serde::serialize_trait_object;
+use wasm_bindgen::prelude::*;
 
+// type OnClickFn = &'static fn(u32) -> Result<JsValue, JsValue>;
 type Widgets = HashMap<u32, Box<dyn Render + Send>>;
 type Hierarchy = HashMap<u32, Vec<u32>>;
 
 pub static WIDGETS: Lazy<Arc<Mutex<Widgets>>> = Lazy::new(|| {
     Arc::new(Mutex::new(HashMap::new()))
 });
+
 pub static HIERARCHY: Lazy<Arc<Mutex<Hierarchy>>> = Lazy::new(|| {
     Arc::new(Mutex::new(HashMap::new()))
 });
+
+// pub static EVENT_HANDLERS: Lazy<Arc<Mutex<EventHandlers>>> = Lazy::new(|| {
+//     Arc::new(Mutex::new(HashMap::new()))
+// });
 
 #[wasm_bindgen]
 extern "C" {
@@ -29,30 +37,86 @@ extern "C" {
     fn log(a: &str);
 }
 
+// pub fn with_stdout(f: &Function) {
+//     let _ = f.call1(&JsValue::NULL, &JsValue::from_str("Hello world!"));
+// }
+
+// pub struct EventHandlers {
+//     on_click: Box<dyn Fn(u32) -> Result<JsValue, JsValue>>,
+//     on_change: Box<dyn Fn(u32) -> Result<JsValue, JsValue>>
+// }
+//
+// impl EventHandlers {
+//     pub fn new(on_click: Box<dyn Fn(u32) -> Result<JsValue, JsValue>>, on_change: Box<dyn Fn(u32) -> Result<JsValue, JsValue>>) -> EventHandlers {
+//         EventHandlers{
+//             on_click,
+//             on_change
+//         }
+//     }
+// }
+
+// #[wasm_bindgen]
+// pub struct EventHandlers {
+//     on_click: js_sys::Function,
+//     on_change: js_sys::Function,
+// }
+//
+// impl EventHandlers {
+//     #[wasm_bindgen(static_method_of = EventHandlers)]
+//     pub fn new(on_click: js_sys::Function, on_change: js_sys::Function) -> EventHandlers {
+//         EventHandlers {
+//             on_click,
+//             on_change
+//         }
+//     }
+// }
+
 #[wasm_bindgen]
-pub fn init_egui() {
+pub struct VecU32 {
+    xs: Vec<u32>,
+}
+
+#[wasm_bindgen]
+impl VecU32 {
+    pub fn each(&self, f: &js_sys::Function) {
+        let this = JsValue::null();
+        for &x in &self.xs {
+            let x = JsValue::from(x);
+            let _ = f.call1(&this, &x);
+        }
+    }
+}
+
+#[wasm_bindgen]
+pub fn init_egui(event_handlers: VecU32) {
     // Redirect `log` message to `console.log` and friends:
     eframe::WebLogger::init(log::LevelFilter::Debug).ok();
 
     let web_options = eframe::WebOptions::default();
+
+    // let a = OwningRef::new(Box::new(on_click));
 
     wasm_bindgen_futures::spawn_local(async {
         eframe::WebRunner::new()
             .start(
                 "the_canvas_id", // hardcode it
                 web_options,
-                Box::new(|cc| Box::new(crate::App::new(cc))),
+                Box::new(|cc| Box::new(
+                    crate::App::new(
+                        cc))),
             )
             .await
             .expect("failed to start eframe");
     });
 }
 
-pub struct App {}
+pub struct App {
+    // event_handlers: EventHandlers
+}
 
 impl App {
     pub fn new(_cc: &eframe::CreationContext<'_>) -> App {
-        App{}
+        App{  }
     }
 
     pub fn render_widget_by_id(&mut self, widgets: &mut Widgets, hierarchy: &Hierarchy, ui: &mut egui::Ui, id: u32) {
