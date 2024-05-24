@@ -7,6 +7,7 @@ export type Primitive = string | number | boolean;
 export type WidgetPropsMap = {
     Horizontal: {};
     InputText: { defaultValue?: string; label?: string };
+    Checkbox: { label: string; defaultChecked?: boolean; tooltipText?: string };
     Button: {
         label: string;
     };
@@ -17,7 +18,7 @@ type WidgetKeys = keyof WidgetPropsMap;
 
 type ReactEguiType = typeof ReactEgui;
 
-type WidgetsWithEvents = "InputText" | "Button" | "CollapsingHeader";
+type WidgetsWithEvents = "InputText" | "Button" | "CollapsingHeader" | "Checkbox";
 
 export type WidgetReactNode =
     | WidgetReactElementsFlat

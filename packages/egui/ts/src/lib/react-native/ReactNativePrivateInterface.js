@@ -28,10 +28,12 @@ export default {
                 switch (elementType) {
                     case "widget":
                         return {
+                            // todo: perhaps it's time to define all widgets as separate entities
                             validAttributes: {
                                 type: true,
                                 id: true,
                                 label: true,
+                                tooltipText: true,
                                 text: true,
                                 defaultValues: true,
                                 defaultValue: true,
