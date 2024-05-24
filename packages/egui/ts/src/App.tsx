@@ -33,6 +33,10 @@ function App() {
         console.log("changed text:", event.nativeEvent.value);
     }, []);
 
+    const handleCheckboxCheckedChange = useCallback((event: any) => {
+        console.log("changed checked state:", event.nativeEvent.value);
+    }, []);
+
     const handleCollapsingHeaderChange = useCallback((event: any) => {
         console.log("changed collapsing header state:", event.nativeEvent.value);
     }, []);
@@ -48,6 +52,12 @@ function App() {
                         <ReactEgui.InputText
                             onChange={handleInputTextChange}
                             defaultValue="Hello, world!"
+                        />
+                        <ReactEgui.Checkbox
+                            onChange={handleCheckboxCheckedChange}
+                            defaultChecked
+                            label="Hello, world?"
+                            tooltipText="Yes, hello, world!!!"
                         />
                         <ReactEgui.Button onClick={handleClick} label="Hello, world!" />
                     </ReactEgui.Horizontal>

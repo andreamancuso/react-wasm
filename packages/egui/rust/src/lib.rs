@@ -236,6 +236,22 @@ pub fn set_widget(raw_widget_def: String) {
                         m.insert(widget_id, Box::new(InputText::new(widget_id, default_value)));
                     }
                 }
+                "Checkbox" => {
+                    let label = widget_def["label"].as_str();
+                    let tooltip_text = widget_def["tooltipText"].as_str();
+                    let default_checked = widget_def["defaultChecked"].as_bool();
+
+                    log(tooltip_text.unwrap_or_default());
+
+                    if label.is_some() {
+                        m.insert(widget_id, Box::new(Checkbox::new(
+                            widget_id,
+                            label.unwrap(),
+                            default_checked.or(Some(false)).unwrap(),
+                            tooltip_text))
+                        );
+                    }
+                }
                 "Horizontal" => {
                     m.insert(widget_id, Box::new(Horizontal::new(widget_id)));
                 }
@@ -328,6 +344,48 @@ impl Render for InputText {
 
     fn get_label(&self) -> &str {
         return "";
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Checkbox {
+    pub id: u32,
+    pub checked: bool,
+    pub label: String,
+    pub tooltip_text: Option<String>,
+    pub widget_type: String
+}
+
+impl Checkbox {
+    fn new(id: u32, label: &str, checked: bool, tooltip_text: Option<&str>) -> Checkbox {
+        Checkbox {
+            id,
+            checked,
+            label: String::from(label),
+            widget_type: String::from("Checkbox"),
+            tooltip_text: if tooltip_text.is_some() { Some(String::from(tooltip_text.unwrap())) } else { None }
+        }
+    }
+    fn set_checked(mut self, checked: bool) -> () {
+        self.checked = checked;
+    }
+}
+
+impl Render for Checkbox {
+    fn render(&mut self, ui: &mut egui::Ui, app: &App) {
+        let response = ui.checkbox(&mut self.checked, self.label.as_str());
+
+        if self.tooltip_text.is_some() {
+            response.on_hover_text(self.tooltip_text.as_ref().unwrap());
+        }
+    }
+
+    fn get_type(&self) -> &str {
+        return self.widget_type.as_str();
+    }
+
+    fn get_label(&self) -> &str {
+        return self.label.as_str();
     }
 }
 

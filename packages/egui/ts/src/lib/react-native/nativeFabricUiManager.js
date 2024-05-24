@@ -15,7 +15,7 @@ export default class {
         this.dispatchEventFn(this.fiberNodesMap.get(rootNodeID), topLevelType, nativeEventParam);
     };
     createNode = (generatedId, uiViewClassName, requiresClone, payload, fiberNode) => {
-        // console.log("createNode", generatedId, uiViewClassName, requiresClone, payload, fiberNode);
+        console.log("createNode", generatedId, uiViewClassName, requiresClone, payload, fiberNode);
 
         // todo: yikes
         if (this.cloningNode) {
@@ -25,7 +25,7 @@ export default class {
         const { children, type, id, ...props } = payload;
         const widget = { ...props, id: generatedId, type };
 
-        // console.log(JSON.stringify(widget));
+        console.log(JSON.stringify(widget));
 
         this.wasmModule.set_widget(JSON.stringify(widget));
 
