@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect, useMemo, useState, useRef, useCallback, PropsWithChildren } from "react";
+import { useEffect, useState, useRef, PropsWithChildren } from "react";
 import { v4 as uuidv4 } from "uuid";
 // import debounce from "lodash.debounce";
 // @ts-ignore
@@ -47,13 +47,6 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
                     // @ts-ignore
                     setWasmModule(initWasmModule);
-
-                    // setTimeout(() => {
-                    //     // @ts-ignore
-                    //     console.log(initWasmModule.get_widgets());
-                    //     // @ts-ignore
-                    //     console.log(initWasmModule.get_hierarchy());
-                    // }, 1000);
                 } catch (exception) {
                     console.log("Unable to initialize the WASM correctly", exception);
                 }

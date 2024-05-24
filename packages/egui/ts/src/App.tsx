@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { ReactEgui } from "./lib/components/ReactEgui/components";
 import initWasmModule, {
     set_widget,
@@ -6,7 +6,6 @@ import initWasmModule, {
     set_children,
     append_child,
     get_hierarchy,
-    get_widgets,
 } from "./lib/wasm/eframe_template";
 
 import "./App.css";
@@ -19,7 +18,6 @@ const module: any = {
     init_egui,
     append_child,
     get_hierarchy,
-    get_widgets,
 };
 
 function App() {
@@ -41,6 +39,19 @@ function App() {
         console.log("changed collapsing header state:", event.nativeEvent.value);
     }, []);
 
+    const handleRadioButtonGroupChange = useCallback((event: any) => {
+        console.log("changed radio button group value:", event.nativeEvent.value);
+    }, []);
+
+    const radioButtonGroupOptions = useMemo(
+        () => [
+            { label: "A", value: "a", tooltipText: "A means a" },
+            { label: "B", value: "b", tooltipText: "B means b" },
+            { label: "C", value: "c", tooltipText: "C means c" },
+        ],
+        [],
+    );
+
     return (
         <div id="app" ref={containerRef}>
             <ReactEgui initWasmModule={module} containerRef={containerRef}>
@@ -59,7 +70,20 @@ function App() {
                             label="Hello, world?"
                             tooltipText="Yes, hello, world!!!"
                         />
+
                         <ReactEgui.Button onClick={handleClick} label="Hello, world!" />
+                    </ReactEgui.Horizontal>
+                    <ReactEgui.Horizontal>
+                        <ReactEgui.RadioButton label="A" />
+                        <ReactEgui.RadioButton label="B" />
+                        <ReactEgui.RadioButton label="C" />
+                    </ReactEgui.Horizontal>
+                    <ReactEgui.Horizontal>
+                        <ReactEgui.RadioButtonGroup
+                            defaultValue="a"
+                            onChange={handleRadioButtonGroupChange}
+                            options={radioButtonGroupOptions}
+                        />
                     </ReactEgui.Horizontal>
                 </ReactEgui.CollapsingHeader>
             </ReactEgui>
