@@ -8,10 +8,8 @@ use std::sync::{Arc, Mutex};
 use eframe::Frame;
 use egui::{Context};
 use once_cell::sync::Lazy;
-use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
-use erased_serde::serialize_trait_object;
 use js_sys::Function;
 
 type Widgets = HashMap<u32, Box<dyn Render + Send>>;
@@ -196,13 +194,6 @@ pub fn set_children(parent_id: u32, raw_children_ids: String) -> () {
 }
 
 #[wasm_bindgen]
-pub fn get_widgets() -> String {
-    let m = WIDGETS.lock().unwrap_throw();
-
-    return serde_json::to_string(&m.deref()).unwrap();
-}
-
-#[wasm_bindgen]
 pub fn get_hierarchy() -> String {
     let h = HIERARCHY.lock().unwrap_throw();
 
@@ -211,7 +202,7 @@ pub fn get_hierarchy() -> String {
 
 #[wasm_bindgen]
 pub fn set_widget(raw_widget_def: String) {
-    let mut m = WIDGETS.lock().unwrap_throw();
+    let mut widgets = WIDGETS.lock().unwrap_throw();
 
     let widget_def: Value = serde_json::from_str(&*raw_widget_def).unwrap();
 
@@ -226,14 +217,14 @@ pub fn set_widget(raw_widget_def: String) {
             match widget_type {
                 "Button" => {
                     if widget_def["label"].is_string() {
-                        m.insert(widget_id, Box::new(Button::new(widget_id, widget_def["label"].as_str().unwrap())));
+                        widgets.insert(widget_id, Box::new(Button::new(widget_id, widget_def["label"].as_str().unwrap())));
                     }
                 }
                 "InputText" => {
                     let default_value = widget_def["defaultValue"].as_str();
 
                     if default_value.is_some() {
-                        m.insert(widget_id, Box::new(InputText::new(widget_id, default_value)));
+                        widgets.insert(widget_id, Box::new(InputText::new(widget_id, default_value)));
                     }
                 }
                 "Checkbox" => {
@@ -244,7 +235,7 @@ pub fn set_widget(raw_widget_def: String) {
                     log(tooltip_text.unwrap_or_default());
 
                     if label.is_some() {
-                        m.insert(widget_id, Box::new(Checkbox::new(
+                        widgets.insert(widget_id, Box::new(Checkbox::new(
                             widget_id,
                             label.unwrap(),
                             default_checked.or(Some(false)).unwrap(),
@@ -252,12 +243,39 @@ pub fn set_widget(raw_widget_def: String) {
                         );
                     }
                 }
+                "RadioButton" => {
+                    let widget_result = RadioButton::try_from(&widget_def);
+
+                    if widget_result.is_ok() {
+                        widgets.insert(widget_id, Box::new(widget_result.unwrap()));
+                    }
+                }
+                "RadioButtonGroup" => {
+                    if widget_def["options"].is_array() {
+                        let mut options = Vec::<RadioButtonGroupOption>::new();
+
+                        for option_def in widget_def["options"].as_array().unwrap().iter() {
+                            let option_result = RadioButtonGroupOption::try_from(option_def);
+
+                            if option_result.is_ok() {
+                                options.push(option_result.unwrap());
+                            }
+                        }
+
+                        widgets.insert(widget_id, Box::new(RadioButtonGroup::new(
+                            widget_id,
+                            get_radio_button_value_from_json_value(&widget_def["defaultValue"]),
+                            options
+                            ))
+                        );
+                    }
+                }
                 "Horizontal" => {
-                    m.insert(widget_id, Box::new(Horizontal::new(widget_id)));
+                    widgets.insert(widget_id, Box::new(Horizontal::new(widget_id)));
                 }
                 "CollapsingHeader" => {
                     if widget_def["label"].is_string() {
-                        m.insert(widget_id, Box::new(CollapsingHeader::new(widget_id, widget_def["label"].as_str().unwrap())));
+                        widgets.insert(widget_id, Box::new(CollapsingHeader::new(widget_id, widget_def["label"].as_str().unwrap())));
                     }
                 }
                 &_ => {
@@ -270,7 +288,7 @@ pub fn set_widget(raw_widget_def: String) {
 
 // ----------------
 
-pub trait Render: erased_serde::Serialize {
+pub trait Render {
     fn render(&mut self, ui: &mut egui::Ui, app: &App);
 
     fn get_type(&self) -> &str;
@@ -278,7 +296,6 @@ pub trait Render: erased_serde::Serialize {
     fn get_label(&self) -> &str;
 }
 
-#[derive(Serialize, Deserialize)]
 pub struct Button {
     pub id: u32,
     pub label: String,
@@ -311,7 +328,6 @@ impl Render for Button {
     }
 }
 
-#[derive(Serialize, Deserialize)]
 pub struct InputText {
     pub id: u32,
     pub value: String,
@@ -347,7 +363,6 @@ impl Render for InputText {
     }
 }
 
-#[derive(Serialize, Deserialize)]
 pub struct Checkbox {
     pub id: u32,
     pub checked: bool,
@@ -375,6 +390,10 @@ impl Render for Checkbox {
     fn render(&mut self, ui: &mut egui::Ui, app: &App) {
         let response = ui.checkbox(&mut self.checked, self.label.as_str());
 
+        if response.changed() {
+            app.event_handlers.on_bool_value_change(self.id, self.checked);
+        }
+
         if self.tooltip_text.is_some() {
             response.on_hover_text(self.tooltip_text.as_ref().unwrap());
         }
@@ -389,7 +408,147 @@ impl Render for Checkbox {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+fn get_radio_button_value_from_json_value(value: &Value) -> Option<String> {
+    if value.is_string() {
+        Some(String::from(value.as_str().unwrap()))
+    } else { None }
+}
+
+pub struct RadioButton {
+    pub id: u32,
+    pub checked: bool,
+    pub label: String,
+    pub tooltip_text: Option<String>,
+    pub value: Option<String>,
+    pub widget_type: String
+}
+
+impl RadioButton {
+    fn new(id: u32, label: &str, checked: bool, value: Option<String>, tooltip_text: Option<&str>) -> RadioButton {
+        RadioButton {
+            id,
+            checked,
+            label: String::from(label),
+            widget_type: String::from("RadioButton"),
+            value,
+            tooltip_text: if tooltip_text.is_some() { Some(String::from(tooltip_text.unwrap())) } else { None }
+        }
+    }
+    fn set_checked(mut self, checked: bool) -> () {
+        self.checked = checked;
+    }
+}
+
+impl TryFrom<&Value> for RadioButton {
+    type Error = &'static str;
+
+    fn try_from(widget_def: &Value) -> Result<Self, Self::Error> {
+        let label = widget_def["label"].as_str();
+
+        if label.is_some() {
+            return Ok(RadioButton::new(
+                widget_def["id"].as_u64().unwrap() as u32,
+                label.unwrap(),
+                widget_def["defaultChecked"].as_bool().or(Some(false)).unwrap(),
+                get_radio_button_value_from_json_value(&widget_def["value"]),
+                widget_def["tooltipText"].as_str()
+            ));
+        } else {
+            return Err("Invalid RadioButton JSON data");
+        }
+    }
+}
+
+// todo: not sure whether it makes sense to render standalone instances of RadioButton
+impl Render for RadioButton {
+    fn render(&mut self, ui: &mut egui::Ui, app: &App) {
+        let response = ui.add(egui::RadioButton::new(self.checked, self.label.as_str()));
+        if response.clicked() {
+            self.checked = !self.checked;
+
+            app.event_handlers.on_bool_value_change(self.id, self.checked);
+        }
+
+        if self.tooltip_text.is_some() {
+            response.on_hover_text(self.tooltip_text.as_ref().unwrap());
+        }
+    }
+
+    fn get_type(&self) -> &str {
+        return self.widget_type.as_str();
+    }
+
+    fn get_label(&self) -> &str {
+        return self.label.as_str();
+    }
+}
+
+pub struct RadioButtonGroupOption {
+    pub label: String,
+    pub tooltip_text: Option<String>,
+    pub value: String,
+}
+
+impl TryFrom<&Value> for RadioButtonGroupOption {
+    type Error = &'static str;
+
+    fn try_from(option_def: &Value) -> Result<Self, Self::Error> {
+        let label = option_def["label"].as_str();
+        let tooltip_text = option_def["tooltipText"].as_str();
+
+        if label.is_some() {
+            return Ok(RadioButtonGroupOption {
+                label: String::from(label.unwrap()),
+                tooltip_text: if tooltip_text.is_some() { Some(String::from(tooltip_text.unwrap())) } else { None },
+                value: get_radio_button_value_from_json_value(&option_def["value"]).unwrap()
+            });
+        } else {
+            return Err("Invalid RadioButtonGroupOption JSON data");
+        }
+    }
+}
+
+pub struct RadioButtonGroup {
+    pub id: u32,
+    pub value: String,
+    pub widget_type: String,
+    pub options: Vec<RadioButtonGroupOption>
+}
+
+impl RadioButtonGroup {
+    fn new(id: u32, value: Option<String>, options: Vec<RadioButtonGroupOption>) -> RadioButtonGroup {
+        RadioButtonGroup {
+            id,
+            value: value.unwrap_or_default(),
+            options,
+            widget_type: String::from("RadioButtonGroup"),
+        }
+    }
+}
+
+impl Render for RadioButtonGroup {
+    fn render(&mut self, ui: &mut egui::Ui, app: &App) {
+        for option in self.options.iter() {
+            if ui.add(egui::RadioButton::new(self.value == option.value, option.label.as_str())).clicked() {
+                // todo: must we really check whether the value has changed ourselves?
+                if self.value != option.value {
+                    self.value = String::from(option.value.as_str());
+                    // todo: must we make a second copy here? #fml
+                    app.event_handlers.on_text_change(self.id, String::from(option.value.as_str()));
+                }
+            }
+        }
+    }
+
+    fn get_type(&self) -> &str {
+        return self.widget_type.as_str();
+    }
+
+    fn get_label(&self) -> &str {
+        return "";
+    }
+}
+
 struct Horizontal {
     pub id: u32,
     pub widget_type: String
@@ -414,7 +573,6 @@ impl Render for Horizontal {
     }
 }
 
-#[derive(Serialize, Deserialize)]
 struct CollapsingHeader {
     pub id: u32,
     pub label: String,
@@ -443,4 +601,3 @@ impl Render for CollapsingHeader {
     }
 }
 
-serialize_trait_object!(Render);

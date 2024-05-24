@@ -8,6 +8,17 @@ export type WidgetPropsMap = {
     Horizontal: {};
     InputText: { defaultValue?: string; label?: string };
     Checkbox: { label: string; defaultChecked?: boolean; tooltipText?: string };
+    RadioButton: {
+        label: string;
+        defaultChecked?: boolean;
+        tooltipText?: string;
+        value?: string | number;
+    };
+    RadioButtonGroup: {
+        options: { label: string; value: string; tooltipText?: string }[];
+        defaultValue?: string;
+        onChange?: (value: string | number) => void;
+    };
     Button: {
         label: string;
     };
@@ -18,7 +29,13 @@ type WidgetKeys = keyof WidgetPropsMap;
 
 type ReactEguiType = typeof ReactEgui;
 
-type WidgetsWithEvents = "InputText" | "Button" | "CollapsingHeader" | "Checkbox";
+type WidgetsWithEvents =
+    | "InputText"
+    | "Button"
+    | "CollapsingHeader"
+    | "Checkbox"
+    | "RadioButton"
+    | "RadioButtonGroup";
 
 export type WidgetReactNode =
     | WidgetReactElementsFlat

@@ -6,7 +6,6 @@ import initWasmModule, {
     set_children,
     append_child,
     get_hierarchy,
-    get_widgets,
 } from "@react-wasm/egui/dist/eframe_template";
 
 // eslint-disable-next-line import/first
@@ -20,7 +19,6 @@ const module: any = {
     init_egui,
     append_child,
     get_hierarchy,
-    get_widgets,
 };
 
 function App() {

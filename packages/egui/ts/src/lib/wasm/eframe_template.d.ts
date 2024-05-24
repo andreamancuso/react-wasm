@@ -19,10 +19,6 @@ export function set_children(parent_id: number, raw_children_ids: string): void;
 /**
 * @returns {string}
 */
-export function get_widgets(): string;
-/**
-* @returns {string}
-*/
 export function get_hierarchy(): string;
 /**
 * @param {string} raw_widget_def
@@ -35,7 +31,6 @@ export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly append_child: (a: number, b: number) => void;
   readonly set_children: (a: number, b: number, c: number) => void;
-  readonly get_widgets: (a: number) => void;
   readonly get_hierarchy: (a: number) => void;
   readonly set_widget: (a: number, b: number) => void;
   readonly init_egui: (a: number, b: number, c: number) => void;
