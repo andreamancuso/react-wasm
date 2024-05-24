@@ -1,6 +1,6 @@
 {
     "name": "@react-wasm/egui",
-    "version": "0.0.1-canary-001",
+    "version": "0.0.1-canary-003",
     "main": "dist/index.js",
     "files": [
         "dist/*"

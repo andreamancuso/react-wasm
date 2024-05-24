@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { ReactEgui } from "@react-wasm/egui";
+import { ReactEgui, EguiDemo } from "@react-wasm/egui";
 import initWasmModule, {
     set_widget,
     init_egui,
@@ -27,10 +27,7 @@ function App() {
     return (
         <div id="app" ref={containerRef}>
             <ReactEgui initWasmModule={module} containerRef={containerRef}>
-                <ReactEgui.Horizontal>
-                    <ReactEgui.InputText defaultValue="Hello, world!" />
-                    <ReactEgui.Button label="Hello, world!" />
-                </ReactEgui.Horizontal>
+                <EguiDemo />
             </ReactEgui>
         </div>
     );

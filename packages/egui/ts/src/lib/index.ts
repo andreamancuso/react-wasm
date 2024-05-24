@@ -1,4 +1,5 @@
 import { ReactEgui } from "./components/ReactEgui/components";
+import { EguiDemo } from "./components/EguiDemo/EguiDemo";
 import { ReactNativeWrapper } from "./components/ReactNativeWrapper";
 import { useWidgetEventManagement, useWidgetRegistrationService, useEguiWasm } from "./hooks";
 import { WidgetRegistrationServiceContext } from "./contexts";
@@ -10,4 +11,5 @@ export {
     useWidgetRegistrationService,
     useEguiWasm,
     WidgetRegistrationServiceContext,
+    EguiDemo,
 };
