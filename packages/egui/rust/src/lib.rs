@@ -7,12 +7,14 @@ mod collapsing_header;
 mod horizontal;
 mod button;
 mod checkbox;
+mod table;
 
+use std::any::Any;
 use std::collections::HashMap;
 use std::ops::{Deref};
 use std::sync::{Arc, Mutex};
 use eframe::Frame;
-use egui::{Context};
+use egui::{Context, TextBuffer};
 use once_cell::sync::Lazy;
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
@@ -23,6 +25,7 @@ use crate::collapsing_header::CollapsingHeader;
 use crate::horizontal::Horizontal;
 use crate::input_text::InputText;
 use crate::radio_button::{RadioButton, RadioButtonGroup};
+use crate::table::Table;
 
 type Widgets = HashMap<u32, Box<dyn Render + Send>>;
 type Hierarchy = HashMap<u32, Vec<u32>>;
@@ -276,6 +279,13 @@ pub fn set_widget(raw_widget_def: String) {
                         widgets.insert(widget_id, Box::new(widget_result.unwrap()));
                     }
                 }
+                "Table" => {
+                    let widget_result = Table::try_from(&widget_def);
+
+                    if widget_result.is_ok() {
+                        widgets.insert(widget_id, Box::new(widget_result.unwrap()));
+                    }
+                }
                 &_ => {
                     log(format!("Unrecognised type: {}", widget_type).as_str());
                 }
@@ -284,9 +294,38 @@ pub fn set_widget(raw_widget_def: String) {
     }
 }
 
+#[wasm_bindgen]
+pub fn append_data_to_table(widget_id: u32, data: JsValue) {
+    let mut widgets = WIDGETS.lock().unwrap();
+    let widget = widgets.get_mut(&widget_id).unwrap();
+
+    if widget.get_type().as_str() == "Table" {
+        let it = widget.as_any();
+
+        match it.downcast_mut::<Table>() {
+            Some(table) => {
+                let mut new_data = Vec::<HashMap<String, String>>::new();
+
+                table.append_data(new_data.as_mut());
+            },
+            None => panic!(),
+        }
+    }
+}
+
 // ----------------
 
-pub trait Render {
+pub trait AToAny: 'static {
+    fn as_any(&mut self) -> &mut dyn Any;
+}
+
+impl<T: 'static> AToAny for T {
+    fn as_any(&mut self) ->&mut (dyn Any + 'static) {
+        self
+    }
+}
+
+pub trait Render: AToAny {
     fn render(&mut self, ui: &mut egui::Ui, app: &App);
 
     fn get_type(&self) -> &str;

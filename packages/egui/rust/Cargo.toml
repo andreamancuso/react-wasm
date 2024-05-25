@@ -15,7 +15,8 @@ crate-type = ["cdylib", "rlib"]
 
 
 [dependencies]
-egui = "0.27.0"
+egui = "0.27.2"
+egui_extras = "0.27.2"
 eframe = { version = "0.27.0", default-features = false, features = [
     "accesskit",     # Make egui comptaible with screen readers. NOTE: adds a lot of dependencies.
     "default_fonts", # Embed the default egui fonts.
