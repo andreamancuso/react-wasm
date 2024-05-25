@@ -1,6 +1,12 @@
 #![warn(clippy::all, rust_2018_idioms)]
 
 mod app;
+mod input_text;
+mod radio_button;
+mod collapsing_header;
+mod horizontal;
+mod button;
+mod checkbox;
 
 use std::collections::HashMap;
 use std::ops::{Deref};
@@ -11,6 +17,12 @@ use once_cell::sync::Lazy;
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
 use js_sys::Function;
+use crate::button::Button;
+use crate::checkbox::Checkbox;
+use crate::collapsing_header::CollapsingHeader;
+use crate::horizontal::Horizontal;
+use crate::input_text::InputText;
+use crate::radio_button::{RadioButton, RadioButtonGroup};
 
 type Widgets = HashMap<u32, Box<dyn Render + Send>>;
 type Hierarchy = HashMap<u32, Vec<u32>>;
@@ -216,31 +228,24 @@ pub fn set_widget(raw_widget_def: String) {
 
             match widget_type {
                 "Button" => {
-                    if widget_def["label"].is_string() {
-                        widgets.insert(widget_id, Box::new(Button::new(widget_id, widget_def["label"].as_str().unwrap())));
+                    let widget_result = Button::try_from(&widget_def);
+
+                    if widget_result.is_ok() {
+                        widgets.insert(widget_id, Box::new(widget_result.unwrap()));
                     }
                 }
                 "InputText" => {
-                    let default_value = widget_def["defaultValue"].as_str();
+                    let widget_result = InputText::try_from(&widget_def);
 
-                    if default_value.is_some() {
-                        widgets.insert(widget_id, Box::new(InputText::new(widget_id, default_value)));
+                    if widget_result.is_ok() {
+                        widgets.insert(widget_id, Box::new(widget_result.unwrap()));
                     }
                 }
                 "Checkbox" => {
-                    let label = widget_def["label"].as_str();
-                    let tooltip_text = widget_def["tooltipText"].as_str();
-                    let default_checked = widget_def["defaultChecked"].as_bool();
+                    let widget_result = Checkbox::try_from(&widget_def);
 
-                    log(tooltip_text.unwrap_or_default());
-
-                    if label.is_some() {
-                        widgets.insert(widget_id, Box::new(Checkbox::new(
-                            widget_id,
-                            label.unwrap(),
-                            default_checked.or(Some(false)).unwrap(),
-                            tooltip_text))
-                        );
+                    if widget_result.is_ok() {
+                        widgets.insert(widget_id, Box::new(widget_result.unwrap()));
                     }
                 }
                 "RadioButton" => {
@@ -251,31 +256,24 @@ pub fn set_widget(raw_widget_def: String) {
                     }
                 }
                 "RadioButtonGroup" => {
-                    if widget_def["options"].is_array() {
-                        let mut options = Vec::<RadioButtonGroupOption>::new();
+                    let widget_result = RadioButtonGroup::try_from(&widget_def);
 
-                        for option_def in widget_def["options"].as_array().unwrap().iter() {
-                            let option_result = RadioButtonGroupOption::try_from(option_def);
-
-                            if option_result.is_ok() {
-                                options.push(option_result.unwrap());
-                            }
-                        }
-
-                        widgets.insert(widget_id, Box::new(RadioButtonGroup::new(
-                            widget_id,
-                            get_radio_button_value_from_json_value(&widget_def["defaultValue"]),
-                            options
-                            ))
-                        );
+                    if widget_result.is_ok() {
+                        widgets.insert(widget_id, Box::new(widget_result.unwrap()));
                     }
                 }
                 "Horizontal" => {
-                    widgets.insert(widget_id, Box::new(Horizontal::new(widget_id)));
+                    let widget_result = Horizontal::try_from(&widget_def);
+
+                    if widget_result.is_ok() {
+                        widgets.insert(widget_id, Box::new(widget_result.unwrap()));
+                    }
                 }
                 "CollapsingHeader" => {
-                    if widget_def["label"].is_string() {
-                        widgets.insert(widget_id, Box::new(CollapsingHeader::new(widget_id, widget_def["label"].as_str().unwrap())));
+                    let widget_result = CollapsingHeader::try_from(&widget_def);
+
+                    if widget_result.is_ok() {
+                        widgets.insert(widget_id, Box::new(widget_result.unwrap()));
                     }
                 }
                 &_ => {
@@ -294,310 +292,5 @@ pub trait Render {
     fn get_type(&self) -> &str;
 
     fn get_label(&self) -> &str;
-}
-
-pub struct Button {
-    pub id: u32,
-    pub label: String,
-    pub widget_type: String
-}
-//
-impl Button {
-    pub fn new(id: u32, label: &str) -> Button {
-        Button{
-            id,
-            label: String::from(label),
-            widget_type: String::from("Button")
-        }
-    }
-}
-//
-impl Render for Button {
-    fn render(&mut self, ui: &mut egui::Ui, app: &App) {
-        if ui.button(self.label.as_str()).clicked() {
-            app.event_handlers.on_click(self.id);
-        }
-    }
-
-    fn get_type(&self) -> &str {
-        return self.widget_type.as_str();
-    }
-
-    fn get_label(&self) -> &str {
-        return "";
-    }
-}
-
-pub struct InputText {
-    pub id: u32,
-    pub value: String,
-    pub widget_type: String
-}
-
-impl InputText {
-    fn new(id: u32, value: Option<&str>) -> InputText {
-        InputText{
-            id,
-            value: String::from(value.unwrap_or_default()),
-            widget_type: String::from("InputText")
-        }
-    }
-    fn set_value(mut self, value: &str) -> () {
-        self.value = String::from(value);
-    }
-}
-
-impl Render for InputText {
-    fn render(&mut self, ui: &mut egui::Ui, app: &App) {
-        if ui.text_edit_singleline(&mut self.value).changed() {
-            app.event_handlers.on_text_change(self.id, self.value.clone());
-        }
-    }
-
-    fn get_type(&self) -> &str {
-        return self.widget_type.as_str();
-    }
-
-    fn get_label(&self) -> &str {
-        return "";
-    }
-}
-
-pub struct Checkbox {
-    pub id: u32,
-    pub checked: bool,
-    pub label: String,
-    pub tooltip_text: Option<String>,
-    pub widget_type: String
-}
-
-impl Checkbox {
-    fn new(id: u32, label: &str, checked: bool, tooltip_text: Option<&str>) -> Checkbox {
-        Checkbox {
-            id,
-            checked,
-            label: String::from(label),
-            widget_type: String::from("Checkbox"),
-            tooltip_text: if tooltip_text.is_some() { Some(String::from(tooltip_text.unwrap())) } else { None }
-        }
-    }
-    fn set_checked(mut self, checked: bool) -> () {
-        self.checked = checked;
-    }
-}
-
-impl Render for Checkbox {
-    fn render(&mut self, ui: &mut egui::Ui, app: &App) {
-        let response = ui.checkbox(&mut self.checked, self.label.as_str());
-
-        if response.changed() {
-            app.event_handlers.on_bool_value_change(self.id, self.checked);
-        }
-
-        if self.tooltip_text.is_some() {
-            response.on_hover_text(self.tooltip_text.as_ref().unwrap());
-        }
-    }
-
-    fn get_type(&self) -> &str {
-        return self.widget_type.as_str();
-    }
-
-    fn get_label(&self) -> &str {
-        return self.label.as_str();
-    }
-}
-
-fn get_radio_button_value_from_json_value(value: &Value) -> Option<String> {
-    if value.is_string() {
-        Some(String::from(value.as_str().unwrap()))
-    } else { None }
-}
-
-pub struct RadioButton {
-    pub id: u32,
-    pub checked: bool,
-    pub label: String,
-    pub tooltip_text: Option<String>,
-    pub value: Option<String>,
-    pub widget_type: String
-}
-
-impl RadioButton {
-    fn new(id: u32, label: &str, checked: bool, value: Option<String>, tooltip_text: Option<&str>) -> RadioButton {
-        RadioButton {
-            id,
-            checked,
-            label: String::from(label),
-            widget_type: String::from("RadioButton"),
-            value,
-            tooltip_text: if tooltip_text.is_some() { Some(String::from(tooltip_text.unwrap())) } else { None }
-        }
-    }
-    fn set_checked(mut self, checked: bool) -> () {
-        self.checked = checked;
-    }
-}
-
-impl TryFrom<&Value> for RadioButton {
-    type Error = &'static str;
-
-    fn try_from(widget_def: &Value) -> Result<Self, Self::Error> {
-        let label = widget_def["label"].as_str();
-
-        if label.is_some() {
-            return Ok(RadioButton::new(
-                widget_def["id"].as_u64().unwrap() as u32,
-                label.unwrap(),
-                widget_def["defaultChecked"].as_bool().or(Some(false)).unwrap(),
-                get_radio_button_value_from_json_value(&widget_def["value"]),
-                widget_def["tooltipText"].as_str()
-            ));
-        } else {
-            return Err("Invalid RadioButton JSON data");
-        }
-    }
-}
-
-// todo: not sure whether it makes sense to render standalone instances of RadioButton
-impl Render for RadioButton {
-    fn render(&mut self, ui: &mut egui::Ui, app: &App) {
-        let response = ui.add(egui::RadioButton::new(self.checked, self.label.as_str()));
-        if response.clicked() {
-            self.checked = !self.checked;
-
-            app.event_handlers.on_bool_value_change(self.id, self.checked);
-        }
-
-        if self.tooltip_text.is_some() {
-            response.on_hover_text(self.tooltip_text.as_ref().unwrap());
-        }
-    }
-
-    fn get_type(&self) -> &str {
-        return self.widget_type.as_str();
-    }
-
-    fn get_label(&self) -> &str {
-        return self.label.as_str();
-    }
-}
-
-pub struct RadioButtonGroupOption {
-    pub label: String,
-    pub tooltip_text: Option<String>,
-    pub value: String,
-}
-
-impl TryFrom<&Value> for RadioButtonGroupOption {
-    type Error = &'static str;
-
-    fn try_from(option_def: &Value) -> Result<Self, Self::Error> {
-        let label = option_def["label"].as_str();
-        let tooltip_text = option_def["tooltipText"].as_str();
-
-        if label.is_some() {
-            return Ok(RadioButtonGroupOption {
-                label: String::from(label.unwrap()),
-                tooltip_text: if tooltip_text.is_some() { Some(String::from(tooltip_text.unwrap())) } else { None },
-                value: get_radio_button_value_from_json_value(&option_def["value"]).unwrap()
-            });
-        } else {
-            return Err("Invalid RadioButtonGroupOption JSON data");
-        }
-    }
-}
-
-pub struct RadioButtonGroup {
-    pub id: u32,
-    pub value: String,
-    pub widget_type: String,
-    pub options: Vec<RadioButtonGroupOption>
-}
-
-impl RadioButtonGroup {
-    fn new(id: u32, value: Option<String>, options: Vec<RadioButtonGroupOption>) -> RadioButtonGroup {
-        RadioButtonGroup {
-            id,
-            value: value.unwrap_or_default(),
-            options,
-            widget_type: String::from("RadioButtonGroup"),
-        }
-    }
-}
-
-impl Render for RadioButtonGroup {
-    fn render(&mut self, ui: &mut egui::Ui, app: &App) {
-        for option in self.options.iter() {
-            if ui.add(egui::RadioButton::new(self.value == option.value, option.label.as_str())).clicked() {
-                // todo: must we really check whether the value has changed ourselves?
-                if self.value != option.value {
-                    self.value = String::from(option.value.as_str());
-                    // todo: must we make a second copy here? #fml
-                    app.event_handlers.on_text_change(self.id, String::from(option.value.as_str()));
-                }
-            }
-        }
-    }
-
-    fn get_type(&self) -> &str {
-        return self.widget_type.as_str();
-    }
-
-    fn get_label(&self) -> &str {
-        return "";
-    }
-}
-
-struct Horizontal {
-    pub id: u32,
-    pub widget_type: String
-}
-
-impl Horizontal {
-    fn new(id: u32) -> Horizontal {
-        Horizontal{
-            id,
-            widget_type: String::from("Horizontal")
-        }
-    }
-}
-
-impl Render for Horizontal {
-    fn render(&mut self, _ui: &mut egui::Ui, app: &App) {}
-
-    fn get_type(&self) -> &str { return self.widget_type.as_str(); }
-
-    fn get_label(&self) -> &str {
-        return "";
-    }
-}
-
-struct CollapsingHeader {
-    pub id: u32,
-    pub label: String,
-    pub widget_type: String
-}
-
-impl CollapsingHeader {
-    pub fn new(id: u32, label: &str) -> CollapsingHeader {
-        CollapsingHeader{
-            id,
-            label: String::from(label),
-            widget_type: String::from("CollapsingHeader")
-        }
-    }
-}
-
-impl Render for CollapsingHeader {
-    fn render(&mut self, _ui: &mut egui::Ui, app: &App) {}
-
-    fn get_type(&self) -> &str {
-        return self.widget_type.as_str();
-    }
-
-    fn get_label(&self) -> &str {
-        return &self.label;
-    }
 }
 
