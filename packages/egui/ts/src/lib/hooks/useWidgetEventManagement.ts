@@ -9,21 +9,21 @@ export const useWidgetEventManagement = (
     const widgetRegistrationService = useWidgetRegistrationService();
     const idRef = useRef(uuidv4());
 
-    useEffect(() => {
-        return () => {
-            if (type === "text") {
-                widgetRegistrationService.offTextInputChange(idRef.current);
-            } else if (type === "combo") {
-                widgetRegistrationService.offComboChange(idRef.current);
-            } else if (type === "numeric") {
-                widgetRegistrationService.offNumericValueChange(idRef.current);
-            } else if (type === "boolean") {
-                widgetRegistrationService.offBooleanValueChange(idRef.current);
-            } else if (type === "multi") {
-                widgetRegistrationService.offMultiValueChange(idRef.current);
-            }
-        };
-    }, [widgetRegistrationService]);
+    // useEffect(() => {
+    //     return () => {
+    //         if (type === "text") {
+    //             widgetRegistrationService.offTextInputChange(idRef.current);
+    //         } else if (type === "combo") {
+    //             widgetRegistrationService.offComboChange(idRef.current);
+    //         } else if (type === "numeric") {
+    //             widgetRegistrationService.offNumericValueChange(idRef.current);
+    //         } else if (type === "boolean") {
+    //             widgetRegistrationService.offBooleanValueChange(idRef.current);
+    //         } else if (type === "multi") {
+    //             widgetRegistrationService.offMultiValueChange(idRef.current);
+    //         }
+    //     };
+    // }, [widgetRegistrationService]);
 
     return [idRef, widgetRegistrationService];
 };

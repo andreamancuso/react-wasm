@@ -1,5 +1,6 @@
 export default class {
     wasmModule;
+    widgetRegistrationService;
     dispatchEventFn;
     cloningNode;
     fiberNodesMap;
@@ -8,8 +9,9 @@ export default class {
         this.fiberNodesMap = new Map();
     }
 
-    init(wasmModule) {
+    init(wasmModule, widgetRegistrationService) {
         this.wasmModule = wasmModule;
+        this.widgetRegistrationService = widgetRegistrationService;
     }
     dispatchEvent = (rootNodeID, topLevelType, nativeEventParam) => {
         this.dispatchEventFn(this.fiberNodesMap.get(rootNodeID), topLevelType, nativeEventParam);
@@ -30,6 +32,11 @@ export default class {
         this.wasmModule.set_widget(JSON.stringify(widget));
 
         this.fiberNodesMap.set(generatedId, fiberNode);
+
+        // todo: type is in some array of types
+        if (type === "Table") {
+            this.widgetRegistrationService.linkWidgetIds(id, generatedId);
+        }
 
         return widget;
     };

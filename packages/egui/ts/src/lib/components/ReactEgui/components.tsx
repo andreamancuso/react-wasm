@@ -7,6 +7,7 @@ import { CollapsingHeader } from "./CollapsingHeader";
 import { Checkbox } from "./Checkbox";
 import { RadioButton } from "./RadioButton";
 import { RadioButtonGroup } from "./RadioButtonGroup";
+import { Table } from "./Table";
 
 export const components = {
     InputText,
@@ -16,6 +17,7 @@ export const components = {
     Checkbox,
     RadioButton,
     RadioButtonGroup,
+    Table,
 } as const;
 
 export const ReactEgui = attachSubComponents("ReactEgui", MainComponent, components);

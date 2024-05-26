@@ -1,7 +1,10 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { ReactEgui } from "../ReactEgui/components";
+import { TableImperativeHandle } from "../ReactEgui/Table";
 
 export const EguiDemo = () => {
+    const tableRef = useRef<TableImperativeHandle>(null);
+
     const handleClick = useCallback(() => {
         console.log("click!");
     }, []);
@@ -30,6 +33,26 @@ export const EguiDemo = () => {
         ],
         [],
     );
+
+    const tableColumns = useMemo(
+        () => [
+            {
+                heading: "ID",
+                fieldId: "id",
+            },
+            {
+                heading: "Name",
+                fieldId: "name",
+            },
+        ],
+        [],
+    );
+
+    const handleAppendDataToTableClick = useCallback(() => {
+        if (tableRef.current) {
+            tableRef.current.appendDataToTable([{ id: 1, name: "Andy" }]);
+        }
+    }, [tableRef]);
 
     return (
         <ReactEgui.CollapsingHeader
@@ -62,6 +85,8 @@ export const EguiDemo = () => {
                     options={radioButtonGroupOptions}
                 />
             </ReactEgui.Horizontal>
+            <ReactEgui.Table ref={tableRef} columns={tableColumns} />
+            <ReactEgui.Button onClick={handleAppendDataToTableClick} label="Add data to table" />
         </ReactEgui.CollapsingHeader>
     );
 };
