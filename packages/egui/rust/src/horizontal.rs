@@ -19,10 +19,6 @@ impl Render for Horizontal {
     fn render(&mut self, _ui: &mut egui::Ui, app: &App) {}
 
     fn get_type(&self) -> &str { return self.widget_type.as_str(); }
-
-    fn get_label(&self) -> &str {
-        return "";
-    }
 }
 
 impl TryFrom<&Value> for Horizontal {

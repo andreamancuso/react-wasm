@@ -24,9 +24,7 @@ impl Render for CollapsingHeader {
         return self.widget_type.as_str();
     }
 
-    fn get_label(&self) -> &str {
-        return &self.label;
-    }
+    fn as_collapsing_header(&mut self) -> Option<&mut CollapsingHeader> { Some(self) }
 }
 
 impl TryFrom<&Value> for CollapsingHeader {

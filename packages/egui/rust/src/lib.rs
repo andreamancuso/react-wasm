@@ -127,7 +127,8 @@ impl App {
                         let collapsing_state = egui::collapsing_header::CollapsingState::load_with_default_open(ui.ctx(), collapsing_header_id, true);
 
                         collapsing_state.show_header(ui, |ui| {
-                                ui.label(widgets.get(&id).unwrap_throw().get_label()).clicked(); // you can put checkboxes or whatever here
+                                let collapsing_header = widgets.get_mut(&id).unwrap_throw().as_collapsing_header().unwrap();
+                                ui.label(collapsing_header.label.as_str()).clicked(); // you can put checkboxes or whatever here
                             })
                             .body(|ui| {
                                 self.render_children(widgets, hierarchy, ui, id);
@@ -309,10 +310,8 @@ pub fn append_data_to_table(widget_id: u32, data: Array) {
         let mut unknown_widget = maybe_widget.unwrap();
 
         if unknown_widget.get_type().as_str() == "Table" {
-            // let a: &mut Box<dyn Any> = unknown_widget;
+            let a = unknown_widget.as_table().unwrap();
 
-            let a = unknown_widget.as_any();
-            // let b = a.downcast_ref::<Table>();
 
             // if let Some(table) = any_mut.downcast_mut::<Table>() {
             //     let mut new_data = Vec::<HashMap<String, String>>::new();
@@ -355,21 +354,13 @@ pub fn append_data_to_table(widget_id: u32, data: Array) {
 
 // ----------------
 
-pub trait AToAny: 'static {
-    fn as_any(&mut self) -> &mut dyn Any;
-}
-
-impl<T: 'static> AToAny for T {
-    fn as_any(&mut self) ->&mut (dyn Any + 'static) {
-        self
-    }
-}
-
-pub trait Render: AToAny {
+pub trait Render {
     fn render(&mut self, ui: &mut egui::Ui, app: &App);
 
     fn get_type(&self) -> &str;
 
-    fn get_label(&self) -> &str;
+    fn as_table(&mut self) -> Option<&mut Table> { None }
+
+    fn as_collapsing_header(&mut self) -> Option<&mut CollapsingHeader> { None }
 }
 

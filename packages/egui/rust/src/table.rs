@@ -16,6 +16,8 @@ enum InitialColumnSize {
     /// Take all available space
     Remainder,
 }
+
+#[derive(Debug)]
 pub struct TableColumn {
     pub heading: String,
     pub column_size_type: Option<InitialColumnSize>, // todo: what's the default?
@@ -25,6 +27,7 @@ pub struct TableColumn {
     pub field_id: Option<String>
 }
 
+#[derive(Debug)]
 pub struct Table {
     pub id: u32,
     pub cell_layout: Layout,
@@ -156,8 +159,8 @@ impl Render for Table {
         return self.widget_type.as_str();
     }
 
-    fn get_label(&self) -> &str {
-        return ""
+    fn as_table(&mut self) -> Option<&mut Table> {
+        Some(self)
     }
 }
 

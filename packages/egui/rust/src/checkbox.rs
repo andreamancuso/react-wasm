@@ -40,10 +40,6 @@ impl Render for Checkbox {
     fn get_type(&self) -> &str {
         return self.widget_type.as_str();
     }
-
-    fn get_label(&self) -> &str {
-        return self.label.as_str();
-    }
 }
 
 impl TryFrom<&Value> for Checkbox {

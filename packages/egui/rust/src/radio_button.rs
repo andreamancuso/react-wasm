@@ -70,10 +70,6 @@ impl Render for RadioButton {
     fn get_type(&self) -> &str {
         return self.widget_type.as_str();
     }
-
-    fn get_label(&self) -> &str {
-        return self.label.as_str();
-    }
 }
 
 pub struct RadioButtonGroupOption {
@@ -135,10 +131,6 @@ impl Render for RadioButtonGroup {
 
     fn get_type(&self) -> &str {
         return self.widget_type.as_str();
-    }
-
-    fn get_label(&self) -> &str {
-        return "";
     }
 }
 
