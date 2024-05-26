@@ -14,7 +14,15 @@ export default class {
         this.widgetRegistrationService = widgetRegistrationService;
     }
     dispatchEvent = (rootNodeID, topLevelType, nativeEventParam) => {
-        this.dispatchEventFn(this.fiberNodesMap.get(rootNodeID), topLevelType, nativeEventParam);
+        // todo: understand the implications of using setTimeout() here, which is currently required
+        // as events are sent while the WIDGETS Mutex is locked -> this is the only way to prevent a deadlock at the moment
+        setTimeout(() => {
+            this.dispatchEventFn(
+                this.fiberNodesMap.get(rootNodeID),
+                topLevelType,
+                nativeEventParam,
+            );
+        }, 0);
     };
     createNode = (generatedId, uiViewClassName, requiresClone, payload, fiberNode) => {
         console.log("createNode", generatedId, uiViewClassName, requiresClone, payload, fiberNode);

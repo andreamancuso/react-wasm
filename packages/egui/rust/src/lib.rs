@@ -170,7 +170,9 @@ impl App {
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
-        let mut widgets = WIDGETS.lock().unwrap_throw();
+        let try_lock_result = WIDGETS.try_lock();
+        let mut widgets = try_lock_result.unwrap();
+
         let hierarchy = HIERARCHY.lock().unwrap_throw();
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -217,7 +219,8 @@ pub fn get_hierarchy() -> String {
 
 #[wasm_bindgen]
 pub fn set_widget(raw_widget_def: String) {
-    let mut widgets = WIDGETS.lock().unwrap_throw();
+    let try_lock_result = WIDGETS.try_lock();
+    let mut widgets = try_lock_result.unwrap();
 
     let widget_def: Value = serde_json::from_str(&*raw_widget_def).unwrap();
 
@@ -284,6 +287,8 @@ pub fn set_widget(raw_widget_def: String) {
 
                     if widget_result.is_ok() {
                         widgets.insert(widget_id, Box::new(widget_result.unwrap()));
+                    } else {
+                        log("Could not add Table widget");
                     }
                 }
                 &_ => {
@@ -296,38 +301,55 @@ pub fn set_widget(raw_widget_def: String) {
 
 #[wasm_bindgen]
 pub fn append_data_to_table(widget_id: u32, data: Array) {
-    let mut widgets = WIDGETS.lock().unwrap_throw();
-    let widget = widgets.get_mut(&widget_id).unwrap_throw();
+    let try_lock_result = WIDGETS.try_lock();
+    let mut widgets = try_lock_result.unwrap();
+    let mut maybe_widget = widgets.get_mut(&widget_id);
 
-    if widget.get_type().as_str() == "Table" {
-        let it = widget.as_any();
+    if maybe_widget.is_some() {
+        let mut unknown_widget = maybe_widget.unwrap();
 
-        match it.downcast_mut::<Table>() {
-            Some(table) => {
-                let mut new_data = Vec::<HashMap<String, String>>::new();
+        if unknown_widget.get_type().as_str() == "Table" {
+            // let a: &mut Box<dyn Any> = unknown_widget;
 
-                for item in data.iter() {
-                    if item.is_object() {
-                        let obj: &Object = item.unchecked_ref();
-                        let mut row = HashMap::<String, String>::new();
+            let a = unknown_widget.as_any();
+            // let b = a.downcast_ref::<Table>();
 
-                        for object_entry_as_js_value in Object::entries(&obj).iter() {
-                            let object_entry: &Array = object_entry_as_js_value.unchecked_ref();
-
-                            let key = object_entry.get(0).as_string().unwrap();
-                            let value = object_entry.get(1).as_string().unwrap();
-
-                            row.insert(key, value);
-                        }
-
-                        new_data.push(row);
-                    }
-                }
-
-                table.append_data(&mut new_data);
-            },
-            None => panic!(),
+            // if let Some(table) = any_mut.downcast_mut::<Table>() {
+            //     let mut new_data = Vec::<HashMap<String, String>>::new();
+            //
+            //     for item in data.iter() {
+            //         if item.is_object() {
+            //             log("is_object returned true");
+            //
+            //             let obj: &Object = item.unchecked_ref();
+            //             let mut row = HashMap::<String, String>::new();
+            //
+            //             for object_entry_as_js_value in Object::entries(&obj).iter() {
+            //                 log("inside Object::entries");
+            //
+            //                 let object_entry: &Array = object_entry_as_js_value.unchecked_ref();
+            //
+            //                 let key = object_entry.get(0).as_string().unwrap();
+            //                 let value = object_entry.get(1).as_string().unwrap();
+            //
+            //                 row.insert(key, value);
+            //             }
+            //
+            //             new_data.push(row);
+            //         } else {
+            //             log("item in array not an object");
+            //         }
+            //     }
+            //
+            //     // table.append_data(&mut new_data);
+            // } else  {
+            //     log("downcasting unsuccessful");
+            // }
+        } else {
+            log("widget not of the right type");
         }
+    } else {
+        log(format!("widget not found: {}", widget_id).as_str());
     }
 }
 

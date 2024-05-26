@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::ops::Deref;
 use eframe::emath::Align;
 use egui::Layout;
 use serde_json::Value;
@@ -27,15 +26,15 @@ pub struct TableColumn {
 }
 
 pub struct Table {
-    id: u32,
-    cell_layout: Layout,
-    striped: bool,
-    resizable: bool,
-    clickable: bool,
-    selection: std::collections::HashSet<usize>,
-    columns: Vec<TableColumn>,
-    widget_type: String,
-    data: Vec<HashMap<String, String>>
+    pub id: u32,
+    pub cell_layout: Layout,
+    pub striped: bool,
+    pub resizable: bool,
+    pub clickable: bool,
+    pub selection: std::collections::HashSet<usize>,
+    pub columns: Vec<TableColumn>,
+    pub widget_type: String,
+    pub data: Vec<HashMap<String, String>>
 }
 
 impl Table {
@@ -170,7 +169,7 @@ impl TryFrom<&Value> for Table {
         // let tooltip_text = widget_def["tooltipText"].as_str();
         // let default_checked = widget_def["defaultChecked"].as_bool();
 
-        return if widget_def["label"].is_string() {
+        return if widget_def["columns"].is_array() {
             Ok(Table::new(
                 widget_def["id"].as_u64().unwrap() as u32,
                 Layout::left_to_right(Align::Center),
