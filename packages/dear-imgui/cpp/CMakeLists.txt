@@ -3,6 +3,13 @@ cmake_minimum_required(VERSION 3.8)
 set(CMAKE_GENERATOR "Ninja")
 set(CMAKE_TOOLCHAIN_FILE deps/vcpkg/scripts/buildsystems/vcpkg.cmake)
 set(VCPKG_TARGET_TRIPLET "wasm32-emscripten")
+
+
+if(NOT DEFINED ENV{EMSDK})
+    message(FATAL_ERROR "Environment variable EMSDK is not defined. Follow the README steps and source emsdk_env.* from the EMSDK root directory in this shell before running CMake")
+endif()
+
+
 set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE $ENV{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake)
 
 execute_process(
