@@ -18,7 +18,7 @@ use egui::{Context, TextBuffer};
 use once_cell::sync::Lazy;
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
-use js_sys::Function;
+use js_sys::{Array, Function, Object};
 use crate::button::Button;
 use crate::checkbox::Checkbox;
 use crate::collapsing_header::CollapsingHeader;
@@ -295,9 +295,9 @@ pub fn set_widget(raw_widget_def: String) {
 }
 
 #[wasm_bindgen]
-pub fn append_data_to_table(widget_id: u32, data: JsValue) {
-    let mut widgets = WIDGETS.lock().unwrap();
-    let widget = widgets.get_mut(&widget_id).unwrap();
+pub fn append_data_to_table(widget_id: u32, data: Array) {
+    let mut widgets = WIDGETS.lock().unwrap_throw();
+    let widget = widgets.get_mut(&widget_id).unwrap_throw();
 
     if widget.get_type().as_str() == "Table" {
         let it = widget.as_any();
@@ -306,7 +306,25 @@ pub fn append_data_to_table(widget_id: u32, data: JsValue) {
             Some(table) => {
                 let mut new_data = Vec::<HashMap<String, String>>::new();
 
-                table.append_data(new_data.as_mut());
+                for item in data.iter() {
+                    if item.is_object() {
+                        let obj: &Object = item.unchecked_ref();
+                        let mut row = HashMap::<String, String>::new();
+
+                        for object_entry_as_js_value in Object::entries(&obj).iter() {
+                            let object_entry: &Array = object_entry_as_js_value.unchecked_ref();
+
+                            let key = object_entry.get(0).as_string().unwrap();
+                            let value = object_entry.get(1).as_string().unwrap();
+
+                            row.insert(key, value);
+                        }
+
+                        new_data.push(row);
+                    }
+                }
+
+                table.append_data(&mut new_data);
             },
             None => panic!(),
         }

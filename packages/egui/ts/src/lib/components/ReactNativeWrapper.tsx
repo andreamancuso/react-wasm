@@ -25,7 +25,10 @@ export const ReactNativeWrapper: React.ComponentType<ReactNativeWrapperProps> = 
             initialisedRef.current = true;
 
             // todo: inject via Context
-            ReactNativePrivateInterface.nativeFabricUIManager.init(wasmModule);
+            ReactNativePrivateInterface.nativeFabricUIManager.init(
+                wasmModule,
+                widgetRegistrationServiceRef.current,
+            );
 
             ReactFabricProd.render(
                 <WidgetRegistrationServiceContext.Provider

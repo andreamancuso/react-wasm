@@ -17,6 +17,8 @@ export class WidgetRegistrationService {
     }
 
     linkWidgetIds(id: string, fabricId: number) {
+        console.log("linkWidgetIds", id, fabricId);
+
         this.fabricWidgetsMapping.set(id, fabricId);
     }
 
@@ -25,6 +27,7 @@ export class WidgetRegistrationService {
     }
 
     registerTable(id: string) {
+        console.log("registerTable", id);
         this.tables.add(id);
     }
 
@@ -35,6 +38,7 @@ export class WidgetRegistrationService {
     appendDataToTable(id: string, data: any) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
+            console.log("appendDataToTable", id, fabricWidgetId, data);
             this.wasmModule.append_data_to_table(fabricWidgetId, data);
         }
     }
