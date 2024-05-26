@@ -26,9 +26,9 @@ export function get_hierarchy(): string;
 export function set_widget(raw_widget_def: string): void;
 /**
 * @param {number} widget_id
-* @param {Array<any>} data
+* @param {Array<any> | undefined} [maybe_data]
 */
-export function append_data_to_table(widget_id: number, data: Array<any>): void;
+export function append_data_to_table(widget_id: number, maybe_data?: Array<any>): void;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 

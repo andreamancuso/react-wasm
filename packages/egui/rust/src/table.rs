@@ -85,6 +85,9 @@ fn thick_row(row_index: usize) -> bool {
 
 impl Render for Table {
     fn render(&mut self, ui: &mut egui::Ui, app: &App) {
+
+        ui.label(format!("Table data length: {}", self.data.len()).as_str());
+
         let text_height = egui::TextStyle::Body
             .resolve(ui.style())
             .size
@@ -121,6 +124,7 @@ impl Render for Table {
         // if let Some(row_index) = self.scroll_to_row.take() {
         //     table = table.scroll_to_row(row_index, None);
         // }
+
 
         table
             // todo: add support for more complex cases, styling, etc.

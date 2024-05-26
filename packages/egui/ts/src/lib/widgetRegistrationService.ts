@@ -39,8 +39,7 @@ export class WidgetRegistrationService {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
             console.log("appendDataToTable", id, fabricWidgetId, data);
-            // this.wasmModule.append_data_to_table(fabricWidgetId, data);
-            this.wasmModule.append_data_to_table(fabricWidgetId);
+            this.wasmModule.append_data_to_table(fabricWidgetId, data);
         }
     }
 }

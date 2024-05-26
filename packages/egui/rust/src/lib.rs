@@ -301,49 +301,58 @@ pub fn set_widget(raw_widget_def: String) {
 }
 
 #[wasm_bindgen]
-pub fn append_data_to_table(widget_id: u32, data: Array) {
+pub fn append_data_to_table(widget_id: u32, maybe_data: Option<Array>) {
     let try_lock_result = WIDGETS.try_lock();
     let mut widgets = try_lock_result.unwrap();
     let mut maybe_widget = widgets.get_mut(&widget_id);
 
     if maybe_widget.is_some() {
         let mut unknown_widget = maybe_widget.unwrap();
+        let maybe_table = unknown_widget.as_table();
 
-        if unknown_widget.get_type().as_str() == "Table" {
-            let a = unknown_widget.as_table().unwrap();
+        if maybe_table.is_some() {
+            if (maybe_data.is_some()) {
+                let table = maybe_table.unwrap();
+                let data = maybe_data.unwrap();
+                let mut new_data = Vec::<HashMap<String, String>>::new();
 
+                log(format!("data length: {}", data.length()).as_str());
 
-            // if let Some(table) = any_mut.downcast_mut::<Table>() {
-            //     let mut new_data = Vec::<HashMap<String, String>>::new();
-            //
-            //     for item in data.iter() {
-            //         if item.is_object() {
-            //             log("is_object returned true");
-            //
-            //             let obj: &Object = item.unchecked_ref();
-            //             let mut row = HashMap::<String, String>::new();
-            //
-            //             for object_entry_as_js_value in Object::entries(&obj).iter() {
-            //                 log("inside Object::entries");
-            //
-            //                 let object_entry: &Array = object_entry_as_js_value.unchecked_ref();
-            //
-            //                 let key = object_entry.get(0).as_string().unwrap();
-            //                 let value = object_entry.get(1).as_string().unwrap();
-            //
-            //                 row.insert(key, value);
-            //             }
-            //
-            //             new_data.push(row);
-            //         } else {
-            //             log("item in array not an object");
-            //         }
-            //     }
-            //
-            //     // table.append_data(&mut new_data);
-            // } else  {
-            //     log("downcasting unsuccessful");
-            // }
+                for item in data.iter() {
+                    if item.is_object() {
+                        log("is_object returned true");
+
+                        let obj: &Object = item.unchecked_ref();
+                        let mut row = HashMap::<String, String>::new();
+
+                        for object_entry_as_js_value in Object::entries(&obj).iter() {
+                            log("inside Object::entries");
+
+                            let object_entry: &Array = object_entry_as_js_value.unchecked_ref();
+
+                            log(format!("entry length: {}", object_entry.length()).as_str());
+
+                            let maybe_key = object_entry.get(0).as_string();
+                            let maybe_value = object_entry.get(1).as_string();
+
+                            if maybe_key.is_some() && maybe_value.is_some() {
+                                let key = maybe_key.unwrap();
+                                let value = maybe_value.unwrap();
+
+                                row.insert(key, value);
+                            }
+                        }
+
+                        new_data.push(row);
+                    } else {
+                        log("item in array not an object");
+                    }
+                }
+
+                table.append_data(&mut new_data);
+            } else {
+                log("No data received");
+            }
         } else {
             log("widget not of the right type");
         }
