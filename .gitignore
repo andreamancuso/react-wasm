@@ -144,3 +144,12 @@ dist
 .vscode
 
 .idea
+
+vcpkg_installed/
+
+build/
+
+Makefile
+reactDearImgui.mjs
+reactDearImgui.wasm
+reactDearImgui.worker.mjs
