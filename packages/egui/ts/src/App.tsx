@@ -6,6 +6,7 @@ import initWasmModule, {
     set_children,
     append_child,
     get_hierarchy,
+    append_data_to_table,
 } from "./lib/wasm/eframe_template";
 import { EguiDemo } from "./lib/components/EguiDemo/EguiDemo";
 
@@ -19,6 +20,7 @@ const module: any = {
     init_egui,
     append_child,
     get_hierarchy,
+    append_data_to_table,
 };
 
 function App() {

@@ -49,6 +49,7 @@ export default {
                                 size: true,
                                 onChange: true,
                                 onClick: true,
+                                columns: true,
                             },
                         };
                 }

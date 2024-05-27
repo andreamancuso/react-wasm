@@ -1,5 +1,6 @@
 export default class {
     wasmModule;
+    widgetRegistrationService;
     dispatchEventFn;
     cloningNode;
     fiberNodesMap;
@@ -8,11 +9,20 @@ export default class {
         this.fiberNodesMap = new Map();
     }
 
-    init(wasmModule) {
+    init(wasmModule, widgetRegistrationService) {
         this.wasmModule = wasmModule;
+        this.widgetRegistrationService = widgetRegistrationService;
     }
     dispatchEvent = (rootNodeID, topLevelType, nativeEventParam) => {
-        this.dispatchEventFn(this.fiberNodesMap.get(rootNodeID), topLevelType, nativeEventParam);
+        // todo: understand the implications of using setTimeout() here, which is currently required
+        // as events are sent while the WIDGETS Mutex is locked -> this is the only way to prevent a deadlock at the moment
+        setTimeout(() => {
+            this.dispatchEventFn(
+                this.fiberNodesMap.get(rootNodeID),
+                topLevelType,
+                nativeEventParam,
+            );
+        }, 0);
     };
     createNode = (generatedId, uiViewClassName, requiresClone, payload, fiberNode) => {
         console.log("createNode", generatedId, uiViewClassName, requiresClone, payload, fiberNode);
@@ -30,6 +40,11 @@ export default class {
         this.wasmModule.set_widget(JSON.stringify(widget));
 
         this.fiberNodesMap.set(generatedId, fiberNode);
+
+        // todo: type is in some array of types
+        if (type === "Table") {
+            this.widgetRegistrationService.linkWidgetIds(id, generatedId);
+        }
 
         return widget;
     };

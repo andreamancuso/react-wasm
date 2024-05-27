@@ -23,6 +23,7 @@ export type WidgetPropsMap = {
         label: string;
     };
     CollapsingHeader: { label: string };
+    Table: { columns: { heading: string; fieldId?: string }[]; initialData?: string };
 };
 
 type WidgetKeys = keyof WidgetPropsMap;
@@ -35,7 +36,10 @@ type WidgetsWithEvents =
     | "CollapsingHeader"
     | "Checkbox"
     | "RadioButton"
-    | "RadioButtonGroup";
+    | "RadioButtonGroup"
+    // todo: whilst click events will be supported, we also need to handle cases where components have an imperative handle
+    // whereby an ID prop is required, but the component may support no user-interaction events
+    | "Table";
 
 export type WidgetReactNode =
     | WidgetReactElementsFlat
@@ -62,6 +66,7 @@ export type ReactElementWidget<
     P extends WidgetPropsMapFlat = WidgetPropsMapFlat,
 > = K extends WidgetsWithEvents
     ? { [L in keyof Omit<P, "children">]: P[L] } & {
+          id: string;
           type: K;
           children?: WidgetReactNode;
       } & { onChange?: any; onClick?: any }
@@ -81,6 +86,7 @@ export type EguiWidget<
     P extends WidgetPropsMapFlat = WidgetPropsMapFlat,
 > = K extends WidgetsWithEvents
     ? { [L in keyof Omit<P, "children">]: P[L] } & {
+          id: string;
           type: K;
           children?: EguiWidget<WidgetKeys>[];
       }
@@ -108,13 +114,22 @@ export type WidgetFunctionComponent<P = {}> = FunctionComponent<P> & {
 export type JSXWidgetNode<
     K extends WidgetKeys,
     P extends WidgetPropsMapFlat = WidgetPropsMapFlat,
-> = {
-    type: "widget";
-    props: {
-        type: K;
-    } & P;
-    children?: JSXWidgetNodesFlat[];
-};
+> = K extends WidgetsWithEvents
+    ? {
+          type: "widget";
+          props: {
+              id: string;
+              type: K;
+          } & P;
+          children?: JSXWidgetNodesFlat[];
+      }
+    : {
+          type: "widget";
+          props: {
+              type: K;
+          } & P;
+          children?: JSXWidgetNodesFlat[];
+      };
 
 type JSXWidgetNodes = {
     [K in WidgetKeys]: JSXWidgetNode<K, WidgetPropsMap[K]>;

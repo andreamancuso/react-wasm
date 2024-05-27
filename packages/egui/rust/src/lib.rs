@@ -7,6 +7,7 @@ mod collapsing_header;
 mod horizontal;
 mod button;
 mod checkbox;
+mod table;
 
 use std::collections::HashMap;
 use std::ops::{Deref};
@@ -16,13 +17,14 @@ use egui::{Context};
 use once_cell::sync::Lazy;
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
-use js_sys::Function;
+use js_sys::{Array, Function, Object};
 use crate::button::Button;
 use crate::checkbox::Checkbox;
 use crate::collapsing_header::CollapsingHeader;
 use crate::horizontal::Horizontal;
 use crate::input_text::InputText;
 use crate::radio_button::{RadioButton, RadioButtonGroup};
+use crate::table::Table;
 
 type Widgets = HashMap<u32, Box<dyn Render + Send>>;
 type Hierarchy = HashMap<u32, Vec<u32>>;
@@ -124,7 +126,8 @@ impl App {
                         let collapsing_state = egui::collapsing_header::CollapsingState::load_with_default_open(ui.ctx(), collapsing_header_id, true);
 
                         collapsing_state.show_header(ui, |ui| {
-                                ui.label(widgets.get(&id).unwrap_throw().get_label()).clicked(); // you can put checkboxes or whatever here
+                                let collapsing_header = widgets.get_mut(&id).unwrap_throw().as_collapsing_header().unwrap();
+                                ui.label(collapsing_header.label.as_str()).clicked(); // you can put checkboxes or whatever here
                             })
                             .body(|ui| {
                                 self.render_children(widgets, hierarchy, ui, id);
@@ -167,7 +170,9 @@ impl App {
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
-        let mut widgets = WIDGETS.lock().unwrap_throw();
+        let try_lock_result = WIDGETS.try_lock();
+        let mut widgets = try_lock_result.unwrap();
+
         let hierarchy = HIERARCHY.lock().unwrap_throw();
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -214,7 +219,8 @@ pub fn get_hierarchy() -> String {
 
 #[wasm_bindgen]
 pub fn set_widget(raw_widget_def: String) {
-    let mut widgets = WIDGETS.lock().unwrap_throw();
+    let try_lock_result = WIDGETS.try_lock();
+    let mut widgets = try_lock_result.unwrap();
 
     let widget_def: Value = serde_json::from_str(&*raw_widget_def).unwrap();
 
@@ -276,9 +282,63 @@ pub fn set_widget(raw_widget_def: String) {
                         widgets.insert(widget_id, Box::new(widget_result.unwrap()));
                     }
                 }
+                "Table" => {
+                    let widget_result = Table::try_from(&widget_def);
+
+                    if widget_result.is_ok() {
+                        widgets.insert(widget_id, Box::new(widget_result.unwrap()));
+                    } else {
+                        log("Could not add Table widget");
+                    }
+                }
                 &_ => {
                     log(format!("Unrecognised type: {}", widget_type).as_str());
                 }
+            }
+        }
+    }
+}
+
+#[wasm_bindgen]
+pub fn append_data_to_table(widget_id: u32, maybe_data: Option<Array>) {
+    let try_lock_result = WIDGETS.try_lock();
+    let mut widgets = try_lock_result.unwrap();
+    let mut maybe_widget = widgets.get_mut(&widget_id);
+
+    if maybe_widget.is_some() {
+        let mut unknown_widget = maybe_widget.unwrap();
+        let maybe_table = unknown_widget.as_table();
+
+        if maybe_table.is_some() {
+            if maybe_data.is_some() {
+                let table = maybe_table.unwrap();
+                let data = maybe_data.unwrap();
+                let mut new_data = Vec::<HashMap<String, String>>::new();
+
+                for item in data.iter() {
+                    if item.is_object() {
+                        let obj: &Object = item.unchecked_ref();
+                        let mut row = HashMap::<String, String>::new();
+
+                        for object_entry_as_js_value in Object::entries(&obj).iter() {
+                            let object_entry: &Array = object_entry_as_js_value.unchecked_ref();
+
+                            let maybe_key = object_entry.get(0).as_string();
+                            let maybe_value = object_entry.get(1).as_string();
+
+                            if maybe_key.is_some() && maybe_value.is_some() {
+                                let key = maybe_key.unwrap();
+                                let value = maybe_value.unwrap();
+
+                                row.insert(key, value);
+                            }
+                        }
+
+                        new_data.push(row);
+                    }
+                }
+
+                table.append_data(&mut new_data);
             }
         }
     }
@@ -291,6 +351,8 @@ pub trait Render {
 
     fn get_type(&self) -> &str;
 
-    fn get_label(&self) -> &str;
+    fn as_table(&mut self) -> Option<&mut Table> { None }
+
+    fn as_collapsing_header(&mut self) -> Option<&mut CollapsingHeader> { None }
 }
 

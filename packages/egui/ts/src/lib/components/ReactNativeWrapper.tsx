@@ -17,7 +17,7 @@ export const ReactNativeWrapper: React.ComponentType<ReactNativeWrapperProps> = 
     wasmModule,
     children,
 }: ReactNativeWrapperProps) => {
-    const widgetRegistrationServiceRef = useRef(new WidgetRegistrationService());
+    const widgetRegistrationServiceRef = useRef(new WidgetRegistrationService(wasmModule));
     const initialisedRef = useRef(false);
 
     useEffect(() => {
@@ -25,7 +25,10 @@ export const ReactNativeWrapper: React.ComponentType<ReactNativeWrapperProps> = 
             initialisedRef.current = true;
 
             // todo: inject via Context
-            ReactNativePrivateInterface.nativeFabricUIManager.init(wasmModule);
+            ReactNativePrivateInterface.nativeFabricUIManager.init(
+                wasmModule,
+                widgetRegistrationServiceRef.current,
+            );
 
             ReactFabricProd.render(
                 <WidgetRegistrationServiceContext.Provider

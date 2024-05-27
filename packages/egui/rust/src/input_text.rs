@@ -30,10 +30,6 @@ impl Render for InputText {
     fn get_type(&self) -> &str {
         return self.widget_type.as_str();
     }
-
-    fn get_label(&self) -> &str {
-        return "";
-    }
 }
 
 impl TryFrom<&Value> for InputText {
