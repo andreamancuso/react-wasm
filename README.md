@@ -49,7 +49,7 @@ Perhaps there are other options I could/should have considered. Feel free to let
 
 ### egui
 
--   [egui](https://github.com/andreamancuso/react-wasm/tree/main/packages/egui) (work in progress) Browser support: Chrome, Firefox, Edge
+-   [egui](https://github.com/andreamancuso/react-wasm/tree/main/packages/egui) (work in progress) ([very basic online demo](https://andreamancuso.github.io/react-wasm/))Browser support: Chrome, Firefox, Edge
 
 ![egui hello world](/screenshots/egui/egui-hello-world.png?raw=true)
 
