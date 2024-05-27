@@ -1,12 +1,14 @@
 # React bindings for Dear ImGui (and ImPlot)
 
-Please note that only Chrome and Edge are currently supported. Firefox Nightlies should also work but no testing has been carried out on them.
+Please note that only Chrome, Edge and [Firefox Nightlies](https://www.mozilla.org/en-US/firefox/channel/desktop/) are currently supported.
 
 ## Building instructions
 
 We provide instructions for manual setup on Windows as well as a devcontainer configuration. We **strongly** recommend to use the Dev Container approach.
 
 ### Requirements for devcontainer-based setup (massive kudos to [@genautz](https://github.com/genautz))
+
+We recommend you let VS Code clone the repo in a separate Docker volume
 
 - [VS Code](https://code.visualstudio.com/)
     -  Install extension `Dev Containers`, Id: `ms-vscode-remote.remote-containers` [Marketplace Link](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
