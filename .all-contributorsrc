@@ -1,0 +1,26 @@
+{
+  "projectName": "react-wasm",
+  "projectOwner": "andreamancuso",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "none",
+  "contributors": [
+    {
+      "login": "genautz",
+      "name": "genautz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/89743955?v=4",
+      "profile": "https://github.com/genautz",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "linkToUsage": false
+}
