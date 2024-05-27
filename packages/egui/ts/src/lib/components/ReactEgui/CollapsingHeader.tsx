@@ -1,3 +1,5 @@
+import { useRef } from "react";
+import { useWidgetRegistrationService } from "../../hooks";
 import { PropsWithChildren, WidgetFunctionComponent } from "./types";
 
 export type CollapsingHeaderProps = PropsWithChildren & {
@@ -10,8 +12,11 @@ export const CollapsingHeader: WidgetFunctionComponent<CollapsingHeaderProps> = 
     label,
     onChange,
 }) => {
+    const widgetRegistratonService = useWidgetRegistrationService();
+    const idRef = useRef(widgetRegistratonService.generateId());
+
     return (
-        <widget type="CollapsingHeader" label={label} onChange={onChange}>
+        <widget type="CollapsingHeader" id={idRef.current} label={label} onChange={onChange}>
             {children}
         </widget>
     );

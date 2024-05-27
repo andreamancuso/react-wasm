@@ -1,3 +1,5 @@
+import { useRef } from "react";
+import { useWidgetRegistrationService } from "../../hooks";
 import { WidgetFunctionComponent } from "./types";
 
 export type InputTextProps = {
@@ -11,7 +13,16 @@ export const InputText: WidgetFunctionComponent<InputTextProps> = ({
     defaultValue,
     label,
 }) => {
+    const widgetRegistratonService = useWidgetRegistrationService();
+    const idRef = useRef(widgetRegistratonService.generateId());
+
     return (
-        <widget type="InputText" defaultValue={defaultValue} label={label} onChange={onChange} />
+        <widget
+            type="InputText"
+            id={idRef.current}
+            defaultValue={defaultValue}
+            label={label}
+            onChange={onChange}
+        />
     );
 };
