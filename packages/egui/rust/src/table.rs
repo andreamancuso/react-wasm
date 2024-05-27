@@ -104,7 +104,7 @@ impl Render for Table {
 
         // todo: add support for rest of column sizes and ranges
         for column in self.columns.iter() {
-            match column.column_size_type.unwrap() {
+            match column.column_size_type.unwrap_or(InitialColumnSize::Remainder) {
                 InitialColumnSize::Absolute(_) => {
                     table = table.column(Column::exact(column.column_size.unwrap_or(100.0)));
                 }
@@ -139,17 +139,27 @@ impl Render for Table {
                 let row_height = |i: usize| if thick_row(i) { 30.0 } else { 18.0 };
                 body.heterogeneous_rows((0..self.data.len()).map(row_height), |mut row| {
                     let row_index = row.index();
-                    let row_data = self.data.get(row_index).unwrap();
+                    let maybe_row_data = self.data.get(row_index);
 
-                    for column in self.columns.iter() {
-                        row.col(|ui| {
-                            let column_field_id = column.field_id.as_ref().unwrap();
-                            let column_value = row_data.get(column_field_id.as_str()).unwrap().as_str();
+                    if maybe_row_data.is_some() {
+                        let row_data = maybe_row_data.unwrap();
 
-                            // ui.style_mut().wrap = Some(false);
+                        for column in self.columns.iter() {
+                            let maybe_field_id = &column.field_id;
+                            if maybe_field_id.is_some() {
+                                let field_id = maybe_field_id.as_ref().unwrap();
 
-                            ui.label(column_value);
-                        });
+                                row.col(|ui| {
+                                    let maybe_column_value = row_data.get(field_id.as_str());
+
+                                    if maybe_column_value.is_some() {
+                                        ui.label(maybe_column_value.unwrap().as_str());
+                                    }
+
+                                    // ui.style_mut().wrap = Some(false);
+                                });
+                            }
+                        }
                     }
 
                     // row.set_selected(self.selection.contains(&row_index));
@@ -172,21 +182,41 @@ impl TryFrom<&Value> for Table {
     type Error = &'static str;
 
     fn try_from(widget_def: &Value) -> Result<Self, Self::Error> {
-        // let label = widget_def["label"].as_str();
-        // let tooltip_text = widget_def["tooltipText"].as_str();
-        // let default_checked = widget_def["defaultChecked"].as_bool();
+        let maybe_column_defs = widget_def["columns"].as_array();
 
-        return if widget_def["columns"].is_array() {
-            Ok(Table::new(
+        if maybe_column_defs.is_some() {
+            let mut columns = Vec::<TableColumn>::new();
+            let column_defs = maybe_column_defs.unwrap();
+
+            for column_def in column_defs.iter() {
+                if column_def.is_object() {
+                    let maybe_heading = column_def["heading"].as_str();
+
+                    if maybe_heading.is_some() {
+                        let maybe_field_id = column_def["fieldId"].as_str();
+
+                        columns.push(TableColumn {
+                            heading: String::from(maybe_heading.unwrap()),
+                            column_size_type: None,
+                            column_size: None,
+                            clip: None,
+                            resizable: None,
+                            field_id: if maybe_field_id.is_some() { Some(String::from(maybe_field_id.unwrap())) } else { None },
+                        });
+                    }
+                }
+            }
+
+            return Ok(Table::new(
                 widget_def["id"].as_u64().unwrap() as u32,
                 Layout::left_to_right(Align::Center),
-                Vec::<TableColumn>::new(),
+                columns,
                 false,
                 false,
                 false
             ))
-        } else {
-            Err("Invalid Table JSON data")
         }
+
+        return Err("Invalid Table JSON data")
     }
 }

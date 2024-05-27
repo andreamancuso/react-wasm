@@ -9,12 +9,11 @@ mod button;
 mod checkbox;
 mod table;
 
-use std::any::Any;
 use std::collections::HashMap;
 use std::ops::{Deref};
 use std::sync::{Arc, Mutex};
 use eframe::Frame;
-use egui::{Context, TextBuffer};
+use egui::{Context};
 use once_cell::sync::Lazy;
 use wasm_bindgen::prelude::*;
 use serde_json::{Value};
@@ -311,26 +310,18 @@ pub fn append_data_to_table(widget_id: u32, maybe_data: Option<Array>) {
         let maybe_table = unknown_widget.as_table();
 
         if maybe_table.is_some() {
-            if (maybe_data.is_some()) {
+            if maybe_data.is_some() {
                 let table = maybe_table.unwrap();
                 let data = maybe_data.unwrap();
                 let mut new_data = Vec::<HashMap<String, String>>::new();
 
-                log(format!("data length: {}", data.length()).as_str());
-
                 for item in data.iter() {
                     if item.is_object() {
-                        log("is_object returned true");
-
                         let obj: &Object = item.unchecked_ref();
                         let mut row = HashMap::<String, String>::new();
 
                         for object_entry_as_js_value in Object::entries(&obj).iter() {
-                            log("inside Object::entries");
-
                             let object_entry: &Array = object_entry_as_js_value.unchecked_ref();
-
-                            log(format!("entry length: {}", object_entry.length()).as_str());
 
                             let maybe_key = object_entry.get(0).as_string();
                             let maybe_value = object_entry.get(1).as_string();
@@ -344,20 +335,12 @@ pub fn append_data_to_table(widget_id: u32, maybe_data: Option<Array>) {
                         }
 
                         new_data.push(row);
-                    } else {
-                        log("item in array not an object");
                     }
                 }
 
                 table.append_data(&mut new_data);
-            } else {
-                log("No data received");
             }
-        } else {
-            log("widget not of the right type");
         }
-    } else {
-        log(format!("widget not found: {}", widget_id).as_str());
     }
 }
 

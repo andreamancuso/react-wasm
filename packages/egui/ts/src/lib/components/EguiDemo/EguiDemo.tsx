@@ -50,7 +50,7 @@ export const EguiDemo = () => {
 
     const handleAppendDataToTableClick = useCallback(() => {
         if (tableRef.current) {
-            tableRef.current.appendDataToTable([{ id: 1, name: "Andy" }]);
+            tableRef.current.appendDataToTable([{ id: "1", name: "Andy" }]);
         }
     }, [tableRef]);
 
