@@ -36,15 +36,10 @@ Tested with:
 
 ## Building
 
--   Open a Windows CLI (not PowerShell)
+-   Open a VS Studio 2022 developer prompt
 -   **IMPORTANT**: Run `<emsdk-dir>/emsdk_env.bat` (if you haven't done so already)
 -   `cd react-wasm/packages/dear-imgui/`
--   Build the WASM, either via Yarn:
-    -   `cd ts`
-    -   `yarn`
-    -   `yarn emcmake`
-    -   `yarn cmake`
--   or directly via CMake:
+-   Build the WASM:
     -   `cd cpp`
     -   `cmake -S . -B build -GNinja`
     -   `cmake --build ./build --target reactDearImgui`
