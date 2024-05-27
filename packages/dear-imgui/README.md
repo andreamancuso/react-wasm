@@ -4,9 +4,26 @@ Please note that only Chrome and Edge are currently supported. Firefox Nightlies
 
 ## Building instructions
 
-The repo ships with a pre-generated WASM file and related .mjs file. You may want to make changes and build new WASM files. Please follow these instructions. Feel free to create an issue if you experience any difficulties. If you are a Linux or Mac user and manage to get it working on your local environment, please feel free to share your findings.
+We provide instructions for manual setup on Windows as well as a devcontainer configuration. We **strongly** recommend to use the Dev Container approach.
 
-### Requirements
+### Requirements for devcontainer-based setup (massive kudos to [@genautz](https://github.com/genautz))
+
+- [VS Code](https://code.visualstudio.com/)
+    -  Install extension `Dev Containers`, Id: `ms-vscode-remote.remote-containers` [Marketplace Link](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+    -  Install extension `WSL` Id: `ms-vscode-remote.remote-wsl` [Marketplace Link](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+#### Building (Dev Container)
+
+-   `cd packages/dear-imgui/cpp`
+-   `cmake -S . -B build`
+-   `cmake --build ./build --target reactDearImgui`
+
+Note: no need to run `emsdk_env` as this has already been added to `.bash_profile`
+
+----
+
+### Requirements for manual setup
 
 Tested with:
 
@@ -16,25 +33,24 @@ Tested with:
 -   Node.js v20 (LTS) download it from https://nodejs.org/dist/v20.13.1/node-v20.13.1-x64.msi or install via [Node Version Manager](https://github.com/coreybutler/nvm-windows)
 -   Yarn, follow these instructions https://yarnpkg.com/getting-started/install
 
-### Setup
-
-#### Emscripten
+#### Manual installation of Emscripten
 
 -   Open a VS Studio 2022 developer prompt
 -   Run `git submodule update --init --recursive` to retrieve all dependencies in the `deps` folder
 -   Install emsdk:
     -   `git clone https://github.com/emscripten-core/emsdk.git`
     -   `cd emsdk`
-    -   `./emsdk install 3.1.60`
-    -   `./emsdk activate 3.1.60`
+    -   `./emsdk install 3.1.60` (`emsdk.bat` on Windows)
+    -   `./emsdk activate 3.1.60` (`emsdk.bat` on Windows)
     -   cd into `emsdk/upstream/emscripten` and run `npm install` (this ensures `tsc` is available so that TypeScript typings can be generated)
 
-#### React and other dependencies
+#### Manual installation of React and other dependencies
 
 -   `cd react-wasm/packages/dear-imgui/ts`
--   `yarn add -P react@18.2.0 react-dom@18.2.0`
+-   `npm i react@18.2.0 react-dom@18.2.0` (you may delete the package-lock.json file generated as part of running this command)
+-   `yarn`
 
-## Building
+#### Building (on Windows)
 
 -   Open a VS Studio 2022 developer prompt
 -   **IMPORTANT**: Run `<emsdk-dir>/emsdk_env.bat` (if you haven't done so already)
