@@ -11,9 +11,8 @@ The repo ships with a pre-generated WASM file and related .mjs file. You may wan
 Tested with:
 
 -   Windows 11
--   emscripten 3.1.54, follow these instructions https://emscripten.org/docs/getting_started/downloads.html
--   CMake 3.29.1, download it from https://github.com/Kitware/CMake/releases
--   ninja 1.12.0, download it from https://github.com/ninja-build/ninja/releases
+-   Visual Studio 2022
+-   emscripten 3.1.60, follow these instructions https://emscripten.org/docs/getting_started/downloads.html
 -   Node.js v20 (LTS) download it from https://nodejs.org/dist/v20.13.1/node-v20.13.1-x64.msi or install via [Node Version Manager](https://github.com/coreybutler/nvm-windows)
 -   Yarn, follow these instructions https://yarnpkg.com/getting-started/install
 
@@ -21,13 +20,14 @@ Tested with:
 
 #### Emscripten
 
+-   Open a VS Studio 2022 developer prompt
 -   Run `git submodule update --init --recursive` to retrieve all dependencies in the `deps` folder
 -   Install emsdk:
     -   `git clone https://github.com/emscripten-core/emsdk.git`
     -   `cd emsdk`
-    -   `./emsdk install 3.1.54`
-    -   `./emsdk activate 3.1.54`
--   Install Ninja and add it to `%PATH%`
+    -   `./emsdk install 3.1.60`
+    -   `./emsdk activate 3.1.60`
+    -   cd into `emsdk/upstream/emscripten` and run `npm install` (this ensures `tsc` is available so that TypeScript typings can be generated)
 
 #### React and other dependencies
 
@@ -37,7 +37,7 @@ Tested with:
 ## Building
 
 -   Open a Windows CLI (not PowerShell)
--   Run `<emsdk-dir>/emsdk_env.bat` (if you haven't done so already)
+-   **IMPORTANT**: Run `<emsdk-dir>/emsdk_env.bat` (if you haven't done so already)
 -   `cd react-wasm/packages/dear-imgui/`
 -   Build the WASM, either via Yarn:
     -   `cd ts`
@@ -46,7 +46,7 @@ Tested with:
     -   `yarn cmake`
 -   or directly via CMake:
     -   `cd cpp`
-    -   `cmake -B build -S .`
+    -   `cmake -S . -B build -GNinja`
     -   `cmake --build ./build --target reactDearImgui`
 
 ## Verifying
