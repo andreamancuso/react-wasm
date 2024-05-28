@@ -79,15 +79,15 @@ void ReactImgui::InitWidget(const json& widgetDef) {
     } else if (type == "Button") {
         m_widgets[id] = Button::makeWidget(widgetDef);
     } else if (type == "Fragment") {
-        m_widgets[id] = std::make_unique<Fragment>(id);
+        m_widgets[id] = Widget::makeWidget<Fragment>(widgetDef);
     } else if (type == "SameLine") {
-        m_widgets[id] = std::make_unique<SameLine>(id);
+        m_widgets[id] = Widget::makeWidget<SameLine>(widgetDef);
     } else if (type == "Separator") {
-        m_widgets[id] = std::make_unique<Separator>(id);
+        m_widgets[id] = Widget::makeWidget<Separator>(widgetDef);
     } else if (type == "Indent") {
-        m_widgets[id] = std::make_unique<Indent>(id);
+        m_widgets[id] = Widget::makeWidget<Indent>(widgetDef);
     } else if (type == "Unindent") {
-        m_widgets[id] = std::make_unique<Indent>(id);
+        m_widgets[id] = Widget::makeWidget<Unindent>(widgetDef);
     } else if (type == "SeparatorText") {
         std::string label = widgetDef["label"].template get<std::string>();
         m_widgets[id] = std::make_unique<SeparatorText>(id, label);
@@ -101,7 +101,7 @@ void ReactImgui::InitWidget(const json& widgetDef) {
         std::string text = widgetDef["text"].template get<std::string>();
         m_widgets[id] = std::make_unique<DisabledText>(id, text);
     } else if (type == "TabBar") {
-        m_widgets[id] = std::make_unique<TabBar>(id);
+        m_widgets[id] = Widget::makeWidget<TabBar>(widgetDef);
     } else if (type == "TabItem") {
         std::string label = widgetDef["label"].template get<std::string>();
         m_widgets[id] = std::make_unique<TabItem>(id, label);
@@ -112,7 +112,7 @@ void ReactImgui::InitWidget(const json& widgetDef) {
         double width = widgetDef["width"].template get<double>();
         m_widgets[id] = std::make_unique<TextWrap>(id, width);
     } else if (type == "ItemTooltip") {
-        m_widgets[id] = std::make_unique<ItemTooltip>(id);
+        m_widgets[id] = Widget::makeWidget<ItemTooltip>(widgetDef);
     } else if (type == "TreeNode") {
         std::string label = widgetDef["label"].template get<std::string>();
         m_widgets[id] = std::make_unique<TreeNode>(id, label);

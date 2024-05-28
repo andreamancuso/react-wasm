@@ -35,6 +35,17 @@ class Widget {
 
         inline static OnTextChangedCallback onInputTextChange_;
 
+        template <typename T> 
+        static std::unique_ptr<T> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                
+                return std::make_unique<T>(id);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
         Widget(int id) {
             m_id = id;
             m_type = "Unknown";
