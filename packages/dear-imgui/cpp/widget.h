@@ -35,7 +35,7 @@ class Widget {
 
         inline static OnTextChangedCallback onInputTextChange_;
 
-        template <typename T> 
+        template <class T> 
         static std::unique_ptr<T> makeWidget(const json& val) {
             if (val.is_object()) {
                 auto id = val["id"].template get<int>();
