@@ -10,6 +10,7 @@
 #include <cstring>
 #include <string>
 #include <sstream>
+#include <mutex>
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include "imgui.h"
@@ -31,6 +32,7 @@ class Widget;
 class ReactImgui : public ImPlotView {
     private:
         std::unordered_map<int, std::unique_ptr<Widget>> m_widgets;
+        std::mutex m_widgets_mutex;
 
         void InitWidget(const json& widgetDef);
         void InitButton(const json& val);
@@ -43,6 +45,7 @@ class ReactImgui : public ImPlotView {
 
     public:
         std::unordered_map<int, std::vector<int>> m_hierarchy;
+        std::mutex m_hierarchy_mutex;
 
         std::unordered_map<int, std::unique_ptr<char[]>> m_floatFormatChars;
 

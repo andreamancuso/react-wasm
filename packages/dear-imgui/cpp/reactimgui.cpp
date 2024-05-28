@@ -77,44 +77,50 @@ void ReactImgui::InitWidget(const json& widgetDef) {
         InitCheckbox(widgetDef);
     } else if (type == "Button") {
         InitButton(widgetDef);
-    } else if (type == "Fragment") {
-        m_widgets[id] = std::make_unique<Fragment>(id);
-    } else if (type == "SameLine") {
-        m_widgets[id] = std::make_unique<SameLine>(id);
-    } else if (type == "Separator") {
-        m_widgets[id] = std::make_unique<Separator>(id);
-    } else if (type == "Indent") {
-        m_widgets[id] = std::make_unique<Indent>(id);
-    } else if (type == "Unindent") {
-        m_widgets[id] = std::make_unique<Indent>(id);
-    } else if (type == "SeparatorText") {
-        std::string label = widgetDef["label"].template get<std::string>();
-        m_widgets[id] = std::make_unique<SeparatorText>(id, label);
-    } else if (type == "BulletText") {
-        std::string text = widgetDef["text"].template get<std::string>();
-        m_widgets[id] = std::make_unique<BulletText>(id, text);
-    } else if (type == "UnformattedText") {
-        std::string text = widgetDef["text"].template get<std::string>();
-        m_widgets[id] = std::make_unique<UnformattedText>(id, text);
-    } else if (type == "DisabledText") {
-        std::string text = widgetDef["text"].template get<std::string>();
-        m_widgets[id] = std::make_unique<DisabledText>(id, text);
-    } else if (type == "TabBar") {
-        m_widgets[id] = std::make_unique<TabBar>(id);
-    } else if (type == "TabItem") {
-        std::string label = widgetDef["label"].template get<std::string>();
-        m_widgets[id] = std::make_unique<TabItem>(id, label);
-    } else if (type == "CollapsingHeader") {
-        std::string label = widgetDef["label"].template get<std::string>();
-        m_widgets[id] = std::make_unique<CollapsingHeader>(id, label);
-    } else if (type == "TextWrap") {
-        double width = widgetDef["width"].template get<double>();
-        m_widgets[id] = std::make_unique<TextWrap>(id, width);
-    } else if (type == "ItemTooltip") {
-        m_widgets[id] = std::make_unique<ItemTooltip>(id);
-    } else if (type == "TreeNode") {
-        std::string label = widgetDef["label"].template get<std::string>();
-        m_widgets[id] = std::make_unique<TreeNode>(id, label);
+    } else { 
+        m_widgets_mutex.lock();
+
+        if (type == "Fragment") {
+            m_widgets[id] = std::make_unique<Fragment>(id);
+        } else if (type == "SameLine") {
+            m_widgets[id] = std::make_unique<SameLine>(id);
+        } else if (type == "Separator") {
+            m_widgets[id] = std::make_unique<Separator>(id);
+        } else if (type == "Indent") {
+            m_widgets[id] = std::make_unique<Indent>(id);
+        } else if (type == "Unindent") {
+            m_widgets[id] = std::make_unique<Indent>(id);
+        } else if (type == "SeparatorText") {
+            std::string label = widgetDef["label"].template get<std::string>();
+            m_widgets[id] = std::make_unique<SeparatorText>(id, label);
+        } else if (type == "BulletText") {
+            std::string text = widgetDef["text"].template get<std::string>();
+            m_widgets[id] = std::make_unique<BulletText>(id, text);
+        } else if (type == "UnformattedText") {
+            std::string text = widgetDef["text"].template get<std::string>();
+            m_widgets[id] = std::make_unique<UnformattedText>(id, text);
+        } else if (type == "DisabledText") {
+            std::string text = widgetDef["text"].template get<std::string>();
+            m_widgets[id] = std::make_unique<DisabledText>(id, text);
+        } else if (type == "TabBar") {
+            m_widgets[id] = std::make_unique<TabBar>(id);
+        } else if (type == "TabItem") {
+            std::string label = widgetDef["label"].template get<std::string>();
+            m_widgets[id] = std::make_unique<TabItem>(id, label);
+        } else if (type == "CollapsingHeader") {
+            std::string label = widgetDef["label"].template get<std::string>();
+            m_widgets[id] = std::make_unique<CollapsingHeader>(id, label);
+        } else if (type == "TextWrap") {
+            double width = widgetDef["width"].template get<double>();
+            m_widgets[id] = std::make_unique<TextWrap>(id, width);
+        } else if (type == "ItemTooltip") {
+            m_widgets[id] = std::make_unique<ItemTooltip>(id);
+        } else if (type == "TreeNode") {
+            std::string label = widgetDef["label"].template get<std::string>();
+            m_widgets[id] = std::make_unique<TreeNode>(id, label);
+        }
+
+        m_widgets_mutex.unlock();
     }
 };
 
@@ -126,6 +132,7 @@ void ReactImgui::InitButton(const json& val) {
     auto id = val["id"].template get<int>();
     auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
 
+    m_widgets_mutex.lock();
     if (m_widgets.contains(id)) {
         auto pButton = static_cast<Button*>(m_widgets[id].get());
 
@@ -133,6 +140,7 @@ void ReactImgui::InitButton(const json& val) {
     } else {
         m_widgets[id] = Button::makeButtonWidget(id, label);
     }
+    m_widgets_mutex.unlock();
 };
 
 void ReactImgui::InitCheckbox(const json& val) {
@@ -144,6 +152,7 @@ void ReactImgui::InitCheckbox(const json& val) {
     auto defaultChecked = val.contains("defaultChecked") && val["defaultChecked"].is_boolean() ? val["defaultChecked"].template get<bool>() : false;
     auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
 
+    m_widgets_mutex.lock();
     if (m_widgets.contains(id)) {
         auto pCheckbox = static_cast<Checkbox*>(m_widgets[id].get());
 
@@ -151,6 +160,7 @@ void ReactImgui::InitCheckbox(const json& val) {
     } else {
         m_widgets[id] = Checkbox::makeCheckboxWidget(id, label, defaultChecked);
     }
+    m_widgets_mutex.unlock();
 };
 
 void ReactImgui::InitSlider(const json& val) {
@@ -165,6 +175,7 @@ void ReactImgui::InitSlider(const json& val) {
     auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
     auto sliderType = val.contains("sliderType") && val["sliderType"].is_string() ? val["sliderType"].template get<std::string>() : "default";
 
+    m_widgets_mutex.lock();
     if (m_widgets.contains(id)) {
         auto pSlider = static_cast<Slider*>(m_widgets[id].get());
 
@@ -180,6 +191,7 @@ void ReactImgui::InitSlider(const json& val) {
     } else {
         m_widgets[id] = Slider::makeSliderWidget(id, label, defaultValue, min, max, sliderType);
     }
+    m_widgets_mutex.unlock();
 };
 
 void ReactImgui::InitMultiSlider(const json& val) {
@@ -195,6 +207,7 @@ void ReactImgui::InitMultiSlider(const json& val) {
     auto max = val.contains("max") && val["max"].is_number() ? val["max"].template get<float>() : 10.0f;
     auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
 
+    m_widgets_mutex.lock();
     if (m_widgets.contains(id)) {
         auto pMultiSlider = static_cast<MultiSlider*>(m_widgets[id].get());
 
@@ -212,6 +225,7 @@ void ReactImgui::InitMultiSlider(const json& val) {
             m_widgets[id] = MultiSlider::makeMultiSliderWidget(id, label, min, max, numValues, decimalDigits);
         }
     }
+    m_widgets_mutex.unlock();
 };
 
 void ReactImgui::SetEventHandlers(
@@ -241,6 +255,7 @@ void ReactImgui::InitInputText(const json& val) {
     auto defaultValue = val.contains("defaultValue") && val["defaultValue"].is_string() ? val["defaultValue"].template get<std::string>() : "";
     auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
 
+    m_widgets_mutex.lock();
     if (m_widgets.contains(id)) {
         auto pInputText = static_cast<InputText*>(m_widgets[id].get());
 
@@ -248,6 +263,7 @@ void ReactImgui::InitInputText(const json& val) {
     } else {
         m_widgets[id] = InputText::makeInputTextWidget(id, defaultValue, label);
     }
+    m_widgets_mutex.unlock();
 };
 
 void ReactImgui::InitBasicCombo(const json& val) {
@@ -259,6 +275,7 @@ void ReactImgui::InitBasicCombo(const json& val) {
     auto defaultValue = val.contains("defaultValue") && val["defaultValue"].is_number() ? val["defaultValue"].template get<int>() : 0;
     auto label = val["label"].template get<std::string>();
     
+    m_widgets_mutex.lock();
     if (m_widgets.contains(id)) {
         auto pCombo = static_cast<Combo*>(m_widgets[id].get());
 
@@ -266,6 +283,7 @@ void ReactImgui::InitBasicCombo(const json& val) {
     } else {
         m_widgets[id] = Combo::makeComboWidget(id, label, defaultValue, val["optionsList"].template get<std::string>());
     }
+    m_widgets_mutex.unlock();
 };
 
 void ReactImgui::SetUpFloatFormatChars() {
@@ -327,6 +345,9 @@ void ReactImgui::Render(int window_width, int window_height) {
     ImGui_ImplWGPU_NewFrame();
     ImGui_ImplGlfw_NewFrame();
 
+    m_widgets_mutex.lock();
+    m_hierarchy_mutex.lock();
+
     ImGui::NewFrame();
 
     ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -338,6 +359,9 @@ void ReactImgui::Render(int window_width, int window_height) {
 
     ImGui::End();
     ImGui::Render();
+
+    m_widgets_mutex.unlock();
+    m_hierarchy_mutex.unlock();
 };
 
 void ReactImgui::SetWidget(std::string widgetJsonAsString) {
@@ -347,6 +371,9 @@ void ReactImgui::SetWidget(std::string widgetJsonAsString) {
 void ReactImgui::PatchWidget(int id, std::string widgetJsonAsString) {
     if (m_widgets.contains(id)) {
         auto widgetDef = json::parse(widgetJsonAsString);
+
+        m_widgets_mutex.lock();
+
         auto pWidget = m_widgets[id].get();
         auto type = pWidget->m_type;
 
@@ -421,17 +448,23 @@ void ReactImgui::PatchWidget(int id, std::string widgetJsonAsString) {
                 static_cast<TreeNode*>(pWidget)->m_label = widgetDef["label"].template get<std::string>();
             }
         }
+
+        m_widgets_mutex.unlock();
     }
 };
 
 void ReactImgui::SetChildren(int id, std::vector<int> childrenIds) {
+    m_hierarchy_mutex.lock();
     m_hierarchy[id] = childrenIds;
+    m_hierarchy_mutex.unlock();
 };
 
 void ReactImgui::AppendChild(int parentId, int childId) {
     if (m_hierarchy.contains(parentId)) {
         if ( std::find(m_hierarchy[parentId].begin(), m_hierarchy[parentId].end(), childId) == m_hierarchy[parentId].end() ) {
+            m_hierarchy_mutex.lock();
             m_hierarchy[parentId].push_back(childId);
+            m_hierarchy_mutex.unlock();
         }
     }
 };
