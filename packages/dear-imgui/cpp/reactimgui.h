@@ -35,8 +35,6 @@ class ReactImgui : public ImPlotView {
         std::mutex m_widgets_mutex;
 
         void InitWidget(const json& widgetDef);
-        void InitButton(const json& val);
-        void InitCheckbox(const json& val);
         void InitSlider(const json& val);
         void InitMultiSlider(const json& val);
         void InitInputText(const json& val);

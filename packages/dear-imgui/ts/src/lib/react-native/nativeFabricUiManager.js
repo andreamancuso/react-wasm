@@ -12,7 +12,13 @@ export default class {
         this.wasmModule = wasmModule;
     }
     dispatchEvent = (rootNodeID, topLevelType, nativeEventParam) => {
-        this.dispatchEventFn(this.fiberNodesMap.get(rootNodeID), topLevelType, nativeEventParam);
+        setTimeout(() => {
+            this.dispatchEventFn(
+                this.fiberNodesMap.get(rootNodeID),
+                topLevelType,
+                nativeEventParam,
+            );
+        }, 0);
     };
     createNode = (generatedId, uiViewClassName, requiresClone, payload, fiberNode) => {
         // console.log("createNode", generatedId, uiViewClassName, requiresClone, payload, fiberNode);
