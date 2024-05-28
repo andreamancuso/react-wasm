@@ -35,6 +35,17 @@ class Widget {
 
         inline static OnTextChangedCallback onInputTextChange_;
 
+        template <class T> 
+        static std::unique_ptr<T> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                
+                return std::make_unique<T>(id);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
         Widget(int id) {
             m_id = id;
             m_type = "Unknown";
@@ -44,6 +55,8 @@ class Widget {
         void HandleChildren(ReactImgui* view);
 
         virtual void Render(ReactImgui* view) = 0;
+
+        virtual void Patch(const json& val) = 0;
 };
 
 class Fragment final : public Widget {
@@ -56,6 +69,8 @@ class Fragment final : public Widget {
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {}
 };
 
 class SameLine final : public Widget {
@@ -66,6 +81,8 @@ class SameLine final : public Widget {
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {}
 };
 
 class Separator final : public Widget {
@@ -73,6 +90,8 @@ class Separator final : public Widget {
         Separator(int id) : Widget(id) {}
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {}
 };
 
 class Indent final : public Widget {
@@ -83,6 +102,8 @@ class Indent final : public Widget {
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {}
 };
 
 // Likely unused
@@ -93,11 +114,24 @@ class Unindent final : public Widget {
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {}
 };
 
 class SeparatorText final : public Widget {
     public:
         std::string m_label;
+
+        static std::unique_ptr<SeparatorText> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                std::string label = widgetDef["label"].template get<std::string>();
+
+                return std::make_unique<SeparatorText>(id, label);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
 
         SeparatorText(int id, std::string label) : Widget(id) {
             m_type = "SeparatorText";
@@ -105,11 +139,30 @@ class SeparatorText final : public Widget {
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                if (val.contains("label") && val["label"].is_string()) {
+                    m_label = val["label"].template get<std::string>();
+                }
+            }
+        }
 };
 
 class BulletText final : public Widget {
     public:
         std::string m_text;
+
+        static std::unique_ptr<BulletText> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                std::string text = widgetDef["text"].template get<std::string>();
+
+                return std::make_unique<BulletText>(id, text);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
 
         BulletText(int id, std::string text) : Widget(id) {
             m_type = "BulletText";
@@ -117,11 +170,30 @@ class BulletText final : public Widget {
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                if (val.contains("text") && val["text"].is_string()) {
+                    m_text = val["text"].template get<std::string>();
+                }
+            }
+        }
 };
 
 class UnformattedText final : public Widget {
     public:
         std::string m_text;
+
+        static std::unique_ptr<UnformattedText> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                std::string text = widgetDef["text"].template get<std::string>();
+
+                return std::make_unique<UnformattedText>(id, text);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
 
         UnformattedText(int id, std::string text) : Widget(id) {
             m_type = "UnformattedText";
@@ -129,11 +201,30 @@ class UnformattedText final : public Widget {
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                if (val.contains("text") && val["text"].is_string()) {
+                    m_text = val["text"].template get<std::string>();
+                }
+            }
+        }
 };
 
 class DisabledText final : public Widget {
     public:
         std::string m_text;
+
+        static std::unique_ptr<DisabledText> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                std::string text = widgetDef["text"].template get<std::string>();
+
+                return std::make_unique<DisabledText>(id, text);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
 
         DisabledText(int id, std::string text) : Widget(id) {
             m_type = "DisabledText";
@@ -141,6 +232,14 @@ class DisabledText final : public Widget {
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                if (val.contains("text") && val["text"].is_string()) {
+                    m_text = val["text"].template get<std::string>();
+                }
+            }
+        }
 };
 
 class TabBar final : public Widget {
@@ -151,11 +250,24 @@ class TabBar final : public Widget {
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {}
 };
 
 class TabItem final : public Widget {
     public:
         std::string m_label;
+
+        static std::unique_ptr<TabItem> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                std::string label = widgetDef["label"].template get<std::string>();
+
+                return std::make_unique<TabItem>(id, label);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
 
         TabItem(int id, std::string label) : Widget(id) {
             m_type = "TabItem";
@@ -164,11 +276,30 @@ class TabItem final : public Widget {
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                if (val.contains("label") && val["label"].is_string()) {
+                    m_label = val["label"].template get<std::string>();
+                }
+            }
+        }
 };
 
 class CollapsingHeader final : public Widget {
     public:
         std::string m_label;
+
+        static std::unique_ptr<CollapsingHeader> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                std::string label = widgetDef["label"].template get<std::string>();
+
+                return std::make_unique<CollapsingHeader>(id, label);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
 
         CollapsingHeader(int id, std::string label) : Widget(id) {
             m_type = "CollapsingHeader";
@@ -177,11 +308,30 @@ class CollapsingHeader final : public Widget {
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                if (val.contains("label") && val["label"].is_string()) {
+                    m_label = val["label"].template get<std::string>();
+                }
+            }
+        }
 };
 
 class TextWrap final : public Widget {
     public:
         double m_width;
+
+        static std::unique_ptr<TextWrap> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                double width = widgetDef["width"].template get<double>();
+
+                return std::make_unique<TextWrap>(id, width);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
 
         TextWrap(int id, double width) : Widget(id) {
             m_type = "TextWrap";
@@ -190,6 +340,14 @@ class TextWrap final : public Widget {
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                if (val.contains("width") && val["width"].is_string()) {
+                    m_width = val["width"].template get<double>();
+                }
+            }
+        }
 };
 
 class ItemTooltip final : public Widget {
@@ -200,11 +358,24 @@ class ItemTooltip final : public Widget {
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {}
 };
 
 class TreeNode final : public Widget {
     public:
         std::string m_label;
+
+        static std::unique_ptr<TreeNode> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                std::string label = widgetDef["label"].template get<std::string>();
+
+                return std::make_unique<TreeNode>(id, label);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
 
         TreeNode(int id, std::string label) : Widget(id) {
             m_type = "TreeNode";
@@ -213,6 +384,14 @@ class TreeNode final : public Widget {
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                if (val.contains("label") && val["label"].is_string()) {
+                    m_label = val["label"].template get<std::string>();
+                }
+            }
+        }
 };
 
 class Combo final : public Widget {
@@ -300,17 +479,38 @@ class Combo final : public Widget {
         std::string m_label;
         std::unique_ptr<char[]> m_itemsSeparatedByZeros; // Relevant for 'basic' combo only
 
-        static std::unique_ptr<Combo> makeComboWidget(int id, std::string label, int defaultValue, const json& options) {
+        static std::unique_ptr<Combo> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                auto defaultValue = val.contains("defaultValue") && val["defaultValue"].is_number() ? val["defaultValue"].template get<int>() : 0;
+                auto label = val["label"].template get<std::string>();
+                auto optionsList = val["optionsList"].template get<std::string>();
+
+                return Combo::makeWidget(id, label, defaultValue, optionsList);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
+        static std::unique_ptr<Combo> makeWidget(int id, std::string label, int defaultValue, const json& options) {
             Combo instance(id, label, defaultValue, options);
             return std::make_unique<Combo>(std::move(instance));
         }
 
-        static std::unique_ptr<Combo> makeComboWidget(int id, std::string label, int defaultValue, std::string optionsList) {
+        static std::unique_ptr<Combo> makeWidget(int id, std::string label, int defaultValue, std::string optionsList) {
             Combo instance(id, label, defaultValue, optionsList);
             return std::make_unique<Combo>(std::move(instance));
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                if (val.contains("label") && val["label"].is_string()) {
+                    m_label = val["label"].template get<std::string>();
+                }
+            }
+        }
 };
 
 class InputText final : public Widget {
@@ -333,12 +533,33 @@ class InputText final : public Widget {
         std::string m_defaultValue;
         std::string m_label;
 
-        inline static std::unique_ptr<InputText> makeInputTextWidget(int id, std::string defaultValue, std::string label) {
+        inline static std::unique_ptr<InputText> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                auto defaultValue = val.contains("defaultValue") && val["defaultValue"].is_string() ? val["defaultValue"].template get<std::string>() : "";
+                auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
+
+                return InputText::makeWidget(id, defaultValue, label);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
+        inline static std::unique_ptr<InputText> makeWidget(int id, std::string defaultValue, std::string label) {
             InputText instance(id, defaultValue, label);
             return std::make_unique<InputText>(std::move(instance));
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                if (val.contains("label") && val["label"].is_string()) {
+                    m_label = val["label"].template get<std::string>();
+                }
+            }
+        }
+        
 };
 
 class Checkbox final : public Widget {
@@ -353,12 +574,32 @@ class Checkbox final : public Widget {
         bool m_checked;
         std::string m_label;
 
-        inline static std::unique_ptr<Checkbox> makeCheckboxWidget(int id, std::string label, bool defaultChecked) {
+        inline static std::unique_ptr<Checkbox> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                auto defaultChecked = val.contains("defaultChecked") && val["defaultChecked"].is_boolean() ? val["defaultChecked"].template get<bool>() : false;
+                auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
+
+                return Checkbox::makeWidget(id, label, defaultChecked);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
+        inline static std::unique_ptr<Checkbox> makeWidget(int id, std::string label, bool defaultChecked) {
             Checkbox instance(id, label, defaultChecked);
             return std::make_unique<Checkbox>(std::move(instance));
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                if (val.contains("label") && val["label"].is_string()) {
+                    m_label = val["label"].template get<std::string>();
+                }
+            }
+        }
 };
 
 class Button final : public Widget {
@@ -371,12 +612,31 @@ class Button final : public Widget {
     public:
         std::string m_label;
 
-        inline static std::unique_ptr<Button> makeButtonWidget(int id, std::string label) {
+        inline static std::unique_ptr<Button> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
+                
+                return Button::makeWidget(id, label);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
+        inline static std::unique_ptr<Button> makeWidget(int id, std::string label) {
             Button instance(id, label);
             return std::make_unique<Button>(std::move(instance));
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                if (val.contains("label") && val["label"].is_string()) {
+                    m_label = val["label"].template get<std::string>();
+                }
+            }
+        }
 };
 
 class Slider final : public Widget {
@@ -397,12 +657,41 @@ class Slider final : public Widget {
         float m_max;
         std::string m_label;
 
-        inline static std::unique_ptr<Slider> makeSliderWidget(int id, std::string label, float defaultValue, float min, float max, std::string sliderType) {
+        inline static std::unique_ptr<Slider> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                auto defaultValue = val.contains("defaultValue") && val["defaultValue"].is_number() ? val["defaultValue"].template get<float>() : 0.0f;
+                auto min = val.contains("min") && val["min"].is_number() ? val["min"].template get<float>() : 0.0f;
+                auto max = val.contains("max") && val["max"].is_number() ? val["max"].template get<float>() : 10.0f;
+                auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
+                auto sliderType = val.contains("sliderType") && val["sliderType"].is_string() ? val["sliderType"].template get<std::string>() : "default";
+
+                return Slider::makeWidget(id, label, defaultValue, min, max, sliderType);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
+        inline static std::unique_ptr<Slider> makeWidget(int id, std::string label, float defaultValue, float min, float max, std::string sliderType) {
             Slider instance(id, label, defaultValue, min, max, sliderType);
             return std::make_unique<Slider>(std::move(instance));
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                if (val.contains("label") && val["label"].is_string()) {
+                    m_label = val["label"].template get<std::string>();
+                }
+                if (val.contains("min") && val["min"].is_number()) {
+                    m_min = val["min"].template get<float>();
+                }
+                if (val.contains("max") && val["max"].is_number()) {
+                    m_max = val["max"].template get<float>();
+                }
+            }
+        }
 };
 
 class MultiSlider final : public Widget {
@@ -425,7 +714,27 @@ class MultiSlider final : public Widget {
         int m_decimalDigits;
         std::string m_label;
 
-        static std::unique_ptr<MultiSlider> makeMultiSliderWidget(int id, std::string label, float min, float max, int numValues, int decimalDigits, const json& defaultValues) {
+        inline static std::unique_ptr<MultiSlider> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                auto numValues = val.contains("numValues") && val["numValues"].is_number() ? val["numValues"].template get<int>() : 2;
+                auto decimalDigits = val.contains("decimalDigits") && val["decimalDigits"].is_number() ? val["decimalDigits"].template get<int>() : 0;
+                
+                auto min = val.contains("min") && val["min"].is_number() ? val["min"].template get<float>() : 0.0f;
+                auto max = val.contains("max") && val["max"].is_number() ? val["max"].template get<float>() : 10.0f;
+                auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
+                
+                if (val.contains("defaultValues") && val["defaultValues"].is_array() && val["defaultValues"].size() == numValues) {
+                    return MultiSlider::makeWidget(id, label, min, max, numValues, decimalDigits, val["defaultValues"]);
+                } else {
+                    return MultiSlider::makeWidget(id, label, min, max, numValues, decimalDigits);
+                }
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
+        static std::unique_ptr<MultiSlider> makeWidget(int id, std::string label, float min, float max, int numValues, int decimalDigits, const json& defaultValues) {
             MultiSlider instance(id, label, min, max, numValues, decimalDigits);
 
             for (auto& [key, item] : defaultValues.items()) {
@@ -435,12 +744,29 @@ class MultiSlider final : public Widget {
             return std::make_unique<MultiSlider>(std::move(instance));
         }
 
-        static std::unique_ptr<MultiSlider> makeMultiSliderWidget(int id, std::string label, float min, float max, int numValues, int decimalDigits) {
+        static std::unique_ptr<MultiSlider> makeWidget(int id, std::string label, float min, float max, int numValues, int decimalDigits) {
             MultiSlider instance(id, label, min, max, numValues, decimalDigits);
 
             return std::make_unique<MultiSlider>(std::move(instance));
         }
 
         void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                if (val.contains("label") && val["label"].is_string()) {
+                    m_label = val["label"].template get<std::string>();
+                }
+                if (val.contains("min") && val["min"].is_number()) {
+                    m_min = val["min"].template get<float>();
+                }
+                if (val.contains("max") && val["max"].is_number()) {
+                    m_max = val["max"].template get<float>();
+                }
+                if (val.contains("decimalDigits") && val["decimalDigits"].is_number()) {
+                    m_decimalDigits = val["decimalDigits"].template get<int>();
+                }
+            }
+        }
 };
 
