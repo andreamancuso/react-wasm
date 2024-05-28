@@ -122,6 +122,17 @@ class SeparatorText final : public Widget {
     public:
         std::string m_label;
 
+        static std::unique_ptr<SeparatorText> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                std::string label = widgetDef["label"].template get<std::string>();
+
+                return std::make_unique<SeparatorText>(id, label);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
         SeparatorText(int id, std::string label) : Widget(id) {
             m_type = "SeparatorText";
             m_label = label;
@@ -141,6 +152,17 @@ class SeparatorText final : public Widget {
 class BulletText final : public Widget {
     public:
         std::string m_text;
+
+        static std::unique_ptr<BulletText> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                std::string text = widgetDef["text"].template get<std::string>();
+
+                return std::make_unique<BulletText>(id, text);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
 
         BulletText(int id, std::string text) : Widget(id) {
             m_type = "BulletText";
@@ -162,6 +184,17 @@ class UnformattedText final : public Widget {
     public:
         std::string m_text;
 
+        static std::unique_ptr<UnformattedText> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                std::string text = widgetDef["text"].template get<std::string>();
+
+                return std::make_unique<UnformattedText>(id, text);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
         UnformattedText(int id, std::string text) : Widget(id) {
             m_type = "UnformattedText";
             m_text = text;
@@ -181,6 +214,17 @@ class UnformattedText final : public Widget {
 class DisabledText final : public Widget {
     public:
         std::string m_text;
+
+        static std::unique_ptr<DisabledText> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                std::string text = widgetDef["text"].template get<std::string>();
+
+                return std::make_unique<DisabledText>(id, text);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
 
         DisabledText(int id, std::string text) : Widget(id) {
             m_type = "DisabledText";
@@ -214,6 +258,17 @@ class TabItem final : public Widget {
     public:
         std::string m_label;
 
+        static std::unique_ptr<TabItem> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                std::string label = widgetDef["label"].template get<std::string>();
+
+                return std::make_unique<TabItem>(id, label);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
         TabItem(int id, std::string label) : Widget(id) {
             m_type = "TabItem";
             m_handlesChildrenWithinRenderMethod = true;
@@ -235,6 +290,17 @@ class CollapsingHeader final : public Widget {
     public:
         std::string m_label;
 
+        static std::unique_ptr<CollapsingHeader> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                std::string label = widgetDef["label"].template get<std::string>();
+
+                return std::make_unique<CollapsingHeader>(id, label);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
         CollapsingHeader(int id, std::string label) : Widget(id) {
             m_type = "CollapsingHeader";
             m_handlesChildrenWithinRenderMethod = true;
@@ -255,6 +321,17 @@ class CollapsingHeader final : public Widget {
 class TextWrap final : public Widget {
     public:
         double m_width;
+
+        static std::unique_ptr<TextWrap> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                double width = widgetDef["width"].template get<double>();
+
+                return std::make_unique<TextWrap>(id, width);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
 
         TextWrap(int id, double width) : Widget(id) {
             m_type = "TextWrap";
@@ -288,6 +365,17 @@ class ItemTooltip final : public Widget {
 class TreeNode final : public Widget {
     public:
         std::string m_label;
+
+        static std::unique_ptr<TreeNode> makeWidget(const json& widgetDef) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                std::string label = widgetDef["label"].template get<std::string>();
+
+                return std::make_unique<TreeNode>(id, label);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
 
         TreeNode(int id, std::string label) : Widget(id) {
             m_type = "TreeNode";

@@ -115,7 +115,9 @@
         "valarray": "cpp",
         "*.inc": "cpp",
         "__config": "cpp",
-        "semaphore": "cpp"
+        "semaphore": "cpp",
+        "*.tcc": "cpp",
+        "numbers": "cpp"
     },
     "prettier.prettierPath": "./packages/dear-imgui/ts/node_modules/prettier",
     "prettier.configPath": "./packages/dear-imgui/ts/.prettierrc.json",
