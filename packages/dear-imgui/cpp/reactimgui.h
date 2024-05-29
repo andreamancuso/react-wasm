@@ -31,15 +31,16 @@ class Widget;
 
 class ReactImgui : public ImPlotView {
     private:
+        std::unordered_map<std::string, std::function<std::unique_ptr<Widget>(const json&)>> m_widget_init_fn;
+
         std::unordered_map<int, std::unique_ptr<Widget>> m_widgets;
         std::mutex m_widgets_mutex;
 
         void InitWidget(const json& widgetDef);
-        void InitSlider(const json& val);
-        void InitMultiSlider(const json& val);
-        void InitInputText(const json& val);
-        void InitBasicCombo(const json& val);
+        
         void SetUpFloatFormatChars();
+
+        void SetUpWidgetCreatorFunctions();
 
     public:
         std::unordered_map<int, std::vector<int>> m_hierarchy;

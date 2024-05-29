@@ -25,15 +25,43 @@
 
 using json = nlohmann::json;
 
+template <typename T, typename std::enable_if<std::is_base_of<Widget, T>::value, int>::type = 0>
+std::unique_ptr<T> makeWidget(const json& val) {
+    return T::makeWidget(val);
+}
+
 ReactImgui::ReactImgui(
     const char* newWindowId, 
     const char* newGlWindowTitle
 ) : ImPlotView(newWindowId, newGlWindowTitle) {
-    
+    SetUpWidgetCreatorFunctions();
 
-    // bindRendererFunctions();
     SetUpFloatFormatChars();
 }
+
+void ReactImgui::SetUpWidgetCreatorFunctions() {
+    m_widget_init_fn["Combo"] = &makeWidget<Combo>;
+    m_widget_init_fn["Slider"] = &makeWidget<Slider>;
+    m_widget_init_fn["InputText"] = &makeWidget<InputText>;
+    m_widget_init_fn["MultiSlider"] = &makeWidget<MultiSlider>;
+    m_widget_init_fn["Checkbox"] = &makeWidget<Checkbox>;
+    m_widget_init_fn["Button"] = &makeWidget<Button>;
+    m_widget_init_fn["Fragment"] = &makeWidget<Fragment>;
+    m_widget_init_fn["SameLine"] = &makeWidget<SameLine>;
+    m_widget_init_fn["Separator"] = &makeWidget<Separator>;
+    m_widget_init_fn["Indent"] = &makeWidget<Indent>;
+    m_widget_init_fn["Unindent"] = &makeWidget<Unindent>;
+    m_widget_init_fn["SeparatorText"] = &makeWidget<SeparatorText>;
+    m_widget_init_fn["BulletText"] = &makeWidget<BulletText>;
+    m_widget_init_fn["UnformattedText"] = &makeWidget<UnformattedText>;
+    m_widget_init_fn["DisabledText"] = &makeWidget<DisabledText>;
+    m_widget_init_fn["TabBar"] = &makeWidget<TabBar>;
+    m_widget_init_fn["TabItem"] = &makeWidget<TabItem>;
+    m_widget_init_fn["CollapsingHeader"] = &makeWidget<CollapsingHeader>;
+    m_widget_init_fn["TextWrap"] = &makeWidget<TextWrap>;
+    m_widget_init_fn["ItemTooltip"] = &makeWidget<ItemTooltip>;
+    m_widget_init_fn["TreeNode"] = &makeWidget<TreeNode>;
+};
 
 void ReactImgui::RenderWidgetById(int id) {
     m_widgets[id]->Render(this);
@@ -66,50 +94,7 @@ void ReactImgui::InitWidget(const json& widgetDef) {
     m_widgets_mutex.lock();
     m_hierarchy_mutex.lock();
 
-    if (type == "Combo") {
-        m_widgets[id] = Combo::makeWidget(widgetDef);
-    } else if (type == "Slider") {
-        m_widgets[id] = Slider::makeWidget(widgetDef);
-    } else if (type == "InputText") {
-        m_widgets[id] = InputText::makeWidget(widgetDef);
-    } else if (type == "MultiSlider") {
-        m_widgets[id] = MultiSlider::makeWidget(widgetDef);
-    } else if (type == "Checkbox") {
-        m_widgets[id] = Checkbox::makeWidget(widgetDef);
-    } else if (type == "Button") {
-        m_widgets[id] = Button::makeWidget(widgetDef);
-    } else if (type == "Fragment") {
-        m_widgets[id] = Widget::makeWidget<Fragment>(widgetDef);
-    } else if (type == "SameLine") {
-        m_widgets[id] = Widget::makeWidget<SameLine>(widgetDef);
-    } else if (type == "Separator") {
-        m_widgets[id] = Widget::makeWidget<Separator>(widgetDef);
-    } else if (type == "Indent") {
-        m_widgets[id] = Widget::makeWidget<Indent>(widgetDef);
-    } else if (type == "Unindent") {
-        m_widgets[id] = Widget::makeWidget<Unindent>(widgetDef);
-    } else if (type == "SeparatorText") {
-        m_widgets[id] = SeparatorText::makeWidget(widgetDef);
-    } else if (type == "BulletText") {
-        m_widgets[id] = BulletText::makeWidget(widgetDef);
-    } else if (type == "UnformattedText") {
-        m_widgets[id] = UnformattedText::makeWidget(widgetDef);
-    } else if (type == "DisabledText") {
-        m_widgets[id] = DisabledText::makeWidget(widgetDef);
-    } else if (type == "TabBar") {
-        m_widgets[id] = Widget::makeWidget<TabBar>(widgetDef);
-    } else if (type == "TabItem") {
-        m_widgets[id] = TabItem::makeWidget(widgetDef);
-    } else if (type == "CollapsingHeader") {
-        m_widgets[id] = CollapsingHeader::makeWidget(widgetDef);
-    } else if (type == "TextWrap") {
-        m_widgets[id] = TextWrap::makeWidget(widgetDef);
-    } else if (type == "ItemTooltip") {
-        m_widgets[id] = Widget::makeWidget<ItemTooltip>(widgetDef);
-    } else if (type == "TreeNode") {
-        m_widgets[id] = TreeNode::makeWidget(widgetDef);
-    }
-
+    m_widgets[id] = m_widget_init_fn[type](widgetDef);
     m_hierarchy[id] = std::vector<int>();
 
     m_widgets_mutex.unlock();

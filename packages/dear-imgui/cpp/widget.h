@@ -35,17 +35,6 @@ class Widget {
 
         inline static OnTextChangedCallback onInputTextChange_;
 
-        template <class T> 
-        static std::unique_ptr<T> makeWidget(const json& val) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
-                
-                return std::make_unique<T>(id);
-            }
-
-            throw std::invalid_argument("Invalid JSON data");
-        }
-
         Widget(int id) {
             m_id = id;
             m_type = "Unknown";
@@ -61,7 +50,15 @@ class Widget {
 
 class Fragment final : public Widget {
     public:
-        std::string m_label;
+        static std::unique_ptr<Fragment> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                
+                return std::make_unique<Fragment>(id);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
 
         Fragment(int id) : Widget(id) {
             m_type = "Fragment";
@@ -75,6 +72,16 @@ class Fragment final : public Widget {
 
 class SameLine final : public Widget {
     public:
+        static std::unique_ptr<SameLine> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                
+                return std::make_unique<SameLine>(id);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
         SameLine(int id) : Widget(id) {
             m_type = "SameLine";
             m_handlesChildrenWithinRenderMethod = true;
@@ -87,6 +94,16 @@ class SameLine final : public Widget {
 
 class Separator final : public Widget {
     public:
+        static std::unique_ptr<Separator> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                
+                return std::make_unique<Separator>(id);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
         Separator(int id) : Widget(id) {}
 
         void Render(ReactImgui* view);
@@ -96,6 +113,16 @@ class Separator final : public Widget {
 
 class Indent final : public Widget {
     public:
+        static std::unique_ptr<Indent> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                
+                return std::make_unique<Indent>(id);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
         Indent(int id) : Widget(id) {
             m_type = "Indent";
             m_handlesChildrenWithinRenderMethod = true;
@@ -109,6 +136,16 @@ class Indent final : public Widget {
 // Likely unused
 class Unindent final : public Widget {
     public:
+        static std::unique_ptr<Unindent> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                
+                return std::make_unique<Unindent>(id);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
         Unindent(int id) : Widget(id) {
             m_type = "Unindent";
         }
@@ -244,6 +281,16 @@ class DisabledText final : public Widget {
 
 class TabBar final : public Widget {
     public:
+        static std::unique_ptr<TabBar> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                
+                return std::make_unique<TabBar>(id);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
         TabBar(int id) : Widget(id) {
             m_type = "TabBar";
             m_handlesChildrenWithinRenderMethod = true;
@@ -352,6 +399,16 @@ class TextWrap final : public Widget {
 
 class ItemTooltip final : public Widget {
     public:
+        static std::unique_ptr<ItemTooltip> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                
+                return std::make_unique<ItemTooltip>(id);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
         ItemTooltip(int id) : Widget(id) {
             m_type = "ItemTooltip";
             m_handlesChildrenWithinRenderMethod = true;
