@@ -214,3 +214,35 @@ void MultiSlider::Render(ReactImgui* view) {
 
     ImGui::PopID();
 };
+
+void Table::Render(ReactImgui* view) {
+    ImGui::PushID(m_id);
+
+    if (ImGui::BeginTable("t", (int)m_columns.size(), m_flags)) {
+        for (const auto& columnSpec : m_columns) {
+            ImGui::TableSetupColumn(columnSpec.heading.c_str(), ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch);
+        }
+
+        ImGui::TableHeadersRow();
+
+        auto numColumns = m_columns.size();
+
+        for (auto& dataRow : m_data) {
+            ImGui::TableNextRow();
+            for (int i = 0; i < numColumns; i++) {
+                ImGui::TableSetColumnIndex(i);
+                if (m_columns[i].fieldId.has_value()) {
+                    auto& fieldId = m_columns[i].fieldId.value();
+
+                    if (dataRow.contains(fieldId)) {
+                        ImGui::TextUnformatted(dataRow[fieldId].c_str());
+                    }
+                }
+            }
+        }
+
+        ImGui::EndTable();
+    }
+
+    ImGui::PopID();
+};

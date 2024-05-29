@@ -836,6 +836,8 @@ class Table final : public Widget {
     } TableColumn;
 
     protected:
+        ImGuiTableFlags m_flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
+
         Table(int id, std::vector<TableColumn>& columns) : Widget(id) {
             m_type = "Table";
             m_columns = columns;
