@@ -34,7 +34,7 @@ EMSCRIPTEN_DECLARE_VAL_TYPE(OnBooleanValueChangeType);
 EMSCRIPTEN_DECLARE_VAL_TYPE(OnClickType);
 
 template <typename T> 
-std::vector<T> JsonToVector(std::string data) {
+std::vector<T> JsonToVector(std::string& data) {
     auto parsedData = json::parse(data);
     std::vector<T> vec;
     for (auto& [key, item] : parsedData.items()) {
@@ -44,7 +44,7 @@ std::vector<T> JsonToVector(std::string data) {
 }
 
 template <typename T> 
-std::set<T> JsonToSet(std::string data) {
+std::set<T> JsonToSet(std::string& data) {
     auto parsedData = json::parse(data);
     std::set<T> set;
     for (auto& [key, item] : parsedData.items()) {
@@ -53,7 +53,7 @@ std::set<T> JsonToSet(std::string data) {
     return set;
 }
 
-json IntVectorToJson(std::vector<int> data) {
+json IntVectorToJson(const std::vector<int>& data) {
     auto jsonArray = json::array();
     for (auto& item : data) {
         jsonArray.push_back(item);
@@ -61,7 +61,7 @@ json IntVectorToJson(std::vector<int> data) {
     return jsonArray;
 }
 
-json IntSetToJson(std::set<int> data) {
+json IntSetToJson(const std::set<int>& data) {
     auto jsonArray = json::array();
     for (auto& item : data) {
         jsonArray.push_back(item);
@@ -146,7 +146,7 @@ class WasmRunner {
         }
 
         void run(
-                std::string canvasSelector) {
+                std::string& canvasSelector) {
             m_view = new ReactImgui(
                 "ReactImgui", 
                 "ReactImgui"
@@ -171,15 +171,15 @@ class WasmRunner {
             m_glWasm->SetWindowSize(width, height);
         }
 
-        void setWidget(std::string widgetJsonAsString) {
+        void setWidget(std::string& widgetJsonAsString) {
             m_view->SetWidget(widgetJsonAsString);
         }
 
-        void patchWidget(int id, std::string widgetJsonAsString) {
+        void patchWidget(int id, std::string& widgetJsonAsString) {
             m_view->PatchWidget(id, widgetJsonAsString);
         }
 
-        void setChildren(int id, std::vector<int> childrenIds) {
+        void setChildren(int id, const std::vector<int>& childrenIds) {
             m_view->SetChildren(id, childrenIds);
         }
 
@@ -193,6 +193,10 @@ class WasmRunner {
 
         std::string getAvailableFonts() {
             return m_view->GetAvailableFonts().dump();
+        }
+
+        void appendDataToTable(int id, std::string& data) {
+            m_view->AppendDataToTable(id, data);
         }
 };
 
@@ -234,6 +238,10 @@ std::string getChildren(int id) {
     return IntVectorToJson(pRunner->getChildren(id)).dump();
 }
 
+void appendDataToTable(int id, std::string data) {
+    pRunner->appendDataToTable(id, data);
+}
+
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("exit", &_exit);
     emscripten::function("resizeWindow", &resizeWindow);
@@ -242,6 +250,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("setChildren", &setChildren);
     emscripten::function("appendChild", &appendChild);
     emscripten::function("getChildren", &getChildren);
+    emscripten::function("appendDataToTable", &appendDataToTable);
 
     // emscripten::class_<WasmRunner>("WasmRunner")
     // .constructor<OnInputTextChangeType, OnComboChangeType, OnNumericValueChangeType, OnMultiValueChangeType, OnBooleanValueChangeType, OnClickType>()

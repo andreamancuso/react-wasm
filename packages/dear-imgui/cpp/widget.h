@@ -7,6 +7,7 @@
 // - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
 // - Introduction, links and more at the top of imgui.cpp
 
+#include <optional>
 #include <cstring>
 #include <string>
 #include <sstream>
@@ -170,7 +171,7 @@ class SeparatorText final : public Widget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        SeparatorText(int id, std::string label) : Widget(id) {
+        SeparatorText(int id, std::string& label) : Widget(id) {
             m_type = "SeparatorText";
             m_label = label;
         }
@@ -201,7 +202,7 @@ class BulletText final : public Widget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        BulletText(int id, std::string text) : Widget(id) {
+        BulletText(int id, std::string& text) : Widget(id) {
             m_type = "BulletText";
             m_text = text;
         }
@@ -232,7 +233,7 @@ class UnformattedText final : public Widget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        UnformattedText(int id, std::string text) : Widget(id) {
+        UnformattedText(int id, std::string& text) : Widget(id) {
             m_type = "UnformattedText";
             m_text = text;
         }
@@ -263,7 +264,7 @@ class DisabledText final : public Widget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        DisabledText(int id, std::string text) : Widget(id) {
+        DisabledText(int id, std::string& text) : Widget(id) {
             m_type = "DisabledText";
             m_text = text;
         }
@@ -316,7 +317,7 @@ class TabItem final : public Widget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        TabItem(int id, std::string label) : Widget(id) {
+        TabItem(int id, std::string& label) : Widget(id) {
             m_type = "TabItem";
             m_handlesChildrenWithinRenderMethod = true;
             m_label = label;
@@ -348,7 +349,7 @@ class CollapsingHeader final : public Widget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        CollapsingHeader(int id, std::string label) : Widget(id) {
+        CollapsingHeader(int id, std::string& label) : Widget(id) {
             m_type = "CollapsingHeader";
             m_handlesChildrenWithinRenderMethod = true;
             m_label = label;
@@ -380,7 +381,7 @@ class TextWrap final : public Widget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        TextWrap(int id, double width) : Widget(id) {
+        TextWrap(int id, double& width) : Widget(id) {
             m_type = "TextWrap";
             m_handlesChildrenWithinRenderMethod = true;
             m_width = width;
@@ -434,7 +435,7 @@ class TreeNode final : public Widget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        TreeNode(int id, std::string label) : Widget(id) {
+        TreeNode(int id, std::string& label) : Widget(id) {
             m_type = "TreeNode";
             m_handlesChildrenWithinRenderMethod = true;
             m_label = label;
@@ -453,14 +454,14 @@ class TreeNode final : public Widget {
 
 class Combo final : public Widget {
     protected:
-        Combo(int id, std::string label, int defaultValue, const json& options) : Widget(id) {
+        Combo(int id, std::string& label, int defaultValue, const json& options) : Widget(id) {
             m_type = "Combo";
             m_selectedIndex = defaultValue;
             m_label = label;
             m_itemsSeparatedByZeros = Combo::getItemsSeparatedByZeros(options);
         }
         
-        Combo(int id, std::string label, int defaultValue, std::string optionsList) : Widget(id) {
+        Combo(int id, std::string& label, int defaultValue, std::string& optionsList) : Widget(id) {
             m_type = "Combo";
             m_selectedIndex = defaultValue;
             m_label = label;
@@ -500,7 +501,7 @@ class Combo final : public Widget {
          * Takes comma-delimited string of options "label,label,label" and converts into "label\0label\0label\0" (double NULL character at the end)
          * because this is what ImGui:Combo() expects
         */
-        inline static std::unique_ptr<char[]> getItemsSeparatedByZeros(std::string optionsList) {
+        inline static std::unique_ptr<char[]> getItemsSeparatedByZeros(std::string& optionsList) {
             std::string delimiter = ",";
 
             int itemsStringLength = 1;  // Account for final NULL character
@@ -549,12 +550,12 @@ class Combo final : public Widget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<Combo> makeWidget(int id, std::string label, int defaultValue, const json& options) {
+        static std::unique_ptr<Combo> makeWidget(int id, std::string& label, int defaultValue, const json& options) {
             Combo instance(id, label, defaultValue, options);
             return std::make_unique<Combo>(std::move(instance));
         }
 
-        static std::unique_ptr<Combo> makeWidget(int id, std::string label, int defaultValue, std::string optionsList) {
+        static std::unique_ptr<Combo> makeWidget(int id, std::string& label, int defaultValue, std::string optionsList) {
             Combo instance(id, label, defaultValue, optionsList);
             return std::make_unique<Combo>(std::move(instance));
         }
@@ -576,7 +577,7 @@ class InputText final : public Widget {
 
         static int InputTextCb(ImGuiInputTextCallbackData* data);
 
-        InputText(int id, std::string defaultValue, std::string label) : Widget(id) {
+        InputText(int id, std::string& defaultValue, std::string& label) : Widget(id) {
             m_type = "InputText";
             m_bufferPointer = std::make_unique<char[]>(100);
             m_defaultValue = defaultValue;
@@ -602,7 +603,7 @@ class InputText final : public Widget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        inline static std::unique_ptr<InputText> makeWidget(int id, std::string defaultValue, std::string label) {
+        inline static std::unique_ptr<InputText> makeWidget(int id, std::string& defaultValue, std::string& label) {
             InputText instance(id, defaultValue, label);
             return std::make_unique<InputText>(std::move(instance));
         }
@@ -621,7 +622,7 @@ class InputText final : public Widget {
 
 class Checkbox final : public Widget {
     protected:
-        Checkbox(int id, std::string label, bool defaultChecked) : Widget(id) {
+        Checkbox(int id, std::string& label, bool defaultChecked) : Widget(id) {
             m_type = "Checkbox";
             m_checked = defaultChecked;
             m_label = label;
@@ -643,7 +644,7 @@ class Checkbox final : public Widget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        inline static std::unique_ptr<Checkbox> makeWidget(int id, std::string label, bool defaultChecked) {
+        inline static std::unique_ptr<Checkbox> makeWidget(int id, std::string& label, bool defaultChecked) {
             Checkbox instance(id, label, defaultChecked);
             return std::make_unique<Checkbox>(std::move(instance));
         }
@@ -661,7 +662,7 @@ class Checkbox final : public Widget {
 
 class Button final : public Widget {
     protected:
-        Button(int id, std::string label) : Widget(id) {
+        Button(int id, std::string& label) : Widget(id) {
             m_type = "Button";
             m_label = label;
         }
@@ -680,7 +681,7 @@ class Button final : public Widget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        inline static std::unique_ptr<Button> makeWidget(int id, std::string label) {
+        inline static std::unique_ptr<Button> makeWidget(int id, std::string& label) {
             Button instance(id, label);
             return std::make_unique<Button>(std::move(instance));
         }
@@ -698,7 +699,7 @@ class Button final : public Widget {
 
 class Slider final : public Widget {
     protected:
-        Slider(int id, std::string label, float defaultValue, float min, float max, std::string sliderType) : Widget(id) {
+        Slider(int id, std::string& label, float defaultValue, float min, float max, std::string& sliderType) : Widget(id) {
             m_type = "Slider";
             m_sliderType = sliderType;
             m_label = label;
@@ -729,7 +730,7 @@ class Slider final : public Widget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        inline static std::unique_ptr<Slider> makeWidget(int id, std::string label, float defaultValue, float min, float max, std::string sliderType) {
+        inline static std::unique_ptr<Slider> makeWidget(int id, std::string& label, float defaultValue, float min, float max, std::string& sliderType) {
             Slider instance(id, label, defaultValue, min, max, sliderType);
             return std::make_unique<Slider>(std::move(instance));
         }
@@ -753,7 +754,7 @@ class Slider final : public Widget {
 
 class MultiSlider final : public Widget {
     protected:
-        MultiSlider(int id, std::string label, float min, float max, int numValues, int decimalDigits) : Widget(id) {
+        MultiSlider(int id, std::string& label, float min, float max, int numValues, int decimalDigits) : Widget(id) {
             m_type = "MultiSlider";
             m_label = label;
             m_numValues = numValues;
@@ -791,7 +792,7 @@ class MultiSlider final : public Widget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<MultiSlider> makeWidget(int id, std::string label, float min, float max, int numValues, int decimalDigits, const json& defaultValues) {
+        static std::unique_ptr<MultiSlider> makeWidget(int id, std::string& label, float min, float max, int numValues, int decimalDigits, const json& defaultValues) {
             MultiSlider instance(id, label, min, max, numValues, decimalDigits);
 
             for (auto& [key, item] : defaultValues.items()) {
@@ -801,7 +802,7 @@ class MultiSlider final : public Widget {
             return std::make_unique<MultiSlider>(std::move(instance));
         }
 
-        static std::unique_ptr<MultiSlider> makeWidget(int id, std::string label, float min, float max, int numValues, int decimalDigits) {
+        static std::unique_ptr<MultiSlider> makeWidget(int id, std::string& label, float min, float max, int numValues, int decimalDigits) {
             MultiSlider instance(id, label, min, max, numValues, decimalDigits);
 
             return std::make_unique<MultiSlider>(std::move(instance));
@@ -827,3 +828,67 @@ class MultiSlider final : public Widget {
         }
 };
 
+// todo: for those use cases where we expect large quantities of data, should we preallocate?
+class Table final : public Widget {
+    typedef struct { 
+        std::optional<std::string> fieldId;
+        std::string heading;
+    } TableColumn;
+
+    protected:
+        Table(int id, std::vector<TableColumn>& columns) : Widget(id) {
+            m_type = "Table";
+            m_columns = columns;
+        }
+
+    public:
+        typedef std::unordered_map<std::string, std::string> TableRow;
+        typedef std::vector<TableRow> TableData;
+
+        TableData m_data;
+        std::vector<TableColumn> m_columns;
+
+        inline static std::unique_ptr<Table> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+
+                if (val["columns"].is_array()) {
+                    std::vector<TableColumn> columns;
+
+                    for (auto& [key, item] : val["columns"].items()) {
+                        columns.push_back({
+                            std::make_optional(item["fieldId"].template get<std::string>()),
+                            item["heading"].template get<std::string>()
+                        });
+                    }
+
+                    return Table::makeWidget(id, columns);
+                }
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
+        static std::unique_ptr<Table> makeWidget(int id, std::vector<TableColumn>& columns) {
+            Table instance(id, columns);
+
+            return std::make_unique<Table>(std::move(instance));
+        }
+
+        void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                // not sure what can be patched - presumably the columns? though that'd likely force us to clear the data
+            }
+        }
+
+        void SetData(TableData& data) {
+            m_data.clear();
+            AppendData(data);
+        }
+
+        void AppendData(TableData& data) {
+            m_data.insert(m_data.end(), data.begin(), data.end());
+        }
+};

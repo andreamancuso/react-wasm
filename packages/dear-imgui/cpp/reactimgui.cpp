@@ -197,11 +197,11 @@ void ReactImgui::Render(int window_width, int window_height) {
     m_hierarchy_mutex.unlock();
 };
 
-void ReactImgui::SetWidget(std::string widgetJsonAsString) {
+void ReactImgui::SetWidget(std::string& widgetJsonAsString) {
     InitWidget(json::parse(widgetJsonAsString));
 };
 
-void ReactImgui::PatchWidget(int id, std::string widgetJsonAsString) {
+void ReactImgui::PatchWidget(int id, std::string& widgetJsonAsString) {
     m_widgets_mutex.lock();
 
     if (m_widgets.contains(id)) {
@@ -214,7 +214,7 @@ void ReactImgui::PatchWidget(int id, std::string widgetJsonAsString) {
     m_widgets_mutex.unlock();
 };
 
-void ReactImgui::SetChildren(int id, std::vector<int> childrenIds) {
+void ReactImgui::SetChildren(int id, const std::vector<int>& childrenIds) {
     m_hierarchy_mutex.lock();
     m_hierarchy[id] = childrenIds;
     m_hierarchy_mutex.unlock();
@@ -246,4 +246,33 @@ json ReactImgui::GetAvailableFonts() {
     }
 
     return fonts;
+};
+
+void ReactImgui::AppendDataToTable(int id, std::string& rawData) {
+    m_widgets_mutex.lock();
+
+    if (m_widgets.contains(id) && m_widgets[id]->m_type == "Table") {
+        Table::TableData data = Table::TableData();
+        auto parsedData = json::parse(rawData);
+
+        if (parsedData.is_array()) {
+            for (auto& [itemKey, item] : parsedData.items()) {
+                if (item.is_object()) {
+                    Table::TableRow row = Table::TableRow();
+
+                    for (auto& [fieldKey, fieldValue] : parsedData.items()) {
+                        if (fieldValue.is_string()) {
+                            row[fieldKey] = fieldValue.template get<std::string>();
+                        }
+                    }
+
+                    data.push_back(row);
+                }
+            }
+        }
+
+        static_cast<Table*>(m_widgets[id].get())->AppendData(data);
+    }
+
+    m_widgets_mutex.unlock();
 };
