@@ -79,13 +79,15 @@ class ReactImgui : public ImPlotView {
 
         void RenderWidgets(int id = 0);
 
-        void SetWidget(std::string widgetJsonAsString);
+        void SetWidget(std::string& widgetJsonAsString);
 
-        void PatchWidget(int id, std::string widgetJsonAsString);
+        void PatchWidget(int id, std::string& widgetJsonAsString);
 
-        void SetChildren(int id, std::vector<int> childIds);
+        void SetChildren(int id, const std::vector<int>& childIds);
 
         void AppendChild(int parentId, int childId);
+
+        void AppendDataToTable(int id, std::string& data);
 
         std::vector<int> GetChildren(int id);
 
