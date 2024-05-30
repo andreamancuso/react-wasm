@@ -14,7 +14,7 @@ export type WidgetPropsMap = {
     Unknown: {};
     Fragment: {};
     TabBar: {};
-    TabItem: { label: string };
+    TabItem: { label: string; onOpenChange?: (value: boolean) => void };
     SameLine: {};
     ItemTooltip: {};
     TextWrap: { width: number };
@@ -40,6 +40,7 @@ export type WidgetPropsMap = {
     InputText: {
         defaultValue?: string;
         label?: string;
+        onChange?: (value: string) => void;
     };
     CollapsingHeader: {
         label?: string;
@@ -49,15 +50,18 @@ export type WidgetPropsMap = {
     };
     Combo: {
         label?: string;
-        optionsList: string;
+        options?: { value: number; label: string }[];
+        optionsList?: string;
         defaultValue?: number;
+        onChange?: (value: number) => void;
     };
     Slider: {
         sliderType: SliderTypes;
-        label?: string;
+        label: string;
         defaultValue?: number;
         min?: number;
         max?: number;
+        onChange?: (value: number) => void;
     };
     MultiSlider: {
         numValues: 2 | 3 | 4;
@@ -66,15 +70,19 @@ export type WidgetPropsMap = {
         min?: number;
         max?: number;
         decimalDigits?: number;
+        onChange?: (values: Primitive[]) => void;
     };
     Checkbox: {
         defaultChecked?: boolean;
         label?: string;
+        onChange?: (value: boolean) => void;
     };
     Button: {
+        onClick?: () => void;
         label?: string;
         size?: Vec2;
     };
+    Table: { columns: { heading: string; fieldId?: string }[]; initialData?: string };
 };
 
 type WidgetKeys = keyof WidgetPropsMap;
@@ -91,15 +99,8 @@ type WidgetsRequiringId =
     | "TabItem"
     | "Slider"
     | "MultiSlider"
-    | "Button";
-
-type WidgetsWithChildren =
-    | "CollapsingHeader"
-    | "TreeNode"
-    | "ItemTooltip"
-    | "TextWrap"
-    | "TabBar"
-    | "TabItem";
+    | "Button"
+    | "Table";
 
 export type WidgetReactNode =
     | WidgetReactElementsFlat

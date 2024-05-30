@@ -216,6 +216,8 @@ void MultiSlider::Render(ReactImgui* view) {
 };
 
 void Table::Render(ReactImgui* view) {
+    ImGui::Text("Table data length: %d", (int) m_data.size());
+
     ImGui::PushID(m_id);
 
     if (ImGui::BeginTable("t", (int)m_columns.size(), m_flags)) {

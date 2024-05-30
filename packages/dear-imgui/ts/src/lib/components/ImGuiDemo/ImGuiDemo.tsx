@@ -1,10 +1,12 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { HelpMarker } from "./HelpMarker/HelpMarker";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { UserGuide } from "./UserGuide/UserGuide";
 import { StyleEditor } from "./StyleEditor/StyleEditor";
+import { TableImperativeHandle } from "../ReactImgui/Table";
 
 export const ImGuiDemo = () => {
+    const tableRef = useRef<TableImperativeHandle>(null);
     const [text, setText] = useState("Hello, world!");
     const [tripleSliderValue, setTripleSliderValue] = useState<[number, number, number]>([9, 9, 9]);
     const [quadSliderValue, setQuadSliderValue] = useState<[number, number, number, number]>([
@@ -37,6 +39,26 @@ export const ImGuiDemo = () => {
             ]);
         }
     }, []);
+
+    const tableColumns = useMemo(
+        () => [
+            {
+                heading: "ID",
+                fieldId: "id",
+            },
+            {
+                heading: "Name",
+                fieldId: "name",
+            },
+        ],
+        [],
+    );
+
+    const handleAppendDataToTableClick = useCallback(() => {
+        if (tableRef.current) {
+            tableRef.current.appendDataToTable([{ id: "1", name: "Andy" }]);
+        }
+    }, [tableRef]);
 
     return (
         <ReactImgui.Fragment>
@@ -97,6 +119,8 @@ export const ImGuiDemo = () => {
                     <ReactImgui.UnformattedText text={quadSliderValue.join(", ")} />
                 </ReactImgui.SameLine>
             </ReactImgui.CollapsingHeader>
+            <ReactImgui.Table ref={tableRef} columns={tableColumns} />
+            <ReactImgui.Button onClick={handleAppendDataToTableClick} label="Add data to table" />
         </ReactImgui.Fragment>
     );
 };

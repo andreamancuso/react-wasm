@@ -1,9 +1,5 @@
-import { WidgetFunctionComponent } from "./types";
+import { WidgetFunctionComponent, WidgetPropsMap } from "./types";
 
-export type DisabledTextProps = {
-    text: string;
-};
-
-export const DisabledText: WidgetFunctionComponent<DisabledTextProps> = ({ text }) => {
+export const DisabledText: WidgetFunctionComponent<WidgetPropsMap["DisabledText"]> = ({ text }) => {
     return <widget type="DisabledText" text={text} />;
 };

@@ -1,15 +1,13 @@
-import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
-import { WidgetFunctionComponent, PropsWithChildren } from "./types";
+import { useRef } from "react";
+import { useWidgetRegistrationService } from "../../hooks";
+import { WidgetFunctionComponent, PropsWithChildren, WidgetPropsMap } from "./types";
 
-export type TreeNodeProps = PropsWithChildren & {
-    label?: string;
-};
-
-export const TreeNode: WidgetFunctionComponent<TreeNodeProps> = ({ children, label }) => {
-    const [widgetId] = useWidgetEventManagement();
+export const TreeNode: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap["TreeNode"]> = ({ children, label }) => {
+    const widgetRegistratonService = useWidgetRegistrationService();
+    const idRef = useRef(widgetRegistratonService.generateId());
 
     return (
-        <widget type="TreeNode" id={widgetId.current} label={label}>
+        <widget type="TreeNode" id={idRef.current} label={label}>
             {children}
         </widget>
     );

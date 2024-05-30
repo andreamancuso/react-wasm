@@ -1,18 +1,8 @@
-import { useEffect } from "react";
-import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
-import { Primitive, WidgetFunctionComponent } from "./types";
+import { useRef } from "react";
+import { useWidgetRegistrationService } from "../../hooks";
+import { Primitive, WidgetFunctionComponent, WidgetPropsMap } from "./types";
 
-type MultiSliderProps = {
-    label?: string;
-    defaultValues?: number[];
-    min?: number;
-    max?: number;
-    decimalDigits?: number;
-    numValues: 2 | 3 | 4;
-    onChange?: (values: Primitive[]) => void;
-};
-
-export const MultiSlider: WidgetFunctionComponent<MultiSliderProps> = ({
+export const MultiSlider: WidgetFunctionComponent<WidgetPropsMap["MultiSlider"]> = ({
     label,
     min,
     max,
@@ -21,13 +11,8 @@ export const MultiSlider: WidgetFunctionComponent<MultiSliderProps> = ({
     numValues,
     decimalDigits,
 }) => {
-    const [widgetId, widgetRegistrationService] = useWidgetEventManagement("multi");
-
-    useEffect(() => {
-        if (onChange) {
-            widgetRegistrationService.onMultiValueChange(widgetId.current, onChange);
-        }
-    }, [onChange]);
+    const widgetRegistratonService = useWidgetRegistrationService();
+    const idRef = useRef(widgetRegistratonService.generateId());
 
     if (Array.isArray(defaultValues) && defaultValues.length !== numValues) {
         // todo: Mismatch! What to do?
@@ -37,7 +22,7 @@ export const MultiSlider: WidgetFunctionComponent<MultiSliderProps> = ({
         <widget
             type="MultiSlider"
             label={label}
-            id={widgetId.current}
+            id={idRef.current}
             defaultValues={defaultValues}
             min={min}
             max={max}

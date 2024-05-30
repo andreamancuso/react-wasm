@@ -8,8 +8,9 @@ export default class {
         this.fiberNodesMap = new Map();
     }
 
-    init(wasmModule) {
+    init(wasmModule, widgetRegistrationService) {
         this.wasmModule = wasmModule;
+        this.widgetRegistrationService = widgetRegistrationService;
     }
     dispatchEvent = (rootNodeID, topLevelType, nativeEventParam) => {
         setTimeout(() => {
@@ -21,19 +22,34 @@ export default class {
         }, 0);
     };
     createNode = (generatedId, uiViewClassName, requiresClone, payload, fiberNode) => {
-        // console.log("createNode", generatedId, uiViewClassName, requiresClone, payload, fiberNode);
-
         // todo: yikes
         if (this.cloningNode) {
             this.cloningNode = null;
         }
 
         const { children, type, id, ...props } = payload;
+
+        if (type === "Table") {
+            console.log(
+                "createNode",
+                generatedId,
+                uiViewClassName,
+                requiresClone,
+                payload,
+                fiberNode,
+            );
+        }
+
         const widget = { ...props, id: generatedId, type };
 
         this.wasmModule.setWidget(JSON.stringify(widget));
 
         this.fiberNodesMap.set(generatedId, fiberNode);
+
+        // todo: type is in some array of types
+        if (type === "Table") {
+            this.widgetRegistrationService.linkWidgetIds(id, generatedId);
+        }
 
         return widget;
     };

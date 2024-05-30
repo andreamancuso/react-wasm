@@ -1,31 +1,20 @@
-import { useEffect } from "react";
-import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
-import { WidgetFunctionComponent } from "./types";
+import { useRef } from "react";
+import { useWidgetRegistrationService } from "../../hooks";
+import { WidgetFunctionComponent, WidgetPropsMap } from "./types";
 
-type CheckboxProps = {
-    label: string;
-    defaultChecked?: boolean;
-    onChange?: (value: boolean) => void;
-};
-
-export const Checkbox: WidgetFunctionComponent<CheckboxProps> = ({
+export const Checkbox: WidgetFunctionComponent<WidgetPropsMap["Checkbox"]> = ({
     label,
     onChange,
     defaultChecked,
 }) => {
-    const [widgetId, widgetRegistrationService] = useWidgetEventManagement("boolean");
-
-    useEffect(() => {
-        if (onChange) {
-            widgetRegistrationService.onBooleanValueChange(widgetId.current, onChange);
-        }
-    }, [onChange]);
+    const widgetRegistratonService = useWidgetRegistrationService();
+    const idRef = useRef(widgetRegistratonService.generateId());
 
     return (
         <widget
             type="Checkbox"
             label={label}
-            id={widgetId.current}
+            id={idRef.current}
             defaultChecked={defaultChecked}
             onChange={onChange}
         />

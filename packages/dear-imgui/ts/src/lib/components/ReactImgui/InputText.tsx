@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
-import { WidgetFunctionComponent } from "./types";
+import { useRef } from "react";
+import { useWidgetRegistrationService } from "../../hooks";
+import { WidgetFunctionComponent, WidgetPropsMap } from "./types";
 
 export type InputTextProps = {
     defaultValue?: string;
@@ -8,27 +8,21 @@ export type InputTextProps = {
     onChange?: (value: string) => void;
 };
 
-export const InputText: WidgetFunctionComponent<InputTextProps> = ({
+export const InputText: WidgetFunctionComponent<WidgetPropsMap["InputText"]> = ({
     onChange,
     defaultValue,
     label,
 }) => {
-    const [widgetId, widgetRegistrationService] = useWidgetEventManagement("text");
-
-    useEffect(() => {
-        if (onChange) {
-            widgetRegistrationService.onTextInputChange(widgetId.current, onChange);
-        }
-    }, [onChange]);
+    const widgetRegistratonService = useWidgetRegistrationService();
+    const idRef = useRef(widgetRegistratonService.generateId());
 
     return (
         <widget
             type="InputText"
-            id={widgetId.current}
+            id={idRef.current}
             defaultValue={defaultValue}
             label={label}
             onChange={onChange}
-            // onChangeText={onChange}
         />
     );
 };

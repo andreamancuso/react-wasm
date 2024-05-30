@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
-import { SliderTypes, WidgetFunctionComponent } from "./types";
+import { useRef } from "react";
+import { useWidgetRegistrationService } from "../../hooks";
+import { SliderTypes, WidgetFunctionComponent, WidgetPropsMap } from "./types";
 
 type SliderProps = {
     label: string;
@@ -11,7 +11,7 @@ type SliderProps = {
     sliderType?: SliderTypes;
 };
 
-export const Slider: WidgetFunctionComponent<SliderProps> = ({
+export const Slider: WidgetFunctionComponent<WidgetPropsMap["Slider"]> = ({
     label,
     min,
     max,
@@ -19,19 +19,14 @@ export const Slider: WidgetFunctionComponent<SliderProps> = ({
     defaultValue,
     sliderType = "default",
 }: SliderProps) => {
-    const [widgetId, widgetRegistrationService] = useWidgetEventManagement("numeric");
-
-    useEffect(() => {
-        if (onChange) {
-            widgetRegistrationService.onNumericValueChange(widgetId.current, onChange);
-        }
-    }, [onChange]);
+    const widgetRegistratonService = useWidgetRegistrationService();
+    const idRef = useRef(widgetRegistratonService.generateId());
 
     return (
         <widget
             type="Slider"
             label={label}
-            id={widgetId.current}
+            id={idRef.current}
             defaultValue={defaultValue}
             min={min}
             max={max}

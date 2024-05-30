@@ -1,21 +1,16 @@
+import { v4 as uuidv4 } from "uuid";
 import { Primitive } from "./components/ReactImgui/types";
 
 export class WidgetRegistrationService {
-    private textChangeEventMap: Map<string, (value: string) => void>;
-    private comboChangeEventMap: Map<string, (value: number) => void>;
-    private numericValueChangeEventMap: Map<string, (value: number) => void>;
-    private multiValueChangeEventMap: Map<string, (values: Primitive[]) => void>;
-    private booleanValueChangeEventMap: Map<string, (value: boolean) => void>;
-    private onClickEventMap: Map<string, () => void>;
+    private wasmModule: any;
+    private tables: Set<string>;
+    private fabricWidgetsMapping: Map<string, number>;
     private fonts: string[];
 
-    constructor() {
-        this.textChangeEventMap = new Map<string, (value: string) => void>();
-        this.comboChangeEventMap = new Map<string, (value: number) => void>();
-        this.numericValueChangeEventMap = new Map<string, (value: number) => void>();
-        this.multiValueChangeEventMap = new Map<string, (values: Primitive[]) => void>();
-        this.booleanValueChangeEventMap = new Map<string, (value: boolean) => void>();
-        this.onClickEventMap = new Map<string, () => void>();
+    constructor(wasmModule: any) {
+        this.wasmModule = wasmModule;
+        this.tables = new Set();
+        this.fabricWidgetsMapping = new Map();
         this.fonts = [];
     }
 
@@ -27,100 +22,35 @@ export class WidgetRegistrationService {
         return this.fonts;
     }
 
-    offTextInputChange(id: string) {
-        this.textChangeEventMap.delete(id);
+    generateId() {
+        return uuidv4();
     }
 
-    onTextInputChange(id: string, fn: (value: string) => void) {
-        this.textChangeEventMap.set(id, fn);
+    linkWidgetIds(id: string, fabricId: number) {
+        console.log("linkWidgetIds", id, fabricId);
+
+        this.fabricWidgetsMapping.set(id, fabricId);
     }
 
-    offComboChange(id: string) {
-        this.comboChangeEventMap.delete(id);
+    unlinkWidgetIds(id: string) {
+        this.fabricWidgetsMapping.delete(id);
     }
 
-    // todo: change value to support anything (using the proper BeginCombo/EndCombo API)
-    onComboChange(id: string, fn: (value: number) => void) {
-        this.comboChangeEventMap.set(id, fn);
+    registerTable(id: string) {
+        this.tables.add(id);
     }
 
-    offNumericValueChange(id: string) {
-        this.numericValueChangeEventMap.delete(id);
+    unregisterTable(id: string) {
+        this.tables.delete(id);
     }
 
-    onNumericValueChange(id: string, fn: (value: number) => void) {
-        this.numericValueChangeEventMap.set(id, fn);
-    }
-
-    offMultiValueChange(id: string) {
-        this.multiValueChangeEventMap.delete(id);
-    }
-
-    onMultiValueChange(id: string, fn: (values: Primitive[]) => void) {
-        this.multiValueChangeEventMap.set(id, fn);
-    }
-
-    offBooleanValueChange(id: string) {
-        this.booleanValueChangeEventMap.delete(id);
-    }
-
-    onBooleanValueChange(id: string, fn: (value: boolean) => void) {
-        this.booleanValueChangeEventMap.set(id, fn);
-    }
-
-    offClick(id: string) {
-        this.onClickEventMap.delete(id);
-    }
-
-    onClick(id: string, fn: () => void) {
-        this.onClickEventMap.set(id, fn);
-    }
-
-    emitTextInputChangeEvent(id: string, value: string) {
-        const fn = this.textChangeEventMap.get(id);
-
-        if (fn) {
-            fn(value);
-        }
-    }
-
-    emitComboChangeEvent(id: string, value: number) {
-        const fn = this.comboChangeEventMap.get(id);
-
-        if (fn) {
-            fn(value);
-        }
-    }
-
-    emitNumericValueChangeEvent(id: string, value: number) {
-        const fn = this.numericValueChangeEventMap.get(id);
-
-        if (fn) {
-            fn(value);
-        }
-    }
-
-    emitMultiValueChangeEvent(id: string, values: Primitive[]) {
-        const fn = this.multiValueChangeEventMap.get(id);
-
-        if (fn) {
-            fn(values);
-        }
-    }
-
-    emitBooleanValueChangeEvent(id: string, value: boolean) {
-        const fn = this.booleanValueChangeEventMap.get(id);
-
-        if (fn) {
-            fn(value);
-        }
-    }
-
-    emitClick(id: string) {
-        const fn = this.onClickEventMap.get(id);
-
-        if (fn) {
-            fn();
+    appendDataToTable(id: string, data: any) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        console.log(fabricWidgetId);
+        if (fabricWidgetId !== undefined) {
+            console.log("appendDataToTable", id, fabricWidgetId, data);
+            // todo: we may want to standardize method names
+            this.wasmModule.appendDataToTable(fabricWidgetId, JSON.stringify(data));
         }
     }
 }

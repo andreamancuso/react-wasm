@@ -1,4 +1,5 @@
 import NativeFabricUIManager from "./nativeFabricUiManager.js";
+import deepDiffer from "./deepDiffer.js";
 
 const uiManager = new NativeFabricUIManager();
 
@@ -46,6 +47,7 @@ export default {
                                 size: true,
                                 onChange: true,
                                 onClick: true,
+                                columns: true,
                             },
                         };
                 }
@@ -64,7 +66,7 @@ export default {
     },
     // TODO: Remove when React has migrated to `createAttributePayload` and `diffAttributePayloads`
     get deepDiffer() {
-        return require("./deepDiffer");
+        return deepDiffer;
     },
     get deepFreezeAndThrowOnMutationInDev() {
         // Applicable only in DEV mode

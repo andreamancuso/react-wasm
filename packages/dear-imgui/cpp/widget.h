@@ -854,7 +854,7 @@ class Table final : public Widget {
             if (val.is_object()) {
                 auto id = val["id"].template get<int>();
 
-                if (val["columns"].is_array()) {
+                if (val.contains("columns") && val["columns"].is_array()) {
                     std::vector<TableColumn> columns;
 
                     for (auto& [key, item] : val["columns"].items()) {

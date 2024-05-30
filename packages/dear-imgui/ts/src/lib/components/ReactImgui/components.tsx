@@ -21,6 +21,7 @@ import { TextWrap } from "./TextWrap";
 import { TreeNode } from "./TreeNode";
 import { UnformattedText } from "./UnformattedText";
 import { Unknown } from "./Unknown";
+import { Table } from "./Table";
 
 export const components = {
     UnformattedText,
@@ -44,6 +45,7 @@ export const components = {
     Fragment,
     TabBar,
     TabItem,
+    Table
 } as const;
 
 export const ReactImgui = attachSubComponents("ReactImgui", MainComponent, components);

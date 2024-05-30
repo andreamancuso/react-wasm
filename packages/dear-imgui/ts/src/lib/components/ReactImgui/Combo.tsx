@@ -1,35 +1,23 @@
-import { useEffect } from "react";
-import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
-import { WidgetFunctionComponent } from "./types";
+import { useMemo, useRef } from "react";
+import { useWidgetRegistrationService } from "../../hooks";
+import { WidgetFunctionComponent, WidgetPropsMap } from "./types";
 
-type ComboProps = {
-    label: string;
-    options: { value: number; label: string }[];
-    defaultValue?: number;
-    onChange?: (value: number) => void;
-};
-
-export const Combo: WidgetFunctionComponent<ComboProps> = ({
+export const Combo: WidgetFunctionComponent<WidgetPropsMap["Combo"]> = ({
     label,
     options,
     onChange,
     defaultValue,
 }) => {
-    const [widgetId, widgetRegistrationService] = useWidgetEventManagement("combo");
+    const widgetRegistratonService = useWidgetRegistrationService();
+    const idRef = useRef(widgetRegistratonService.generateId());
 
-    useEffect(() => {
-        if (onChange) {
-            widgetRegistrationService.onComboChange(widgetId.current, onChange);
-        }
-    }, [onChange]);
-
-    const optionsList = options.map(({ label }) => label).join(",");
+    const optionsList = useMemo(() => options?.map(({ label }) => label).join(","), [options]);
 
     return (
         <widget
             type="Combo"
             label={label}
-            id={widgetId.current}
+            id={idRef.current}
             defaultValue={defaultValue}
             // Is it possible to pass arrays here?
             optionsList={optionsList}

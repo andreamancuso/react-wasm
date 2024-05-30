@@ -1,10 +1,9 @@
-import { PropsWithChildren, WidgetFunctionComponent } from "./types";
+import { PropsWithChildren, WidgetFunctionComponent, WidgetPropsMap } from "./types";
 
-type TextWrapProps = PropsWithChildren & {
-    width: number;
-};
-
-export const TextWrap: WidgetFunctionComponent<TextWrapProps> = ({ children, width }) => {
+export const TextWrap: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap["TextWrap"]> = ({
+    children,
+    width,
+}) => {
     return (
         <widget type="TextWrap" width={width}>
             {children}

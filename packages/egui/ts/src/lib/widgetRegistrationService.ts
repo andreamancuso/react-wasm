@@ -27,7 +27,6 @@ export class WidgetRegistrationService {
     }
 
     registerTable(id: string) {
-        console.log("registerTable", id);
         this.tables.add(id);
     }
 

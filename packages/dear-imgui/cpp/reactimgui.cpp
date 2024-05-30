@@ -61,6 +61,7 @@ void ReactImgui::SetUpWidgetCreatorFunctions() {
     m_widget_init_fn["TextWrap"] = &makeWidget<TextWrap>;
     m_widget_init_fn["ItemTooltip"] = &makeWidget<ItemTooltip>;
     m_widget_init_fn["TreeNode"] = &makeWidget<TreeNode>;
+    m_widget_init_fn["Table"] = &makeWidget<Table>;
 };
 
 void ReactImgui::RenderWidgetById(int id) {
@@ -89,16 +90,20 @@ void ReactImgui::RenderChildren(int id) {
 
 void ReactImgui::InitWidget(const json& widgetDef) {
     std::string type = widgetDef["type"].template get<std::string>();
-    int id = widgetDef["id"].template get<int>();
+    if (m_widget_init_fn.contains(type)) {
+        int id = widgetDef["id"].template get<int>();
 
-    m_widgets_mutex.lock();
-    m_hierarchy_mutex.lock();
+        m_widgets_mutex.lock();
+        m_hierarchy_mutex.lock();
 
-    m_widgets[id] = m_widget_init_fn[type](widgetDef);
-    m_hierarchy[id] = std::vector<int>();
+        m_widgets[id] = m_widget_init_fn[type](widgetDef);
+        m_hierarchy[id] = std::vector<int>();
 
-    m_widgets_mutex.unlock();
-    m_hierarchy_mutex.unlock();
+        m_widgets_mutex.unlock();
+        m_hierarchy_mutex.unlock();
+    } else {
+        printf("unrecognised widget type: '%s'\n", type.c_str());
+    }
 };
 
 void ReactImgui::SetEventHandlers(
@@ -256,13 +261,13 @@ void ReactImgui::AppendDataToTable(int id, std::string& rawData) {
         auto parsedData = json::parse(rawData);
 
         if (parsedData.is_array()) {
-            for (auto& [itemKey, item] : parsedData.items()) {
-                if (item.is_object()) {
+            for (auto& [parsedItemKey, parsedRow] : parsedData.items()) {
+                if (parsedRow.is_object()) {
                     Table::TableRow row = Table::TableRow();
 
-                    for (auto& [fieldKey, fieldValue] : parsedData.items()) {
-                        if (fieldValue.is_string()) {
-                            row[fieldKey] = fieldValue.template get<std::string>();
+                    for (auto& [parsedRowFieldKey, parsedRowFieldValue] : parsedRow.items()) {
+                        if (parsedRowFieldValue.is_string()) {
+                            row[parsedRowFieldKey] = parsedRowFieldValue.template get<std::string>();
                         }
                     }
 

@@ -1,18 +1,16 @@
-import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
-import { PropsWithChildren, WidgetFunctionComponent } from "./types";
+import { useRef } from "react";
+import { useWidgetRegistrationService } from "../../hooks";
+import { PropsWithChildren, WidgetFunctionComponent, WidgetPropsMap } from "./types";
 
-export type CollapsingHeaderProps = PropsWithChildren & {
-    label?: string;
-};
-
-export const CollapsingHeader: WidgetFunctionComponent<CollapsingHeaderProps> = ({
+export const CollapsingHeader: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap["CollapsingHeader"]> = ({
     children,
     label,
 }) => {
-    const [widgetId] = useWidgetEventManagement();
+    const widgetRegistratonService = useWidgetRegistrationService();
+    const idRef = useRef(widgetRegistratonService.generateId());
 
     return (
-        <widget type="CollapsingHeader" id={widgetId.current} label={label}>
+        <widget type="CollapsingHeader" id={idRef.current} label={label}>
             {children}
         </widget>
     );

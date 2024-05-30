@@ -1,9 +1,5 @@
-import { WidgetFunctionComponent } from "./types";
+import { WidgetFunctionComponent, WidgetPropsMap } from "./types";
 
-export type BulletTextProps = {
-    text: string;
-};
-
-export const BulletText: WidgetFunctionComponent<BulletTextProps> = ({ text }) => {
+export const BulletText: WidgetFunctionComponent<WidgetPropsMap["BulletText"]> = ({ text }) => {
     return <widget type="BulletText" text={text} />;
 };

@@ -1,10 +1,11 @@
-import { useMemo } from "react";
-import { useWidgetEventManagement } from "../../hooks/useWidgetEventManagement";
+import { useMemo, useRef } from "react";
+import { useWidgetRegistrationService } from "../../hooks";
 import { PropsWithChildren, WidgetFunctionComponent, WidgetReactElement } from "./types";
 import { TabItem } from "./TabItem";
 
 export const TabBar: WidgetFunctionComponent<PropsWithChildren> = ({ children }) => {
-    const [widgetId, widgetRegistrationService] = useWidgetEventManagement();
+    const widgetRegistratonService = useWidgetRegistrationService();
+    const idRef = useRef(widgetRegistratonService.generateId());
 
     const tabs = useMemo(
         () =>
@@ -17,7 +18,7 @@ export const TabBar: WidgetFunctionComponent<PropsWithChildren> = ({ children })
     );
 
     return (
-        <widget type="TabBar" id={widgetId.current}>
+        <widget type="TabBar" id={idRef.current}>
             {tabs}
         </widget>
     );
