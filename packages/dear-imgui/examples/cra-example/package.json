@@ -7,7 +7,7 @@
         "url": "https://github.com/andreamancuso"
     },
     "dependencies": {
-        "@react-wasm/dear-imgui": "^0.1.28",
+        "@react-wasm/dear-imgui": "^0.1.29-canary-001",
         "@testing-library/jest-dom": "^5.17.0",
         "@testing-library/react": "^13.4.0",
         "@testing-library/user-event": "^13.5.0",
@@ -22,9 +22,9 @@
         "web-vitals": "^2.1.4"
     },
     "scripts": {
-        "start": "react-scripts start",
-        "build": "react-scripts build",
-        "test": "react-scripts test",
+        "start": "craco start",
+        "build": "craco build",
+        "test": "craco test",
         "eject": "react-scripts eject"
     },
     "eslintConfig": {

@@ -1,6 +1,6 @@
 {
     "name": "@react-wasm/dear-imgui",
-    "version": "0.1.29-canary-000",
+    "version": "0.1.29-canary-001",
     "main": "dist/index.js",
     "files": [
         "dist/*"
