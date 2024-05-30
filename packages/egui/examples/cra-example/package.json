@@ -6,7 +6,7 @@
         "name": "Andrea Mancuso",
         "url": "https://github.com/andreamancuso"
     },
-    "homepage": "https://andreamancuso.github.io/react-wasm/",
+    "homepage": "https://andreamancuso.github.io/react-wasm/egui",
     "dependencies": {
         "@react-wasm/egui": "^0.0.1-canary-004",
         "@testing-library/jest-dom": "^5.17.0",

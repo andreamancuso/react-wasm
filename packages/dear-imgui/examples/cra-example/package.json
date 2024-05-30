@@ -6,6 +6,7 @@
         "name": "Andrea Mancuso",
         "url": "https://github.com/andreamancuso"
     },
+    "homepage": "https://andreamancuso.github.io/react-wasm/dear-imgui",
     "dependencies": {
         "@react-wasm/dear-imgui": "^0.1.29-canary-001",
         "@testing-library/jest-dom": "^5.17.0",
