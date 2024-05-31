@@ -35,7 +35,7 @@ Perhaps there are other options I could/should have considered. Feel free to let
 
 ### Dear Imgui
 
-[Dear Imgui](https://github.com/andreamancuso/react-wasm/tree/main/packages/dear-imgui) (work in progress) Browser support: latest Chrome and Edge only presently.
+[Dear Imgui](https://github.com/andreamancuso/react-wasm/tree/main/packages/dear-imgui) (work in progress) ([very basic online demo](https://andreamancuso.github.io/react-wasm/dear-imgui)) Browser support: latest Chrome and Edge only presently.
 
 ![React Dear Imgui screenshot 1](/screenshots/dear-imgui/react-wasm-dear-imgui-s1.png?raw=true)
 
@@ -49,7 +49,7 @@ Perhaps there are other options I could/should have considered. Feel free to let
 
 ### egui
 
--   [egui](https://github.com/andreamancuso/react-wasm/tree/main/packages/egui) (work in progress) ([very basic online demo](https://andreamancuso.github.io/react-wasm/))Browser support: Chrome, Firefox, Edge
+-   [egui](https://github.com/andreamancuso/react-wasm/tree/main/packages/egui) (work in progress) ([very basic online demo](https://andreamancuso.github.io/react-wasm/egui)) Browser support: Chrome, Firefox, Edge
 
 ![egui hello world](/screenshots/egui/egui-hello-world.png?raw=true)
 
