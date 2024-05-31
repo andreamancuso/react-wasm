@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/react-wasm/dear-imgui/static/css/main.6933c6d5.css",
-    "main.js": "/react-wasm/dear-imgui/static/js/main.09a426df.js",
+    "main.js": "/react-wasm/dear-imgui/static/js/main.76d1a74f.js",
     "static/js/453.2bc380f2.chunk.js": "/react-wasm/dear-imgui/static/js/453.2bc380f2.chunk.js",
-    "static/media/reactDearImgui.wasm": "/react-wasm/dear-imgui/static/media/reactDearImgui.b0cbd8a77b7569a1b06e.wasm",
+    "static/media/reactDearImgui.data": "/react-wasm/dear-imgui/static/media/reactDearImgui.6a1068420b6b25e8d4b8.data",
     "index.html": "/react-wasm/dear-imgui/index.html",
     "main.6933c6d5.css.map": "/react-wasm/dear-imgui/static/css/main.6933c6d5.css.map",
-    "main.09a426df.js.map": "/react-wasm/dear-imgui/static/js/main.09a426df.js.map",
+    "main.76d1a74f.js.map": "/react-wasm/dear-imgui/static/js/main.76d1a74f.js.map",
     "453.2bc380f2.chunk.js.map": "/react-wasm/dear-imgui/static/js/453.2bc380f2.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.6933c6d5.css",
-    "static/js/main.09a426df.js"
+    "static/js/main.76d1a74f.js"
   ]
 }

@@ -167,7 +167,7 @@ void ReactImgui::PrepareForRender() {
 
 #ifndef IMGUI_DISABLE_FILE_FUNCTIONS
     //io.Fonts->AddFontFromFileTTF("fonts/segoeui.ttf", 18.0f);
-    io.Fonts->AddFontFromFileTTF("fonts/DroidSans.ttf", 16.0f);
+    // io.Fonts->AddFontFromFileTTF("fonts/DroidSans.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("fonts/Roboto-Medium.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("fonts/Cousine-Regular.ttf", 15.0f);
     //io.Fonts->AddFontFromFileTTF("fonts/ProggyTiny.ttf", 10.0f);

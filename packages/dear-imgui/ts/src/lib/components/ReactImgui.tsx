@@ -17,12 +17,14 @@ import { useDearImguiWasm } from "../hooks";
 export type MainComponentProps = PropsWithChildren & {
     containerRef?: React.RefObject<HTMLElement>;
     getWasmModule: any;
+    wasmDataPackage: any;
 };
 
 export const MainComponent: React.ComponentType<MainComponentProps> = ({
     containerRef,
     children,
     getWasmModule,
+    wasmDataPackage,
 }: MainComponentProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -43,11 +45,11 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                 const moduleArg: any = {
                     canvas: canvasRef.current, // ?
                     arguments: [`#${canvasId}`],
-                    // locateFile: (path: any, scriptDirectory: any) => {
-                    //     console.log(path, scriptDirectory);
+                    locateFile: (_path: string) => {
+                        console.log(_path);
 
-                    //     return `${scriptDirectory}/lib/wasm/${path}`;
-                    // },
+                        return wasmDataPackage;
+                    },
                     eventHandlers,
                 };
 

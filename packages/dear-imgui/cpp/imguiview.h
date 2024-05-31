@@ -21,6 +21,10 @@ class ImGuiView : public View {
         ImGuiView(const char* newWindowId, const char* newGlWindowTitle) : View(newWindowId, newGlWindowTitle) {
             m_imGuiCtx = ImGui::CreateContext();
 
+            ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+            io.Fonts->AddFontFromFileTTF("fonts/dejavu/DejaVuSans.ttf", 14.0f);
+
             ImVec4 v4 = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
             m_clearColor = { v4.x * v4.w, v4.y * v4.w, v4.z * v4.w, v4.w };
         }
