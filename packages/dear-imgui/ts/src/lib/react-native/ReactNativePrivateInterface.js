@@ -50,6 +50,7 @@ export default {
                                 onClick: true,
                                 columns: true,
                                 title: true,
+                                clipRows: true,
                             },
                         };
                 }

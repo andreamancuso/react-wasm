@@ -295,3 +295,7 @@ void ReactImgui::AppendTextToClippedMultiLineTextRenderer(int id, std::string& r
 
     m_widgets_mutex.unlock();
 };
+
+float ReactImgui::GetTextLineHeightWithSpacing() {
+    return ImGui::GetTextLineHeightWithSpacing();
+};

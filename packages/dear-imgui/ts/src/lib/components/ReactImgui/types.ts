@@ -85,7 +85,11 @@ export type WidgetPropsMap = {
         label?: string;
         size?: Vec2;
     };
-    Table: { columns: { heading: string; fieldId?: string }[]; initialData?: string };
+    Table: {
+        columns: { heading: string; fieldId?: string }[];
+        initialData?: string;
+        clipRows?: number;
+    };
     ClippedMultiLineTextRenderer: {};
 };
 

@@ -91,6 +91,8 @@ class ReactImgui : public ImPlotView {
 
         void AppendTextToClippedMultiLineTextRenderer(int id, std::string& data);
 
+        float GetTextLineHeightWithSpacing();
+
         std::vector<int> GetChildren(int id);
 
         json GetAvailableFonts();

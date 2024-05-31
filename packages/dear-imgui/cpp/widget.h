@@ -936,9 +936,14 @@ class Table final : public Widget {
     protected:
         ImGuiTableFlags m_flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
 
-        Table(int id, std::vector<TableColumn>& columns) : Widget(id) {
+        Table(int id, std::vector<TableColumn>& columns, std::optional<int> clipRows) : Widget(id) {
             m_type = "Table";
             m_columns = columns;
+            m_clipRows = 0;
+
+            if (clipRows.has_value()) {
+                m_clipRows = clipRows.value();
+            }
         }
 
     public:
@@ -947,13 +952,19 @@ class Table final : public Widget {
 
         TableData m_data;
         std::vector<TableColumn> m_columns;
+        int m_clipRows;
 
         inline static std::unique_ptr<Table> makeWidget(const json& val) {
             if (val.is_object()) {
                 auto id = val["id"].template get<int>();
 
                 if (val.contains("columns") && val["columns"].is_array()) {
+                    std::optional<int> clipRows;
                     std::vector<TableColumn> columns;
+
+                    if (val.contains("clipRows") && val["clipRows"].is_number_integer()) {
+                        clipRows.emplace(val["clipRows"].template get<int>());
+                    }
 
                     for (auto& [key, item] : val["columns"].items()) {
                         columns.push_back({
@@ -962,15 +973,15 @@ class Table final : public Widget {
                         });
                     }
 
-                    return Table::makeWidget(id, columns);
+                    return Table::makeWidget(id, columns, clipRows);
                 }
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<Table> makeWidget(int id, std::vector<TableColumn>& columns) {
-            Table instance(id, columns);
+        static std::unique_ptr<Table> makeWidget(int id, std::vector<TableColumn>& columns, std::optional<int> clipRows) {
+            Table instance(id, columns, clipRows);
 
             return std::make_unique<Table>(std::move(instance));
         }

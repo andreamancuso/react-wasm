@@ -202,6 +202,10 @@ class WasmRunner {
         void appendTextToClippedMultiLineTextRenderer(int id, std::string& data) {
             m_view->AppendTextToClippedMultiLineTextRenderer(id, data);
         }
+
+        float getTextLineHeightWithSpacing() {
+            m_view->GetTextLineHeightWithSpacing();
+        }
 };
 
 static std::unique_ptr<WasmRunner> pRunner = std::make_unique<WasmRunner>();
@@ -250,6 +254,10 @@ void appendTextToClippedMultiLineTextRenderer(int id, std::string data) {
     pRunner->appendTextToClippedMultiLineTextRenderer(id, data);
 }
 
+float getTextLineHeightWithSpacing() {
+    pRunner->getTextLineHeightWithSpacing();
+}
+
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("exit", &_exit);
     emscripten::function("resizeWindow", &resizeWindow);
@@ -260,6 +268,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("getChildren", &getChildren);
     emscripten::function("appendDataToTable", &appendDataToTable);
     emscripten::function("appendTextToClippedMultiLineTextRenderer", &appendTextToClippedMultiLineTextRenderer);
+    emscripten::function("getTextLineHeightWithSpacing", &getTextLineHeightWithSpacing);
 
     // emscripten::class_<WasmRunner>("WasmRunner")
     // .constructor<OnInputTextChangeType, OnComboChangeType, OnNumericValueChangeType, OnMultiValueChangeType, OnBooleanValueChangeType, OnClickType>()

@@ -7,7 +7,7 @@ export type TableImperativeHandle = {
 };
 
 export const Table = forwardRef<TableImperativeHandle, WidgetPropsMap["Table"]>(
-    ({ columns, initialData }: WidgetPropsMap["Table"], ref) => {
+    ({ columns, clipRows, initialData }: WidgetPropsMap["Table"], ref) => {
         const widgetRegistratonService = useWidgetRegistrationService();
         const idRef = useRef(widgetRegistratonService.generateId());
 
@@ -27,6 +27,6 @@ export const Table = forwardRef<TableImperativeHandle, WidgetPropsMap["Table"]>(
             [],
         );
 
-        return <widget type="Table" id={idRef.current} columns={columns} />;
+        return <widget type="Table" id={idRef.current} columns={columns} clipRows={clipRows} />;
     },
 );

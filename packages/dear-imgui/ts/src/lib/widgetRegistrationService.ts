@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from "uuid";
-import { Primitive } from "./components/ReactImgui/types";
 
 export class WidgetRegistrationService {
     private wasmModule: any;
@@ -12,6 +11,10 @@ export class WidgetRegistrationService {
         this.tables = new Set();
         this.fabricWidgetsMapping = new Map();
         this.fonts = [];
+    }
+
+    getTextLineHeightWithSpacing(): number {
+        return this.getTextLineHeightWithSpacing();
     }
 
     setFonts(fonts: string[]) {

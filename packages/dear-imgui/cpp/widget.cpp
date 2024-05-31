@@ -36,7 +36,7 @@ void Fragment::Render(ReactImgui* view) {
 };
 
 void Window::Render(ReactImgui* view) {
-    ImGui::PushID(m_id);
+    // ImGui::PushID(m_id);
     ImGui::SetNextWindowSize(ImVec2(m_width, m_height), ImGuiCond_FirstUseEver);
     
     if (!ImGui::Begin(m_title.c_str(), &m_open, m_flags)) {
@@ -45,7 +45,7 @@ void Window::Render(ReactImgui* view) {
     }
     Widget::HandleChildren(view);
     ImGui::End();
-    ImGui::PopID();
+    // ImGui::PopID();
 };
 
 void Group::Render(ReactImgui* view) {
@@ -247,30 +247,68 @@ void Table::Render(ReactImgui* view) {
 
     ImGui::PushID(m_id);
 
-    if (ImGui::BeginTable("t", (int)m_columns.size(), m_flags)) {
-        for (const auto& columnSpec : m_columns) {
-            ImGui::TableSetupColumn(columnSpec.heading.c_str(), ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch);
-        }
+    if (m_clipRows > 0) {
+        // static ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
 
-        ImGui::TableHeadersRow();
+        const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
+        ImVec2 outer_size = ImVec2(0.0f, TEXT_BASE_HEIGHT * (m_clipRows + 1)); // account for frozen table headings
+        if (ImGui::BeginTable("t", (int)m_columns.size(), m_flags | ImGuiTableFlags_ScrollY, outer_size)) {
+            ImGui::TableSetupScrollFreeze(0, 1); // Make top row always visible
+            for (const auto& columnSpec : m_columns) {
+                ImGui::TableSetupColumn(columnSpec.heading.c_str(), ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch);
+            }
+            ImGui::TableHeadersRow();
 
-        auto numColumns = m_columns.size();
+            auto numColumns = m_columns.size();
 
-        for (auto& dataRow : m_data) {
-            ImGui::TableNextRow();
-            for (int i = 0; i < numColumns; i++) {
-                ImGui::TableSetColumnIndex(i);
-                if (m_columns[i].fieldId.has_value()) {
-                    auto& fieldId = m_columns[i].fieldId.value();
+            // Demonstrate using clipper for large vertical lists
+            ImGuiListClipper clipper;
+            clipper.Begin((int)m_data.size());
+            while (clipper.Step())
+            {
+                for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
+                {
+                    ImGui::TableNextRow();
+                    for (int i = 0; i < numColumns; i++) {
+                        ImGui::TableSetColumnIndex(i);
+                        if (m_columns[i].fieldId.has_value()) {
+                            auto& fieldId = m_columns[i].fieldId.value();
 
-                    if (dataRow.contains(fieldId)) {
-                        ImGui::TextUnformatted(dataRow[fieldId].c_str());
+                            if (m_data[row].contains(fieldId)) {
+                                ImGui::TextUnformatted(m_data[row][fieldId].c_str());
+                            }
+                        }
                     }
                 }
             }
+            ImGui::EndTable();
         }
+    } else {
+        if (ImGui::BeginTable("t", (int)m_columns.size(), m_flags)) {
+            for (const auto& columnSpec : m_columns) {
+                ImGui::TableSetupColumn(columnSpec.heading.c_str(), ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch);
+            }
 
-        ImGui::EndTable();
+            ImGui::TableHeadersRow();
+
+            auto numColumns = m_columns.size();
+
+            for (auto& dataRow : m_data) {
+                ImGui::TableNextRow();
+                for (int i = 0; i < numColumns; i++) {
+                    ImGui::TableSetColumnIndex(i);
+                    if (m_columns[i].fieldId.has_value()) {
+                        auto& fieldId = m_columns[i].fieldId.value();
+
+                        if (dataRow.contains(fieldId)) {
+                            ImGui::TextUnformatted(dataRow[fieldId].c_str());
+                        }
+                    }
+                }
+            }
+
+            ImGui::EndTable();
+        }
     }
 
     ImGui::PopID();

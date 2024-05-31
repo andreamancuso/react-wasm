@@ -137,7 +137,7 @@ export const ImGuiDemo = () => {
                         <ReactImgui.UnformattedText text={text} />
                     </ReactImgui.Child>
                     <ReactImgui.Child width={400} height={0}>
-                        <ReactImgui.Table ref={tableRef} columns={tableColumns} />
+                        <ReactImgui.Table ref={tableRef} columns={tableColumns} clipRows={10} />
                         <ReactImgui.Button
                             onClick={handleAppendDataToTableClick}
                             label="Add data to table"
