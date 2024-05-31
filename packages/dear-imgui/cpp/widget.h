@@ -139,8 +139,16 @@ class Child final : public Widget {
         static std::unique_ptr<Child> makeWidget(const json& val) {
             if (val.is_object()) {
                 auto id = val["id"].template get<int>();
-                auto width = val["width"].template get<float>();
-                auto height = val["height"].template get<float>();
+                float width = 0;
+                auto height = 0;
+
+                if (val.contains("width") && val["width"].is_number()) {
+                    width = val["width"].template get<float>();
+                }
+
+                if (val.contains("height") && val["height"].is_number()) {
+                    height = val["height"].template get<float>();
+                }
                 
                 return std::make_unique<Child>(id, width, height);
             }
@@ -982,5 +990,62 @@ class Table final : public Widget {
 
         void AppendData(TableData& data) {
             m_data.insert(m_data.end(), data.begin(), data.end());
+        }
+};
+
+// todo: should we preallocate buffer size?
+class ClippedMultiLineTextRenderer final : public Widget {
+    protected:
+        ClippedMultiLineTextRenderer(int id) : Widget(id) {
+            m_type = "ClippedMultiLineTextRenderer";
+        }
+
+    public:
+        ImVector<int> m_lineOffsets;
+        ImGuiTextBuffer m_textBuffer;
+
+        inline static std::unique_ptr<ClippedMultiLineTextRenderer> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+
+                return ClippedMultiLineTextRenderer::makeWidget(id);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
+        static std::unique_ptr<ClippedMultiLineTextRenderer> makeWidget(int id) {
+            ClippedMultiLineTextRenderer instance(id);
+
+            return std::make_unique<ClippedMultiLineTextRenderer>(std::move(instance));
+        }
+
+        void Render(ReactImgui* view);
+
+        void Patch(const json& val) {
+            if (val.is_object()) {
+                // not sure what can be patched - presumably the columns? though that'd likely force us to clear the data
+            }
+        }
+
+        void Clear() {
+            m_lineOffsets.clear();
+            m_lineOffsets.push_back(0);
+            m_textBuffer.clear();
+        }
+
+        void SetData(const char* str) {
+            Clear();
+            AppendText(str);
+        }
+
+        void AppendText(const char* str) {
+            int old_size = m_textBuffer.size();
+
+            m_textBuffer.append(str);
+
+            for (int new_size = m_textBuffer.size(); old_size < new_size; old_size++)
+                if (m_textBuffer[old_size] == '\n')
+                    m_lineOffsets.push_back(old_size + 1);
         }
 };

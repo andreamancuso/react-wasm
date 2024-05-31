@@ -13,7 +13,7 @@ export type SliderTypes = "default" | "angle";
 export type WidgetPropsMap = {
     Unknown: {};
     Fragment: {};
-    Child: { width: number; height: number };
+    Child: { width?: number; height?: number };
     DIWindow: { title: string; width: number; height: number };
     Group: {};
     TabBar: {};
@@ -86,6 +86,7 @@ export type WidgetPropsMap = {
         size?: Vec2;
     };
     Table: { columns: { heading: string; fieldId?: string }[]; initialData?: string };
+    ClippedMultiLineTextRenderer: {};
 };
 
 type WidgetKeys = keyof WidgetPropsMap;
@@ -103,7 +104,8 @@ type WidgetsRequiringId =
     | "Slider"
     | "MultiSlider"
     | "Button"
-    | "Table";
+    | "Table"
+    | "ClippedMultiLineTextRenderer";
 
 export type WidgetReactNode =
     | WidgetReactElementsFlat

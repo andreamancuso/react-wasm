@@ -4,9 +4,12 @@ import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { UserGuide } from "./UserGuide/UserGuide";
 import { StyleEditor } from "./StyleEditor/StyleEditor";
 import { TableImperativeHandle } from "../ReactImgui/Table";
+import { ClippedMultiLineTextRendererImperativeHandle } from "../ReactImgui/ClippedMultiLineTextRenderer";
 
 export const ImGuiDemo = () => {
     const tableRef = useRef<TableImperativeHandle>(null);
+    const clippedMultiLineTextRendererRef =
+        useRef<ClippedMultiLineTextRendererImperativeHandle>(null);
     const [text, setText] = useState("Hello, world!");
     const [tripleSliderValue, setTripleSliderValue] = useState<[number, number, number]>([9, 9, 9]);
     const [quadSliderValue, setQuadSliderValue] = useState<[number, number, number, number]>([
@@ -59,6 +62,14 @@ export const ImGuiDemo = () => {
             tableRef.current.appendDataToTable([{ id: "1", name: "Andy" }]);
         }
     }, [tableRef]);
+
+    const handleAppendTextToTextRenderer = useCallback(() => {
+        if (clippedMultiLineTextRendererRef.current) {
+            clippedMultiLineTextRendererRef.current.appendTextToClippedMultiLineTextRenderer(
+                `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n`,
+            );
+        }
+    }, [clippedMultiLineTextRendererRef]);
 
     return (
         <ReactImgui.Fragment>
@@ -132,6 +143,17 @@ export const ImGuiDemo = () => {
                             label="Add data to table"
                         />
                     </ReactImgui.Child>
+                </ReactImgui.SameLine>
+            </ReactImgui.DIWindow>
+
+            <ReactImgui.DIWindow title="clipped multi line text renderer" width={820} height={600}>
+                <ReactImgui.Child height={-40}>
+                    <ReactImgui.ClippedMultiLineTextRenderer
+                        ref={clippedMultiLineTextRendererRef}
+                    />
+                </ReactImgui.Child>
+                <ReactImgui.SameLine>
+                    <ReactImgui.Button onClick={handleAppendTextToTextRenderer} label="Add text" />
                 </ReactImgui.SameLine>
             </ReactImgui.DIWindow>
         </ReactImgui.Fragment>

@@ -89,6 +89,8 @@ class ReactImgui : public ImPlotView {
 
         void AppendDataToTable(int id, std::string& data);
 
+        void AppendTextToClippedMultiLineTextRenderer(int id, std::string& data);
+
         std::vector<int> GetChildren(int id);
 
         json GetAvailableFonts();

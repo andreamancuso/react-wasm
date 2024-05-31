@@ -65,6 +65,7 @@ void ReactImgui::SetUpWidgetCreatorFunctions() {
     m_widget_init_fn["ItemTooltip"] = &makeWidget<ItemTooltip>;
     m_widget_init_fn["TreeNode"] = &makeWidget<TreeNode>;
     m_widget_init_fn["Table"] = &makeWidget<Table>;
+    m_widget_init_fn["ClippedMultiLineTextRenderer"] = &makeWidget<ClippedMultiLineTextRenderer>;
 };
 
 void ReactImgui::RenderWidgetById(int id) {
@@ -280,6 +281,16 @@ void ReactImgui::AppendDataToTable(int id, std::string& rawData) {
         }
 
         static_cast<Table*>(m_widgets[id].get())->AppendData(data);
+    }
+
+    m_widgets_mutex.unlock();
+};
+
+void ReactImgui::AppendTextToClippedMultiLineTextRenderer(int id, std::string& rawData) {
+    m_widgets_mutex.lock();
+
+    if (m_widgets.contains(id) && m_widgets[id]->m_type == "ClippedMultiLineTextRenderer") {
+        static_cast<ClippedMultiLineTextRenderer*>(m_widgets[id].get())->AppendText(rawData.c_str());
     }
 
     m_widgets_mutex.unlock();

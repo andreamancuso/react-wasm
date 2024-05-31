@@ -4,6 +4,8 @@ export default class {
     cloningNode;
     fiberNodesMap;
 
+    linkedWidgetTypes = ["Table", "ClippedMultiLineTextRenderer"];
+
     constructor() {
         this.fiberNodesMap = new Map();
     }
@@ -29,16 +31,16 @@ export default class {
 
         const { children, type, id, ...props } = payload;
 
-        if (type === "Table") {
-            console.log(
-                "createNode",
-                generatedId,
-                uiViewClassName,
-                requiresClone,
-                payload,
-                fiberNode,
-            );
-        }
+        // if (type === "Table") {
+        //     console.log(
+        //         "createNode",
+        //         generatedId,
+        //         uiViewClassName,
+        //         requiresClone,
+        //         payload,
+        //         fiberNode,
+        //     );
+        // }
 
         const widget = { ...props, id: generatedId, type };
 
@@ -47,7 +49,7 @@ export default class {
         this.fiberNodesMap.set(generatedId, fiberNode);
 
         // todo: type is in some array of types
-        if (type === "Table") {
+        if (this.linkedWidgetTypes.includes(type)) {
             this.widgetRegistrationService.linkWidgetIds(id, generatedId);
         }
 

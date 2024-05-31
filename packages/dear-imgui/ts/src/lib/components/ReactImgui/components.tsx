@@ -25,6 +25,7 @@ import { Table } from "./Table";
 import { Child } from "./Child";
 import { Group } from "./Group";
 import { DIWindow } from "./DIWindow";
+import { ClippedMultiLineTextRenderer } from "./ClippedMultiLineTextRenderer";
 
 export const components = {
     UnformattedText,
@@ -52,6 +53,7 @@ export const components = {
     TabBar,
     TabItem,
     Table,
+    ClippedMultiLineTextRenderer,
 } as const;
 
 export const ReactImgui = attachSubComponents("ReactImgui", MainComponent, components);

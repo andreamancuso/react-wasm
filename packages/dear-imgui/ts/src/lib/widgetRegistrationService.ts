@@ -27,8 +27,6 @@ export class WidgetRegistrationService {
     }
 
     linkWidgetIds(id: string, fabricId: number) {
-        console.log("linkWidgetIds", id, fabricId);
-
         this.fabricWidgetsMapping.set(id, fabricId);
     }
 
@@ -48,9 +46,16 @@ export class WidgetRegistrationService {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         console.log(fabricWidgetId);
         if (fabricWidgetId !== undefined) {
-            console.log("appendDataToTable", id, fabricWidgetId, data);
             // todo: we may want to standardize method names
             this.wasmModule.appendDataToTable(fabricWidgetId, JSON.stringify(data));
+        }
+    }
+
+    appendTextToClippedMultiLineTextRenderer(id: string, text: string) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            // console.log("appendTextToClippedMultiLineTextRenderer", id, fabricWidgetId, text);
+            this.wasmModule.appendTextToClippedMultiLineTextRenderer(fabricWidgetId, text);
         }
     }
 }
