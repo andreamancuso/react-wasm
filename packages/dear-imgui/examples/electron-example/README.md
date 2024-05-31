@@ -2,9 +2,10 @@
 
 I have followed [these instructions](https://www.electronforge.io/guides/framework-integration/react-with-typescript).
 
-I then ran:
+Sadly I ran into issue when trying to build a Windows installer using electron forge so I switched to electron builder
 
-`yarn add react@18.2.0`
-`yarn add react-dom@18.2.0`
-`yarn add -D @types/react@18.2.79`
-`yarn add -D @types/react-dom@18.2.25`
+The steps to build a package are
+
+-   `npm run package`
+-   `npm run make`
+-   open the `dist` folder
