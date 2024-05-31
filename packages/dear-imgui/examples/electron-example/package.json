@@ -6,8 +6,8 @@
     "description": "My Electron application description",
     "main": ".webpack/x64/main",
     "scripts": {
-        "start": "electron-forge start",
-        "package": "electron-forge package",
+        "start": "electron-forge start --app-path ./.webpack/main",
+        "package": "electron-forge package -- --arch=\"x64\"",
         "make": "electron-builder build",
         "lint": "eslint --ext .ts,.tsx ."
     },
