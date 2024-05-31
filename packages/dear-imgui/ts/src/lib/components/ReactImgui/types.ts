@@ -14,7 +14,7 @@ export type WidgetPropsMap = {
     Unknown: {};
     Fragment: {};
     Child: { width: number; height: number };
-    DIWindow: { title: string };
+    DIWindow: { title: string; width: number; height: number };
     Group: {};
     TabBar: {};
     TabItem: { label: string; onOpenChange?: (value: boolean) => void };

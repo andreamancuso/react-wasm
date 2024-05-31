@@ -37,7 +37,12 @@ void Fragment::Render(ReactImgui* view) {
 
 void Window::Render(ReactImgui* view) {
     ImGui::PushID(m_id);
-    ImGui::Begin(m_title.c_str(), &m_open, m_flags);
+    ImGui::SetNextWindowSize(ImVec2(m_width, m_height), ImGuiCond_FirstUseEver);
+    
+    if (!ImGui::Begin(m_title.c_str(), &m_open, m_flags)) {
+        ImGui::End();
+        return;
+    }
     Widget::HandleChildren(view);
     ImGui::End();
     ImGui::PopID();

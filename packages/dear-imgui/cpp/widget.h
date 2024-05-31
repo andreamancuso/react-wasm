@@ -98,23 +98,29 @@ class Window final : public Widget {
         ImGuiWindowFlags m_flags = ImGuiWindowFlags_None;
         bool m_open;
         std::string m_title;
+        float m_width;
+        float m_height;
 
         static std::unique_ptr<Window> makeWidget(const json& val) {
             if (val.is_object()) {
                 auto id = val["id"].template get<int>();
                 auto title = val["title"].template get<std::string>();
+                auto width = val["width"].template get<float>();
+                auto height = val["height"].template get<float>();
                 
-                return std::make_unique<Window>(id, title);
+                return std::make_unique<Window>(id, title, width, height);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        Window(int id, std::string title) : Widget(id) {
+        Window(int id, std::string title, float width, float height) : Widget(id) {
             m_type = "Window";
             m_handlesChildrenWithinRenderMethod = true;
 
             m_title = title;
+            m_width = width;
+            m_height = height;
             m_open = true;
         }
 

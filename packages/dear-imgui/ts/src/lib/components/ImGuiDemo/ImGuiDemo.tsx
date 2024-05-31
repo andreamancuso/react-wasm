@@ -116,7 +116,7 @@ export const ImGuiDemo = () => {
                 </ReactImgui.SameLine>
             </ReactImgui.CollapsingHeader>
 
-            <ReactImgui.DIWindow title="another window">
+            <ReactImgui.DIWindow title="another window" width={820} height={600}>
                 <ReactImgui.SameLine>
                     <ReactImgui.Child width={400} height={0}>
                         <ReactImgui.InputText
