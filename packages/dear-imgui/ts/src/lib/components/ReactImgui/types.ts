@@ -13,6 +13,8 @@ export type SliderTypes = "default" | "angle";
 export type WidgetPropsMap = {
     Unknown: {};
     Fragment: {};
+    Child: { width: number; height: number };
+    Group: {};
     TabBar: {};
     TabItem: { label: string; onOpenChange?: (value: boolean) => void };
     SameLine: {};

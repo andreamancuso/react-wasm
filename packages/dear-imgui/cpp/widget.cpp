@@ -24,6 +24,7 @@
 
 using json = nlohmann::json;
 
+// todo: seems redundant
 void Widget::HandleChildren(ReactImgui* view) {
     view->RenderChildren(m_id);
 };
@@ -34,6 +35,19 @@ void Fragment::Render(ReactImgui* view) {
     // ImGui::Text("End Fragment (ID: %d)", m_id);
 };
 
+void Group::Render(ReactImgui* view) {
+    ImGui::BeginGroup();
+    Widget::HandleChildren(view);
+    ImGui::EndGroup();
+};
+
+void Child::Render(ReactImgui* view) {
+    ImGui::PushID(m_id);
+    ImGui::BeginChild("", ImVec2(m_width, m_height), m_flags);
+    Widget::HandleChildren(view);
+    ImGui::EndChild();
+    ImGui::PopID();
+};
 
 void SameLine::Render(ReactImgui* view) {
     // Special case

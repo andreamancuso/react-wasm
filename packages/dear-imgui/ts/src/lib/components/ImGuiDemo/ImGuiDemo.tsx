@@ -62,10 +62,6 @@ export const ImGuiDemo = () => {
 
     return (
         <ReactImgui.Fragment>
-            <ReactImgui.SameLine>
-                <ReactImgui.InputText defaultValue={text} onChange={handleInputTextChanged} />
-                <ReactImgui.UnformattedText text={text} />
-            </ReactImgui.SameLine>
             <ReactImgui.UnformattedText text="dear imgui says hello!" />
 
             <ReactImgui.CollapsingHeader label="Help">
@@ -119,8 +115,20 @@ export const ImGuiDemo = () => {
                     <ReactImgui.UnformattedText text={quadSliderValue.join(", ")} />
                 </ReactImgui.SameLine>
             </ReactImgui.CollapsingHeader>
-            <ReactImgui.Table ref={tableRef} columns={tableColumns} />
-            <ReactImgui.Button onClick={handleAppendDataToTableClick} label="Add data to table" />
+
+            <ReactImgui.SameLine>
+                <ReactImgui.Child width={400} height={0}>
+                    <ReactImgui.InputText defaultValue={text} onChange={handleInputTextChanged} />
+                    <ReactImgui.UnformattedText text={text} />
+                </ReactImgui.Child>
+                <ReactImgui.Child width={400} height={0}>
+                    <ReactImgui.Table ref={tableRef} columns={tableColumns} />
+                    <ReactImgui.Button
+                        onClick={handleAppendDataToTableClick}
+                        label="Add data to table"
+                    />
+                </ReactImgui.Child>
+            </ReactImgui.SameLine>
         </ReactImgui.Fragment>
     );
 };

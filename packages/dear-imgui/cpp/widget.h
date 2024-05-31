@@ -71,6 +71,60 @@ class Fragment final : public Widget {
         void Patch(const json& val) {}
 };
 
+class Group final : public Widget {
+    public:
+        static std::unique_ptr<Group> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                
+                return std::make_unique<Group>(id);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
+        Group(int id) : Widget(id) {
+            m_type = "Group";
+            m_handlesChildrenWithinRenderMethod = true;
+        }
+
+        void Render(ReactImgui* view);
+
+        void Patch(const json& val) {}
+};
+
+class Child final : public Widget {
+    public:
+        ImGuiChildFlags m_flags = ImGuiChildFlags_None;
+        ImGuiWindowFlags m_window_flags = ImGuiWindowFlags_None;
+        float m_width;
+        float m_height;
+
+        static std::unique_ptr<Child> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                auto width = val["width"].template get<float>();
+                auto height = val["height"].template get<float>();
+                
+                return std::make_unique<Child>(id, width, height);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
+        Child(int id, float width, float height) : Widget(id) {
+            m_type = "Child";
+            m_handlesChildrenWithinRenderMethod = true;
+
+            m_width = width;
+            m_height = height;
+        }
+
+        void Render(ReactImgui* view);
+
+        void Patch(const json& val) {}
+};
+
 class SameLine final : public Widget {
     public:
         static std::unique_ptr<SameLine> makeWidget(const json& val) {

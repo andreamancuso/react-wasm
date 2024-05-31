@@ -39,6 +39,7 @@ export default {
                                 min: true,
                                 max: true,
                                 width: true,
+                                height: true,
                                 optionsList: true,
                                 sliderType: true,
                                 numValues: true,

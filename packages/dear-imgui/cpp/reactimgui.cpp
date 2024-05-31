@@ -47,6 +47,8 @@ void ReactImgui::SetUpWidgetCreatorFunctions() {
     m_widget_init_fn["Checkbox"] = &makeWidget<Checkbox>;
     m_widget_init_fn["Button"] = &makeWidget<Button>;
     m_widget_init_fn["Fragment"] = &makeWidget<Fragment>;
+    m_widget_init_fn["Group"] = &makeWidget<Group>;
+    m_widget_init_fn["Child"] = &makeWidget<Child>;
     m_widget_init_fn["SameLine"] = &makeWidget<SameLine>;
     m_widget_init_fn["Separator"] = &makeWidget<Separator>;
     m_widget_init_fn["Indent"] = &makeWidget<Indent>;

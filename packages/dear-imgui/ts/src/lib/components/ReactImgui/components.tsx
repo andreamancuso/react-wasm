@@ -22,6 +22,8 @@ import { TreeNode } from "./TreeNode";
 import { UnformattedText } from "./UnformattedText";
 import { Unknown } from "./Unknown";
 import { Table } from "./Table";
+import { Child } from "./Child";
+import { Group } from "./Group";
 
 export const components = {
     UnformattedText,
@@ -43,9 +45,11 @@ export const components = {
     Button,
     Separator,
     Fragment,
+    Child,
+    Group,
     TabBar,
     TabItem,
-    Table
+    Table,
 } as const;
 
 export const ReactImgui = attachSubComponents("ReactImgui", MainComponent, components);
