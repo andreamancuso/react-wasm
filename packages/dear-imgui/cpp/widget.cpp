@@ -35,6 +35,14 @@ void Fragment::Render(ReactImgui* view) {
     // ImGui::Text("End Fragment (ID: %d)", m_id);
 };
 
+void Window::Render(ReactImgui* view) {
+    ImGui::PushID(m_id);
+    ImGui::Begin(m_title.c_str(), &m_open, m_flags);
+    Widget::HandleChildren(view);
+    ImGui::End();
+    ImGui::PopID();
+};
+
 void Group::Render(ReactImgui* view) {
     ImGui::BeginGroup();
     Widget::HandleChildren(view);

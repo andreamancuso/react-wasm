@@ -49,6 +49,7 @@ export default {
                                 onChange: true,
                                 onClick: true,
                                 columns: true,
+                                title: true,
                             },
                         };
                 }

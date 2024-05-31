@@ -116,19 +116,24 @@ export const ImGuiDemo = () => {
                 </ReactImgui.SameLine>
             </ReactImgui.CollapsingHeader>
 
-            <ReactImgui.SameLine>
-                <ReactImgui.Child width={400} height={0}>
-                    <ReactImgui.InputText defaultValue={text} onChange={handleInputTextChanged} />
-                    <ReactImgui.UnformattedText text={text} />
-                </ReactImgui.Child>
-                <ReactImgui.Child width={400} height={0}>
-                    <ReactImgui.Table ref={tableRef} columns={tableColumns} />
-                    <ReactImgui.Button
-                        onClick={handleAppendDataToTableClick}
-                        label="Add data to table"
-                    />
-                </ReactImgui.Child>
-            </ReactImgui.SameLine>
+            <ReactImgui.DIWindow title="another window">
+                <ReactImgui.SameLine>
+                    <ReactImgui.Child width={400} height={0}>
+                        <ReactImgui.InputText
+                            defaultValue={text}
+                            onChange={handleInputTextChanged}
+                        />
+                        <ReactImgui.UnformattedText text={text} />
+                    </ReactImgui.Child>
+                    <ReactImgui.Child width={400} height={0}>
+                        <ReactImgui.Table ref={tableRef} columns={tableColumns} />
+                        <ReactImgui.Button
+                            onClick={handleAppendDataToTableClick}
+                            label="Add data to table"
+                        />
+                    </ReactImgui.Child>
+                </ReactImgui.SameLine>
+            </ReactImgui.DIWindow>
         </ReactImgui.Fragment>
     );
 };

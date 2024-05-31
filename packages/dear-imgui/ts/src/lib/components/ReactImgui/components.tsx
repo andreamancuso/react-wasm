@@ -24,6 +24,7 @@ import { Unknown } from "./Unknown";
 import { Table } from "./Table";
 import { Child } from "./Child";
 import { Group } from "./Group";
+import { DIWindow } from "./DIWindow";
 
 export const components = {
     UnformattedText,
@@ -45,6 +46,7 @@ export const components = {
     Button,
     Separator,
     Fragment,
+    DIWindow,
     Child,
     Group,
     TabBar,

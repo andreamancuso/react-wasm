@@ -93,6 +93,36 @@ class Group final : public Widget {
         void Patch(const json& val) {}
 };
 
+class Window final : public Widget {
+    public:
+        ImGuiWindowFlags m_flags = ImGuiWindowFlags_None;
+        bool m_open;
+        std::string m_title;
+
+        static std::unique_ptr<Window> makeWidget(const json& val) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                auto title = val["title"].template get<std::string>();
+                
+                return std::make_unique<Window>(id, title);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
+        Window(int id, std::string title) : Widget(id) {
+            m_type = "Window";
+            m_handlesChildrenWithinRenderMethod = true;
+
+            m_title = title;
+            m_open = true;
+        }
+
+        void Render(ReactImgui* view);
+
+        void Patch(const json& val) {}
+};
+
 class Child final : public Widget {
     public:
         ImGuiChildFlags m_flags = ImGuiChildFlags_None;
