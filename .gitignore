@@ -152,4 +152,5 @@ build/
 Makefile
 reactDearImgui.mjs
 reactDearImgui.wasm
+reactDearImgui.data
 reactDearImgui.worker.mjs
