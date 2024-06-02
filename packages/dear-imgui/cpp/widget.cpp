@@ -108,6 +108,30 @@ void UnformattedText::Render(ReactImgui* view) {
     ImGui::TextUnformatted(m_text.c_str());
 };
 
+std::unique_ptr<UnformattedText> UnformattedText::makeWidget(const json& widgetDef, ReactImgui* view) {
+    if (widgetDef.is_object()) {
+        auto id = widgetDef["id"].template get<int>();
+        std::string text = widgetDef["text"].template get<std::string>();
+
+        std::optional<int> fontIndex;
+        
+        if (widgetDef.contains("font") 
+            && widgetDef["font"].is_object() 
+            && widgetDef["font"]["name"].is_string() 
+            && widgetDef["font"]["size"].is_number_unsigned()) {
+
+            fontIndex.emplace(view->GetFontIndex(
+                widgetDef["font"]["name"].template get<std::string>(), 
+                widgetDef["font"]["size"].template get<int>()
+            ));
+        }
+
+        return std::make_unique<UnformattedText>(id, text, fontIndex);
+    }
+
+    throw std::invalid_argument("Invalid JSON data");
+};
+
 void DisabledText::Render(ReactImgui* view) {
     ImGui::TextDisabled(m_text.c_str());
 };

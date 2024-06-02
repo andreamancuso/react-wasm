@@ -145,11 +145,11 @@ class WasmRunner {
             );
         }
 
-        void run(
-                std::string& canvasSelector) {
+        void run(std::string& canvasSelector, std::string& rawFontDefs) {
             m_view = new ReactImgui(
                 "ReactImgui", 
-                "ReactImgui"
+                "ReactImgui",
+                rawFontDefs
             );
             m_view->SetEventHandlers(
                 OnTextChanged,
@@ -212,8 +212,9 @@ static std::unique_ptr<WasmRunner> pRunner = std::make_unique<WasmRunner>();
 
 int main(int argc, char* argv[]) {
     std::string canvasSelector = argv[1];
+    std::string rawFontDefs = argv[2];
 
-    pRunner->run(canvasSelector);
+    pRunner->run(canvasSelector, rawFontDefs);
 
     return 0;
 }

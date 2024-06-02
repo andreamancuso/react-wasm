@@ -73,9 +73,11 @@ export const ImGuiDemo = () => {
         }
     }, [clippedMultiLineTextRendererRef]);
 
+    const nonDefaultFontCombo = useMemo(() => ({ name: "roboto-regular", size: 24 }), []);
+
     return (
         <ReactImgui.Fragment>
-            <ReactImgui.UnformattedText text="dear imgui says hello!" />
+            <ReactImgui.UnformattedText text="dear imgui says hello!" font={nonDefaultFontCombo} />
 
             <ReactImgui.CollapsingHeader label="Help">
                 <ReactImgui.SeparatorText label="ABOUT THIS DEMO:" />

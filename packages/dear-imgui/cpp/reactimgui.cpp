@@ -26,14 +26,15 @@
 using json = nlohmann::json;
 
 template <typename T, typename std::enable_if<std::is_base_of<Widget, T>::value, int>::type = 0>
-std::unique_ptr<T> makeWidget(const json& val) {
-    return T::makeWidget(val);
+std::unique_ptr<T> makeWidget(const json& val, ReactImgui* view) {
+    return T::makeWidget(val, view);
 }
 
 ReactImgui::ReactImgui(
     const char* newWindowId, 
-    const char* newGlWindowTitle
-) : ImPlotView(newWindowId, newGlWindowTitle) {
+    const char* newGlWindowTitle, 
+    std::string& rawFontDefs
+) : ImPlotView(newWindowId, newGlWindowTitle, rawFontDefs) {
     SetUpWidgetCreatorFunctions();
 
     SetUpFloatFormatChars();
@@ -69,7 +70,14 @@ void ReactImgui::SetUpWidgetCreatorFunctions() {
 };
 
 void ReactImgui::RenderWidgetById(int id) {
-    m_widgets[id]->Render(this);
+    // todo: is there a way we can safely memoize the result of IsFontIndexValid()?
+    if (m_widgets[id]->m_fontIndex.has_value() && IsFontIndexValid(m_widgets[id]->m_fontIndex.value())) {
+        PushFont(m_widgets[id]->m_fontIndex.value());
+        m_widgets[id]->Render(this);
+        PopFont();
+    } else {
+        m_widgets[id]->Render(this);
+    }
 };
 
 void ReactImgui::RenderWidgets(int id) {
@@ -100,7 +108,7 @@ void ReactImgui::InitWidget(const json& widgetDef) {
         m_widgets_mutex.lock();
         m_hierarchy_mutex.lock();
 
-        m_widgets[id] = m_widget_init_fn[type](widgetDef);
+        m_widgets[id] = m_widget_init_fn[type](widgetDef, this);
         m_hierarchy[id] = std::vector<int>();
 
         m_widgets_mutex.unlock();

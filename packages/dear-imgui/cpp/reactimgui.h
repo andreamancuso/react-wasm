@@ -31,7 +31,7 @@ class Widget;
 
 class ReactImgui : public ImPlotView {
     private:
-        std::unordered_map<std::string, std::function<std::unique_ptr<Widget>(const json&)>> m_widget_init_fn;
+        std::unordered_map<std::string, std::function<std::unique_ptr<Widget>(const json&, ReactImgui*)>> m_widget_init_fn;
 
         std::unordered_map<int, std::unique_ptr<Widget>> m_widgets;
         std::mutex m_widgets_mutex;
@@ -57,7 +57,8 @@ class ReactImgui : public ImPlotView {
 
         ReactImgui(
             const char* newWindowId, 
-            const char* newGlWindowTitle
+            const char* newGlWindowTitle, 
+            std::string& rawFontDefs
         );
 
         void RenderWidgetById(int id);

@@ -1,23 +1,20 @@
 import * as React from "react";
-import { useEffect, useMemo, useState, useRef, useCallback, PropsWithChildren } from "react";
+import { useEffect, useMemo, useState, useRef, PropsWithChildren } from "react";
 import { v4 as uuidv4 } from "uuid";
 import debounce from "lodash.debounce";
 // @ts-ignore
 import ReactNativePrivateInterface from "../react-native/ReactNativePrivateInterface";
 import { MainModule, WasmExitStatus } from "../wasm/wasm-app-types";
 import { ReactNativeWrapper } from "../components/ReactNativeWrapper";
-import { useDearImguiWasm } from "../hooks";
-
-// getWasmModule.preRun = () => {
-//     ENV.MY_FILE_ROOT = "/usr/lib/test";
-// };
-
-// console.log(getWasmModule);
+import { useDearImguiFonts, useDearImguiWasm } from "../hooks";
+import { FontDef } from "./ReactImgui/types";
 
 export type MainComponentProps = PropsWithChildren & {
     containerRef?: React.RefObject<HTMLElement>;
     getWasmModule: any;
     wasmDataPackage: any;
+    fontDefs?: FontDef[];
+    defaultFont?: { name: string; size: number };
 };
 
 export const MainComponent: React.ComponentType<MainComponentProps> = ({
@@ -25,6 +22,8 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
     children,
     getWasmModule,
     wasmDataPackage,
+    fontDefs,
+    defaultFont,
 }: MainComponentProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -34,40 +33,43 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
     const canvasId = useMemo(() => `canvas-${uuidv4()}`, []);
 
     const { eventHandlers } = useDearImguiWasm(ReactNativePrivateInterface);
+    const fonts = useDearImguiFonts(fontDefs);
 
     useEffect(() => {
-        if (canvasRef.current && !isWasmModuleLoading.current) {
-            isWasmModuleLoading.current = true;
+        if (canvasRef.current) {
+            if (!isWasmModuleLoading.current) {
+                isWasmModuleLoading.current = true;
 
-            let localModule: MainModule;
+                let localModule: MainModule;
 
-            const load = async () => {
-                const moduleArg: any = {
-                    canvas: canvasRef.current, // ?
-                    arguments: [`#${canvasId}`],
-                    locateFile: (_path: string) => {
-                        console.log(_path);
+                const load = async () => {
+                    const moduleArg: any = {
+                        canvas: canvasRef.current, // ?
+                        arguments: [`#${canvasId}`, JSON.stringify({ defs: fonts, defaultFont })],
+                        locateFile: (_path: string) => {
+                            console.log(_path);
 
-                        return wasmDataPackage;
-                    },
-                    eventHandlers,
+                            return wasmDataPackage;
+                        },
+                        eventHandlers,
+                    };
+
+                    try {
+                        localModule = await getWasmModule(moduleArg);
+
+                        setWasmModule(localModule);
+                    } catch (exception) {
+                        console.log("Unable to initialize the WASM correctly", exception);
+                    }
                 };
 
-                try {
-                    localModule = await getWasmModule(moduleArg);
-
-                    setWasmModule(localModule);
-                } catch (exception) {
-                    console.log("Unable to initialize the WASM correctly", exception);
-                }
-            };
-
-            load();
+                load();
+            }
 
             return () => {
-                if (localModule) {
+                if (wasmModule) {
                     try {
-                        localModule.exit();
+                        wasmModule.exit();
                     } catch (error) {
                         if ((error as WasmExitStatus).status !== 0) {
                             // TODO: report error?
@@ -78,7 +80,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         } else {
             return () => {};
         }
-    }, [canvasId, canvasRef]);
+    }, [canvasId, canvasRef, fonts, wasmModule, defaultFont]);
 
     useEffect(() => {
         if (wasmModule) {

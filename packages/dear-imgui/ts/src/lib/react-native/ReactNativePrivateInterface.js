@@ -51,6 +51,7 @@ export default {
                                 columns: true,
                                 title: true,
                                 clipRows: true,
+                                font: true,
                             },
                         };
                 }

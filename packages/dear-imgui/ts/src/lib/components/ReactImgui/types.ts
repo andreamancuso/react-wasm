@@ -10,6 +10,15 @@ export type Vec2 = {
 };
 export type SliderTypes = "default" | "angle";
 
+export type FontDef = {
+    name: string;
+    sizes: number[];
+};
+
+export type FontProps = {
+    font?: { name: string; size: number };
+};
+
 export type WidgetPropsMap = {
     Unknown: {};
     Fragment: {};
@@ -17,48 +26,48 @@ export type WidgetPropsMap = {
     DIWindow: { title: string; width: number; height: number };
     Group: {};
     TabBar: {};
-    TabItem: { label: string; onOpenChange?: (value: boolean) => void };
+    TabItem: FontProps & { label: string; onOpenChange?: (value: boolean) => void };
     SameLine: {};
     ItemTooltip: {};
     TextWrap: { width: number };
     Indent: {};
     Unindent: {};
-    UnformattedText: {
+    UnformattedText: FontProps & {
         text: string;
     };
-    DisabledText: {
+    DisabledText: FontProps & {
         text: string;
     };
-    HelpMarker: {
+    HelpMarker: FontProps & {
         text: string;
     };
-    BulletText: {
+    BulletText: FontProps & {
         // todo: What about `fmt` ?
         text: string;
     };
     Separator: {};
-    SeparatorText: {
+    SeparatorText: FontProps & {
         label: string;
     };
-    InputText: {
+    InputText: FontProps & {
         defaultValue?: string;
         label?: string;
         onChange?: (value: string) => void;
     };
-    CollapsingHeader: {
+    CollapsingHeader: FontProps & {
         label?: string;
     };
-    TreeNode: {
+    TreeNode: FontProps & {
         label?: string;
     };
-    Combo: {
+    Combo: FontProps & {
         label?: string;
         options?: { value: number; label: string }[];
         optionsList?: string;
         defaultValue?: number;
         onChange?: (value: number) => void;
     };
-    Slider: {
+    Slider: FontProps & {
         sliderType: SliderTypes;
         label: string;
         defaultValue?: number;
@@ -66,7 +75,7 @@ export type WidgetPropsMap = {
         max?: number;
         onChange?: (value: number) => void;
     };
-    MultiSlider: {
+    MultiSlider: FontProps & {
         numValues: 2 | 3 | 4;
         label?: string;
         defaultValues?: number[];
@@ -75,22 +84,22 @@ export type WidgetPropsMap = {
         decimalDigits?: number;
         onChange?: (values: Primitive[]) => void;
     };
-    Checkbox: {
+    Checkbox: FontProps & {
         defaultChecked?: boolean;
         label?: string;
         onChange?: (value: boolean) => void;
     };
-    Button: {
+    Button: FontProps & {
         onClick?: () => void;
         label?: string;
         size?: Vec2;
     };
-    Table: {
+    Table: FontProps & {
         columns: { heading: string; fieldId?: string }[];
         initialData?: string;
         clipRows?: number;
     };
-    ClippedMultiLineTextRenderer: {};
+    ClippedMultiLineTextRenderer: FontProps & {};
 };
 
 type WidgetKeys = keyof WidgetPropsMap;

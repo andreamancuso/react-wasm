@@ -10,7 +10,11 @@ class ImPlotView : public ImGuiView {
         ImPlotContext* m_imPlotCtx;
 
     public:
-        ImPlotView(const char* newWindowId, const char* newGlWindowTitle) : ImGuiView(newWindowId, newGlWindowTitle) {
+        ImPlotView(
+            const char* newWindowId, 
+            const char* newGlWindowTitle, 
+            std::string& rawFontDefs
+            ) : ImGuiView(newWindowId, newGlWindowTitle, rawFontDefs) {
             m_imPlotCtx = ImPlot::CreateContext();
         }
 
