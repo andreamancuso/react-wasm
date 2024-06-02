@@ -52,6 +52,7 @@ export default {
                                 title: true,
                                 clipRows: true,
                                 font: true,
+                                color: true,
                             },
                         };
                 }

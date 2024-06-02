@@ -19,6 +19,10 @@ export type FontProps = {
     font?: { name: string; size: number };
 };
 
+export type ColorProps = {
+    color?: string;
+};
+
 export type WidgetPropsMap = {
     Unknown: {};
     Fragment: {};
@@ -32,9 +36,10 @@ export type WidgetPropsMap = {
     TextWrap: { width: number };
     Indent: {};
     Unindent: {};
-    UnformattedText: FontProps & {
-        text: string;
-    };
+    UnformattedText: ColorProps &
+        FontProps & {
+            text: string;
+        };
     DisabledText: FontProps & {
         text: string;
     };

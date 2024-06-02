@@ -8,8 +8,6 @@ import { ImGuiDemo } from "./lib";
 
 import "./App.css";
 
-// console.log(process.env.NODE_ENV);
-
 function App() {
     const containerRef = useRef<HTMLDivElement>(null);
 

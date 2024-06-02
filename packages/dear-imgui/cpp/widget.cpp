@@ -19,6 +19,7 @@
 #include "implot_internal.h"
 #include <nlohmann/json.hpp>
 
+#include "shared.h"
 #include "widget.h"
 #include "reactimgui.h"
 
@@ -27,6 +28,10 @@ using json = nlohmann::json;
 // todo: seems redundant
 void Widget::HandleChildren(ReactImgui* view) {
     view->RenderChildren(m_id);
+};
+
+ImGuiCol Widget::GetImGuiCol() {
+    return ImGuiCol_COUNT;
 };
 
 void Fragment::Render(ReactImgui* view) {
@@ -108,25 +113,42 @@ void UnformattedText::Render(ReactImgui* view) {
     ImGui::TextUnformatted(m_text.c_str());
 };
 
+ImGuiCol UnformattedText::GetImGuiCol() {
+    return ImGuiCol_Text;
+};
+
 std::unique_ptr<UnformattedText> UnformattedText::makeWidget(const json& widgetDef, ReactImgui* view) {
     if (widgetDef.is_object()) {
         auto id = widgetDef["id"].template get<int>();
         std::string text = widgetDef["text"].template get<std::string>();
 
-        std::optional<int> fontIndex;
+        std::optional<int> maybeFontIndex;
+        std::optional<ImVec4> maybeColor;
         
         if (widgetDef.contains("font") 
             && widgetDef["font"].is_object() 
             && widgetDef["font"]["name"].is_string() 
             && widgetDef["font"]["size"].is_number_unsigned()) {
 
-            fontIndex.emplace(view->GetFontIndex(
+            maybeFontIndex.emplace(view->GetFontIndex(
                 widgetDef["font"]["name"].template get<std::string>(), 
                 widgetDef["font"]["size"].template get<int>()
             ));
         }
+        
+        if (widgetDef.contains("color") 
+            && widgetDef["color"].is_string()) {
 
-        return std::make_unique<UnformattedText>(id, text, fontIndex);
+            auto color = widgetDef["color"].template get<std::string>();
+
+            printf("color string length: %d", (int)color.size());
+
+            if (color.size() == 6) {
+                maybeColor.emplace(HEXAtoIV4(color.c_str()));
+            }
+        }
+
+        return std::make_unique<UnformattedText>(id, text, maybeFontIndex, maybeColor);
     }
 
     throw std::invalid_argument("Invalid JSON data");

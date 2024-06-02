@@ -77,7 +77,11 @@ export const ImGuiDemo = () => {
 
     return (
         <ReactImgui.Fragment>
-            <ReactImgui.UnformattedText text="dear imgui says hello!" font={nonDefaultFontCombo} />
+            <ReactImgui.UnformattedText
+                text="dear imgui says hello!"
+                font={nonDefaultFontCombo}
+                color="ff0000"
+            />
 
             <ReactImgui.CollapsingHeader label="Help">
                 <ReactImgui.SeparatorText label="ABOUT THIS DEMO:" />

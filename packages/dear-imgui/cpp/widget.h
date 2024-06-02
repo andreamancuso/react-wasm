@@ -33,7 +33,9 @@ class Widget {
         int m_id;
         std::string m_type;
         bool m_handlesChildrenWithinRenderMethod;
-        std::optional<int> m_fontIndex;
+        // todo: still not entirely sure whether fontIndex is better than name+size combo
+        std::optional<int> m_maybeFontIndex;
+        std::optional<ImVec4> m_maybeColor;
 
         // todo: does this belong here?
         inline static OnTextChangedCallback onInputTextChange_;
@@ -49,6 +51,8 @@ class Widget {
         virtual void Render(ReactImgui* view) = 0;
 
         virtual void Patch(const json& val) = 0;
+
+        virtual ImGuiCol GetImGuiCol();
 };
 
 class Fragment final : public Widget {
@@ -324,11 +328,14 @@ class UnformattedText final : public Widget {
 
         static std::unique_ptr<UnformattedText> makeWidget(const json& widgetDef, ReactImgui* view);
 
-        UnformattedText(int id, std::string& text, std::optional<int>& fontIndex) : Widget(id) {
+        UnformattedText(int id, std::string& text, std::optional<int>& maybeFontIndex, std::optional<ImVec4> maybeColor) : Widget(id) {
             m_type = "UnformattedText";
             m_text = text;
-            m_fontIndex = fontIndex;
+            m_maybeFontIndex = maybeFontIndex;
+            m_maybeColor = maybeColor;
         }
+
+        ImGuiCol GetImGuiCol();
 
         void Render(ReactImgui* view);
 

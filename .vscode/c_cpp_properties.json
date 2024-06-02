@@ -11,11 +11,7 @@
                 "${workspaceFolder}/packages/dear-imgui/cpp/deps/wasm-glfw3-boilerplate",
                 "${workspaceFolder}/packages/dear-imgui/cpp/deps/emscripten/system/include"
             ],
-            "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE"
-            ],
+            "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
             "windowsSdkVersion": "10.0.22621.0",
             "compilerPath": "cl.exe",
             "cStandard": "c23",
@@ -24,14 +20,8 @@
         },
         {
             "name": "emscripten",
-            "includePath": [
-                "${workspaceFolder}/**"
-            ],
-            "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE"
-            ],
+            "includePath": ["${workspaceFolder}/**"],
+            "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
             "windowsSdkVersion": "10.0.22621.0",
             "compilerPath": "cl.exe",
             "cStandard": "c23",

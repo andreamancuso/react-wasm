@@ -33,6 +33,7 @@ set(CMAKE_EXECUTABLE_SUFFIX ".mjs")
 if (DEFINED EMSCRIPTEN)
 	add_executable(reactDearImgui main.cpp
         plot.cpp
+        shared.cpp
         widget.cpp
         reactimgui.cpp
         ${DEPS}/wasm-glfw3-boilerplate/view.cpp
