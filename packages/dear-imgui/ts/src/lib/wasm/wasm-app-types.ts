@@ -3,25 +3,51 @@ export type WasmExitStatus = {
 };
 
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
+declare namespace RuntimeExports {
+    let HEAPF32: any;
+    let HEAPF64: any;
+    let HEAP_DATA_VIEW: any;
+    let HEAP8: any;
+    let HEAPU8: any;
+    let HEAP16: any;
+    let HEAPU16: any;
+    let HEAP32: any;
+    let HEAPU32: any;
+    let HEAP64: any;
+    let HEAPU64: any;
+    let FS_createPath: any;
+    function FS_createDataFile(
+        parent: any,
+        name: any,
+        fileData: any,
+        canRead: any,
+        canWrite: any,
+        canOwn: any,
+    ): void;
+    function FS_createPreloadedFile(
+        parent: any,
+        name: any,
+        url: any,
+        canRead: any,
+        canWrite: any,
+        onload: any,
+        onerror: any,
+        dontCreateFile: any,
+        canOwn: any,
+        preFinish: any,
+    ): void;
+    function FS_unlink(path: any): any;
+    let FS_createLazyFile: any;
+    let FS_createDevice: any;
+    let addRunDependency: any;
+    let removeRunDependency: any;
+}
 interface WasmModule {
     _main(_0: number, _1: number): number;
-    __emscripten_tls_init(): number;
-    _pthread_self(): number;
-    __emscripten_proxy_main(_0: number, _1: number): number;
-    __embind_initialize_bindings(): void;
-    __emscripten_thread_init(
-        _0: number,
-        _1: number,
-        _2: number,
-        _3: number,
-        _4: number,
-        _5: number,
-    ): void;
-    __emscripten_thread_crashed(): void;
-    __emscripten_thread_exit(_0: number): void;
     ___set_stack_limits(_0: number, _1: number): void;
 }
 
+type EmbindString = ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string;
 export interface ImGuiWindowFlagsValue<T extends number> {
     value: T;
 }
@@ -806,6 +832,16 @@ export type ImGuiViewportFlags =
     | ImGuiViewportFlagsValue<4>;
 
 interface EmbindModule {
+    exit(): void;
+    resizeWindow(_0: number, _1: number): void;
+    setWidget(_0: EmbindString): void;
+    patchWidget(_0: number, _1: EmbindString): void;
+    setChildren(_0: number, _1: EmbindString): void;
+    appendChild(_0: number, _1: number): void;
+    getChildren(_0: number): string;
+    appendDataToTable(_0: number, _1: EmbindString): void;
+    appendTextToClippedMultiLineTextRenderer(_0: number, _1: EmbindString): void;
+    getTextLineHeightWithSpacing(): number;
     ImGuiWindowFlags: {
         None: ImGuiWindowFlagsValue<0>;
         NoTitleBar: ImGuiWindowFlagsValue<1>;
@@ -1497,4 +1533,6 @@ interface EmbindModule {
     ): void;
     getChildren(_0: number): string;
 }
-export type MainModule = WasmModule & EmbindModule;
+
+export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;
+export type GetWasmModule = (options?: unknown) => Promise<MainModule>;

@@ -4,15 +4,15 @@ import { v4 as uuidv4 } from "uuid";
 import debounce from "lodash.debounce";
 // @ts-ignore
 import ReactNativePrivateInterface from "../react-native/ReactNativePrivateInterface";
-import { MainModule, WasmExitStatus } from "../wasm/wasm-app-types";
+import { GetWasmModule, MainModule, WasmExitStatus } from "../wasm/wasm-app-types";
 import { ReactNativeWrapper } from "../components/ReactNativeWrapper";
 import { useDearImguiFonts, useDearImguiWasm } from "../hooks";
 import { FontDef } from "./ReactImgui/types";
 
 export type MainComponentProps = PropsWithChildren & {
     containerRef?: React.RefObject<HTMLElement>;
-    getWasmModule: any;
-    wasmDataPackage: any;
+    getWasmModule: GetWasmModule;
+    wasmDataPackage: string;
     fontDefs?: FontDef[];
     defaultFont?: { name: string; size: number };
 };
@@ -44,11 +44,9 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
                 const load = async () => {
                     const moduleArg: any = {
-                        canvas: canvasRef.current, // ?
+                        canvas: canvasRef.current,
                         arguments: [`#${canvasId}`, JSON.stringify({ defs: fonts, defaultFont })],
                         locateFile: (_path: string) => {
-                            console.log(_path);
-
                             return wasmDataPackage;
                         },
                         eventHandlers,

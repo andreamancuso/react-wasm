@@ -5,6 +5,7 @@ import getWasmModule from "./lib/wasm/reactDearImgui.mjs";
 // @ts-ignore
 import wasmDataPackage from "./lib/wasm/reactDearImgui.data";
 import { ImGuiDemo } from "./lib";
+import { GetWasmModule } from "./lib/wasm/wasm-app-types";
 
 import "./App.css";
 
@@ -26,8 +27,8 @@ function App() {
     return (
         <div id="app" ref={containerRef}>
             <ReactImgui
-                getWasmModule={getWasmModule}
-                wasmDataPackage={wasmDataPackage}
+                getWasmModule={getWasmModule as GetWasmModule}
+                wasmDataPackage={wasmDataPackage as string}
                 containerRef={containerRef}
                 fontDefs={fontDefs}
                 defaultFont={defaultFont}

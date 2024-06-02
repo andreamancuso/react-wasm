@@ -12,6 +12,8 @@
 #include <sstream>
 #include <emscripten.h>
 #include <emscripten/bind.h>
+#include "IconsFontAwesome6.h"
+// #include "IconsMaterialDesignIcons.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
@@ -122,6 +124,7 @@ std::unique_ptr<UnformattedText> UnformattedText::makeWidget(const json& widgetD
         auto id = widgetDef["id"].template get<int>();
         std::string text = widgetDef["text"].template get<std::string>();
 
+        // todo: extract and reuse
         std::optional<int> maybeFontIndex;
         std::optional<ImVec4> maybeColor;
         

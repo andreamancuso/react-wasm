@@ -32,7 +32,6 @@ set(CMAKE_EXECUTABLE_SUFFIX ".mjs")
 
 if (DEFINED EMSCRIPTEN)
 	add_executable(reactDearImgui main.cpp
-        plot.cpp
         shared.cpp
         widget.cpp
         reactimgui.cpp
@@ -42,10 +41,11 @@ if (DEFINED EMSCRIPTEN)
         implotview.cpp
     )
 
-    target_include_directories(reactDearImgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${DEPS}/wasm-glfw3-boilerplate)
+    target_include_directories(reactDearImgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${DEPS}/wasm-glfw3-boilerplate ${DEPS}/IconFontCppHeaders)
 
-	set_target_properties(reactDearImgui PROPERTIES COMPILE_FLAGS " -O0 -Wall -Wformat -s DISABLE_EXCEPTION_CATCHING=0 ")
+	set_target_properties(reactDearImgui PROPERTIES COMPILE_FLAGS " -O0 -Wall -Wformat -s DISABLE_EXCEPTION_CATCHING=0")
     set_target_properties(reactDearImgui PROPERTIES LINK_FLAGS "--no-heap-copy --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/../fonts@/fonts -O0 -lembind --embind-emit-tsd interface.d.ts -lhtml5.js -lhtml5_webgl.js -lglfw.js -s ENVIRONMENT='web' -s MODULARIZE=1 -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s USE_GLFW=3 -s USE_WEBGPU=1 -s NO_EXIT_RUNTIME=0 -s STANDALONE_WASM=0 -s EXIT_RUNTIME=1 -s ASSERTIONS=1 -s STACK_OVERFLOW_CHECK=2 -s MIN_WEBGL_VERSION=2 -s MAX_WEBGL_VERSION=2 -s DISABLE_EXCEPTION_CATCHING=0 -s SINGLE_FILE=1")
     set_target_properties(reactDearImgui PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../ts/src/lib/wasm)
-    target_link_libraries(reactDearImgui PRIVATE imgui::imgui implot::implot nlohmann_json::nlohmann_json)
+    target_link_libraries(reactDearImgui PUBLIC imgui::imgui implot::implot nlohmann_json::nlohmann_json)
+    # target_compile_definitions(reactDearImgui PUBLIC IMGUI_USE_WCHAR32)
 endif()

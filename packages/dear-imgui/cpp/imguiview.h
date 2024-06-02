@@ -1,3 +1,5 @@
+// #include "IconsMaterialDesignIcons.h"
+#include "IconsFontAwesome6.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
@@ -7,6 +9,7 @@
 #include <webgpu/webgpu_cpp.h>
 #include <nlohmann/json.hpp>
 
+#include "./shared.h"
 #include "./view.cpp"
 
 #pragma once
@@ -24,6 +27,8 @@ class ImGuiView : public View {
         std::vector<ImFont*> m_loadedFonts;
 
         std::unordered_map<std::string, std::unordered_map<int, int>> m_fontDefMap;
+
+        // static constexpr ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
     public:
 
         ImGuiView(
@@ -35,6 +40,9 @@ class ImGuiView : public View {
             ImGuiIO& io = ImGui::GetIO(); (void)io;
 
             auto fontDefs = json::parse(rawFontDefs);
+
+            static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
+            // static const ImWchar icons_ranges[] = { ICON_MIN_MDI, ICON_MAX_16_MDI, 0 };
 
             if (fontDefs.is_object() && fontDefs.contains("defs")) {
                 if (fontDefs["defs"].is_array()) {
@@ -59,9 +67,24 @@ class ImGuiView : public View {
                                         fontSize
                                     )
                                 );
+
+                                float iconFontSize = fontSize * 2.0f / 3.0f; // FontAwesome fonts need to have their sizes reduced by 2.0f/3.0f in order to align correctly
+                                ImFontConfig icons_config; 
+                                icons_config.MergeMode = true; 
+                                icons_config.PixelSnapH = true; 
+                                icons_config.GlyphMinAdvanceX = iconFontSize;
+                                auto pathToFaFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_FAS);
+                                // auto pathToMdiFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_MDI);
+                                
+                                io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges);
+                                // io.Fonts->AddFontFromFileTTF(pathToMdiFontFile.c_str(), fontSize, &icons_config, icons_ranges);
+                                
+                                
                             }
                         }
                     }
+
+                    io.Fonts->Build();
                 }
 
                 if (fontDefs.contains("defaultFont") 

@@ -7,8 +7,6 @@
 // - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
 // - Introduction, links and more at the top of imgui.cpp
 
-#define IMGUI_USE_WCHAR32
-
 #include <set>
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -1019,7 +1017,4 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .value("OwnedByApp", ImGuiViewportFlags_OwnedByApp)
         ;
 
-    // emscripten::constant("IMGUI_VERSION", emscripten::val(IMGUI_VERSION));
-    // emscripten::constant("IMGUI_PAYLOAD_TYPE_COLOR_3F", emscripten::val(IMGUI_PAYLOAD_TYPE_COLOR_3F));
-    // emscripten::constant("IMGUI_PAYLOAD_TYPE_COLOR_4F", emscripten::val(IMGUI_PAYLOAD_TYPE_COLOR_4F));
 }

@@ -5,6 +5,7 @@ import { UserGuide } from "./UserGuide/UserGuide";
 import { StyleEditor } from "./StyleEditor/StyleEditor";
 import { TableImperativeHandle } from "../ReactImgui/Table";
 import { ClippedMultiLineTextRendererImperativeHandle } from "../ReactImgui/ClippedMultiLineTextRenderer";
+import faIconMap from "../../fa-icons";
 
 export const ImGuiDemo = () => {
     const tableRef = useRef<TableImperativeHandle>(null);
@@ -78,7 +79,7 @@ export const ImGuiDemo = () => {
     return (
         <ReactImgui.Fragment>
             <ReactImgui.UnformattedText
-                text="dear imgui says hello!"
+                text={`dear imgui says hello! ${faIconMap["address-book"]} ${faIconMap["wine-bottle"]}`}
                 font={nonDefaultFontCombo}
                 color="ff0000"
             />
