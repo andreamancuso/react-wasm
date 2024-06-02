@@ -4,3 +4,6 @@
 [submodule "packages/dear-imgui/cpp/deps/vcpkg"]
 	path = packages/dear-imgui/cpp/deps/vcpkg
 	url = https://github.com/microsoft/vcpkg
+[submodule "packages/dear-imgui/cpp/deps/IconFontCppHeaders"]
+	path = packages/dear-imgui/cpp/deps/IconFontCppHeaders
+	url = https://github.com/juliettef/IconFontCppHeaders.git
