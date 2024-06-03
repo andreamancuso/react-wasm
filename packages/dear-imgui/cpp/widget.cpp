@@ -28,7 +28,7 @@
 
 using json = nlohmann::json;
 
-Widget::Style Widget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
+Widget::StyleTuple Widget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
     std::optional<int> maybeFontIndex;
     std::optional<ImVec4> maybeColor;
         

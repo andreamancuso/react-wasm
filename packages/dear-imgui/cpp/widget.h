@@ -29,26 +29,32 @@ using json = nlohmann::json;
 
 class ReactImgui;
 
+struct Style {
+    std::optional<int> maybeFontIndex;
+    std::optional<ImVec4> maybeColor;
+};
+
 class Widget {
     public:
-        typedef std::tuple<std::optional<int>, std::optional<ImVec4>> Style;
+        typedef std::tuple<std::optional<int>, std::optional<ImVec4>> StyleTuple;
 
         int m_id;
         std::string m_type;
         bool m_handlesChildrenWithinRenderMethod;
         // todo: still not entirely sure whether fontIndex is better than name+size combo
-        std::optional<int> m_maybeFontIndex;
-        std::optional<ImVec4> m_maybeColor;
+        std::unique_ptr<Style> m_style;
 
         // todo: does this belong here?
         inline static OnTextChangedCallback onInputTextChange_;
 
-        static Widget::Style ExtractStyle(const json& widgetDef, ReactImgui* view);
+        static StyleTuple ExtractStyle(const json& widgetDef, ReactImgui* view);
 
         Widget(int id) {
             m_id = id;
             m_type = "Unknown";
             m_handlesChildrenWithinRenderMethod = false;
+
+            m_style = std::make_unique<Style>();
         }
 
         void HandleChildren(ReactImgui* view);
@@ -333,11 +339,11 @@ class UnformattedText final : public Widget {
 
         static std::unique_ptr<UnformattedText> makeWidget(const json& widgetDef, ReactImgui* view);
 
-        UnformattedText(int id, std::string& text, Widget::Style& style) : Widget(id) {
+        UnformattedText(int id, std::string& text, Widget::StyleTuple& style) : Widget(id) {
             m_type = "UnformattedText";
             m_text = text;
-            m_maybeFontIndex = std::get<0>(style);
-            m_maybeColor = std::get<1>(style);
+            m_style->maybeFontIndex = std::get<0>(style);
+            m_style->maybeColor = std::get<1>(style);
         }
 
         ImGuiCol GetImGuiCol();

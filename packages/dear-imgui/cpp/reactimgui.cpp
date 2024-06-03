@@ -71,15 +71,15 @@ void ReactImgui::SetUpWidgetCreatorFunctions() {
 
 void ReactImgui::RenderWidgetById(int id) {
     // todo: is there a way we can safely memoize the result of IsFontIndexValid()?
-    bool hasCustomFont = m_widgets[id]->m_maybeFontIndex.has_value() && IsFontIndexValid(m_widgets[id]->m_maybeFontIndex.value());
-    bool hasCustomColor = m_widgets[id]->m_maybeColor.has_value();
+    bool hasCustomFont = m_widgets[id]->m_style->maybeFontIndex.has_value() && IsFontIndexValid(m_widgets[id]->m_style->maybeFontIndex.value());
+    bool hasCustomColor = m_widgets[id]->m_style->maybeColor.has_value();
 
     if (hasCustomFont) {
-        PushFont(m_widgets[id]->m_maybeFontIndex.value());
+        PushFont(m_widgets[id]->m_style->maybeFontIndex.value());
     }
 
     if (hasCustomColor) {
-        ImGui::PushStyleColor(m_widgets[id]->GetImGuiCol(), m_widgets[id]->m_maybeColor.value());
+        ImGui::PushStyleColor(m_widgets[id]->GetImGuiCol(), m_widgets[id]->m_style->maybeColor.value());
     }
      
     m_widgets[id]->Render(this);
