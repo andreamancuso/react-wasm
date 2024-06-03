@@ -1,4 +1,4 @@
-import NativeFabricUIManager from "./nativeFabricUiManager.js";
+import NativeFabricUIManager from "./nativeFabricUiManager.ts";
 import deepDiffer from "./deepDiffer.js";
 
 const uiManager = new NativeFabricUIManager();
