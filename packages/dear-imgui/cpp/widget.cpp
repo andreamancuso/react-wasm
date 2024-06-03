@@ -28,7 +28,7 @@
 
 using json = nlohmann::json;
 
-Widget::StyleTuple Widget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
+StyledWidget::StyleTuple StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
     std::optional<int> maybeFontIndex;
     std::optional<ImVec4> maybeColor;
         
@@ -158,7 +158,7 @@ std::unique_ptr<UnformattedText> UnformattedText::makeWidget(const json& widgetD
         std::string text = widgetDef["text"].template get<std::string>();
 
         // todo: extract and reuse
-        auto style = Widget::ExtractStyle(widgetDef, view);
+        auto style = StyledWidget::ExtractStyle(widgetDef, view);
         
 
         return std::make_unique<UnformattedText>(id, text, style);

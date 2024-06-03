@@ -36,25 +36,17 @@ struct Style {
 
 class Widget {
     public:
-        typedef std::tuple<std::optional<int>, std::optional<ImVec4>> StyleTuple;
-
         int m_id;
         std::string m_type;
         bool m_handlesChildrenWithinRenderMethod;
-        // todo: still not entirely sure whether fontIndex is better than name+size combo
-        std::unique_ptr<Style> m_style;
 
         // todo: does this belong here?
         inline static OnTextChangedCallback onInputTextChange_;
-
-        static StyleTuple ExtractStyle(const json& widgetDef, ReactImgui* view);
 
         Widget(int id) {
             m_id = id;
             m_type = "Unknown";
             m_handlesChildrenWithinRenderMethod = false;
-
-            m_style = std::make_unique<Style>();
         }
 
         void HandleChildren(ReactImgui* view);
@@ -64,6 +56,19 @@ class Widget {
         virtual void Patch(const json& val) = 0;
 
         virtual ImGuiCol GetImGuiCol();
+};
+
+class StyledWidget : public Widget {
+    public:
+        typedef std::tuple<std::optional<int>, std::optional<ImVec4>> StyleTuple;
+
+        std::unique_ptr<Style> m_style;
+
+        static StyleTuple ExtractStyle(const json& widgetDef, ReactImgui* view);
+
+        StyledWidget(int id) : Widget(id) {
+            m_style = std::make_unique<Style>();
+        }
 };
 
 class Fragment final : public Widget {
@@ -333,13 +338,13 @@ class BulletText final : public Widget {
         }
 };
 
-class UnformattedText final : public Widget {
+class UnformattedText final : public StyledWidget {
     public:
         std::string m_text;
 
         static std::unique_ptr<UnformattedText> makeWidget(const json& widgetDef, ReactImgui* view);
 
-        UnformattedText(int id, std::string& text, Widget::StyleTuple& style) : Widget(id) {
+        UnformattedText(int id, std::string& text, StyledWidget::StyleTuple& style) : StyledWidget(id) {
             m_type = "UnformattedText";
             m_text = text;
             m_style->maybeFontIndex = std::get<0>(style);
