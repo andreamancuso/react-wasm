@@ -38,6 +38,7 @@ class ImGuiView : public View {
             m_imGuiCtx = ImGui::CreateContext();
 
             ImGuiIO& io = ImGui::GetIO(); (void)io;
+            io.Fonts->TexDesiredWidth = 4096;
 
             auto fontDefs = json::parse(rawFontDefs);
 
@@ -74,6 +75,7 @@ class ImGuiView : public View {
                             icons_config.MergeMode = true; 
                             icons_config.PixelSnapH = true; 
                             icons_config.GlyphMinAdvanceX = iconFontSize;
+                            icons_config.OversampleH = 1;
                             // auto pathToFaFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_FAS);
                             auto pathToMdiFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_MDI);
                             
