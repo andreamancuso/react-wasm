@@ -76,10 +76,12 @@ export const ImGuiDemo = () => {
 
     const nonDefaultFontCombo = useMemo(() => ({ name: "roboto-regular", size: 24 }), []);
 
+    const icon = "\u{F0004}";
+
     return (
         <ReactImgui.Fragment>
             <ReactImgui.UnformattedText
-                text={`dear imgui says hello! ${faIconMap["address-book"]} ${faIconMap["wine-bottle"]}`}
+                text={`dear imgui says hello! ${icon}`}
                 font={nonDefaultFontCombo}
                 color="ff0000"
             />

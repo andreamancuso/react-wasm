@@ -1,5 +1,5 @@
-// #include "IconsMaterialDesignIcons.h"
-#include "IconsFontAwesome6.h"
+#include "IconsMaterialDesignIcons.h"
+// #include "IconsFontAwesome6.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
@@ -38,11 +38,12 @@ class ImGuiView : public View {
             m_imGuiCtx = ImGui::CreateContext();
 
             ImGuiIO& io = ImGui::GetIO(); (void)io;
+            io.Fonts->TexDesiredWidth = 4096;
 
             auto fontDefs = json::parse(rawFontDefs);
 
-            static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
-            // static const ImWchar icons_ranges[] = { ICON_MIN_MDI, ICON_MAX_16_MDI, 0 };
+            // static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
+            static const ImWchar icons_ranges[] = { ICON_MIN_MDI, ICON_MAX_MDI, 0 };
 
             
 
@@ -74,11 +75,12 @@ class ImGuiView : public View {
                             icons_config.MergeMode = true; 
                             icons_config.PixelSnapH = true; 
                             icons_config.GlyphMinAdvanceX = iconFontSize;
-                            auto pathToFaFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_FAS);
-                            // auto pathToMdiFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_MDI);
+                            icons_config.OversampleH = 1;
+                            // auto pathToFaFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_FAS);
+                            auto pathToMdiFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_MDI);
                             
-                            io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges);
-                            // io.Fonts->AddFontFromFileTTF(pathToMdiFontFile.c_str(), fontSize, &icons_config, icons_ranges);
+                            // io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges);
+                            io.Fonts->AddFontFromFileTTF(pathToMdiFontFile.c_str(), fontSize, &icons_config, icons_ranges);
                         }
                     }
                 }
@@ -102,25 +104,25 @@ class ImGuiView : public View {
             }
 
             // If not custom fonts defined, ensure font-awesome are still available
-            if (m_loadedFonts.size() == 0) {
-                io.Fonts->AddFontDefault();
-                float baseFontSize = 13.0f; // 13.0f is the size of the default font.
-                float iconFontSize = baseFontSize * 2.0f / 3.0f; // FontAwesome fonts need to have their sizes reduced by 2.0f/3.0f in order to align correctly
+            // if (m_loadedFonts.size() == 0) {
+            //     io.Fonts->AddFontDefault();
+            //     float baseFontSize = 13.0f; // 13.0f is the size of the default font.
+            //     float iconFontSize = baseFontSize * 2.0f / 3.0f; // FontAwesome fonts need to have their sizes reduced by 2.0f/3.0f in order to align correctly
 
-                ImFontConfig icons_config; 
-                icons_config.MergeMode = true; 
-                icons_config.PixelSnapH = true; 
-                icons_config.GlyphMinAdvanceX = iconFontSize;
-                auto pathToFaFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_FAS);
+            //     ImFontConfig icons_config; 
+            //     icons_config.MergeMode = true; 
+            //     icons_config.PixelSnapH = true; 
+            //     icons_config.GlyphMinAdvanceX = iconFontSize;
+            //     auto pathToFaFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_FAS);
                 
-                m_loadedFonts.push_back(
-                    io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges)
-                );
+            //     m_loadedFonts.push_back(
+            //         io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges)
+            //     );
 
-                io.Fonts->Build();
+            //     io.Fonts->Build();
 
-                SetFontDefault(0);
-            }
+            //     SetFontDefault(0);
+            // }
 
             ImVec4 v4 = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
             m_clearColor = { v4.x * v4.w, v4.y * v4.w, v4.z * v4.w, v4.w };
