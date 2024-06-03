@@ -14,7 +14,6 @@
 #include <sstream>
 #include <emscripten.h>
 #include <emscripten/bind.h>
-#include "rxcpp/rx.hpp"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
@@ -971,12 +970,6 @@ class Table final : public Widget {
             m_columns = columns;
             m_clipRows = 0;
 
-            // auto coordination = rxcpp::observe_on_event_loop();
-            // auto a = TableData();
-            // rxcpp::subjects::replay<TableData, rxcpp::observe_on_one_worker> test(a, coordination);
-
-            // m_replaySubject = std::make_unique<rxcpp::subjects::replay<TableData, rxcpp::observe_on_one_worker>>(test);
-
             if (clipRows.has_value()) {
                 m_clipRows = clipRows.value();
             }
@@ -989,7 +982,6 @@ class Table final : public Widget {
         TableData m_data;
         std::vector<TableColumn> m_columns;
         int m_clipRows;
-        // std::unique_ptr<rxcpp::subjects::replay<TableData, rxcpp::observe_on_one_worker>> m_replaySubject;
 
         inline static std::unique_ptr<Table> makeWidget(const json& val, ReactImgui* view) {
             if (val.is_object()) {
@@ -1039,7 +1031,6 @@ class Table final : public Widget {
         void AppendData(TableData& data) {
             m_data.insert(m_data.end(), data.begin(), data.end());
 
-            // m_replaySubject->get_subscriber().on_next(data);
         }
 };
 
