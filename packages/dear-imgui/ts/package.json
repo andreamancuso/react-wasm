@@ -45,6 +45,7 @@
         "prettier": "3.2.5",
         "pretty-format": "^29.7.0",
         "promise": "^8.3.0",
+        "rxjs": "^7.8.1",
         "stacktrace-parser": "^0.1.10",
         "tsx": "^4.9.5",
         "uuid": "^9.0.1",
