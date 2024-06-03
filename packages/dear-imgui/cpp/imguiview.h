@@ -44,48 +44,46 @@ class ImGuiView : public View {
             static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
             // static const ImWchar icons_ranges[] = { ICON_MIN_MDI, ICON_MAX_16_MDI, 0 };
 
-            if (fontDefs.is_object() && fontDefs.contains("defs")) {
-                if (fontDefs["defs"].is_array()) {
-                    for (auto& [key, item] : fontDefs["defs"].items()) {
-                        if (item.is_object()) {
-                            if (item.contains("name") && item.contains("size") && item["name"].is_string() && item["size"].is_number_unsigned()) {
-                                auto fontName = item["name"].template get<std::string>();
-                                auto pathToFont = std::format("fonts/{}.ttf", fontName.c_str());
-                                auto fontSize = item["size"].template get<int>();
+            
 
-                                if (!m_fontDefMap.contains(fontName)) {
-                                    m_fontDefMap[fontName] = std::unordered_map<int, int>();
-                                }
+            if (fontDefs.is_object() && fontDefs.contains("defs") && fontDefs["defs"].is_array()) {
+                for (auto& [key, item] : fontDefs["defs"].items()) {
+                    if (item.is_object()) {
+                        if (item.contains("name") && item.contains("size") && item["name"].is_string() && item["size"].is_number_unsigned()) {
+                            auto fontName = item["name"].template get<std::string>();
+                            auto pathToFont = std::format("fonts/{}.ttf", fontName.c_str());
+                            auto fontSize = item["size"].template get<int>();
 
-                                if (!m_fontDefMap[fontName].contains(fontSize)) {
-                                    m_fontDefMap[fontName][fontSize] = (int)m_loadedFonts.size();
-                                }
-
-                                m_loadedFonts.push_back(
-                                    io.Fonts->AddFontFromFileTTF(
-                                        pathToFont.c_str(), 
-                                        fontSize
-                                    )
-                                );
-
-                                float iconFontSize = fontSize * 2.0f / 3.0f; // FontAwesome fonts need to have their sizes reduced by 2.0f/3.0f in order to align correctly
-                                ImFontConfig icons_config; 
-                                icons_config.MergeMode = true; 
-                                icons_config.PixelSnapH = true; 
-                                icons_config.GlyphMinAdvanceX = iconFontSize;
-                                auto pathToFaFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_FAS);
-                                // auto pathToMdiFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_MDI);
-                                
-                                io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges);
-                                // io.Fonts->AddFontFromFileTTF(pathToMdiFontFile.c_str(), fontSize, &icons_config, icons_ranges);
-                                
-                                
+                            if (!m_fontDefMap.contains(fontName)) {
+                                m_fontDefMap[fontName] = std::unordered_map<int, int>();
                             }
+
+                            if (!m_fontDefMap[fontName].contains(fontSize)) {
+                                m_fontDefMap[fontName][fontSize] = (int)m_loadedFonts.size();
+                            }
+
+                            m_loadedFonts.push_back(
+                                io.Fonts->AddFontFromFileTTF(
+                                    pathToFont.c_str(), 
+                                    fontSize
+                                )
+                            );
+
+                            float iconFontSize = fontSize * 2.0f / 3.0f; // FontAwesome fonts need to have their sizes reduced by 2.0f/3.0f in order to align correctly
+                            ImFontConfig icons_config; 
+                            icons_config.MergeMode = true; 
+                            icons_config.PixelSnapH = true; 
+                            icons_config.GlyphMinAdvanceX = iconFontSize;
+                            auto pathToFaFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_FAS);
+                            // auto pathToMdiFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_MDI);
+                            
+                            io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges);
+                            // io.Fonts->AddFontFromFileTTF(pathToMdiFontFile.c_str(), fontSize, &icons_config, icons_ranges);
                         }
                     }
-
-                    io.Fonts->Build();
                 }
+
+                io.Fonts->Build();
 
                 if (fontDefs.contains("defaultFont") 
                     && fontDefs["defaultFont"].is_object() 
@@ -101,6 +99,27 @@ class ImGuiView : public View {
                         SetFontDefault(fontIndex);
                     }
                 }
+            }
+
+            // If not custom fonts defined, ensure font-awesome are still available
+            if (m_loadedFonts.size() == 0) {
+                io.Fonts->AddFontDefault();
+                float baseFontSize = 13.0f; // 13.0f is the size of the default font.
+                float iconFontSize = baseFontSize * 2.0f / 3.0f; // FontAwesome fonts need to have their sizes reduced by 2.0f/3.0f in order to align correctly
+
+                ImFontConfig icons_config; 
+                icons_config.MergeMode = true; 
+                icons_config.PixelSnapH = true; 
+                icons_config.GlyphMinAdvanceX = iconFontSize;
+                auto pathToFaFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_FAS);
+                
+                m_loadedFonts.push_back(
+                    io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges)
+                );
+
+                io.Fonts->Build();
+
+                SetFontDefault(0);
             }
 
             ImVec4 v4 = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
