@@ -118,14 +118,11 @@ void ReactImgui::InitWidget(const json& widgetDef) {
     if (m_widget_init_fn.contains(type)) {
         int id = widgetDef["id"].template get<int>();
 
-        m_widgets_mutex.lock();
-        m_hierarchy_mutex.lock();
+        const std::lock_guard<std::mutex> widgetLock(m_widgets_mutex);
+        const std::lock_guard<std::mutex> hierarchyLock(m_hierarchy_mutex);
 
         m_widgets[id] = m_widget_init_fn[type](widgetDef, this);
         m_hierarchy[id] = std::vector<int>();
-
-        m_widgets_mutex.unlock();
-        m_hierarchy_mutex.unlock();
     } else {
         printf("unrecognised widget type: '%s'\n", type.c_str());
     }
@@ -208,8 +205,8 @@ void ReactImgui::Render(int window_width, int window_height) {
     ImGui_ImplWGPU_NewFrame();
     ImGui_ImplGlfw_NewFrame();
 
-    m_widgets_mutex.lock();
-    m_hierarchy_mutex.lock();
+    const std::lock_guard<std::mutex> widgetsLock(m_widgets_mutex);
+    const std::lock_guard<std::mutex> hierarchyLock(m_hierarchy_mutex);
 
     ImGui::NewFrame();
 
@@ -222,9 +219,6 @@ void ReactImgui::Render(int window_width, int window_height) {
 
     ImGui::End();
     ImGui::Render();
-
-    m_widgets_mutex.unlock();
-    m_hierarchy_mutex.unlock();
 };
 
 void ReactImgui::SetWidget(std::string& widgetJsonAsString) {
@@ -232,7 +226,7 @@ void ReactImgui::SetWidget(std::string& widgetJsonAsString) {
 };
 
 void ReactImgui::PatchWidget(int id, std::string& widgetJsonAsString) {
-    m_widgets_mutex.lock();
+    const std::lock_guard<std::mutex> lock(m_widgets_mutex);
 
     if (m_widgets.contains(id)) {
         auto widgetDef = json::parse(widgetJsonAsString);
@@ -240,22 +234,18 @@ void ReactImgui::PatchWidget(int id, std::string& widgetJsonAsString) {
 
         pWidget->Patch(widgetDef);
     }
-
-    m_widgets_mutex.unlock();
 };
 
 void ReactImgui::SetChildren(int id, const std::vector<int>& childrenIds) {
-    m_hierarchy_mutex.lock();
+    const std::lock_guard<std::mutex> lock(m_hierarchy_mutex);
     m_hierarchy[id] = childrenIds;
-    m_hierarchy_mutex.unlock();
 };
 
 void ReactImgui::AppendChild(int parentId, int childId) {
     if (m_hierarchy.contains(parentId)) {
         if ( std::find(m_hierarchy[parentId].begin(), m_hierarchy[parentId].end(), childId) == m_hierarchy[parentId].end() ) {
-            m_hierarchy_mutex.lock();
+            const std::lock_guard<std::mutex> lock(m_hierarchy_mutex);
             m_hierarchy[parentId].push_back(childId);
-            m_hierarchy_mutex.unlock();
         }
     }
 };
@@ -279,7 +269,7 @@ json ReactImgui::GetAvailableFonts() {
 };
 
 void ReactImgui::AppendDataToTable(int id, std::string& rawData) {
-    m_widgets_mutex.lock();
+    const std::lock_guard<std::mutex> lock(m_widgets_mutex);
 
     if (m_widgets.contains(id) && m_widgets[id]->m_type == "Table") {
         Table::TableData data = Table::TableData();
@@ -303,18 +293,14 @@ void ReactImgui::AppendDataToTable(int id, std::string& rawData) {
 
         static_cast<Table*>(m_widgets[id].get())->AppendData(data);
     }
-
-    m_widgets_mutex.unlock();
 };
 
 void ReactImgui::AppendTextToClippedMultiLineTextRenderer(int id, std::string& rawData) {
-    m_widgets_mutex.lock();
+    const std::lock_guard<std::mutex> lock(m_widgets_mutex);
 
     if (m_widgets.contains(id) && m_widgets[id]->m_type == "ClippedMultiLineTextRenderer") {
         static_cast<ClippedMultiLineTextRenderer*>(m_widgets[id].get())->AppendText(rawData.c_str());
     }
-
-    m_widgets_mutex.unlock();
 };
 
 float ReactImgui::GetTextLineHeightWithSpacing() {
