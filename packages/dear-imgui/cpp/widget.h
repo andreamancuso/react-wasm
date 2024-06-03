@@ -8,6 +8,7 @@
 // - Introduction, links and more at the top of imgui.cpp
 
 #include <optional>
+#include <tuple>
 #include <cstring>
 #include <string>
 #include <sstream>
@@ -30,6 +31,8 @@ class ReactImgui;
 
 class Widget {
     public:
+        typedef std::tuple<std::optional<int>, std::optional<ImVec4>> Style;
+
         int m_id;
         std::string m_type;
         bool m_handlesChildrenWithinRenderMethod;
@@ -39,6 +42,8 @@ class Widget {
 
         // todo: does this belong here?
         inline static OnTextChangedCallback onInputTextChange_;
+
+        static Widget::Style ExtractStyle(const json& widgetDef, ReactImgui* view);
 
         Widget(int id) {
             m_id = id;
@@ -328,11 +333,11 @@ class UnformattedText final : public Widget {
 
         static std::unique_ptr<UnformattedText> makeWidget(const json& widgetDef, ReactImgui* view);
 
-        UnformattedText(int id, std::string& text, std::optional<int>& maybeFontIndex, std::optional<ImVec4> maybeColor) : Widget(id) {
+        UnformattedText(int id, std::string& text, Widget::Style& style) : Widget(id) {
             m_type = "UnformattedText";
             m_text = text;
-            m_maybeFontIndex = maybeFontIndex;
-            m_maybeColor = maybeColor;
+            m_maybeFontIndex = std::get<0>(style);
+            m_maybeColor = std::get<1>(style);
         }
 
         ImGuiCol GetImGuiCol();

@@ -6,6 +6,14 @@ import { StyleEditor } from "./StyleEditor/StyleEditor";
 import { TableImperativeHandle } from "../ReactImgui/Table";
 import { ClippedMultiLineTextRendererImperativeHandle } from "../ReactImgui/ClippedMultiLineTextRenderer";
 import faIconMap from "../../fa-icons";
+import RWStyleSheet from "../../stylesheet/stylesheet";
+
+const styleSheet = RWStyleSheet.create({
+    ut: {
+        color: "ff0000",
+        font: { name: "roboto-regular", size: 24 },
+    },
+});
 
 export const ImGuiDemo = () => {
     const tableRef = useRef<TableImperativeHandle>(null);
@@ -74,14 +82,11 @@ export const ImGuiDemo = () => {
         }
     }, [clippedMultiLineTextRendererRef]);
 
-    const nonDefaultFontCombo = useMemo(() => ({ name: "roboto-regular", size: 24 }), []);
-
     return (
         <ReactImgui.Fragment>
             <ReactImgui.UnformattedText
                 text={`dear imgui says hello! ${faIconMap["address-book"]} ${faIconMap["wine-bottle"]}`}
-                font={nonDefaultFontCombo}
-                color="ff0000"
+                style={styleSheet.ut}
             />
 
             <ReactImgui.CollapsingHeader label="Help">

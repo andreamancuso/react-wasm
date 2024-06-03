@@ -8,6 +8,7 @@
 // - Introduction, links and more at the top of imgui.cpp
 
 #include <cstring>
+#include <tuple>
 #include <string>
 #include <sstream>
 #include <emscripten.h>
@@ -26,6 +27,38 @@
 #include "reactimgui.h"
 
 using json = nlohmann::json;
+
+Widget::Style Widget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
+    std::optional<int> maybeFontIndex;
+    std::optional<ImVec4> maybeColor;
+        
+    if (widgetDef.contains("style") && widgetDef["style"].is_object()) {
+        if (widgetDef["style"].contains("font") 
+            && widgetDef["style"]["font"].is_object() 
+            && widgetDef["style"]["font"]["name"].is_string() 
+            && widgetDef["style"]["font"]["size"].is_number_unsigned()) {
+
+            maybeFontIndex.emplace(view->GetFontIndex(
+                widgetDef["style"]["font"]["name"].template get<std::string>(), 
+                widgetDef["style"]["font"]["size"].template get<int>()
+            ));
+        }
+
+        if (widgetDef["style"].contains("color") 
+            && widgetDef["style"]["color"].is_string()) {
+
+            auto color = widgetDef["style"]["color"].template get<std::string>();
+
+            // printf("color string length: %d", (int)color.size());
+
+            if (color.size() == 6) {
+                maybeColor.emplace(HEXAtoIV4(color.c_str()));
+            }
+        }
+    }
+
+    return {maybeFontIndex, maybeColor};
+};
 
 // todo: seems redundant
 void Widget::HandleChildren(ReactImgui* view) {
@@ -125,33 +158,10 @@ std::unique_ptr<UnformattedText> UnformattedText::makeWidget(const json& widgetD
         std::string text = widgetDef["text"].template get<std::string>();
 
         // todo: extract and reuse
-        std::optional<int> maybeFontIndex;
-        std::optional<ImVec4> maybeColor;
+        auto style = Widget::ExtractStyle(widgetDef, view);
         
-        if (widgetDef.contains("font") 
-            && widgetDef["font"].is_object() 
-            && widgetDef["font"]["name"].is_string() 
-            && widgetDef["font"]["size"].is_number_unsigned()) {
 
-            maybeFontIndex.emplace(view->GetFontIndex(
-                widgetDef["font"]["name"].template get<std::string>(), 
-                widgetDef["font"]["size"].template get<int>()
-            ));
-        }
-        
-        if (widgetDef.contains("color") 
-            && widgetDef["color"].is_string()) {
-
-            auto color = widgetDef["color"].template get<std::string>();
-
-            printf("color string length: %d", (int)color.size());
-
-            if (color.size() == 6) {
-                maybeColor.emplace(HEXAtoIV4(color.c_str()));
-            }
-        }
-
-        return std::make_unique<UnformattedText>(id, text, maybeFontIndex, maybeColor);
+        return std::make_unique<UnformattedText>(id, text, style);
     }
 
     throw std::invalid_argument("Invalid JSON data");

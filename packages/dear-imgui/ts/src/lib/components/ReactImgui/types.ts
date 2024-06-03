@@ -1,6 +1,7 @@
 import { FunctionComponent, JSXElementConstructor, ReactElement } from "react";
 import { ReactImgui } from "./components";
 import { MainComponentProps } from "../ReactImgui";
+import { StyleRules } from "src/lib/stylesheet/stylesheet";
 
 export type Primitive = string | number | boolean;
 
@@ -15,12 +16,8 @@ export type FontDef = {
     sizes: number[];
 };
 
-export type FontProps = {
-    font?: { name: string; size: number };
-};
-
-export type ColorProps = {
-    color?: string;
+export type StyleProps = {
+    style?: StyleRules;
 };
 
 export type WidgetPropsMap = {
@@ -30,49 +27,48 @@ export type WidgetPropsMap = {
     DIWindow: { title: string; width: number; height: number };
     Group: {};
     TabBar: {};
-    TabItem: FontProps & { label: string; onOpenChange?: (value: boolean) => void };
+    TabItem: StyleProps & { label: string; onOpenChange?: (value: boolean) => void };
     SameLine: {};
     ItemTooltip: {};
     TextWrap: { width: number };
     Indent: {};
     Unindent: {};
-    UnformattedText: ColorProps &
-        FontProps & {
-            text: string;
-        };
-    DisabledText: FontProps & {
+    UnformattedText: StyleProps & {
         text: string;
     };
-    HelpMarker: FontProps & {
+    DisabledText: StyleProps & {
         text: string;
     };
-    BulletText: FontProps & {
+    HelpMarker: StyleProps & {
+        text: string;
+    };
+    BulletText: StyleProps & {
         // todo: What about `fmt` ?
         text: string;
     };
     Separator: {};
-    SeparatorText: FontProps & {
+    SeparatorText: StyleProps & {
         label: string;
     };
-    InputText: FontProps & {
+    InputText: StyleProps & {
         defaultValue?: string;
         label?: string;
         onChange?: (value: string) => void;
     };
-    CollapsingHeader: FontProps & {
+    CollapsingHeader: StyleProps & {
         label?: string;
     };
-    TreeNode: FontProps & {
+    TreeNode: StyleProps & {
         label?: string;
     };
-    Combo: FontProps & {
+    Combo: StyleProps & {
         label?: string;
         options?: { value: number; label: string }[];
         optionsList?: string;
         defaultValue?: number;
         onChange?: (value: number) => void;
     };
-    Slider: FontProps & {
+    Slider: StyleProps & {
         sliderType: SliderTypes;
         label: string;
         defaultValue?: number;
@@ -80,7 +76,7 @@ export type WidgetPropsMap = {
         max?: number;
         onChange?: (value: number) => void;
     };
-    MultiSlider: FontProps & {
+    MultiSlider: StyleProps & {
         numValues: 2 | 3 | 4;
         label?: string;
         defaultValues?: number[];
@@ -89,22 +85,22 @@ export type WidgetPropsMap = {
         decimalDigits?: number;
         onChange?: (values: Primitive[]) => void;
     };
-    Checkbox: FontProps & {
+    Checkbox: StyleProps & {
         defaultChecked?: boolean;
         label?: string;
         onChange?: (value: boolean) => void;
     };
-    Button: FontProps & {
+    Button: StyleProps & {
         onClick?: () => void;
         label?: string;
         size?: Vec2;
     };
-    Table: FontProps & {
+    Table: StyleProps & {
         columns: { heading: string; fieldId?: string }[];
         initialData?: string;
         clipRows?: number;
     };
-    ClippedMultiLineTextRenderer: FontProps & {};
+    ClippedMultiLineTextRenderer: StyleProps & {};
 };
 
 type WidgetKeys = keyof WidgetPropsMap;

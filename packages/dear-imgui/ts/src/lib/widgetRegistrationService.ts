@@ -47,7 +47,6 @@ export class WidgetRegistrationService {
 
     appendDataToTable(id: string, data: any) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
-        console.log(fabricWidgetId);
         if (fabricWidgetId !== undefined) {
             // todo: we may want to standardize method names
             this.wasmModule.appendDataToTable(fabricWidgetId, JSON.stringify(data));
@@ -57,7 +56,6 @@ export class WidgetRegistrationService {
     appendTextToClippedMultiLineTextRenderer(id: string, text: string) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
-            // console.log("appendTextToClippedMultiLineTextRenderer", id, fabricWidgetId, text);
             this.wasmModule.appendTextToClippedMultiLineTextRenderer(fabricWidgetId, text);
         }
     }
