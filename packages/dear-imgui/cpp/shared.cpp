@@ -23,3 +23,14 @@ ImVec4 HEXAtoIV4(const char* hex, float a) {
 ImVec4 HEXAtoIV4(const char* hex) {
 	return HEXAtoIV4(hex, 1.0f);
 }
+
+json IV4toJson(ImVec4 imVec4) {
+    json j = {
+        {"w", imVec4.w},
+        {"x", imVec4.x},
+        {"y", imVec4.y},
+        {"z", imVec4.z}
+    };
+
+    return j;
+};

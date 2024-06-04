@@ -10,7 +10,7 @@
 #include <nlohmann/json.hpp>
 
 #include "./shared.h"
-#include "./view.cpp"
+#include "view.cpp"
 
 #pragma once
 
@@ -153,6 +153,10 @@ class ImGuiView : public View {
 
         void PopFont() {
             ImGui::PopFont();
+        }
+
+        ImGuiStyle& GetStyle() {
+            return ImGui::GetStyle();
         }
 
         WGPUColor GetClearColor();

@@ -2,6 +2,119 @@ export type WasmExitStatus = {
     status: number;
 };
 
+export type ImVec2 = [number, number];
+
+export enum ImGuiCol {
+    Text,
+    TextDisabled,
+    WindowBg,
+    ChildBg,
+    PopupBg,
+    Border,
+    BorderShadow,
+    FrameBg,
+    FrameBgHovered,
+    FrameBgActive,
+    TitleBg,
+    TitleBgActive,
+    TitleBgCollapsed,
+    MenuBarBg,
+    ScrollbarBg,
+    ScrollbarGrab,
+    ScrollbarGrabHovered,
+    ScrollbarGrabActive,
+    CheckMark,
+    SliderGrab,
+    SliderGrabActive,
+    Button,
+    ButtonHovered,
+    ButtonActive,
+    Header,
+    HeaderHovered,
+    HeaderActive,
+    Separator,
+    SeparatorHovered,
+    SeparatorActive,
+    ResizeGrip,
+    ResizeGripHovered,
+    ResizeGripActive,
+    Tab,
+    TabHovered,
+    TabActive,
+    TabUnfocused,
+    TabUnfocusedActive,
+    PlotLines,
+    PlotLinesHovered,
+    PlotHistogram,
+    PlotHistogramHovered,
+    TableHeaderBg,
+    TableBorderStrong,
+    TableBorderLight,
+    TableRowBg,
+    TableRowBgAlt,
+    TextSelectedBg,
+    DragDropTarget,
+    NavHighlight,
+    NavWindowingHighlight,
+    NavWindowingDimBg,
+    ModalWindowDimBg,
+    COUNT,
+}
+
+export type ImGuiCol_Text = 0;
+export type ImGuiCol_TextDisabled = 1;
+export type ImGuiCol_WindowBg = 1;
+export type ImGuiCol_ChildBg = 1;
+export type ImGuiCol_PopupBg = 1;
+export type ImGuiCol_Border = 1;
+export type ImGuiCol_BorderShadow = 1;
+export type ImGuiCol_FrameBg = 1;
+export type ImGuiCol_FrameBgHovered = 1;
+export type ImGuiCol_FrameBgActive = 1;
+export type ImGuiCol_TitleBg = 1;
+export type ImGuiCol_TitleBgActive = 1;
+export type ImGuiCol_TitleBgCollapsed = 1;
+export type ImGuiCol_MenuBarBg = 1;
+export type ImGuiCol_ScrollbarBg = 1;
+export type ImGuiCol_ScrollbarGrab = 1;
+export type ImGuiCol_ScrollbarGrabHovered = 1;
+export type ImGuiCol_ScrollbarGrabActive = 1;
+export type ImGuiCol_CheckMark = 1;
+export type ImGuiCol_SliderGrab = 1;
+export type ImGuiCol_SliderGrabActive = 1;
+export type ImGuiCol_Button = 1;
+export type ImGuiCol_ButtonHovered = 1;
+export type ImGuiCol_ButtonActive = 1;
+export type ImGuiCol_Header = 1;
+export type ImGuiCol_HeaderHovered = 1;
+export type ImGuiCol_HeaderActive = 1;
+export type ImGuiCol_Separator = 1;
+export type ImGuiCol_SeparatorHovered = 1;
+export type ImGuiCol_SeparatorActive = 1;
+export type ImGuiCol_ResizeGrip = 1;
+export type ImGuiCol_ResizeGripHovered = 1;
+export type ImGuiCol_ResizeGripActive = 1;
+export type ImGuiCol_Tab = 1;
+export type ImGuiCol_TabHovered = 1;
+export type ImGuiCol_TabActive = 1;
+export type ImGuiCol_TabUnfocused = 1;
+export type ImGuiCol_TabUnfocusedActive = 1;
+export type ImGuiCol_PlotLines = 1;
+export type ImGuiCol_PlotLinesHovered = 1;
+export type ImGuiCol_PlotHistogram = 1;
+export type ImGuiCol_PlotHistogramHovered = 1;
+export type ImGuiCol_TableHeaderBg = 1;
+export type ImGuiCol_TableBorderStrong = 1;
+export type ImGuiCol_TableBorderLight = 1;
+export type ImGuiCol_TableRowBg = 1;
+export type ImGuiCol_TableRowBgAlt = 1;
+export type ImGuiCol_TextSelectedBg = 1;
+export type ImGuiCol_DragDropTarget = 1;
+export type ImGuiCol_NavHighlight = 1;
+export type ImGuiCol_NavWindowingHighlight = 1;
+export type ImGuiCol_NavWindowingDimBg = 1;
+export type ImGuiCol_ModalWindowDimBg = 1;
+
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
     let HEAPF32: any;
@@ -515,61 +628,61 @@ export type ImGuiBackendFlags =
 export interface ImGuiColValue<T extends number> {
     value: T;
 }
-export type ImGuiCol =
-    | ImGuiColValue<0>
-    | ImGuiColValue<1>
-    | ImGuiColValue<2>
-    | ImGuiColValue<3>
-    | ImGuiColValue<4>
-    | ImGuiColValue<5>
-    | ImGuiColValue<6>
-    | ImGuiColValue<7>
-    | ImGuiColValue<8>
-    | ImGuiColValue<9>
-    | ImGuiColValue<10>
-    | ImGuiColValue<11>
-    | ImGuiColValue<12>
-    | ImGuiColValue<13>
-    | ImGuiColValue<14>
-    | ImGuiColValue<15>
-    | ImGuiColValue<16>
-    | ImGuiColValue<17>
-    | ImGuiColValue<18>
-    | ImGuiColValue<19>
-    | ImGuiColValue<20>
-    | ImGuiColValue<21>
-    | ImGuiColValue<22>
-    | ImGuiColValue<23>
-    | ImGuiColValue<24>
-    | ImGuiColValue<25>
-    | ImGuiColValue<26>
-    | ImGuiColValue<27>
-    | ImGuiColValue<28>
-    | ImGuiColValue<29>
-    | ImGuiColValue<30>
-    | ImGuiColValue<31>
-    | ImGuiColValue<32>
-    | ImGuiColValue<33>
-    | ImGuiColValue<34>
-    | ImGuiColValue<35>
-    | ImGuiColValue<36>
-    | ImGuiColValue<37>
-    | ImGuiColValue<38>
-    | ImGuiColValue<39>
-    | ImGuiColValue<40>
-    | ImGuiColValue<41>
-    | ImGuiColValue<42>
-    | ImGuiColValue<43>
-    | ImGuiColValue<44>
-    | ImGuiColValue<45>
-    | ImGuiColValue<46>
-    | ImGuiColValue<47>
-    | ImGuiColValue<48>
-    | ImGuiColValue<49>
-    | ImGuiColValue<50>
-    | ImGuiColValue<51>
-    | ImGuiColValue<52>
-    | ImGuiColValue<53>;
+// export type ImGuiCol =
+//     | ImGuiColValue<0>
+//     | ImGuiColValue<1>
+//     | ImGuiColValue<2>
+//     | ImGuiColValue<3>
+//     | ImGuiColValue<4>
+//     | ImGuiColValue<5>
+//     | ImGuiColValue<6>
+//     | ImGuiColValue<7>
+//     | ImGuiColValue<8>
+//     | ImGuiColValue<9>
+//     | ImGuiColValue<10>
+//     | ImGuiColValue<11>
+//     | ImGuiColValue<12>
+//     | ImGuiColValue<13>
+//     | ImGuiColValue<14>
+//     | ImGuiColValue<15>
+//     | ImGuiColValue<16>
+//     | ImGuiColValue<17>
+//     | ImGuiColValue<18>
+//     | ImGuiColValue<19>
+//     | ImGuiColValue<20>
+//     | ImGuiColValue<21>
+//     | ImGuiColValue<22>
+//     | ImGuiColValue<23>
+//     | ImGuiColValue<24>
+//     | ImGuiColValue<25>
+//     | ImGuiColValue<26>
+//     | ImGuiColValue<27>
+//     | ImGuiColValue<28>
+//     | ImGuiColValue<29>
+//     | ImGuiColValue<30>
+//     | ImGuiColValue<31>
+//     | ImGuiColValue<32>
+//     | ImGuiColValue<33>
+//     | ImGuiColValue<34>
+//     | ImGuiColValue<35>
+//     | ImGuiColValue<36>
+//     | ImGuiColValue<37>
+//     | ImGuiColValue<38>
+//     | ImGuiColValue<39>
+//     | ImGuiColValue<40>
+//     | ImGuiColValue<41>
+//     | ImGuiColValue<42>
+//     | ImGuiColValue<43>
+//     | ImGuiColValue<44>
+//     | ImGuiColValue<45>
+//     | ImGuiColValue<46>
+//     | ImGuiColValue<47>
+//     | ImGuiColValue<48>
+//     | ImGuiColValue<49>
+//     | ImGuiColValue<50>
+//     | ImGuiColValue<51>
+//     | ImGuiColValue<52>
+//     | ImGuiColValue<53>;
 
 export interface ImGuiStyleVarValue<T extends number> {
     value: T;

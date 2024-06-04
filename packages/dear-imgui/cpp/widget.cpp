@@ -28,19 +28,6 @@
 
 using json = nlohmann::json;
 
-ImGuiCol Widget::GetImGuiCol() {
-    return ImGuiCol_COUNT;
-};
-
-// todo: seems redundant
-void Widget::HandleChildren(ReactImgui* view) {
-    view->RenderChildren(m_id);
-};
-
-void Widget::PreRender(ReactImgui* view) {};
-
-void Widget::PostRender(ReactImgui* view) {};
-
 StyledWidget::StyleTuple StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
     std::optional<int> maybeFontIndex;
     std::optional<ImVec4> maybeColor;
@@ -73,32 +60,13 @@ StyledWidget::StyleTuple StyledWidget::ExtractStyle(const json& widgetDef, React
     return {maybeFontIndex, maybeColor};
 };
 
-bool StyledWidget::HasCustomFont(ReactImgui* view) {
-    return m_style->maybeFontIndex.has_value() && view->IsFontIndexValid(m_style->maybeFontIndex.value());
+// todo: seems redundant
+void Widget::HandleChildren(ReactImgui* view) {
+    view->RenderChildren(m_id);
 };
 
-bool StyledWidget::HasCustomColor() {
-    return m_style->maybeColor.has_value();
-};
-
-void StyledWidget::PreRender(ReactImgui* view) {
-    if (HasCustomFont(view)) {
-        view->PushFont(m_style->maybeFontIndex.value());
-    }
-
-    if (HasCustomColor()) {
-        ImGui::PushStyleColor(GetImGuiCol(), m_style->maybeColor.value());
-    }
-};
-
-void StyledWidget::PostRender(ReactImgui* view) {
-    if (HasCustomFont(view)) {
-        view->PopFont();
-    }
-
-    if (HasCustomColor()) {
-        ImGui::PopStyleColor();
-    }
+ImGuiCol Widget::GetImGuiCol() {
+    return ImGuiCol_COUNT;
 };
 
 void Fragment::Render(ReactImgui* view) {

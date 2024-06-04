@@ -51,11 +51,7 @@ class Widget {
 
         void HandleChildren(ReactImgui* view);
 
-        virtual void PreRender(ReactImgui* view);
-
         virtual void Render(ReactImgui* view) = 0;
-
-        virtual void PostRender(ReactImgui* view);
 
         virtual void Patch(const json& val) = 0;
 
@@ -73,14 +69,6 @@ class StyledWidget : public Widget {
         StyledWidget(int id) : Widget(id) {
             m_style = std::make_unique<Style>();
         }
-
-        void PreRender(ReactImgui* view);
-
-        void PostRender(ReactImgui* view);
-
-        bool HasCustomFont(ReactImgui* view);
-
-        bool HasCustomColor();
 };
 
 class Fragment final : public Widget {

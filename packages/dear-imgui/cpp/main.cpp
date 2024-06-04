@@ -204,6 +204,72 @@ class WasmRunner {
         float getTextLineHeightWithSpacing() {
             m_view->GetTextLineHeightWithSpacing();
         }
+
+        std::string getStyle() {
+            auto imguiStyle = m_view->GetStyle();
+
+            json style;
+
+            style["alpha"] = imguiStyle.Alpha;
+            style["disabledAlpha"] = imguiStyle.DisabledAlpha;
+            style["windowPadding"] = { imguiStyle.WindowPadding.x, imguiStyle.WindowPadding.y };
+            style["windowRounding"] = imguiStyle.WindowRounding;
+            style["windowBorderSize"] = imguiStyle.WindowBorderSize;
+            style["windowMinSize"] = { imguiStyle.WindowMinSize.x, imguiStyle.WindowMinSize.y };
+            style["windowTitleAlign"] = { imguiStyle.WindowTitleAlign.x, imguiStyle.WindowTitleAlign.y };
+            style["windowMenuButtonPosition"] = imguiStyle.WindowMenuButtonPosition;
+            style["childRounding"] = imguiStyle.ChildRounding;
+            style["childBorderSize"] = imguiStyle.ChildBorderSize;
+            style["popupRounding"] = imguiStyle.PopupRounding;
+            style["popupBorderSize"] = imguiStyle.PopupBorderSize;
+            style["framePadding"] = { imguiStyle.FramePadding.x, imguiStyle.FramePadding.y };
+            style["frameRounding"] = imguiStyle.FrameRounding;
+            style["frameBorderSize"] = imguiStyle.FrameBorderSize;
+            style["itemSpacing"] = { imguiStyle.ItemSpacing.x, imguiStyle.ItemSpacing.y };
+            style["itemInnerSpacing"] = { imguiStyle.ItemInnerSpacing.x, imguiStyle.ItemInnerSpacing.y };
+            style["cellPadding"] = { imguiStyle.CellPadding.x, imguiStyle.CellPadding.y };
+            style["touchExtraPadding"] = { imguiStyle.TouchExtraPadding.x, imguiStyle.TouchExtraPadding.y };
+            style["indentSpacing"] = imguiStyle.IndentSpacing;
+            style["columnsMinSpacing"] = imguiStyle.ColumnsMinSpacing;
+            style["scrollbarSize"] = imguiStyle.ScrollbarSize;
+            style["scrollbarRounding"] = imguiStyle.ScrollbarRounding;
+            style["grabMinSize"] = imguiStyle.GrabMinSize;
+            style["grabRounding"] = imguiStyle.GrabRounding;
+            style["logSliderDeadzone"] = imguiStyle.LogSliderDeadzone;
+            style["tabRounding"] = imguiStyle.TabRounding;
+            style["tabBorderSize"] = imguiStyle.TabBorderSize;
+            style["tabMinWidthForCloseButton"] = imguiStyle.TabMinWidthForCloseButton;
+            style["tabBarBorderSize"] = imguiStyle.TabBarBorderSize;
+            style["tableAngledHeadersAngle"] = imguiStyle.TableAngledHeadersAngle;
+            style["tableAngledHeadersTextAlign"] = { imguiStyle.TableAngledHeadersTextAlign.x, imguiStyle.TableAngledHeadersTextAlign.y };
+            style["colorButtonPosition"] = imguiStyle.ColorButtonPosition;
+            style["buttonTextAlign"] = { imguiStyle.ButtonTextAlign.x, imguiStyle.ButtonTextAlign.y };
+            style["selectableTextAlign"] = { imguiStyle.SelectableTextAlign.x, imguiStyle.SelectableTextAlign.y };
+            style["separatorTextPadding"] = { imguiStyle.SeparatorTextPadding.x, imguiStyle.SeparatorTextPadding.y };
+            style["displayWindowPadding"] = { imguiStyle.DisplayWindowPadding.x, imguiStyle.DisplayWindowPadding.y };
+            style["displaySafeAreaPadding"] = { imguiStyle.DisplaySafeAreaPadding.x, imguiStyle.DisplaySafeAreaPadding.y };
+            style["mouseCursorScale"] = imguiStyle.MouseCursorScale;
+            style["antiAliasedLines"] = imguiStyle.AntiAliasedLines;
+            style["antiAliasedLinesUseTex"] = imguiStyle.AntiAliasedLinesUseTex;
+            style["antiAliasedFill"] = imguiStyle.AntiAliasedFill;
+            style["curveTessellationTol"] = imguiStyle.CurveTessellationTol;
+            style["circleTessellationMaxError"] = imguiStyle.CircleTessellationMaxError;
+            
+            style["hoverStationaryDelay"] = imguiStyle.HoverStationaryDelay;
+            style["hoverDelayShort"] = imguiStyle.HoverDelayShort;
+            style["hoverDelayNormal"] = imguiStyle.HoverDelayNormal;
+
+            style["hoverFlagsForTooltipMouse"] = imguiStyle.HoverFlagsForTooltipMouse;
+            style["hoverFlagsForTooltipNav"] = imguiStyle.HoverFlagsForTooltipNav;
+
+            style["colors"] = json::object();
+
+            for (int i = 0; i < ImGuiCol_COUNT; i++) {
+                style["colors"][i] = IV4toJson(imguiStyle.Colors[i]);
+            }
+
+            return style.dump();
+        }
 };
 
 static std::unique_ptr<WasmRunner> pRunner = std::make_unique<WasmRunner>();
@@ -257,6 +323,10 @@ float getTextLineHeightWithSpacing() {
     pRunner->getTextLineHeightWithSpacing();
 }
 
+std::string getStyle() {
+    return pRunner->getStyle();
+}
+
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("exit", &_exit);
     emscripten::function("resizeWindow", &resizeWindow);
@@ -268,6 +338,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("appendDataToTable", &appendDataToTable);
     emscripten::function("appendTextToClippedMultiLineTextRenderer", &appendTextToClippedMultiLineTextRenderer);
     emscripten::function("getTextLineHeightWithSpacing", &getTextLineHeightWithSpacing);
+    emscripten::function("getStyle", &getStyle);
 
     // emscripten::class_<WasmRunner>("WasmRunner")
     // .constructor<OnInputTextChangeType, OnComboChangeType, OnNumericValueChangeType, OnMultiValueChangeType, OnBooleanValueChangeType, OnClickType>()
