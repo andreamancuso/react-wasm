@@ -61,60 +61,6 @@ export enum ImGuiCol {
     COUNT,
 }
 
-export type ImGuiCol_Text = 0;
-export type ImGuiCol_TextDisabled = 1;
-export type ImGuiCol_WindowBg = 1;
-export type ImGuiCol_ChildBg = 1;
-export type ImGuiCol_PopupBg = 1;
-export type ImGuiCol_Border = 1;
-export type ImGuiCol_BorderShadow = 1;
-export type ImGuiCol_FrameBg = 1;
-export type ImGuiCol_FrameBgHovered = 1;
-export type ImGuiCol_FrameBgActive = 1;
-export type ImGuiCol_TitleBg = 1;
-export type ImGuiCol_TitleBgActive = 1;
-export type ImGuiCol_TitleBgCollapsed = 1;
-export type ImGuiCol_MenuBarBg = 1;
-export type ImGuiCol_ScrollbarBg = 1;
-export type ImGuiCol_ScrollbarGrab = 1;
-export type ImGuiCol_ScrollbarGrabHovered = 1;
-export type ImGuiCol_ScrollbarGrabActive = 1;
-export type ImGuiCol_CheckMark = 1;
-export type ImGuiCol_SliderGrab = 1;
-export type ImGuiCol_SliderGrabActive = 1;
-export type ImGuiCol_Button = 1;
-export type ImGuiCol_ButtonHovered = 1;
-export type ImGuiCol_ButtonActive = 1;
-export type ImGuiCol_Header = 1;
-export type ImGuiCol_HeaderHovered = 1;
-export type ImGuiCol_HeaderActive = 1;
-export type ImGuiCol_Separator = 1;
-export type ImGuiCol_SeparatorHovered = 1;
-export type ImGuiCol_SeparatorActive = 1;
-export type ImGuiCol_ResizeGrip = 1;
-export type ImGuiCol_ResizeGripHovered = 1;
-export type ImGuiCol_ResizeGripActive = 1;
-export type ImGuiCol_Tab = 1;
-export type ImGuiCol_TabHovered = 1;
-export type ImGuiCol_TabActive = 1;
-export type ImGuiCol_TabUnfocused = 1;
-export type ImGuiCol_TabUnfocusedActive = 1;
-export type ImGuiCol_PlotLines = 1;
-export type ImGuiCol_PlotLinesHovered = 1;
-export type ImGuiCol_PlotHistogram = 1;
-export type ImGuiCol_PlotHistogramHovered = 1;
-export type ImGuiCol_TableHeaderBg = 1;
-export type ImGuiCol_TableBorderStrong = 1;
-export type ImGuiCol_TableBorderLight = 1;
-export type ImGuiCol_TableRowBg = 1;
-export type ImGuiCol_TableRowBgAlt = 1;
-export type ImGuiCol_TextSelectedBg = 1;
-export type ImGuiCol_DragDropTarget = 1;
-export type ImGuiCol_NavHighlight = 1;
-export type ImGuiCol_NavWindowingHighlight = 1;
-export type ImGuiCol_NavWindowingDimBg = 1;
-export type ImGuiCol_ModalWindowDimBg = 1;
-
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
     let HEAPF32: any;
@@ -625,65 +571,6 @@ export type ImGuiBackendFlags =
     | ImGuiBackendFlagsValue<4>
     | ImGuiBackendFlagsValue<8>;
 
-export interface ImGuiColValue<T extends number> {
-    value: T;
-}
-// export type ImGuiCol =
-//     | ImGuiColValue<0>
-//     | ImGuiColValue<1>
-//     | ImGuiColValue<2>
-//     | ImGuiColValue<3>
-//     | ImGuiColValue<4>
-//     | ImGuiColValue<5>
-//     | ImGuiColValue<6>
-//     | ImGuiColValue<7>
-//     | ImGuiColValue<8>
-//     | ImGuiColValue<9>
-//     | ImGuiColValue<10>
-//     | ImGuiColValue<11>
-//     | ImGuiColValue<12>
-//     | ImGuiColValue<13>
-//     | ImGuiColValue<14>
-//     | ImGuiColValue<15>
-//     | ImGuiColValue<16>
-//     | ImGuiColValue<17>
-//     | ImGuiColValue<18>
-//     | ImGuiColValue<19>
-//     | ImGuiColValue<20>
-//     | ImGuiColValue<21>
-//     | ImGuiColValue<22>
-//     | ImGuiColValue<23>
-//     | ImGuiColValue<24>
-//     | ImGuiColValue<25>
-//     | ImGuiColValue<26>
-//     | ImGuiColValue<27>
-//     | ImGuiColValue<28>
-//     | ImGuiColValue<29>
-//     | ImGuiColValue<30>
-//     | ImGuiColValue<31>
-//     | ImGuiColValue<32>
-//     | ImGuiColValue<33>
-//     | ImGuiColValue<34>
-//     | ImGuiColValue<35>
-//     | ImGuiColValue<36>
-//     | ImGuiColValue<37>
-//     | ImGuiColValue<38>
-//     | ImGuiColValue<39>
-//     | ImGuiColValue<40>
-//     | ImGuiColValue<41>
-//     | ImGuiColValue<42>
-//     | ImGuiColValue<43>
-//     | ImGuiColValue<44>
-//     | ImGuiColValue<45>
-//     | ImGuiColValue<46>
-//     | ImGuiColValue<47>
-//     | ImGuiColValue<48>
-//     | ImGuiColValue<49>
-//     | ImGuiColValue<50>
-//     | ImGuiColValue<51>
-//     | ImGuiColValue<52>
-//     | ImGuiColValue<53>;
-
 export interface ImGuiStyleVarValue<T extends number> {
     value: T;
 }
@@ -955,6 +842,7 @@ interface EmbindModule {
     appendDataToTable(_0: number, _1: EmbindString): void;
     appendTextToClippedMultiLineTextRenderer(_0: number, _1: EmbindString): void;
     getTextLineHeightWithSpacing(): number;
+    getStyle(): string;
     ImGuiWindowFlags: {
         None: ImGuiWindowFlagsValue<0>;
         NoTitleBar: ImGuiWindowFlagsValue<1>;
@@ -1362,62 +1250,6 @@ interface EmbindModule {
         HasSetMousePos: ImGuiBackendFlagsValue<4>;
         RendererHasVtxOffset: ImGuiBackendFlagsValue<8>;
     };
-    ImGuiCol: {
-        Text: ImGuiColValue<0>;
-        TextDisabled: ImGuiColValue<1>;
-        WindowBg: ImGuiColValue<2>;
-        ChildBg: ImGuiColValue<3>;
-        PopupBg: ImGuiColValue<4>;
-        Border: ImGuiColValue<5>;
-        BorderShadow: ImGuiColValue<6>;
-        FrameBg: ImGuiColValue<7>;
-        FrameBgHovered: ImGuiColValue<8>;
-        FrameBgActive: ImGuiColValue<9>;
-        TitleBg: ImGuiColValue<10>;
-        TitleBgActive: ImGuiColValue<11>;
-        TitleBgCollapsed: ImGuiColValue<12>;
-        MenuBarBg: ImGuiColValue<13>;
-        ScrollbarBg: ImGuiColValue<14>;
-        ScrollbarGrab: ImGuiColValue<15>;
-        ScrollbarGrabHovered: ImGuiColValue<16>;
-        ScrollbarGrabActive: ImGuiColValue<17>;
-        CheckMark: ImGuiColValue<18>;
-        SliderGrab: ImGuiColValue<19>;
-        SliderGrabActive: ImGuiColValue<20>;
-        Button: ImGuiColValue<21>;
-        ButtonHovered: ImGuiColValue<22>;
-        ButtonActive: ImGuiColValue<23>;
-        Header: ImGuiColValue<24>;
-        HeaderHovered: ImGuiColValue<25>;
-        HeaderActive: ImGuiColValue<26>;
-        Separator: ImGuiColValue<27>;
-        SeparatorHovered: ImGuiColValue<28>;
-        SeparatorActive: ImGuiColValue<29>;
-        ResizeGrip: ImGuiColValue<30>;
-        ResizeGripHovered: ImGuiColValue<31>;
-        ResizeGripActive: ImGuiColValue<32>;
-        Tab: ImGuiColValue<33>;
-        TabHovered: ImGuiColValue<34>;
-        TabActive: ImGuiColValue<35>;
-        TabUnfocused: ImGuiColValue<36>;
-        TabUnfocusedActive: ImGuiColValue<37>;
-        PlotLines: ImGuiColValue<38>;
-        PlotLinesHovered: ImGuiColValue<39>;
-        PlotHistogram: ImGuiColValue<40>;
-        PlotHistogramHovered: ImGuiColValue<41>;
-        TableHeaderBg: ImGuiColValue<42>;
-        TableBorderStrong: ImGuiColValue<43>;
-        TableBorderLight: ImGuiColValue<44>;
-        TableRowBg: ImGuiColValue<45>;
-        TableRowBgAlt: ImGuiColValue<46>;
-        TextSelectedBg: ImGuiColValue<47>;
-        DragDropTarget: ImGuiColValue<48>;
-        NavHighlight: ImGuiColValue<49>;
-        NavWindowingHighlight: ImGuiColValue<50>;
-        NavWindowingDimBg: ImGuiColValue<51>;
-        ModalWindowDimBg: ImGuiColValue<52>;
-        COUNT: ImGuiColValue<53>;
-    };
     ImGuiStyleVar: {
         Alpha: ImGuiStyleVarValue<0>;
         DisabledAlpha: ImGuiStyleVarValue<1>;
@@ -1632,19 +1464,6 @@ interface EmbindModule {
         IsPlatformMonitor: ImGuiViewportFlagsValue<2>;
         OwnedByApp: ImGuiViewportFlagsValue<4>;
     };
-    exit(): void;
-    setEventHandlers(): void;
-    resizeWindow(_0: number, _1: number): void;
-    setWidget(_0: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string): void;
-    patchWidget(
-        _0: number,
-        _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
-    ): void;
-    setChildren(
-        _0: number,
-        _1: ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | string,
-    ): void;
-    getChildren(_0: number): string;
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;

@@ -11,7 +11,7 @@ import { MainModule } from "../wasm/wasm-app-types";
 const ReactFabricProd = ReactFabricProdInitialiser(ReactNativePrivateInterface);
 
 export type ReactNativeWrapperProps = PropsWithChildren & {
-    wasmModule?: MainModule;
+    wasmModule: MainModule;
 };
 
 export const ReactNativeWrapper: React.ComponentType<ReactNativeWrapperProps> = ({
@@ -23,6 +23,8 @@ export const ReactNativeWrapper: React.ComponentType<ReactNativeWrapperProps> = 
 
     useEffect(() => {
         if (wasmModule && !initialisedRef.current) {
+            console.log(wasmModule.getStyle());
+
             initialisedRef.current = true;
 
             // todo: inject via Context
