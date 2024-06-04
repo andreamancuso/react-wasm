@@ -70,32 +70,9 @@ void ReactImgui::SetUpWidgetCreatorFunctions() {
 };
 
 void ReactImgui::RenderWidgetById(int id) {
-    // todo: I have read dynamic_cast is expensive - how can I distinguish between styled vs non-styled widgets?
-    if (StyledWidget* styledWidget = dynamic_cast<StyledWidget*>(m_widgets[id].get())) {
-        // todo: is there a way we can safely memoize the result of IsFontIndexValid()?
-        bool hasCustomFont = styledWidget->m_style->maybeFontIndex.has_value() && IsFontIndexValid(styledWidget->m_style->maybeFontIndex.value());
-        bool hasCustomColor = styledWidget->m_style->maybeColor.has_value();
-
-        if (hasCustomFont) {
-            PushFont(styledWidget->m_style->maybeFontIndex.value());
-        }
-
-        if (hasCustomColor) {
-            ImGui::PushStyleColor(styledWidget->GetImGuiCol(), styledWidget->m_style->maybeColor.value());
-        }
-        
-        styledWidget->Render(this);
-
-        if (hasCustomFont) {
-            PopFont();
-        }
-
-        if (hasCustomColor) {
-            ImGui::PopStyleColor();
-        }
-    } else {
-        m_widgets[id]->Render(this);
-    }
+    m_widgets[id]->PreRender(this);
+    m_widgets[id]->Render(this);
+    m_widgets[id]->PostRender(this);
 };
 
 void ReactImgui::RenderWidgets(int id) {
