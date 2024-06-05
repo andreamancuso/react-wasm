@@ -1,5 +1,7 @@
 import { ImGuiCol, ImGuiDir, ImGuiHoveredFlags, ImVec2 } from "../wasm/wasm-app-types";
 
+export type HEXA = [string, number];
+
 export type ImGuiStyle = {
     alpha: number; // Global alpha applies to everything in Dear ImGui.
     disabledAlpha: number; // Additional alpha multiplier applied by BeginDisabled(). Multiply over current value of Alpha.
@@ -48,62 +50,64 @@ export type ImGuiStyle = {
     curveTessellationTol: number; // Tessellation tolerance when using PathBezierCurveTo() without a specific number of segments. Decrease for highly tessellated curves (higher quality, more polygons), increase to reduce quality.
     circleTessellationMaxError: number; // Maximum error (in pixels) allowed when using AddCircle()/AddCircleFilled() or drawing rounded corner rectangles with no explicit segment count specified. Decrease for higher quality but more geometry.
 
+    colors: HEXA[]; // 53 items exactly
+
     // these get converted to ImVec4 and can be overridden
-    colors: {
-        [ImGuiCol.Text]: string;
-        [ImGuiCol.TextDisabled]: string;
-        [ImGuiCol.WindowBg]: string;
-        [ImGuiCol.ChildBg]: string;
-        [ImGuiCol.PopupBg]: string;
-        [ImGuiCol.Border]: string;
-        [ImGuiCol.BorderShadow]: string;
-        [ImGuiCol.FrameBg]: string;
-        [ImGuiCol.FrameBgHovered]: string;
-        [ImGuiCol.FrameBgActive]: string;
-        [ImGuiCol.TitleBg]: string;
-        [ImGuiCol.TitleBgActive]: string;
-        [ImGuiCol.TitleBgCollapsed]: string;
-        [ImGuiCol.MenuBarBg]: string;
-        [ImGuiCol.ScrollbarBg]: string;
-        [ImGuiCol.ScrollbarGrab]: string;
-        [ImGuiCol.ScrollbarGrabHovered]: string;
-        [ImGuiCol.ScrollbarGrabActive]: string;
-        [ImGuiCol.CheckMark]: string;
-        [ImGuiCol.SliderGrab]: string;
-        [ImGuiCol.SliderGrabActive]: string;
-        [ImGuiCol.Button]: string;
-        [ImGuiCol.ButtonHovered]: string;
-        [ImGuiCol.ButtonActive]: string;
-        [ImGuiCol.Header]: string;
-        [ImGuiCol.HeaderHovered]: string;
-        [ImGuiCol.HeaderActive]: string;
-        [ImGuiCol.Separator]: string;
-        [ImGuiCol.SeparatorHovered]: string;
-        [ImGuiCol.SeparatorActive]: string;
-        [ImGuiCol.ResizeGrip]: string;
-        [ImGuiCol.ResizeGripHovered]: string;
-        [ImGuiCol.ResizeGripActive]: string;
-        [ImGuiCol.Tab]: string;
-        [ImGuiCol.TabHovered]: string;
-        [ImGuiCol.TabActive]: string;
-        [ImGuiCol.TabUnfocused]: string;
-        [ImGuiCol.TabUnfocusedActive]: string;
-        [ImGuiCol.PlotLines]: string;
-        [ImGuiCol.PlotLinesHovered]: string;
-        [ImGuiCol.PlotHistogram]: string;
-        [ImGuiCol.PlotHistogramHovered]: string;
-        [ImGuiCol.TableHeaderBg]: string;
-        [ImGuiCol.TableBorderStrong]: string;
-        [ImGuiCol.TableBorderLight]: string;
-        [ImGuiCol.TableRowBg]: string;
-        [ImGuiCol.TableRowBgAlt]: string;
-        [ImGuiCol.TextSelectedBg]: string;
-        [ImGuiCol.DragDropTarget]: string;
-        [ImGuiCol.NavHighlight]: string;
-        [ImGuiCol.NavWindowingHighlight]: string;
-        [ImGuiCol.NavWindowingDimBg]: string;
-        [ImGuiCol.ModalWindowDimBg]: string;
-    };
+    // colors: {
+    //     [ImGuiCol.Text]: string;
+    //     [ImGuiCol.TextDisabled]: string;
+    //     [ImGuiCol.WindowBg]: string;
+    //     [ImGuiCol.ChildBg]: string;
+    //     [ImGuiCol.PopupBg]: string;
+    //     [ImGuiCol.Border]: string;
+    //     [ImGuiCol.BorderShadow]: string;
+    //     [ImGuiCol.FrameBg]: string;
+    //     [ImGuiCol.FrameBgHovered]: string;
+    //     [ImGuiCol.FrameBgActive]: string;
+    //     [ImGuiCol.TitleBg]: string;
+    //     [ImGuiCol.TitleBgActive]: string;
+    //     [ImGuiCol.TitleBgCollapsed]: string;
+    //     [ImGuiCol.MenuBarBg]: string;
+    //     [ImGuiCol.ScrollbarBg]: string;
+    //     [ImGuiCol.ScrollbarGrab]: string;
+    //     [ImGuiCol.ScrollbarGrabHovered]: string;
+    //     [ImGuiCol.ScrollbarGrabActive]: string;
+    //     [ImGuiCol.CheckMark]: string;
+    //     [ImGuiCol.SliderGrab]: string;
+    //     [ImGuiCol.SliderGrabActive]: string;
+    //     [ImGuiCol.Button]: string;
+    //     [ImGuiCol.ButtonHovered]: string;
+    //     [ImGuiCol.ButtonActive]: string;
+    //     [ImGuiCol.Header]: string;
+    //     [ImGuiCol.HeaderHovered]: string;
+    //     [ImGuiCol.HeaderActive]: string;
+    //     [ImGuiCol.Separator]: string;
+    //     [ImGuiCol.SeparatorHovered]: string;
+    //     [ImGuiCol.SeparatorActive]: string;
+    //     [ImGuiCol.ResizeGrip]: string;
+    //     [ImGuiCol.ResizeGripHovered]: string;
+    //     [ImGuiCol.ResizeGripActive]: string;
+    //     [ImGuiCol.Tab]: string;
+    //     [ImGuiCol.TabHovered]: string;
+    //     [ImGuiCol.TabActive]: string;
+    //     [ImGuiCol.TabUnfocused]: string;
+    //     [ImGuiCol.TabUnfocusedActive]: string;
+    //     [ImGuiCol.PlotLines]: string;
+    //     [ImGuiCol.PlotLinesHovered]: string;
+    //     [ImGuiCol.PlotHistogram]: string;
+    //     [ImGuiCol.PlotHistogramHovered]: string;
+    //     [ImGuiCol.TableHeaderBg]: string;
+    //     [ImGuiCol.TableBorderStrong]: string;
+    //     [ImGuiCol.TableBorderLight]: string;
+    //     [ImGuiCol.TableRowBg]: string;
+    //     [ImGuiCol.TableRowBgAlt]: string;
+    //     [ImGuiCol.TextSelectedBg]: string;
+    //     [ImGuiCol.DragDropTarget]: string;
+    //     [ImGuiCol.NavHighlight]: string;
+    //     [ImGuiCol.NavWindowingHighlight]: string;
+    //     [ImGuiCol.NavWindowingDimBg]: string;
+    //     [ImGuiCol.ModalWindowDimBg]: string;
+    // };
 
     hoverStationaryDelay: number; // Delay for IsItemHovered(ImGuiHoveredFlags_Stationary). Time required to consider mouse stationary.
     hoverDelayShort: number; // Delay for IsItemHovered(ImGuiHoveredFlags_DelayShort). Usually used along with HoverStationaryDelay.
@@ -111,4 +115,10 @@ export type ImGuiStyle = {
 
     hoverFlagsForTooltipMouse: ImGuiHoveredFlags;
     hoverFlagsForTooltipNav: ImGuiHoveredFlags;
+};
+
+export type ImGuiStyleForPatching = Partial<Omit<ImGuiStyle, "colors">> & {
+    colors?: {
+        [k in ImGuiCol]?: HEXA;
+    };
 };

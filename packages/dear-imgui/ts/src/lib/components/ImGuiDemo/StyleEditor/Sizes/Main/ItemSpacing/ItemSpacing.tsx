@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { ReactImgui } from "../../../../../../components/ReactImgui/components";
 
 export const ItemSpacing = () => {
-    const [value, setValue] = useState<[number, number]>([9, 9]);
+    const [value, setValue] = useState<[number, number]>([0, 0]);
 
     const handleValueChanged = useCallback((event: any) => {
         if (event.nativeEvent) {

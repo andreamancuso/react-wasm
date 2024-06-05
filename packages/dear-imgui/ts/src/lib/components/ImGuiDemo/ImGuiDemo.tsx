@@ -10,7 +10,7 @@ import RWStyleSheet from "../../stylesheet/stylesheet";
 
 const styleSheet = RWStyleSheet.create({
     ut: {
-        color: "ff0000",
+        color: "ff6e59",
         font: { name: "roboto-regular", size: 24 },
     },
 });
@@ -20,9 +20,9 @@ export const ImGuiDemo = () => {
     const clippedMultiLineTextRendererRef =
         useRef<ClippedMultiLineTextRendererImperativeHandle>(null);
     const [text, setText] = useState("Hello, world!");
-    const [tripleSliderValue, setTripleSliderValue] = useState<[number, number, number]>([9, 9, 9]);
+    const [tripleSliderValue, setTripleSliderValue] = useState<[number, number, number]>([0, 0, 0]);
     const [quadSliderValue, setQuadSliderValue] = useState<[number, number, number, number]>([
-        9, 9, 9, 9,
+        0, 0, 0, 0,
     ]);
 
     const handleInputTextChanged = useCallback((event: any) => {
@@ -68,7 +68,7 @@ export const ImGuiDemo = () => {
 
     const handleAppendDataToTableClick = useCallback(() => {
         if (tableRef.current) {
-            tableRef.current.appendDataToTable([{ id: "1", name: "Andy" }]);
+            tableRef.current.appendDataToTable([{ id: "1", name: "Name" }]);
         }
     }, [tableRef]);
 

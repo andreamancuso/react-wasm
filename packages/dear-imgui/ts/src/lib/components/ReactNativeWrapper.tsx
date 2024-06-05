@@ -23,7 +23,9 @@ export const ReactNativeWrapper: React.ComponentType<ReactNativeWrapperProps> = 
 
     useEffect(() => {
         if (wasmModule && !initialisedRef.current) {
-            console.log(wasmModule.getStyle());
+            // setTimeout(() => {
+            //     console.log(wasmModule.getStyle());
+            // }, 2000);
 
             initialisedRef.current = true;
 

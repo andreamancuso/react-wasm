@@ -58,7 +58,8 @@ class ReactImgui : public ImPlotView {
         ReactImgui(
             const char* newWindowId, 
             const char* newGlWindowTitle, 
-            std::string& rawFontDefs
+            std::string& rawFontDefs,
+            std::optional<std::string>& rawStyleOverridesDefs
         );
 
         void RenderWidgetById(int id);
@@ -97,5 +98,7 @@ class ReactImgui : public ImPlotView {
         std::vector<int> GetChildren(int id);
 
         json GetAvailableFonts();
+
+        void PatchStyle(const json& styleDef);
 };
 

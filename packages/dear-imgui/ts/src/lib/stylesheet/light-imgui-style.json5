@@ -1,0 +1,106 @@
+{
+    alpha: 1.0,
+    antiAliasedFill: true,
+    antiAliasedLines: true,
+    antiAliasedLinesUseTex: true,
+    buttonTextAlign: [0.5, 0.5],
+    cellPadding: [4.0, 2.0],
+    childBorderSize: 1.0,
+    childRounding: 0.0,
+    circleTessellationMaxError: 0.30000001192092896,
+    colorButtonPosition: 1,
+    colors: [
+        ["#000000", 1.0], // Text
+        ["#999999", 1.0], // TextDisabled
+        ["#efefef", 1.0], // WindowBg
+        ["#000000", 0.0], // ChildBg
+        ["#ffffff", 0.9800000190734863], // PopupBg
+        ["#000000", 0.30000001192092896], // Border
+        ["#000000", 0.0], // BorderShadow
+        ["#ffffff", 1.0], // FrameBg
+        ["#4296f9", 0.4000000059604645], // FrameBgHovered
+        ["#4296f9", 0.6700000166893005], // FrameBgActive
+        ["#f4f4f4", 1.0], // TitleBg
+        ["#d1d1d1", 1.0], // TitleBgActive
+        ["#ffffff", 0.5099999904632568], // TitleBgCollapsed
+        ["#dbdbdb", 1.0], // MenuBarBg
+        ["#f9f9f9", 0.5299999713897705], // ScrollbarBg
+        ["#afafaf", 0.800000011920929], // ScrollbarGrab
+        ["#7c7c7c", 0.800000011920929], // ScrollbarGrabHovered
+        ["#7c7c7c", 1.0], // ScrollbarGrabActive
+        ["#4296f9", 1.0], // CheckMark
+        ["#4296f9", 0.7799999713897705], // SliderGrab
+        ["#7589cc", 0.6000000238418579], // SliderGrabActive
+        ["#4296f9", 0.4000000059604645], // Button
+        ["#4296f9", 1.0], // ButtonHovered
+        ["#0f87f9", 1.0], // ButtonActive
+        ["#4296f9", 0.3100000023841858], // Header
+        ["#4296f9", 0.800000011920929], // HeaderHovered
+        ["#4296f9", 1.0], // HeaderActive
+        ["#636363", 0.6200000047683716], // Separator
+        ["#2370cc", 0.7799999713897705], // SeparatorHovered
+        ["#2370cc", 1.0], // SeparatorActive
+        ["#595959", 0.17000000178813934], // ResizeGrip
+        ["#4296f9", 0.6700000166893005], // ResizeGripHovered
+        ["#4296f9", 0.949999988079071], // ResizeGripActive
+        ["#c2cbd5", 0.9309999942779541], // Tab
+        ["#4296f9", 0.800000011920929], // TabHovered
+        ["#97b9e1", 1.0], // TabActive
+        ["#eaecee", 0.9861999750137329], // TabUnfocused
+        ["#bdd1e9", 1.0], // TabUnfocusedActive
+        ["#636363", 1.0], // PlotLines
+        ["#ff6d59", 1.0], // PlotLinesHovered
+        ["#e5b200", 1.0], // PlotHistogram
+        ["#ff7200", 1.0], // PlotHistogramHovered
+        ["#c6ddf9", 1.0], // TableHeaderBg
+        ["#9191a3", 1.0], // TableBorderStrong
+        ["#adadbc", 1.0], // TableBorderLight
+        ["#000000", 0.0], // TableRowBg
+        ["#4c4c4c", 0.09000000357627869], // TableRowBgAlt
+        ["#4296f9", 0.3499999940395355], // TextSelectedBg
+        ["#4296f9", 0.949999988079071], // DragDropTarget
+        ["#4296f9", 0.800000011920929], // NavHighlight
+        ["#b2b2b2", 0.699999988079071], // NavWindowingHighlight
+        ["#333333", 0.20000000298023224], // NavWindowingDimBg
+        ["#333333", 0.3499999940395355], // ModalWindowDimBg
+    ],
+    columnsMinSpacing: 6.0,
+    curveTessellationTol: 1.25,
+    disabledAlpha: 0.6000000238418579,
+    displaySafeAreaPadding: [3.0, 3.0],
+    displayWindowPadding: [19.0, 19.0],
+    frameBorderSize: 0.0,
+    framePadding: [4.0, 3.0],
+    frameRounding: 0.0,
+    grabMinSize: 12.0,
+    grabRounding: 0.0,
+    hoverDelayNormal: 0.4000000059604645,
+    hoverDelayShort: 0.15000000596046448,
+    hoverFlagsForTooltipMouse: 41984,
+    hoverFlagsForTooltipNav: 197632,
+    hoverStationaryDelay: 0.15000000596046448,
+    indentSpacing: 21.0,
+    itemInnerSpacing: [4.0, 4.0],
+    itemSpacing: [8.0, 4.0],
+    logSliderDeadzone: 4.0,
+    mouseCursorScale: 1.0,
+    popupBorderSize: 1.0,
+    popupRounding: 0.0,
+    scrollbarRounding: 9.0,
+    scrollbarSize: 14.0,
+    selectableTextAlign: [0.0, 0.0],
+    separatorTextPadding: [20.0, 3.0],
+    tabBarBorderSize: 1.0,
+    tabBorderSize: 0.0,
+    tabMinWidthForCloseButton: 0.0,
+    tabRounding: 4.0,
+    tableAngledHeadersAngle: 0.6108652353286743,
+    tableAngledHeadersTextAlign: [0.5, 0.0],
+    touchExtraPadding: [0.0, 0.0],
+    windowBorderSize: 1.0,
+    windowMenuButtonPosition: 0,
+    windowMinSize: [32.0, 32.0],
+    windowPadding: [8.0, 8.0],
+    windowRounding: 0.0,
+    windowTitleAlign: [0.0, 0.5],
+}

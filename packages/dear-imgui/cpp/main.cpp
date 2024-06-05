@@ -8,6 +8,7 @@
 // - Introduction, links and more at the top of imgui.cpp
 
 #include <set>
+#include <optional>
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
@@ -143,11 +144,12 @@ class WasmRunner {
             );
         }
 
-        void run(std::string& canvasSelector, std::string& rawFontDefs) {
+        void run(std::string& canvasSelector, std::string& rawFontDefs, std::optional<std::string>& rawStyleOverridesDefs) {
             m_view = new ReactImgui(
                 "ReactImgui", 
                 "ReactImgui",
-                rawFontDefs
+                rawFontDefs,
+                rawStyleOverridesDefs
             );
             m_view->SetEventHandlers(
                 OnTextChanged,
@@ -262,23 +264,34 @@ class WasmRunner {
             style["hoverFlagsForTooltipMouse"] = imguiStyle.HoverFlagsForTooltipMouse;
             style["hoverFlagsForTooltipNav"] = imguiStyle.HoverFlagsForTooltipNav;
 
-            style["colors"] = json::object();
+            style["colors"] = json::array();
 
             for (int i = 0; i < ImGuiCol_COUNT; i++) {
-                style["colors"][std::to_string(i)] = IV4toJson(imguiStyle.Colors[i]);
+                style["colors"].push_back(IV4toJsonHEXATuple(imguiStyle.Colors[i]));
             }
 
             return style.dump();
+        }
+
+        void patchStyle(std::string& styleDef) {
+            m_view->PatchStyle(json::parse(styleDef));
         }
 };
 
 static std::unique_ptr<WasmRunner> pRunner = std::make_unique<WasmRunner>();
 
+// todo: add validation of arguments
 int main(int argc, char* argv[]) {
     std::string canvasSelector = argv[1];
     std::string rawFontDefs = argv[2];
+    std::optional<std::string> rawStyleOverridesDefs;
 
-    pRunner->run(canvasSelector, rawFontDefs);
+    if (argc > 2) {
+        // third argument is style overrides
+        rawStyleOverridesDefs.emplace(std::string(argv[3]));
+    }
+
+    pRunner->run(canvasSelector, rawFontDefs, rawStyleOverridesDefs);
 
     return 0;
 }
@@ -327,6 +340,10 @@ std::string getStyle() {
     return pRunner->getStyle();
 }
 
+void patchStyle(std::string styleDef) {
+    return pRunner->patchStyle(styleDef);
+}
+
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("exit", &_exit);
     emscripten::function("resizeWindow", &resizeWindow);
@@ -339,6 +356,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("appendTextToClippedMultiLineTextRenderer", &appendTextToClippedMultiLineTextRenderer);
     emscripten::function("getTextLineHeightWithSpacing", &getTextLineHeightWithSpacing);
     emscripten::function("getStyle", &getStyle);
+    emscripten::function("patchStyle", &patchStyle);
 
     // emscripten::class_<WasmRunner>("WasmRunner")
     // .constructor<OnInputTextChangeType, OnComboChangeType, OnNumericValueChangeType, OnMultiValueChangeType, OnBooleanValueChangeType, OnClickType>()

@@ -8,6 +8,7 @@ import { GetWasmModule, MainModule, WasmExitStatus } from "../wasm/wasm-app-type
 import { ReactNativeWrapper } from "../components/ReactNativeWrapper";
 import { useDearImguiFonts, useDearImguiWasm } from "../hooks";
 import { FontDef } from "./ReactImgui/types";
+import { ImGuiStyleForPatching } from "../stylesheet/imgui-style";
 
 export type MainComponentProps = PropsWithChildren & {
     containerRef?: React.RefObject<HTMLElement>;
@@ -15,6 +16,7 @@ export type MainComponentProps = PropsWithChildren & {
     wasmDataPackage: string;
     fontDefs?: FontDef[];
     defaultFont?: { name: string; size: number };
+    styleOverrides?: ImGuiStyleForPatching;
 };
 
 export const MainComponent: React.ComponentType<MainComponentProps> = ({
@@ -24,6 +26,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
     wasmDataPackage,
     fontDefs,
     defaultFont,
+    styleOverrides,
 }: MainComponentProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -43,9 +46,18 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                 let localModule: MainModule;
 
                 const load = async () => {
+                    const args: any[] = [
+                        `#${canvasId}`,
+                        JSON.stringify({ defs: fonts, defaultFont }),
+                    ];
+
+                    if (styleOverrides) {
+                        args.push(JSON.stringify(styleOverrides));
+                    }
+
                     const moduleArg: any = {
                         canvas: canvasRef.current,
-                        arguments: [`#${canvasId}`, JSON.stringify({ defs: fonts, defaultFont })],
+                        arguments: args,
                         locateFile: (_path: string) => {
                             return wasmDataPackage;
                         },
@@ -78,7 +90,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         } else {
             return () => {};
         }
-    }, [canvasId, canvasRef, fonts, wasmModule, defaultFont]);
+    }, [canvasId, canvasRef, fonts, wasmModule, defaultFont, styleOverrides]);
 
     useEffect(() => {
         if (wasmModule) {
@@ -102,8 +114,8 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                     if (containerRef.current) {
                         try {
                             wasmModule.resizeWindow(
-                                containerRef.current.clientWidth,
-                                containerRef.current.clientHeight - 62,
+                                containerRef.current.clientWidth - 1,
+                                containerRef.current.clientHeight - 10,
                             );
                         } catch (exception) {
                             console.log("Unable to resize window");

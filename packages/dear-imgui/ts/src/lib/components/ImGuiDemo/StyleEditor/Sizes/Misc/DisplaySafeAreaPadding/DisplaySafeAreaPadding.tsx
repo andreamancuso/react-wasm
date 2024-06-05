@@ -3,7 +3,7 @@ import { ReactImgui } from "../../../../../../components/ReactImgui/components";
 import { HelpMarker } from "../../../../HelpMarker/HelpMarker";
 
 export const DisplaySafeAreaPadding = () => {
-    const [value, setValue] = useState<[number, number]>([9, 9]);
+    const [value, setValue] = useState<[number, number]>([0, 0]);
 
     const handleValueChanged = useCallback((event: any) => {
         if (event.nativeEvent) {

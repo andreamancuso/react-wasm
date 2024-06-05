@@ -24,5 +24,8 @@ ImVec4 HEXAtoIV4(const char* hex, float a);
 ImVec4 HEXAtoIV4(const char* hex);
 
 json IV4toJson(ImVec4 imVec4);
+json IV4toJsonTuple(ImVec4 imVec4);
+json IV4toJsonRGBATuple(ImVec4 imVec4);
+json IV4toJsonHEXATuple(ImVec4 imVec4);
 
 #endif
