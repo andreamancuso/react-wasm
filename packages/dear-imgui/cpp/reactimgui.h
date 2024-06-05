@@ -99,6 +99,13 @@ class ReactImgui : public ImPlotView {
 
         json GetAvailableFonts();
 
+        template <typename T>
+        void ExtractNumberFromStyleDef(const json& styleDef, std::string key, T& value);
+
+        void ExtractBooleanFromStyleDef(const json& styleDef, std::string key, bool& value);
+
+        void ExtractImVec2FromStyleDef(const json& styleDef, std::string key, ImVec2& value);
+
         void PatchStyle(const json& styleDef);
 };
 

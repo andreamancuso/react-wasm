@@ -39,13 +39,15 @@ function App() {
 
     const styleOverrides: ImGuiStyleForPatching = useMemo(
         () => ({
+            // frameBorderSize: 1,
+            // windowPadding: [20, 20],
             colors: {
                 [ImGuiCol.Text]: [themeColors.black, 1],
                 [ImGuiCol.TextDisabled]: [themeColors.darkGrey, 1],
                 [ImGuiCol.WindowBg]: [themeColors.white, 1],
                 [ImGuiCol.ChildBg]: [themeColors.white, 1],
                 [ImGuiCol.PopupBg]: [themeColors.white, 1],
-                [ImGuiCol.Border]: [themeColors.lightGrey, 1],
+                [ImGuiCol.Border]: [themeColors.darkGrey, 1],
                 [ImGuiCol.BorderShadow]: [themeColors.black, 1],
                 [ImGuiCol.FrameBg]: [themeColors.veryLightGrey, 1],
                 [ImGuiCol.FrameBgHovered]: [themeColors.lightGrey, 1],

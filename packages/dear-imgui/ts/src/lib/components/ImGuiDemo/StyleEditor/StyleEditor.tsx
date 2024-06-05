@@ -65,13 +65,13 @@ export const StyleEditor = () => {
                     <Misc />
                 </ReactImgui.TabItem>
                 <ReactImgui.TabItem label="Colors">
-                    <ReactImgui.SeparatorText label="Main" />
+                    <ReactImgui.UnformattedText text="Coming soon!" />
                 </ReactImgui.TabItem>
                 <ReactImgui.TabItem label="Fonts">
-                    <ReactImgui.SeparatorText label="Main" />
+                    <ReactImgui.UnformattedText text="Coming soon!" />
                 </ReactImgui.TabItem>
                 <ReactImgui.TabItem label="Rendering">
-                    <ReactImgui.SeparatorText label="Main" />
+                    <ReactImgui.UnformattedText text="Coming soon!" />
                 </ReactImgui.TabItem>
             </ReactImgui.TabBar>
         </ReactImgui.Fragment>

@@ -211,9 +211,81 @@ void ReactImgui::Render(int window_width, int window_height) {
     ImGui::Render();
 };
 
+template <typename T>
+void ReactImgui::ExtractNumberFromStyleDef(const json& styleDef, std::string key, T& value) {
+    if (styleDef.contains(key) && styleDef[key].is_number_unsigned()) {
+        value = styleDef[key].template get<T>();
+    }
+};
+
+void ReactImgui::ExtractBooleanFromStyleDef(const json& styleDef, std::string key, bool& value) {
+    if (styleDef.contains(key) && styleDef[key].is_number_unsigned()) {
+        value = styleDef[key].template get<bool>();
+    }
+};
+
+void ReactImgui::ExtractImVec2FromStyleDef(const json& styleDef, std::string key, ImVec2& value) {
+    if (styleDef.contains(key)  && styleDef[key].is_array() && styleDef[key].size() == 2) {
+        value.x = styleDef[key][0].template get<float>();
+        value.y = styleDef[key][1].template get<float>();
+    }
+};
+
 void ReactImgui::PatchStyle(const json& styleDef) {
     if (styleDef.is_object()) {
         ImGuiStyle* style = &GetStyle();
+
+        ExtractNumberFromStyleDef<float>(styleDef, "alpha", style->Alpha);
+        ExtractNumberFromStyleDef<float>(styleDef, "disabledAlpha", style->DisabledAlpha);
+        ExtractImVec2FromStyleDef(styleDef, "windowPadding", style->WindowPadding);
+        ExtractNumberFromStyleDef<float>(styleDef, "windowRounding", style->WindowRounding);
+        ExtractNumberFromStyleDef<float>(styleDef, "windowBorderSize", style->WindowBorderSize);
+        ExtractImVec2FromStyleDef(styleDef, "windowMinSize", style->WindowMinSize);
+        ExtractImVec2FromStyleDef(styleDef, "windowTitleAlign", style->WindowTitleAlign);
+        ExtractNumberFromStyleDef<int>(styleDef, "windowMenuButtonPosition", style->WindowMenuButtonPosition);
+        ExtractNumberFromStyleDef<float>(styleDef, "childRounding", style->ChildRounding);
+        ExtractNumberFromStyleDef<float>(styleDef, "childBorderSize", style->ChildBorderSize);
+        ExtractNumberFromStyleDef<float>(styleDef, "popupRounding", style->PopupRounding);
+        ExtractNumberFromStyleDef<float>(styleDef, "popupBorderSize", style->PopupBorderSize);
+        ExtractImVec2FromStyleDef(styleDef, "framePadding", style->FramePadding);
+        ExtractNumberFromStyleDef<float>(styleDef, "frameRounding", style->FrameRounding);
+        ExtractNumberFromStyleDef<float>(styleDef, "frameBorderSize", style->FrameBorderSize);
+        ExtractImVec2FromStyleDef(styleDef, "itemSpacing", style->ItemSpacing);
+        ExtractImVec2FromStyleDef(styleDef, "itemInnerSpacing", style->ItemInnerSpacing);
+        ExtractImVec2FromStyleDef(styleDef, "cellPadding", style->CellPadding);
+        ExtractImVec2FromStyleDef(styleDef, "touchExtraPadding", style->TouchExtraPadding);
+        ExtractNumberFromStyleDef<float>(styleDef, "indentSpacing", style->IndentSpacing);
+        ExtractNumberFromStyleDef<float>(styleDef, "columnsMinSpacing", style->ColumnsMinSpacing);
+        ExtractNumberFromStyleDef<float>(styleDef, "scrollbarSize", style->ScrollbarSize);
+        ExtractNumberFromStyleDef<float>(styleDef, "scrollbarRounding", style->ScrollbarRounding);
+        ExtractNumberFromStyleDef<float>(styleDef, "grabMinSize", style->GrabMinSize);
+        ExtractNumberFromStyleDef<float>(styleDef, "grabRounding", style->GrabRounding);
+        ExtractNumberFromStyleDef<float>(styleDef, "logSliderDeadzone", style->LogSliderDeadzone);
+        ExtractNumberFromStyleDef<float>(styleDef, "tabRounding", style->TabRounding);
+        ExtractNumberFromStyleDef<float>(styleDef, "tabBorderSize", style->TabBorderSize);
+        ExtractNumberFromStyleDef<float>(styleDef, "tabMinWidthForCloseButton", style->TabMinWidthForCloseButton);
+        ExtractNumberFromStyleDef<float>(styleDef, "tabBarBorderSize", style->TabBarBorderSize);
+        ExtractNumberFromStyleDef<float>(styleDef, "tableAngledHeadersAngle", style->TableAngledHeadersAngle);
+        ExtractImVec2FromStyleDef(styleDef, "tableAngledHeadersTextAlign", style->TableAngledHeadersTextAlign);
+        ExtractNumberFromStyleDef<int>(styleDef, "colorButtonPosition", style->ColorButtonPosition);
+        ExtractImVec2FromStyleDef(styleDef, "buttonTextAlign", style->ButtonTextAlign);
+        ExtractImVec2FromStyleDef(styleDef, "selectableTextAlign", style->SelectableTextAlign);
+        ExtractNumberFromStyleDef<float>(styleDef, "separatorTextBorderSize", style->SeparatorTextBorderSize);
+        ExtractImVec2FromStyleDef(styleDef, "separatorTextAlign", style->SeparatorTextAlign);
+        ExtractImVec2FromStyleDef(styleDef, "separatorTextPadding", style->SeparatorTextPadding);
+        ExtractImVec2FromStyleDef(styleDef, "displayWindowPadding", style->DisplayWindowPadding);
+        ExtractImVec2FromStyleDef(styleDef, "displaySafeAreaPadding", style->DisplaySafeAreaPadding);
+        ExtractNumberFromStyleDef<float>(styleDef, "mouseCursorScale", style->MouseCursorScale);
+        ExtractBooleanFromStyleDef(styleDef, "antiAliasedLines", style->AntiAliasedLines);
+        ExtractBooleanFromStyleDef(styleDef, "antiAliasedLinesUseTex", style->AntiAliasedLinesUseTex);
+        ExtractBooleanFromStyleDef(styleDef, "antiAliasedFill", style->AntiAliasedFill);
+        ExtractNumberFromStyleDef<float>(styleDef, "curveTessellationTol", style->CurveTessellationTol);
+        ExtractNumberFromStyleDef<float>(styleDef, "circleTessellationMaxError", style->CircleTessellationMaxError);
+        ExtractNumberFromStyleDef<float>(styleDef, "hoverStationaryDelay", style->HoverStationaryDelay);
+        ExtractNumberFromStyleDef<float>(styleDef, "hoverDelayShort", style->HoverDelayShort);
+        ExtractNumberFromStyleDef<float>(styleDef, "hoverDelayNormal", style->HoverDelayNormal);
+        ExtractNumberFromStyleDef<int>(styleDef, "hoverFlagsForTooltipMouse", style->HoverFlagsForTooltipMouse);
+        ExtractNumberFromStyleDef<int>(styleDef, "hoverFlagsForTooltipNav", style->HoverFlagsForTooltipNav);
 
         if (styleDef.contains("colors") && styleDef["colors"].is_object()) {
             ImVec4* colors = style->Colors;

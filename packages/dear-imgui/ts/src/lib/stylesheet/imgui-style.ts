@@ -18,7 +18,7 @@ export type ImGuiStyle = {
     popupBorderSize: number; // Thickness of border around popup/tooltip windows. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly).
     framePadding: ImVec2; // Padding within a framed rectangle (used by most widgets).
     frameRounding: number; // Radius of frame corners rounding. Set to 0.0f to have rectangular frame (used by most widgets).
-    frameBorderSize: number; // Thickness of border around frames. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly).
+    frameBorderSize: 0 | 1; // Thickness of border around frames. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly).
     itemSpacing: ImVec2; // Horizontal and vertical spacing between widgets/lines.
     itemInnerSpacing: ImVec2; // Horizontal and vertical spacing between within elements of a composed widget (e.g. a slider and its label).
     cellPadding: ImVec2; // Padding within a table cell. Cellpadding.x is locked for entire table. CellPadding.y may be altered between different rows.
