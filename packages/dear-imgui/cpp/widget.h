@@ -32,6 +32,7 @@ class ReactImgui;
 struct Style {
     std::optional<int> maybeFontIndex;
     std::optional<ImVec4> maybeColor;
+    std::optional<std::unordered_map<ImGuiStyleVar, float>> maybeScalarStyleVars;
 };
 
 class Widget {

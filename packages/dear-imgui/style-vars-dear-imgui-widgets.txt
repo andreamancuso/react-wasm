@@ -1,0 +1,218 @@
+-- LabelTextV
+
+FramePadding
+ItemInnerSpacing
+
+-- BulletTextV
+
+FramePadding
+
+-- ButtonEx
+
+FramePadding
+FrameRounding
+ButtonTextAlign
+
+-- SmallButton
+
+FramePadding
+
+-- ArrowButtonEx
+
+FramePadding
+FrameRounding
+
+-- ScrollbarEx
+
+FramePadding
+GrabMinSize
+ScrollbarRounding
+
+-- ImageButtonEx
+
+FramePadding
+FrameRounding
+
+-- Checkbox
+
+ItemInnerSpacing
+FramePadding
+FrameRounding
+
+-- RadioButton
+
+ItemInnerSpacing
+FramePadding
+FrameBorderSize
+
+-- ProgressBar
+
+FramePadding
+FrameRounding
+FrameBorderSize
+ItemSpacing
+ItemInnerSpacing
+
+-- Bullet
+
+FramePadding
+
+-- AlignTextToFramePadding
+
+FramePadding
+
+-- SeparatorTextEx
+
+SeparatorTextPadding
+SeparatorTextBorderSize
+SeparatorTextAlign
+ItemSpacing
+
+-- BeginCombo
+
+FramePadding
+ItemInnerSpacing
+FrameRounding
+
+-- BeginComboPopup
+
+ItemSpacing
+WindowPadding
+FramePadding
+
+-- BeginComboPreview
+
+FramePadding
+
+-- DragScalar/DragFloat/DragIntRange2
+
+FramePadding
+ItemInnerSpacing
+FrameRounding
+
+-- SliderBehaviorT
+
+GrabMinSize
+LogSliderDeadzone
+
+-- SliderScalar
+
+FramePadding
+ItemInnerSpacing
+FrameRounding
+
+-- InputScalar
+
+ItemInnerSpacing
+FramePadding
+
+-- InputTextEx
+
+FramePadding
+ItemInnerSpacing
+style.Colors[ImGuiCol_FrameBg]
+FrameRounding
+FrameBorderSize
+
+ // We reproduce the contents of BeginChildFrame() in order to provide 'label' so our window internal data are easier to read/debug.
+        PushStyleColor(ImGuiCol_ChildBg, style.Colors[ImGuiCol_FrameBg]);
+        PushStyleVar(ImGuiStyleVar_ChildRounding, style.FrameRounding);
+        PushStyleVar(ImGuiStyleVar_ChildBorderSize, style.FrameBorderSize);
+        PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0)); // Ensure no clip rect so mouse hover can reach FramePadding edges
+        bool child_visible = BeginChildEx(label, id, frame_bb.GetSize(), true, ImGuiWindowFlags_NoMove);
+        g.NavActivateId = backup_activate_id;
+        PopStyleVar(3);
+        PopStyleColor();
+		
+-- ColorEdit4 (useful functionality for hex color conversion)
+
+ItemInnerSpacing
+ColorButtonPosition
+ItemSpacing
+
+-- ColorPicker4
+
+ItemInnerSpacing
+Alpha?
+
+-- ColorButton
+
+FramePadding
+FrameRounding
+FrameBorderSize
+
+-- ColorTooltip
+
+FramePadding
+
+-- ColorPickerOptionsPopup
+
+ItemInnerSpacing
+
+-- TreeNodeBehavior
+
+FramePadding
+ItemSpacing
+TouchExtraPadding
+FrameRounding
+
+-- CollapsingHeader
+
+FramePadding
+
+-- Selectable
+
+ItemSpacing
+SelectableTextAlign
+
+-- BeginListBox/ListBox
+
+FramePadding
+ItemInnerSpacing
+
+-- PlotEx
+
+FramePadding
+ItemInnerSpacing
+FrameRounding
+
+-- BeginMainMenuBar
+
+DisplaySafeAreaPadding
+FramePadding
+
+-- BeginMenuEx
+
+ItemSpacing
+FramePadding
+WindowPadding
+PopupRounding
+
+-- MenuItemEx
+
+ItemSpacing
+PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
+                RenderText(pos + ImVec2(offsets->OffsetShortcut + stretch_w, 0.0f), shortcut, NULL, false);
+                PopStyleColor();
+				
+-- BeginTabBar
+
+FramePadding
+ItemSpacing
+TabBarBorderSize
+
+-- TabBarLayout
+
+ItemInnerSpacing
+
+-- TabBarScrollingButtons
+
+FramePadding
+ImVec4 arrow_col = g.Style.Colors[ImGuiCol_Text];
+
+-- TabItemBackground
+
+FrameRounding
+TabRounding
+TabBarBorderSize
+TabMinWidthForCloseButton

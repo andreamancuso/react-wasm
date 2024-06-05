@@ -41,9 +41,16 @@ void Widget::PreRender(ReactImgui* view) {};
 
 void Widget::PostRender(ReactImgui* view) {};
 
+void ExtractScalarStyleVar(const json& styleVarsDef, std::string key, ImGuiStyleVar varId, std::unordered_map<ImGuiStyleVar, float>& map) {
+    if (styleVarsDef.contains(key) && styleVarsDef[key].is_number_unsigned()) {
+        map[varId] = styleVarsDef[key].template get<float>();
+    }
+}
+
 StyledWidget::StyleTuple StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
     std::optional<int> maybeFontIndex;
     std::optional<ImVec4> maybeColor;
+    std::optional<std::unordered_map<ImGuiStyleVar, float>> maybeScalarStyleVars;
         
     if (widgetDef.contains("style") && widgetDef["style"].is_object()) {
         if (widgetDef["style"].contains("font") 
@@ -65,6 +72,15 @@ StyledWidget::StyleTuple StyledWidget::ExtractStyle(const json& widgetDef, React
             if (color.size() == 6) {
                 maybeColor.emplace(HEXAtoIV4(color.c_str()));
             }
+        }
+
+        if (widgetDef["style"].contains("vars")) {
+            std::unordered_map<ImGuiStyleVar, float> scalarStyleVars;
+            auto styleVars = widgetDef["style"]["vars"];
+            
+            ExtractScalarStyleVar(styleVars, "alpha", ImGuiStyleVar_Alpha, scalarStyleVars);
+            ExtractScalarStyleVar(styleVars, "alpha", ImGuiStyleVar_DisabledAlpha, scalarStyleVars);
+            ExtractScalarStyleVar(styleVars, "alpha", ImGuiStyleVar_WindowRounding, scalarStyleVars);
         }
     }
 
