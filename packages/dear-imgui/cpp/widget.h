@@ -363,9 +363,9 @@ class UnformattedText final : public StyledWidget {
             m_style->maybeColor = std::get<1>(style);
         }
 
-        ImGuiCol GetImGuiCol();
-
         void Render(ReactImgui* view);
+
+        ImGuiCol GetImGuiCol();
 
         void Patch(const json& val) {
             if (val.is_object()) {

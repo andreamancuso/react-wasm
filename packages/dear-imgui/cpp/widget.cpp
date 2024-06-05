@@ -62,8 +62,6 @@ StyledWidget::StyleTuple StyledWidget::ExtractStyle(const json& widgetDef, React
 
             auto color = widgetDef["style"]["color"].template get<std::string>();
 
-            // printf("color string length: %d", (int)color.size());
-
             if (color.size() == 6) {
                 maybeColor.emplace(HEXAtoIV4(color.c_str()));
             }

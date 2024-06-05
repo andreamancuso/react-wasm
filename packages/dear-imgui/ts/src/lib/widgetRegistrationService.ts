@@ -1,12 +1,14 @@
 import { v4 as uuidv4 } from "uuid";
+import { MainModule } from "./wasm/wasm-app-types";
+import { ImGuiStyle } from "./stylesheet/imgui-style";
 
 export class WidgetRegistrationService {
-    private wasmModule: any;
+    private wasmModule: MainModule;
     private tables: Set<string>;
     private fabricWidgetsMapping: Map<string, number>;
     private fonts: string[];
 
-    constructor(wasmModule: any) {
+    constructor(wasmModule: MainModule) {
         this.wasmModule = wasmModule;
         this.tables = new Set();
         this.fabricWidgetsMapping = new Map();
@@ -23,6 +25,10 @@ export class WidgetRegistrationService {
 
     getFonts() {
         return this.fonts;
+    }
+
+    getStyle(): ImGuiStyle {
+        return JSON.parse(this.wasmModule.getStyle());
     }
 
     generateId() {

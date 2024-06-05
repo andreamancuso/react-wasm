@@ -8,6 +8,7 @@
 // - Introduction, links and more at the top of imgui.cpp
 
 #include <set>
+#include <optional>
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
@@ -143,11 +144,12 @@ class WasmRunner {
             );
         }
 
-        void run(std::string& canvasSelector, std::string& rawFontDefs) {
+        void run(std::string& canvasSelector, std::string& rawFontDefs, std::optional<std::string>& rawStyleOverridesDefs) {
             m_view = new ReactImgui(
                 "ReactImgui", 
                 "ReactImgui",
-                rawFontDefs
+                rawFontDefs,
+                rawStyleOverridesDefs
             );
             m_view->SetEventHandlers(
                 OnTextChanged,
@@ -204,15 +206,92 @@ class WasmRunner {
         float getTextLineHeightWithSpacing() {
             m_view->GetTextLineHeightWithSpacing();
         }
+
+        std::string getStyle() {
+            auto imguiStyle = m_view->GetStyle();
+
+            json style;
+
+            style["alpha"] = imguiStyle.Alpha;
+            style["disabledAlpha"] = imguiStyle.DisabledAlpha;
+            style["windowPadding"] = { imguiStyle.WindowPadding.x, imguiStyle.WindowPadding.y };
+            style["windowRounding"] = imguiStyle.WindowRounding;
+            style["windowBorderSize"] = imguiStyle.WindowBorderSize;
+            style["windowMinSize"] = { imguiStyle.WindowMinSize.x, imguiStyle.WindowMinSize.y };
+            style["windowTitleAlign"] = { imguiStyle.WindowTitleAlign.x, imguiStyle.WindowTitleAlign.y };
+            style["windowMenuButtonPosition"] = imguiStyle.WindowMenuButtonPosition;
+            style["childRounding"] = imguiStyle.ChildRounding;
+            style["childBorderSize"] = imguiStyle.ChildBorderSize;
+            style["popupRounding"] = imguiStyle.PopupRounding;
+            style["popupBorderSize"] = imguiStyle.PopupBorderSize;
+            style["framePadding"] = { imguiStyle.FramePadding.x, imguiStyle.FramePadding.y };
+            style["frameRounding"] = imguiStyle.FrameRounding;
+            style["frameBorderSize"] = imguiStyle.FrameBorderSize;
+            style["itemSpacing"] = { imguiStyle.ItemSpacing.x, imguiStyle.ItemSpacing.y };
+            style["itemInnerSpacing"] = { imguiStyle.ItemInnerSpacing.x, imguiStyle.ItemInnerSpacing.y };
+            style["cellPadding"] = { imguiStyle.CellPadding.x, imguiStyle.CellPadding.y };
+            style["touchExtraPadding"] = { imguiStyle.TouchExtraPadding.x, imguiStyle.TouchExtraPadding.y };
+            style["indentSpacing"] = imguiStyle.IndentSpacing;
+            style["columnsMinSpacing"] = imguiStyle.ColumnsMinSpacing;
+            style["scrollbarSize"] = imguiStyle.ScrollbarSize;
+            style["scrollbarRounding"] = imguiStyle.ScrollbarRounding;
+            style["grabMinSize"] = imguiStyle.GrabMinSize;
+            style["grabRounding"] = imguiStyle.GrabRounding;
+            style["logSliderDeadzone"] = imguiStyle.LogSliderDeadzone;
+            style["tabRounding"] = imguiStyle.TabRounding;
+            style["tabBorderSize"] = imguiStyle.TabBorderSize;
+            style["tabMinWidthForCloseButton"] = imguiStyle.TabMinWidthForCloseButton;
+            style["tabBarBorderSize"] = imguiStyle.TabBarBorderSize;
+            style["tableAngledHeadersAngle"] = imguiStyle.TableAngledHeadersAngle;
+            style["tableAngledHeadersTextAlign"] = { imguiStyle.TableAngledHeadersTextAlign.x, imguiStyle.TableAngledHeadersTextAlign.y };
+            style["colorButtonPosition"] = imguiStyle.ColorButtonPosition;
+            style["buttonTextAlign"] = { imguiStyle.ButtonTextAlign.x, imguiStyle.ButtonTextAlign.y };
+            style["selectableTextAlign"] = { imguiStyle.SelectableTextAlign.x, imguiStyle.SelectableTextAlign.y };
+            style["separatorTextPadding"] = { imguiStyle.SeparatorTextPadding.x, imguiStyle.SeparatorTextPadding.y };
+            style["displayWindowPadding"] = { imguiStyle.DisplayWindowPadding.x, imguiStyle.DisplayWindowPadding.y };
+            style["displaySafeAreaPadding"] = { imguiStyle.DisplaySafeAreaPadding.x, imguiStyle.DisplaySafeAreaPadding.y };
+            style["mouseCursorScale"] = imguiStyle.MouseCursorScale;
+            style["antiAliasedLines"] = imguiStyle.AntiAliasedLines;
+            style["antiAliasedLinesUseTex"] = imguiStyle.AntiAliasedLinesUseTex;
+            style["antiAliasedFill"] = imguiStyle.AntiAliasedFill;
+            style["curveTessellationTol"] = imguiStyle.CurveTessellationTol;
+            style["circleTessellationMaxError"] = imguiStyle.CircleTessellationMaxError;
+            
+            style["hoverStationaryDelay"] = imguiStyle.HoverStationaryDelay;
+            style["hoverDelayShort"] = imguiStyle.HoverDelayShort;
+            style["hoverDelayNormal"] = imguiStyle.HoverDelayNormal;
+
+            style["hoverFlagsForTooltipMouse"] = imguiStyle.HoverFlagsForTooltipMouse;
+            style["hoverFlagsForTooltipNav"] = imguiStyle.HoverFlagsForTooltipNav;
+
+            style["colors"] = json::array();
+
+            for (int i = 0; i < ImGuiCol_COUNT; i++) {
+                style["colors"].push_back(IV4toJsonHEXATuple(imguiStyle.Colors[i]));
+            }
+
+            return style.dump();
+        }
+
+        void patchStyle(std::string& styleDef) {
+            m_view->PatchStyle(json::parse(styleDef));
+        }
 };
 
 static std::unique_ptr<WasmRunner> pRunner = std::make_unique<WasmRunner>();
 
+// todo: add validation of arguments
 int main(int argc, char* argv[]) {
     std::string canvasSelector = argv[1];
     std::string rawFontDefs = argv[2];
+    std::optional<std::string> rawStyleOverridesDefs;
 
-    pRunner->run(canvasSelector, rawFontDefs);
+    if (argc > 2) {
+        // third argument is style overrides
+        rawStyleOverridesDefs.emplace(std::string(argv[3]));
+    }
+
+    pRunner->run(canvasSelector, rawFontDefs, rawStyleOverridesDefs);
 
     return 0;
 }
@@ -257,6 +336,14 @@ float getTextLineHeightWithSpacing() {
     pRunner->getTextLineHeightWithSpacing();
 }
 
+std::string getStyle() {
+    return pRunner->getStyle();
+}
+
+void patchStyle(std::string styleDef) {
+    return pRunner->patchStyle(styleDef);
+}
+
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("exit", &_exit);
     emscripten::function("resizeWindow", &resizeWindow);
@@ -268,6 +355,8 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("appendDataToTable", &appendDataToTable);
     emscripten::function("appendTextToClippedMultiLineTextRenderer", &appendTextToClippedMultiLineTextRenderer);
     emscripten::function("getTextLineHeightWithSpacing", &getTextLineHeightWithSpacing);
+    emscripten::function("getStyle", &getStyle);
+    emscripten::function("patchStyle", &patchStyle);
 
     // emscripten::class_<WasmRunner>("WasmRunner")
     // .constructor<OnInputTextChangeType, OnComboChangeType, OnNumericValueChangeType, OnMultiValueChangeType, OnBooleanValueChangeType, OnClickType>()
@@ -726,63 +815,6 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .value("HasMouseCursors", ImGuiBackendFlags_HasMouseCursors)
         .value("HasSetMousePos", ImGuiBackendFlags_HasSetMousePos)
         .value("RendererHasVtxOffset", ImGuiBackendFlags_RendererHasVtxOffset)
-        ;
-
-    emscripten::enum_<ImGuiCol_>("ImGuiCol")
-        .value("Text", ImGuiCol_Text)
-        .value("TextDisabled", ImGuiCol_TextDisabled)
-        .value("WindowBg", ImGuiCol_WindowBg)
-        .value("ChildBg", ImGuiCol_ChildBg)
-        .value("PopupBg", ImGuiCol_PopupBg)
-        .value("Border", ImGuiCol_Border)
-        .value("BorderShadow", ImGuiCol_BorderShadow)
-        .value("FrameBg", ImGuiCol_FrameBg)
-        .value("FrameBgHovered", ImGuiCol_FrameBgHovered)
-        .value("FrameBgActive", ImGuiCol_FrameBgActive)
-        .value("TitleBg", ImGuiCol_TitleBg)
-        .value("TitleBgActive", ImGuiCol_TitleBgActive)
-        .value("TitleBgCollapsed", ImGuiCol_TitleBgCollapsed)
-        .value("MenuBarBg", ImGuiCol_MenuBarBg)
-        .value("ScrollbarBg", ImGuiCol_ScrollbarBg)
-        .value("ScrollbarGrab", ImGuiCol_ScrollbarGrab)
-        .value("ScrollbarGrabHovered", ImGuiCol_ScrollbarGrabHovered)
-        .value("ScrollbarGrabActive", ImGuiCol_ScrollbarGrabActive)
-        .value("CheckMark", ImGuiCol_CheckMark)
-        .value("SliderGrab", ImGuiCol_SliderGrab)
-        .value("SliderGrabActive", ImGuiCol_SliderGrabActive)
-        .value("Button", ImGuiCol_Button)
-        .value("ButtonHovered", ImGuiCol_ButtonHovered)
-        .value("ButtonActive", ImGuiCol_ButtonActive)
-        .value("Header", ImGuiCol_Header)
-        .value("HeaderHovered", ImGuiCol_HeaderHovered)
-        .value("HeaderActive", ImGuiCol_HeaderActive)
-        .value("Separator", ImGuiCol_Separator)
-        .value("SeparatorHovered", ImGuiCol_SeparatorHovered)
-        .value("SeparatorActive", ImGuiCol_SeparatorActive)
-        .value("ResizeGrip", ImGuiCol_ResizeGrip)
-        .value("ResizeGripHovered", ImGuiCol_ResizeGripHovered)
-        .value("ResizeGripActive", ImGuiCol_ResizeGripActive)
-        .value("Tab", ImGuiCol_Tab)
-        .value("TabHovered", ImGuiCol_TabHovered)
-        .value("TabActive", ImGuiCol_TabActive)
-        .value("TabUnfocused", ImGuiCol_TabUnfocused)
-        .value("TabUnfocusedActive", ImGuiCol_TabUnfocusedActive)
-        .value("PlotLines", ImGuiCol_PlotLines)
-        .value("PlotLinesHovered", ImGuiCol_PlotLinesHovered)
-        .value("PlotHistogram", ImGuiCol_PlotHistogram)
-        .value("PlotHistogramHovered", ImGuiCol_PlotHistogramHovered)
-        .value("TableHeaderBg", ImGuiCol_TableHeaderBg)
-        .value("TableBorderStrong", ImGuiCol_TableBorderStrong)
-        .value("TableBorderLight", ImGuiCol_TableBorderLight)
-        .value("TableRowBg", ImGuiCol_TableRowBg)
-        .value("TableRowBgAlt", ImGuiCol_TableRowBgAlt)
-        .value("TextSelectedBg", ImGuiCol_TextSelectedBg)
-        .value("DragDropTarget", ImGuiCol_DragDropTarget)
-        .value("NavHighlight", ImGuiCol_NavHighlight)
-        .value("NavWindowingHighlight", ImGuiCol_NavWindowingHighlight)
-        .value("NavWindowingDimBg", ImGuiCol_NavWindowingDimBg)
-        .value("ModalWindowDimBg", ImGuiCol_ModalWindowDimBg)
-        .value("COUNT", ImGuiCol_COUNT)
         ;
 
     emscripten::enum_<ImGuiStyleVar_>("ImGuiStyleVar")

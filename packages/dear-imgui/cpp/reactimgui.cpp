@@ -33,11 +33,17 @@ std::unique_ptr<T> makeWidget(const json& val, ReactImgui* view) {
 ReactImgui::ReactImgui(
     const char* newWindowId, 
     const char* newGlWindowTitle, 
-    std::string& rawFontDefs
+    std::string& rawFontDefs,
+    std::optional<std::string>& rawStyleOverridesDefs
 ) : ImPlotView(newWindowId, newGlWindowTitle, rawFontDefs) {
     SetUpWidgetCreatorFunctions();
 
     SetUpFloatFormatChars();
+
+    if (rawStyleOverridesDefs.has_value()) {
+        m_shouldLoadDefaultStyle = false;
+        PatchStyle(json::parse(rawStyleOverridesDefs.value()));
+    }
 }
 
 void ReactImgui::SetUpWidgetCreatorFunctions() {
@@ -175,8 +181,10 @@ void ReactImgui::PrepareForRender() {
     //IM_ASSERT(font != nullptr);
 #endif
 
-    // ImGui::StyleColorsLight();
-    ImGui::StyleColorsDark();
+    if (m_shouldLoadDefaultStyle) {
+        ImGui::StyleColorsLight();
+        // ImGui::StyleColorsDark();
+    }
 };
 
 void ReactImgui::Render(int window_width, int window_height) {
@@ -201,6 +209,28 @@ void ReactImgui::Render(int window_width, int window_height) {
 
     ImGui::End();
     ImGui::Render();
+};
+
+void ReactImgui::PatchStyle(const json& styleDef) {
+    if (styleDef.is_object()) {
+        ImGuiStyle* style = &GetStyle();
+
+        if (styleDef.contains("colors") && styleDef["colors"].is_object()) {
+            ImVec4* colors = style->Colors;
+
+            for (auto& [colorItemKey, colorItemValue] : styleDef["colors"].items()) {
+                auto colorItemKeyAsNumber = stoi(colorItemKey);
+
+                if (colorItemKeyAsNumber >= 0 && colorItemKeyAsNumber < ImGuiCol_COUNT 
+                    && colorItemValue.is_array() && colorItemValue.size() == 2) {
+                    colors[colorItemKeyAsNumber] = HEXAtoIV4(
+                        colorItemValue[0].template get<std::string>().c_str(),
+                        colorItemValue[1].template get<float>()
+                    );
+                }
+            }
+        }
+    }
 };
 
 void ReactImgui::SetWidget(std::string& widgetJsonAsString) {

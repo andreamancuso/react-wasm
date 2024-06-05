@@ -10,7 +10,7 @@
 #include <nlohmann/json.hpp>
 
 #include "./shared.h"
-#include "./view.cpp"
+#include "view.cpp"
 
 #pragma once
 
@@ -18,6 +18,8 @@ using json = nlohmann::json;
 
 class ImGuiView : public View {
     protected:
+        bool m_shouldLoadDefaultStyle;
+
         WGPUColor m_clearColor;
 
         ImGuiContext* m_imGuiCtx;
@@ -35,6 +37,8 @@ class ImGuiView : public View {
             const char* newWindowId, 
             const char* newGlWindowTitle, 
             std::string& rawFontDefs) : View(newWindowId, newGlWindowTitle) {
+            m_shouldLoadDefaultStyle = true;
+
             m_imGuiCtx = ImGui::CreateContext();
 
             ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -43,8 +47,6 @@ class ImGuiView : public View {
 
             static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
             // static const ImWchar icons_ranges[] = { ICON_MIN_MDI, ICON_MAX_16_MDI, 0 };
-
-            
 
             if (fontDefs.is_object() && fontDefs.contains("defs") && fontDefs["defs"].is_array()) {
                 for (auto& [key, item] : fontDefs["defs"].items()) {
@@ -153,6 +155,10 @@ class ImGuiView : public View {
 
         void PopFont() {
             ImGui::PopFont();
+        }
+
+        ImGuiStyle& GetStyle() {
+            return ImGui::GetStyle();
         }
 
         WGPUColor GetClearColor();
