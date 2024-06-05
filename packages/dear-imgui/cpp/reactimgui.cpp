@@ -41,7 +41,7 @@ ReactImgui::ReactImgui(
     SetUpFloatFormatChars();
 
     if (rawStyleOverridesDefs.has_value()) {
-        m_hasStyleOverrides = true;
+        m_shouldLoadDefaultStyle = false;
         PatchStyle(json::parse(rawStyleOverridesDefs.value()));
     }
 }
@@ -181,7 +181,7 @@ void ReactImgui::PrepareForRender() {
     //IM_ASSERT(font != nullptr);
 #endif
 
-    if (!m_hasStyleOverrides) {
+    if (m_shouldLoadDefaultStyle) {
         ImGui::StyleColorsLight();
         // ImGui::StyleColorsDark();
     }

@@ -2,6 +2,7 @@ import { ImGuiCol, ImGuiDir, ImGuiHoveredFlags, ImVec2 } from "../wasm/wasm-app-
 
 export type HEXA = [string, number];
 
+// This is a more or less accurate representation of ImGuiStyle
 export type ImGuiStyle = {
     alpha: number; // Global alpha applies to everything in Dear ImGui.
     disabledAlpha: number; // Additional alpha multiplier applied by BeginDisabled(). Multiply over current value of Alpha.
@@ -52,63 +53,6 @@ export type ImGuiStyle = {
 
     colors: HEXA[]; // 53 items exactly
 
-    // these get converted to ImVec4 and can be overridden
-    // colors: {
-    //     [ImGuiCol.Text]: string;
-    //     [ImGuiCol.TextDisabled]: string;
-    //     [ImGuiCol.WindowBg]: string;
-    //     [ImGuiCol.ChildBg]: string;
-    //     [ImGuiCol.PopupBg]: string;
-    //     [ImGuiCol.Border]: string;
-    //     [ImGuiCol.BorderShadow]: string;
-    //     [ImGuiCol.FrameBg]: string;
-    //     [ImGuiCol.FrameBgHovered]: string;
-    //     [ImGuiCol.FrameBgActive]: string;
-    //     [ImGuiCol.TitleBg]: string;
-    //     [ImGuiCol.TitleBgActive]: string;
-    //     [ImGuiCol.TitleBgCollapsed]: string;
-    //     [ImGuiCol.MenuBarBg]: string;
-    //     [ImGuiCol.ScrollbarBg]: string;
-    //     [ImGuiCol.ScrollbarGrab]: string;
-    //     [ImGuiCol.ScrollbarGrabHovered]: string;
-    //     [ImGuiCol.ScrollbarGrabActive]: string;
-    //     [ImGuiCol.CheckMark]: string;
-    //     [ImGuiCol.SliderGrab]: string;
-    //     [ImGuiCol.SliderGrabActive]: string;
-    //     [ImGuiCol.Button]: string;
-    //     [ImGuiCol.ButtonHovered]: string;
-    //     [ImGuiCol.ButtonActive]: string;
-    //     [ImGuiCol.Header]: string;
-    //     [ImGuiCol.HeaderHovered]: string;
-    //     [ImGuiCol.HeaderActive]: string;
-    //     [ImGuiCol.Separator]: string;
-    //     [ImGuiCol.SeparatorHovered]: string;
-    //     [ImGuiCol.SeparatorActive]: string;
-    //     [ImGuiCol.ResizeGrip]: string;
-    //     [ImGuiCol.ResizeGripHovered]: string;
-    //     [ImGuiCol.ResizeGripActive]: string;
-    //     [ImGuiCol.Tab]: string;
-    //     [ImGuiCol.TabHovered]: string;
-    //     [ImGuiCol.TabActive]: string;
-    //     [ImGuiCol.TabUnfocused]: string;
-    //     [ImGuiCol.TabUnfocusedActive]: string;
-    //     [ImGuiCol.PlotLines]: string;
-    //     [ImGuiCol.PlotLinesHovered]: string;
-    //     [ImGuiCol.PlotHistogram]: string;
-    //     [ImGuiCol.PlotHistogramHovered]: string;
-    //     [ImGuiCol.TableHeaderBg]: string;
-    //     [ImGuiCol.TableBorderStrong]: string;
-    //     [ImGuiCol.TableBorderLight]: string;
-    //     [ImGuiCol.TableRowBg]: string;
-    //     [ImGuiCol.TableRowBgAlt]: string;
-    //     [ImGuiCol.TextSelectedBg]: string;
-    //     [ImGuiCol.DragDropTarget]: string;
-    //     [ImGuiCol.NavHighlight]: string;
-    //     [ImGuiCol.NavWindowingHighlight]: string;
-    //     [ImGuiCol.NavWindowingDimBg]: string;
-    //     [ImGuiCol.ModalWindowDimBg]: string;
-    // };
-
     hoverStationaryDelay: number; // Delay for IsItemHovered(ImGuiHoveredFlags_Stationary). Time required to consider mouse stationary.
     hoverDelayShort: number; // Delay for IsItemHovered(ImGuiHoveredFlags_DelayShort). Usually used along with HoverStationaryDelay.
     hoverDelayNormal: number; // Delay for IsItemHovered(ImGuiHoveredFlags_DelayNormal).
@@ -117,6 +61,7 @@ export type ImGuiStyle = {
     hoverFlagsForTooltipNav: ImGuiHoveredFlags;
 };
 
+// This is what the WASM expects so that it can 'patch' the default style
 export type ImGuiStyleForPatching = Partial<Omit<ImGuiStyle, "colors">> & {
     colors?: {
         [k in ImGuiCol]?: HEXA;

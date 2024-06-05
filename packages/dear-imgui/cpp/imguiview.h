@@ -18,7 +18,7 @@ using json = nlohmann::json;
 
 class ImGuiView : public View {
     protected:
-        bool m_hasStyleOverrides;
+        bool m_shouldLoadDefaultStyle;
 
         WGPUColor m_clearColor;
 
@@ -37,7 +37,7 @@ class ImGuiView : public View {
             const char* newWindowId, 
             const char* newGlWindowTitle, 
             std::string& rawFontDefs) : View(newWindowId, newGlWindowTitle) {
-            m_hasStyleOverrides = false;
+            m_shouldLoadDefaultStyle = true;
 
             m_imGuiCtx = ImGui::CreateContext();
 
