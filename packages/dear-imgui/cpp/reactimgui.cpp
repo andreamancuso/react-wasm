@@ -147,6 +147,8 @@ void ReactImgui::HandleTableData(int id, std::vector<TableData> val) {
 
     TableData data;
 
+    data.reserve(totalSize);
+
     for (const auto& chunk : val) {
         data.insert(data.end(), chunk.begin(), chunk.end());
     }
