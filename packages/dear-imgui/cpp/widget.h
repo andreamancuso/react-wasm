@@ -976,9 +976,6 @@ class Table final : public Widget {
         }
 
     public:
-        typedef std::unordered_map<std::string, std::string> TableRow;
-        typedef std::vector<Table::TableRow> TableData;
-
         TableData m_data;
         std::vector<TableColumn> m_columns;
         int m_clipRows;

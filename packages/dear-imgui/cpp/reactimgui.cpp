@@ -9,9 +9,12 @@
 
 #include <cstring>
 #include <string>
+#include <functional>
+#include <concepts>
 #include <sstream>
 #include <emscripten.h>
 #include <emscripten/bind.h>
+#include <rpp/rpp.hpp>
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
@@ -22,6 +25,7 @@
 #include "reactimgui.h"
 #include "implotview.h"
 #include "widget.h"
+#include "shared.h"
 
 using json = nlohmann::json;
 
@@ -37,14 +41,18 @@ ReactImgui::ReactImgui(
     std::optional<std::string>& rawStyleOverridesDefs
 ) : ImPlotView(newWindowId, newGlWindowTitle, rawFontDefs) {
     SetUpWidgetCreatorFunctions();
-
     SetUpFloatFormatChars();
+    SetUpObservables();
 
     if (rawStyleOverridesDefs.has_value()) {
         m_shouldLoadDefaultStyle = false;
         PatchStyle(json::parse(rawStyleOverridesDefs.value()));
     }
 }
+
+void ReactImgui::SetUpObservables() {
+    // Do we need this?
+};
 
 void ReactImgui::SetUpWidgetCreatorFunctions() {
     m_widget_init_fn["Combo"] = &makeWidget<Combo>;
@@ -111,9 +119,39 @@ void ReactImgui::InitWidget(const json& widgetDef) {
 
         m_widgets[id] = m_widget_init_fn[type](widgetDef, this);
         m_hierarchy[id] = std::vector<int>();
+
+        if (type == "Table") {
+            const std::lock_guard<std::mutex> lock(m_tableSubjectsMutex);
+
+            m_tableSubjects[id] = rpp::subjects::replay_subject<TableData>{100};
+
+            auto handler = std::bind(&ReactImgui::HandleTableData, this, id, std::placeholders::_1);
+
+            m_tableSubjects[id].get_observable() | rpp::ops::buffer(50) | rpp::ops::subscribe(handler);
+        }
     } else {
         printf("unrecognised widget type: '%s'\n", type.c_str());
     }
+};
+
+void ReactImgui::HandleTableData(int id, std::vector<TableData> val) {
+    // printf("%d\n", (int)val.size());
+
+    const std::lock_guard<std::mutex> widgetLock(m_widgets_mutex);
+
+    size_t totalSize = 0;
+
+    for (const auto& chunk : val) {
+        totalSize += chunk.size();
+    }
+
+    TableData data;
+
+    for (const auto& chunk : val) {
+        data.insert(data.end(), chunk.begin(), chunk.end());
+    }
+
+    static_cast<Table*>(m_widgets[id].get())->AppendData(data);
 };
 
 void ReactImgui::SetEventHandlers(
@@ -353,16 +391,16 @@ json ReactImgui::GetAvailableFonts() {
 };
 
 void ReactImgui::AppendDataToTable(int id, std::string& rawData) {
-    const std::lock_guard<std::mutex> lock(m_widgets_mutex);
-
-    if (m_widgets.contains(id) && m_widgets[id]->m_type == "Table") {
-        Table::TableData data = Table::TableData();
+    if (m_tableSubjects.contains(id)) {
+        const std::lock_guard<std::mutex> lock(m_tableSubjectsMutex);
         auto parsedData = json::parse(rawData);
 
         if (parsedData.is_array()) {
+            TableData data = TableData();
+
             for (auto& [parsedItemKey, parsedRow] : parsedData.items()) {
                 if (parsedRow.is_object()) {
-                    Table::TableRow row = Table::TableRow();
+                    TableRow row = TableRow();
 
                     for (auto& [parsedRowFieldKey, parsedRowFieldValue] : parsedRow.items()) {
                         if (parsedRowFieldValue.is_string()) {
@@ -373,9 +411,14 @@ void ReactImgui::AppendDataToTable(int id, std::string& rawData) {
                     data.push_back(row);
                 }
             }
-        }
 
-        static_cast<Table*>(m_widgets[id].get())->AppendData(data);
+            // printf("About to add data to subject\n");
+            m_tableSubjects[id].get_observer().on_next(data);
+            // printf("Added data to subject\n");
+        }
+    } else {
+        // todo: should we lock beforehand?
+        // todo: should we throw here, or return a boolean to indicate whether the append operation was successfully 'queued' success or failure
     }
 };
 

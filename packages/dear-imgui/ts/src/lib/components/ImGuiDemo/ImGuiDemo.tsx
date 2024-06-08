@@ -16,6 +16,7 @@ const styleSheet = RWStyleSheet.create({
 });
 
 export const ImGuiDemo = () => {
+    const intervalRef = useRef<NodeJS.Timeout>();
     const tableRef = useRef<TableImperativeHandle>(null);
     const clippedMultiLineTextRendererRef =
         useRef<ClippedMultiLineTextRendererImperativeHandle>(null);
@@ -68,9 +69,25 @@ export const ImGuiDemo = () => {
 
     const handleAppendDataToTableClick = useCallback(() => {
         if (tableRef.current) {
-            tableRef.current.appendDataToTable([{ id: "1", name: "Name" }]);
+            intervalRef.current = setInterval(() => {
+                if (tableRef.current) {
+                    tableRef.current.appendDataToTable([
+                        { id: "1", name: "Name" },
+                        // { id: "1", name: "Name" },
+                        // { id: "1", name: "Name" },
+                        // { id: "1", name: "Name" },
+                        // { id: "1", name: "Name" },
+                    ]);
+                }
+            }, 0);
         }
     }, [tableRef]);
+
+    const handleStopAppendingDataToTableClick = useCallback(() => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+        }
+    }, []);
 
     const handleAppendTextToTextRenderer = useCallback(() => {
         if (clippedMultiLineTextRendererRef.current) {
@@ -141,6 +158,17 @@ export const ImGuiDemo = () => {
                 </ReactImgui.SameLine>
             </ReactImgui.CollapsingHeader>
 
+            <ReactImgui.DIWindow title="clipped multi line text renderer" width={820} height={600}>
+                <ReactImgui.Child height={-40}>
+                    <ReactImgui.ClippedMultiLineTextRenderer
+                        ref={clippedMultiLineTextRendererRef}
+                    />
+                </ReactImgui.Child>
+                <ReactImgui.SameLine>
+                    <ReactImgui.Button onClick={handleAppendTextToTextRenderer} label="Add text" />
+                </ReactImgui.SameLine>
+            </ReactImgui.DIWindow>
+
             <ReactImgui.DIWindow title="another window" width={820} height={600}>
                 <ReactImgui.SameLine>
                     <ReactImgui.Child width={400} height={0}>
@@ -152,22 +180,17 @@ export const ImGuiDemo = () => {
                     </ReactImgui.Child>
                     <ReactImgui.Child width={400} height={0}>
                         <ReactImgui.Table ref={tableRef} columns={tableColumns} clipRows={10} />
-                        <ReactImgui.Button
-                            onClick={handleAppendDataToTableClick}
-                            label="Add data to table"
-                        />
+                        <ReactImgui.SameLine>
+                            <ReactImgui.Button
+                                onClick={handleAppendDataToTableClick}
+                                label="Add data to table"
+                            />
+                            <ReactImgui.Button
+                                onClick={handleStopAppendingDataToTableClick}
+                                label="Stop adding data"
+                            />
+                        </ReactImgui.SameLine>
                     </ReactImgui.Child>
-                </ReactImgui.SameLine>
-            </ReactImgui.DIWindow>
-
-            <ReactImgui.DIWindow title="clipped multi line text renderer" width={820} height={600}>
-                <ReactImgui.Child height={-40}>
-                    <ReactImgui.ClippedMultiLineTextRenderer
-                        ref={clippedMultiLineTextRendererRef}
-                    />
-                </ReactImgui.Child>
-                <ReactImgui.SameLine>
-                    <ReactImgui.Button onClick={handleAppendTextToTextRenderer} label="Add text" />
                 </ReactImgui.SameLine>
             </ReactImgui.DIWindow>
         </ReactImgui.Fragment>
