@@ -9,9 +9,9 @@ FramePadding
 
 -- ButtonEx
 
-FramePadding
-FrameRounding
-ButtonTextAlign
+FramePadding ImVec2
+FrameRounding number
+ButtonTextAlign ImVec2
 
 -- SmallButton
 

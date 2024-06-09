@@ -29,10 +29,15 @@ using json = nlohmann::json;
 
 class ReactImgui;
 
-struct Style {
+struct BaseStyle {
     std::optional<int> maybeFontIndex;
     std::optional<ImVec4> maybeColor;
-    std::optional<std::unordered_map<ImGuiStyleVar, float>> maybeScalarStyleVars;
+};
+
+struct ButtonStyle : BaseStyle {
+    std::optional<int> maybeFrameRounding;
+    std::optional<ImVec2> maybeFramePadding;
+    std::optional<ImVec2> maybeButtonTextAlign;
 };
 
 class Widget {
@@ -63,16 +68,17 @@ class Widget {
         virtual ImGuiCol GetImGuiCol();
 };
 
+template <typename T>
 class StyledWidget : public Widget {
     public:
-        typedef std::tuple<std::optional<int>, std::optional<ImVec4>> StyleTuple;
+        // typedef std::tuple<std::optional<int>, std::optional<ImVec4>> StyleTuple;
 
-        std::unique_ptr<Style> m_style;
+        std::unique_ptr<T> m_style;
 
-        static StyleTuple ExtractStyle(const json& widgetDef, ReactImgui* view);
+        static T ExtractStyle(const json& widgetDef, ReactImgui* view);
 
         StyledWidget(int id) : Widget(id) {
-            m_style = std::make_unique<Style>();
+            // m_style = std::make_unique<Style>();
         }
 
         void PreRender(ReactImgui* view);
@@ -351,17 +357,18 @@ class BulletText final : public Widget {
         }
 };
 
-class UnformattedText final : public StyledWidget {
+
+class UnformattedText final : public StyledWidget<BaseStyle> {
     public:
         std::string m_text;
 
         static std::unique_ptr<UnformattedText> makeWidget(const json& widgetDef, ReactImgui* view);
 
-        UnformattedText(int id, std::string& text, StyledWidget::StyleTuple& style) : StyledWidget(id) {
+        UnformattedText(int id, std::string& text, BaseStyle& style) : StyledWidget(id) {
             m_type = "UnformattedText";
             m_text = text;
-            m_style->maybeFontIndex = std::get<0>(style);
-            m_style->maybeColor = std::get<1>(style);
+
+            m_style = std::make_unique<BaseStyle>(style);
         }
 
         void Render(ReactImgui* view);
@@ -788,31 +795,28 @@ class Checkbox final : public Widget {
         }
 };
 
-class Button final : public Widget {
+class Button final : public StyledWidget<ButtonStyle> {
     protected:
-        Button(int id, std::string& label) : Widget(id) {
+        Button(int id, std::string& label, ButtonStyle& style) : StyledWidget(id) {
             m_type = "Button";
             m_label = label;
+
+            m_style = std::make_unique<ButtonStyle>(style);
         }
 
     public:
         std::string m_label;
 
-        inline static std::unique_ptr<Button> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
-                auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
-                
-                return Button::makeWidget(id, label);
-            }
+        // static ButtonStyle ExtractStyle(const json& widgetDef, ReactImgui* view);
 
-            throw std::invalid_argument("Invalid JSON data");
-        }
+        static std::unique_ptr<Button> makeWidget(const json& widgetDef, ReactImgui* view);
 
-        inline static std::unique_ptr<Button> makeWidget(int id, std::string& label) {
-            Button instance(id, label);
+        inline static std::unique_ptr<Button> makeWidget(int id, std::string& label, ButtonStyle& style) {
+            Button instance(id, label, style);
             return std::make_unique<Button>(std::move(instance));
         }
+
+        ImGuiCol GetImGuiCol();
 
         void Render(ReactImgui* view);
 

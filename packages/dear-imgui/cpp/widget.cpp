@@ -47,10 +47,10 @@ void ExtractScalarStyleVar(const json& styleVarsDef, std::string key, ImGuiStyle
     }
 }
 
-StyledWidget::StyleTuple StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
+template <typename T>
+T StyledWidget<T>::ExtractStyle(const json& widgetDef, ReactImgui* view) {
     std::optional<int> maybeFontIndex;
     std::optional<ImVec4> maybeColor;
-    std::optional<std::unordered_map<ImGuiStyleVar, float>> maybeScalarStyleVars;
         
     if (widgetDef.contains("style") && widgetDef["style"].is_object()) {
         if (widgetDef["style"].contains("font") 
@@ -74,28 +74,31 @@ StyledWidget::StyleTuple StyledWidget::ExtractStyle(const json& widgetDef, React
             }
         }
 
-        if (widgetDef["style"].contains("vars")) {
-            std::unordered_map<ImGuiStyleVar, float> scalarStyleVars;
-            auto styleVars = widgetDef["style"]["vars"];
+        // if (widgetDef["style"].contains("vars")) {
+        //     std::unordered_map<ImGuiStyleVar, float> scalarStyleVars;
+        //     auto styleVars = widgetDef["style"]["vars"];
             
-            ExtractScalarStyleVar(styleVars, "alpha", ImGuiStyleVar_Alpha, scalarStyleVars);
-            ExtractScalarStyleVar(styleVars, "alpha", ImGuiStyleVar_DisabledAlpha, scalarStyleVars);
-            ExtractScalarStyleVar(styleVars, "alpha", ImGuiStyleVar_WindowRounding, scalarStyleVars);
-        }
+        //     ExtractScalarStyleVar(styleVars, "alpha", ImGuiStyleVar_Alpha, scalarStyleVars);
+        //     ExtractScalarStyleVar(styleVars, "alpha", ImGuiStyleVar_DisabledAlpha, scalarStyleVars);
+        //     ExtractScalarStyleVar(styleVars, "alpha", ImGuiStyleVar_WindowRounding, scalarStyleVars);
+        // }
     }
 
-    return {maybeFontIndex, maybeColor};
+    return T{maybeFontIndex, maybeColor};
 };
 
-bool StyledWidget::HasCustomFont(ReactImgui* view) {
+template <typename T>
+bool StyledWidget<T>::HasCustomFont(ReactImgui* view) {
     return m_style->maybeFontIndex.has_value() && view->IsFontIndexValid(m_style->maybeFontIndex.value());
 };
 
-bool StyledWidget::HasCustomColor() {
+template <typename T>
+bool StyledWidget<T>::HasCustomColor() {
     return m_style->maybeColor.has_value();
 };
 
-void StyledWidget::PreRender(ReactImgui* view) {
+template <typename T>
+void StyledWidget<T>::PreRender(ReactImgui* view) {
     if (HasCustomFont(view)) {
         view->PushFont(m_style->maybeFontIndex.value());
     }
@@ -105,7 +108,8 @@ void StyledWidget::PreRender(ReactImgui* view) {
     }
 };
 
-void StyledWidget::PostRender(ReactImgui* view) {
+template <typename T>
+void StyledWidget<T>::PostRender(ReactImgui* view) {
     if (HasCustomFont(view)) {
         view->PopFont();
     }
@@ -303,6 +307,27 @@ void Checkbox::Render(ReactImgui* view) {
         view->m_onBooleanValueChange(m_id, m_checked);
     }
     ImGui::PopID();
+};
+
+// ButtonStyle Button::ExtractStyle(const json& widgetDef, ReactImgui* view) {
+//     return StyledWidget::ExtractStyle(widgetDef, view);
+// };
+
+ImGuiCol Button::GetImGuiCol() {
+    return ImGuiCol_Button;
+};
+
+std::unique_ptr<Button> Button::makeWidget(const json& widgetDef, ReactImgui* view) {
+    if (widgetDef.is_object()) {
+        auto id = widgetDef["id"].template get<int>();
+        auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+
+        auto style = StyledWidget<ButtonStyle>::ExtractStyle(widgetDef, view);
+        
+        return Button::makeWidget(id, label, style);
+    }
+
+    throw std::invalid_argument("Invalid JSON data");
 };
 
 void Button::Render(ReactImgui* view) {
