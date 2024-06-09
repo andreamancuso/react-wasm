@@ -976,9 +976,6 @@ class Table final : public Widget {
         }
 
     public:
-        typedef std::unordered_map<std::string, std::string> TableRow;
-        typedef std::vector<TableRow> TableData;
-
         TableData m_data;
         std::vector<TableColumn> m_columns;
         int m_clipRows;
@@ -1030,6 +1027,7 @@ class Table final : public Widget {
 
         void AppendData(TableData& data) {
             m_data.insert(m_data.end(), data.begin(), data.end());
+
         }
 };
 

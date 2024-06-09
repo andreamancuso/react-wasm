@@ -10,6 +10,9 @@
 
 using json = nlohmann::json;
 
+typedef std::unordered_map<std::string, std::string> TableRow;
+typedef std::vector<TableRow> TableData;
+
 typedef void (*OnTextChangedCallback)(int id, std::string value);
 typedef void (*OnComboChangedCallback)(int id, int value);
 typedef void (*OnNumericValueChangedCallback)(int id, int value);

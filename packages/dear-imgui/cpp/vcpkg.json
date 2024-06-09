@@ -1,13 +1,12 @@
 {
-    "name": "reactdearimgui",
-    "version-string": "1.0.0",
     "vcpkg-configuration": {
         "overlay-ports": [
             "./vcpkg-overlay-ports/imgui"
         ]
     },
+    "name": "reactdearimgui",
+    "version-string": "1.0.0",
     "dependencies": [
-        "nlohmann-json",
         {
             "name": "imgui",
             "features": [
@@ -17,6 +16,8 @@
             ]
         },
         "implot",
-        "opengl-registry"
+        "nlohmann-json",
+        "opengl-registry",
+        "reactiveplusplus"
     ]
 }

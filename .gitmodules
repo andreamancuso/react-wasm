@@ -1,9 +1,9 @@
 [submodule "deps/wasm-glfw3-boilerplate"]
 	path = packages/dear-imgui/cpp/deps/wasm-glfw3-boilerplate
 	url = https://github.com/andreamancuso/wasm-glfw3-boilerplate
-[submodule "packages/dear-imgui/cpp/deps/vcpkg"]
-	path = packages/dear-imgui/cpp/deps/vcpkg
-	url = https://github.com/microsoft/vcpkg
 [submodule "packages/dear-imgui/cpp/deps/IconFontCppHeaders"]
 	path = packages/dear-imgui/cpp/deps/IconFontCppHeaders
 	url = https://github.com/juliettef/IconFontCppHeaders.git
+[submodule "packages/dear-imgui/cpp/deps/vcpkg"]
+	path = packages/dear-imgui/cpp/deps/vcpkg
+	url = https://github.com/andreamancuso/vcpkg.git

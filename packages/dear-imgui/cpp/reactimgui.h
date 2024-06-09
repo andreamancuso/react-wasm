@@ -13,6 +13,7 @@
 #include <mutex>
 #include <emscripten.h>
 #include <emscripten/bind.h>
+#include <rpp/rpp.hpp>
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
@@ -31,6 +32,9 @@ class Widget;
 
 class ReactImgui : public ImPlotView {
     private:
+        std::unordered_map<int, rpp::subjects::replay_subject<TableData>> m_tableSubjects;
+        std::mutex m_tableSubjectsMutex;
+
         std::unordered_map<std::string, std::function<std::unique_ptr<Widget>(const json&, ReactImgui*)>> m_widget_init_fn;
 
         std::unordered_map<int, std::unique_ptr<Widget>> m_widgets;
@@ -41,6 +45,10 @@ class ReactImgui : public ImPlotView {
         void SetUpFloatFormatChars();
 
         void SetUpWidgetCreatorFunctions();
+        
+        void HandleTableData(int id, TableData val);
+        
+        void HandleBufferedTableData(int id, std::vector<TableData> val);
 
     public:
         std::unordered_map<int, std::vector<int>> m_hierarchy;
@@ -72,6 +80,8 @@ class ReactImgui : public ImPlotView {
             OnBooleanValueChangedCallback onBooleanValueChangeFn,
             OnClickCallback onClickFn
         );
+
+        void SetUpObservables();
 
         void PrepareForRender();
 
