@@ -125,17 +125,26 @@ void ReactImgui::InitWidget(const json& widgetDef) {
 
             m_tableSubjects[id] = rpp::subjects::replay_subject<TableData>{100};
 
+            // auto handler = std::bind(&ReactImgui::HandleBufferedTableData, this, id, std::placeholders::_1);
             auto handler = std::bind(&ReactImgui::HandleTableData, this, id, std::placeholders::_1);
 
-            m_tableSubjects[id].get_observable() | rpp::ops::buffer(50) | rpp::ops::subscribe(handler);
+            // todo: restore buffer() usage
+            // m_tableSubjects[id].get_observable() | rpp::ops::buffer(50) | rpp::ops::subscribe(handler);
+            m_tableSubjects[id].get_observable() | rpp::ops::subscribe(handler);
         }
     } else {
         printf("unrecognised widget type: '%s'\n", type.c_str());
     }
 };
 
-void ReactImgui::HandleTableData(int id, std::vector<TableData> val) {
+void ReactImgui::HandleTableData(int id, TableData val) {
     // printf("%d\n", (int)val.size());
+
+    static_cast<Table*>(m_widgets[id].get())->AppendData(val);
+};
+
+void ReactImgui::HandleBufferedTableData(int id, std::vector<TableData> val) {
+    // printf("%d\n", (int)val.size()); // I'm seeing 50 the first time this gets called, then 1 subsequent times...
 
     const std::lock_guard<std::mutex> widgetLock(m_widgets_mutex);
 

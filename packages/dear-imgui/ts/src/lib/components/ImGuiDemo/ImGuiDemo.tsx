@@ -7,6 +7,7 @@ import { TableImperativeHandle } from "../ReactImgui/Table";
 import { ClippedMultiLineTextRendererImperativeHandle } from "../ReactImgui/ClippedMultiLineTextRenderer";
 import faIconMap from "../../fa-icons";
 import RWStyleSheet from "../../stylesheet/stylesheet";
+import { Tables } from "./Tables/Tables";
 
 const styleSheet = RWStyleSheet.create({
     ut: {
@@ -16,8 +17,6 @@ const styleSheet = RWStyleSheet.create({
 });
 
 export const ImGuiDemo = () => {
-    const intervalRef = useRef<NodeJS.Timeout>();
-    const tableRef = useRef<TableImperativeHandle>(null);
     const clippedMultiLineTextRendererRef =
         useRef<ClippedMultiLineTextRendererImperativeHandle>(null);
     const [text, setText] = useState("Hello, world!");
@@ -50,42 +49,6 @@ export const ImGuiDemo = () => {
                 event.nativeEvent.values[2],
                 event.nativeEvent.values[3],
             ]);
-        }
-    }, []);
-
-    const tableColumns = useMemo(
-        () => [
-            {
-                heading: "ID",
-                fieldId: "id",
-            },
-            {
-                heading: "Name",
-                fieldId: "name",
-            },
-        ],
-        [],
-    );
-
-    const handleAppendDataToTableClick = useCallback(() => {
-        if (tableRef.current) {
-            intervalRef.current = setInterval(() => {
-                if (tableRef.current) {
-                    tableRef.current.appendDataToTable([
-                        { id: "1", name: "Name" },
-                        // { id: "1", name: "Name" },
-                        // { id: "1", name: "Name" },
-                        // { id: "1", name: "Name" },
-                        // { id: "1", name: "Name" },
-                    ]);
-                }
-            }, 0);
-        }
-    }, [tableRef]);
-
-    const handleStopAppendingDataToTableClick = useCallback(() => {
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
         }
     }, []);
 
@@ -169,7 +132,7 @@ export const ImGuiDemo = () => {
                 </ReactImgui.SameLine>
             </ReactImgui.DIWindow>
 
-            <ReactImgui.DIWindow title="another window" width={820} height={600}>
+            <ReactImgui.DIWindow title="input widgets" width={820} height={600}>
                 <ReactImgui.SameLine>
                     <ReactImgui.Child width={400} height={0}>
                         <ReactImgui.InputText
@@ -178,20 +141,11 @@ export const ImGuiDemo = () => {
                         />
                         <ReactImgui.UnformattedText text={text} />
                     </ReactImgui.Child>
-                    <ReactImgui.Child width={400} height={0}>
-                        <ReactImgui.Table ref={tableRef} columns={tableColumns} clipRows={10} />
-                        <ReactImgui.SameLine>
-                            <ReactImgui.Button
-                                onClick={handleAppendDataToTableClick}
-                                label="Add data to table"
-                            />
-                            <ReactImgui.Button
-                                onClick={handleStopAppendingDataToTableClick}
-                                label="Stop adding data"
-                            />
-                        </ReactImgui.SameLine>
-                    </ReactImgui.Child>
                 </ReactImgui.SameLine>
+            </ReactImgui.DIWindow>
+
+            <ReactImgui.DIWindow title="tables" width={1000} height={600}>
+                <Tables />
             </ReactImgui.DIWindow>
         </ReactImgui.Fragment>
     );

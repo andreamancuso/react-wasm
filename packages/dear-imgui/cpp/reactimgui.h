@@ -46,7 +46,9 @@ class ReactImgui : public ImPlotView {
 
         void SetUpWidgetCreatorFunctions();
         
-        void HandleTableData(int id, std::vector<TableData> val);
+        void HandleTableData(int id, TableData val);
+        
+        void HandleBufferedTableData(int id, std::vector<TableData> val);
 
     public:
         std::unordered_map<int, std::vector<int>> m_hierarchy;
