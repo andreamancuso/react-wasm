@@ -154,17 +154,19 @@ void StyledWidget::PreRender(ReactImgui* view) {
 };
 
 void StyledWidget::PostRender(ReactImgui* view) {
-    if (HasCustomFont(view)) {
-        view->PopFont();
-    }
+    if (HasCustomStyles()) {
+        if (HasCustomFont(view)) {
+            view->PopFont();
+        }
 
-    if (HasCustomColors()) {
-        ImGui::PopStyleColor(m_style.value()->maybeColors.value().size());
-    }
+        if (HasCustomColors()) {
+            ImGui::PopStyleColor(m_style.value()->maybeColors.value().size());
+        }
 
-    if (HasCustomStyleVars()) {
-        // Big, big assumption that this will match exactly the number of style vars being pushed above... Maybe we should actually keep track
-        ImGui::PopStyleVar(m_style.value()->maybeStyleVars.value().size());
+        if (HasCustomStyleVars()) {
+            // Big, big assumption that this will match exactly the number of style vars being pushed above... Maybe we should actually keep track
+            ImGui::PopStyleVar(m_style.value()->maybeStyleVars.value().size());
+        }
     }
 };
 
