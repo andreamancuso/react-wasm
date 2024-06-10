@@ -12,6 +12,7 @@ export const InputText: WidgetFunctionComponent<WidgetPropsMap["InputText"]> = (
     onChange,
     defaultValue,
     label,
+    style,
 }) => {
     const widgetRegistratonService = useWidgetRegistrationService();
     const idRef = useRef(widgetRegistratonService.generateId());
@@ -23,6 +24,7 @@ export const InputText: WidgetFunctionComponent<WidgetPropsMap["InputText"]> = (
             defaultValue={defaultValue}
             label={label}
             onChange={onChange}
+            style={style}
         />
     );
 };

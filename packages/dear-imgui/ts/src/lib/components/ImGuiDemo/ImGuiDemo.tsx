@@ -10,17 +10,30 @@ import RWStyleSheet from "../../stylesheet/stylesheet";
 import { Tables } from "./Tables/Tables";
 import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 
-const styleSheet = RWStyleSheet.create({
-    ut: {
-        colors: { [ImGuiCol.Text]: "ff6e59" },
-        font: { name: "roboto-regular", size: 24 },
-    },
-    inputWindow: {
-        vars: { [ImGuiStyleVar.WindowPadding]: [20, 10] },
-    },
-});
-
 export const ImGuiDemo = () => {
+    const [color, setColor] = useState("ff6e59");
+    const styleSheet = useMemo(
+        () =>
+            RWStyleSheet.create({
+                title: {
+                    colors: { [ImGuiCol.Text]: "ff6e59" },
+                    font: { name: "roboto-regular", size: 24 },
+                },
+                clippedText: {
+                    colors: { [ImGuiCol.Text]: color },
+                },
+                inputWindow: {
+                    vars: { [ImGuiStyleVar.WindowPadding]: [20, 10] },
+                },
+            }),
+        [color],
+    );
+
+    const handleToggleColorClicked = useCallback(
+        () => setColor((currentColor) => (currentColor === "ff6e59" ? "1a1a1a" : "ff6e59")),
+        [],
+    );
+
     const clippedMultiLineTextRendererRef =
         useRef<ClippedMultiLineTextRendererImperativeHandle>(null);
     const [text, setText] = useState("Hello, world!");
@@ -70,7 +83,7 @@ export const ImGuiDemo = () => {
         <ReactImgui.Fragment>
             <ReactImgui.UnformattedText
                 text={`dear imgui says hello! ${faIconMap["address-book"]} ${faIconMap["wine-bottle"]}`}
-                style={styleSheet.ut}
+                style={styleSheet.title}
             />
 
             <ReactImgui.CollapsingHeader label="Help">
@@ -129,10 +142,12 @@ export const ImGuiDemo = () => {
                 <ReactImgui.Child height={-40}>
                     <ReactImgui.ClippedMultiLineTextRenderer
                         ref={clippedMultiLineTextRendererRef}
+                        style={styleSheet.clippedText}
                     />
                 </ReactImgui.Child>
                 <ReactImgui.SameLine>
                     <ReactImgui.Button onClick={handleAppendTextToTextRenderer} label="Add text" />
+                    <ReactImgui.Button onClick={handleToggleColorClicked} label="Toggle color" />
                 </ReactImgui.SameLine>
             </ReactImgui.DIWindow>
 

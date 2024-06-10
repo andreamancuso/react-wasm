@@ -7,6 +7,7 @@ export const Combo: WidgetFunctionComponent<WidgetPropsMap["Combo"]> = ({
     options,
     onChange,
     defaultValue,
+    style,
 }) => {
     const widgetRegistratonService = useWidgetRegistrationService();
     const idRef = useRef(widgetRegistratonService.generateId());
@@ -22,6 +23,7 @@ export const Combo: WidgetFunctionComponent<WidgetPropsMap["Combo"]> = ({
             // Is it possible to pass arrays here?
             optionsList={optionsList}
             onChange={onChange}
+            style={style}
         >
             {/* {options.map(({ value, label }) => (
                 <div key={value} data-value={value} data-label={label} />

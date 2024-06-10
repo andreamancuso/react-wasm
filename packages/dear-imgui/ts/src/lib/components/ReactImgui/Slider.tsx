@@ -1,15 +1,6 @@
 import { useRef } from "react";
 import { useWidgetRegistrationService } from "../../hooks";
-import { SliderTypes, WidgetFunctionComponent, WidgetPropsMap } from "./types";
-
-type SliderProps = {
-    label: string;
-    defaultValue?: number;
-    min?: number;
-    max?: number;
-    onChange?: (value: number) => void;
-    sliderType?: SliderTypes;
-};
+import { WidgetFunctionComponent, WidgetPropsMap } from "./types";
 
 export const Slider: WidgetFunctionComponent<WidgetPropsMap["Slider"]> = ({
     label,
@@ -18,7 +9,8 @@ export const Slider: WidgetFunctionComponent<WidgetPropsMap["Slider"]> = ({
     onChange,
     defaultValue,
     sliderType = "default",
-}: SliderProps) => {
+    style,
+}) => {
     const widgetRegistratonService = useWidgetRegistrationService();
     const idRef = useRef(widgetRegistratonService.generateId());
 
@@ -32,6 +24,7 @@ export const Slider: WidgetFunctionComponent<WidgetPropsMap["Slider"]> = ({
             max={max}
             sliderType={sliderType}
             onChange={onChange}
+            style={style}
         />
     );
 };

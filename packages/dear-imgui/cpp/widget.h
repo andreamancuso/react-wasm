@@ -58,7 +58,7 @@ class Widget {
 
         virtual void PostRender(ReactImgui* view);
 
-        virtual void Patch(const json& val) = 0;
+        virtual void Patch(const json& widgetPatchDef, ReactImgui* view);
 };
 
 class StyledWidget : public Widget {
@@ -86,6 +86,10 @@ class StyledWidget : public Widget {
         bool HasCustomColors();
 
         bool HasCustomStyleVars();
+
+        void ReplaceStyle(BaseStyle& newStyle);
+
+        virtual void Patch(const json& widgetPatchDef, ReactImgui* view);
 };
 
 class Fragment final : public Widget {
@@ -106,30 +110,28 @@ class Fragment final : public Widget {
         }
 
         void Render(ReactImgui* view);
-
-        void Patch(const json& val) {}
 };
 
-class Group final : public Widget {
+class Group final : public StyledWidget {
     public:
-        static std::unique_ptr<Group> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
+        static std::unique_ptr<Group> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
                 
-                return std::make_unique<Group>(id);
+                return std::make_unique<Group>(id, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        Group(int id) : Widget(id) {
+        Group(int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Group";
             m_handlesChildrenWithinRenderMethod = true;
         }
 
         void Render(ReactImgui* view);
-
-        void Patch(const json& val) {}
 };
 
 class Window final : public StyledWidget {
@@ -167,7 +169,21 @@ class Window final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {}
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef["title"].is_string()) {
+                    m_title = widgetPatchDef["title"].template get<std::string>();
+                }
+                if (widgetPatchDef["width"].is_string()) {
+                    m_width = widgetPatchDef["width"].template get<float>();
+                }
+                if (widgetPatchDef["height"].is_string()) {
+                    m_height = widgetPatchDef["height"].template get<float>();
+                }
+            }
+        }
 };
 
 class Child final : public StyledWidget {
@@ -209,7 +225,18 @@ class Child final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {}
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef["width"].is_string()) {
+                    m_width = widgetPatchDef["width"].template get<float>();
+                }
+                if (widgetPatchDef["height"].is_string()) {
+                    m_height = widgetPatchDef["height"].template get<float>();
+                }
+            }
+        }
 };
 
 class SameLine final : public Widget {
@@ -231,7 +258,7 @@ class SameLine final : public Widget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {}
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {}
 };
 
 class Separator final : public StyledWidget {
@@ -251,8 +278,6 @@ class Separator final : public StyledWidget {
         Separator(int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {}
 
         void Render(ReactImgui* view);
-
-        void Patch(const json& val) {}
 };
 
 class Indent final : public StyledWidget {
@@ -275,8 +300,6 @@ class Indent final : public StyledWidget {
         }
 
         void Render(ReactImgui* view);
-
-        void Patch(const json& val) {}
 };
 
 class SeparatorText final : public StyledWidget {
@@ -303,10 +326,12 @@ class SeparatorText final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                if (val.contains("label") && val["label"].is_string()) {
-                    m_label = val["label"].template get<std::string>();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
+                    m_label = widgetPatchDef["label"].template get<std::string>();
                 }
             }
         }
@@ -336,10 +361,12 @@ class BulletText final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                if (val.contains("text") && val["text"].is_string()) {
-                    m_text = val["text"].template get<std::string>();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef.contains("text") && widgetPatchDef["text"].is_string()) {
+                    m_text = widgetPatchDef["text"].template get<std::string>();
                 }
             }
         }
@@ -358,10 +385,12 @@ class UnformattedText final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                if (val.contains("text") && val["text"].is_string()) {
-                    m_text = val["text"].template get<std::string>();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef.contains("text") && widgetPatchDef["text"].is_string()) {
+                    m_text = widgetPatchDef["text"].template get<std::string>();
                 }
             }
         }
@@ -391,10 +420,12 @@ class DisabledText final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                if (val.contains("text") && val["text"].is_string()) {
-                    m_text = val["text"].template get<std::string>();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef.contains("text") && widgetPatchDef["text"].is_string()) {
+                    m_text = widgetPatchDef["text"].template get<std::string>();
                 }
             }
         }
@@ -420,8 +451,6 @@ class TabBar final : public StyledWidget {
         }
 
         void Render(ReactImgui* view);
-
-        void Patch(const json& val) {}
 };
 
 class TabItem final : public StyledWidget {
@@ -449,10 +478,12 @@ class TabItem final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                if (val.contains("label") && val["label"].is_string()) {
-                    m_label = val["label"].template get<std::string>();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
+                    m_label = widgetPatchDef["label"].template get<std::string>();
                 }
             }
         }
@@ -483,10 +514,12 @@ class CollapsingHeader final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                if (val.contains("label") && val["label"].is_string()) {
-                    m_label = val["label"].template get<std::string>();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
+                    m_label = widgetPatchDef["label"].template get<std::string>();
                 }
             }
         }
@@ -517,10 +550,12 @@ class TextWrap final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                if (val.contains("width") && val["width"].is_string()) {
-                    m_width = val["width"].template get<double>();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef.contains("width") && widgetPatchDef["width"].is_string()) {
+                    m_width = widgetPatchDef["width"].template get<double>();
                 }
             }
         }
@@ -546,8 +581,6 @@ class ItemTooltip final : public StyledWidget {
         }
 
         void Render(ReactImgui* view);
-
-        void Patch(const json& val) {}
 };
 
 class TreeNode final : public StyledWidget {
@@ -575,10 +608,12 @@ class TreeNode final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                if (val.contains("label") && val["label"].is_string()) {
-                    m_label = val["label"].template get<std::string>();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
+                    m_label = widgetPatchDef["label"].template get<std::string>();
                 }
             }
         }
@@ -696,10 +731,12 @@ class Combo final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                if (val.contains("label") && val["label"].is_string()) {
-                    m_label = val["label"].template get<std::string>();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
+                    m_label = widgetPatchDef["label"].template get<std::string>();
                 }
             }
         }
@@ -746,10 +783,12 @@ class InputText final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                if (val.contains("label") && val["label"].is_string()) {
-                    m_label = val["label"].template get<std::string>();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
+                    m_label = widgetPatchDef["label"].template get<std::string>();
                 }
             }
         }
@@ -789,10 +828,12 @@ class Checkbox final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                if (val.contains("label") && val["label"].is_string()) {
-                    m_label = val["label"].template get<std::string>();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
+                    m_label = widgetPatchDef["label"].template get<std::string>();
                 }
             }
         }
@@ -819,10 +860,12 @@ class Button final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                if (val.contains("label") && val["label"].is_string()) {
-                    m_label = val["label"].template get<std::string>();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
+                    m_label = widgetPatchDef["label"].template get<std::string>();
                 }
             }
         }
@@ -870,16 +913,18 @@ class Slider final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                if (val.contains("label") && val["label"].is_string()) {
-                    m_label = val["label"].template get<std::string>();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
+                    m_label = widgetPatchDef["label"].template get<std::string>();
                 }
-                if (val.contains("min") && val["min"].is_number()) {
-                    m_min = val["min"].template get<float>();
+                if (widgetPatchDef.contains("min") && widgetPatchDef["min"].is_number()) {
+                    m_min = widgetPatchDef["min"].template get<float>();
                 }
-                if (val.contains("max") && val["max"].is_number()) {
-                    m_max = val["max"].template get<float>();
+                if (widgetPatchDef.contains("max") && widgetPatchDef["max"].is_number()) {
+                    m_max = widgetPatchDef["max"].template get<float>();
                 }
             }
         }
@@ -946,19 +991,21 @@ class MultiSlider final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                if (val.contains("label") && val["label"].is_string()) {
-                    m_label = val["label"].template get<std::string>();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+
+                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
+                    m_label = widgetPatchDef["label"].template get<std::string>();
                 }
-                if (val.contains("min") && val["min"].is_number()) {
-                    m_min = val["min"].template get<float>();
+                if (widgetPatchDef.contains("min") && widgetPatchDef["min"].is_number()) {
+                    m_min = widgetPatchDef["min"].template get<float>();
                 }
-                if (val.contains("max") && val["max"].is_number()) {
-                    m_max = val["max"].template get<float>();
+                if (widgetPatchDef.contains("max") && widgetPatchDef["max"].is_number()) {
+                    m_max = widgetPatchDef["max"].template get<float>();
                 }
-                if (val.contains("decimalDigits") && val["decimalDigits"].is_number()) {
-                    m_decimalDigits = val["decimalDigits"].template get<int>();
+                if (widgetPatchDef.contains("decimalDigits") && widgetPatchDef["decimalDigits"].is_number()) {
+                    m_decimalDigits = widgetPatchDef["decimalDigits"].template get<int>();
                 }
             }
         }
@@ -1025,8 +1072,9 @@ class Table final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
                 // not sure what can be patched - presumably the columns? though that'd likely force us to clear the data
             }
         }
@@ -1073,9 +1121,10 @@ class ClippedMultiLineTextRenderer final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
-        void Patch(const json& val) {
-            if (val.is_object()) {
-                // not sure what can be patched - presumably the columns? though that'd likely force us to clear the data
+        void Patch(const json& widgetPatchDef, ReactImgui* view) {
+            if (widgetPatchDef.is_object()) {
+                StyledWidget::Patch(widgetPatchDef, view);
+                // not sure what can be patched
             }
         }
 

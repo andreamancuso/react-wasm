@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useWidgetRegistrationService } from "../../hooks";
-import { Primitive, WidgetFunctionComponent, WidgetPropsMap } from "./types";
+import { WidgetFunctionComponent, WidgetPropsMap } from "./types";
 
 export const MultiSlider: WidgetFunctionComponent<WidgetPropsMap["MultiSlider"]> = ({
     label,
@@ -10,6 +10,7 @@ export const MultiSlider: WidgetFunctionComponent<WidgetPropsMap["MultiSlider"]>
     defaultValues,
     numValues,
     decimalDigits,
+    style,
 }) => {
     const widgetRegistratonService = useWidgetRegistrationService();
     const idRef = useRef(widgetRegistratonService.generateId());
@@ -29,6 +30,7 @@ export const MultiSlider: WidgetFunctionComponent<WidgetPropsMap["MultiSlider"]>
             decimalDigits={decimalDigits}
             numValues={numValues}
             onChange={onChange}
+            style={style}
         />
     );
 };

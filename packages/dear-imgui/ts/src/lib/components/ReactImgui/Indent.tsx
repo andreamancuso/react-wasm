@@ -1,5 +1,12 @@
-import { PropsWithChildren, WidgetFunctionComponent } from "./types";
+import { WidgetPropsMap, WidgetFunctionComponent, PropsWithChildren } from "./types";
 
-export const Indent: WidgetFunctionComponent<PropsWithChildren> = ({ children }) => {
-    return <widget type="Indent">{children}</widget>;
+export const Indent: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap["Indent"]> = ({
+    children,
+    style,
+}) => {
+    return (
+        <widget type="Indent" style={style}>
+            {children}
+        </widget>
+    );
 };

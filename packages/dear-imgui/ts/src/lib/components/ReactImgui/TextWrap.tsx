@@ -3,9 +3,10 @@ import { PropsWithChildren, WidgetFunctionComponent, WidgetPropsMap } from "./ty
 export const TextWrap: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap["TextWrap"]> = ({
     children,
     width,
+    style,
 }) => {
     return (
-        <widget type="TextWrap" width={width}>
+        <widget type="TextWrap" width={width} style={style}>
             {children}
         </widget>
     );

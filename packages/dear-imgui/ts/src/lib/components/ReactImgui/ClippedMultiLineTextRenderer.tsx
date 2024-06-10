@@ -9,7 +9,7 @@ export type ClippedMultiLineTextRendererImperativeHandle = {
 export const ClippedMultiLineTextRenderer = forwardRef<
     ClippedMultiLineTextRendererImperativeHandle,
     WidgetPropsMap["ClippedMultiLineTextRenderer"]
->(({}: WidgetPropsMap["ClippedMultiLineTextRenderer"], ref) => {
+>(({ style }: WidgetPropsMap["ClippedMultiLineTextRenderer"], ref) => {
     const widgetRegistratonService = useWidgetRegistrationService();
     const idRef = useRef(widgetRegistratonService.generateId());
 
@@ -32,5 +32,5 @@ export const ClippedMultiLineTextRenderer = forwardRef<
         [],
     );
 
-    return <widget type="ClippedMultiLineTextRenderer" id={idRef.current} />;
+    return <widget type="ClippedMultiLineTextRenderer" id={idRef.current} style={style} />;
 });

@@ -5,9 +5,10 @@ export const Child: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap["
     width,
     height,
     children,
+    style,
 }) => {
     return (
-        <widget type="Child" width={width} height={height}>
+        <widget type="Child" width={width} height={height} style={style}>
             {children}
         </widget>
     );

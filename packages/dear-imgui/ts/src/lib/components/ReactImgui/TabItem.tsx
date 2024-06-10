@@ -11,12 +11,13 @@ export const TabItem: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap
     children,
     onOpenChange,
     label,
+    style,
 }) => {
     const widgetRegistratonService = useWidgetRegistrationService();
     const idRef = useRef(widgetRegistratonService.generateId());
 
     return (
-        <widget type="TabItem" id={idRef.current} label={label}>
+        <widget type="TabItem" id={idRef.current} label={label} style={style}>
             {children}
         </widget>
     );

@@ -23,16 +23,15 @@ export type StyleProps = {
 export type WidgetPropsMap = {
     Unknown: {};
     Fragment: {};
-    Child: { width?: number; height?: number };
+    Child: StyleProps & { width?: number; height?: number };
     DIWindow: StyleProps & { title: string; width: number; height: number };
-    Group: {};
-    TabBar: {};
+    Group: StyleProps & {};
+    TabBar: StyleProps & {};
     TabItem: StyleProps & { label: string; onOpenChange?: (value: boolean) => void };
     SameLine: {};
-    ItemTooltip: {};
-    TextWrap: { width: number };
-    Indent: {};
-    Unindent: {};
+    ItemTooltip: StyleProps & {};
+    TextWrap: StyleProps & { width: number };
+    Indent: StyleProps & {};
     UnformattedText: StyleProps & {
         text: string;
     };
@@ -46,7 +45,7 @@ export type WidgetPropsMap = {
         // todo: What about `fmt` ?
         text: string;
     };
-    Separator: {};
+    Separator: StyleProps & {};
     SeparatorText: StyleProps & {
         label: string;
     };

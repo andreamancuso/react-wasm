@@ -364,7 +364,7 @@ void ReactImgui::PatchWidget(int id, std::string& widgetJsonAsString) {
         auto widgetDef = json::parse(widgetJsonAsString);
         auto pWidget = m_widgets[id].get();
 
-        pWidget->Patch(widgetDef);
+        pWidget->Patch(widgetDef, this);
     }
 };
 

@@ -33,6 +33,8 @@ void Widget::HandleChildren(ReactImgui* view) {
     view->RenderChildren(m_id);
 };
 
+void Widget::Patch(const json& widgetPatchDef, ReactImgui* view) {};
+
 void Widget::PreRender(ReactImgui* view) {};
 
 void Widget::PostRender(ReactImgui* view) {};
@@ -40,7 +42,7 @@ void Widget::PostRender(ReactImgui* view) {};
 std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
     std::optional<BaseStyle> maybeStyle;
         
-    if (widgetDef.contains("style") && widgetDef["style"].is_object()) {
+    if (widgetDef.is_object() && widgetDef.contains("style") && widgetDef["style"].is_object()) {
         if (widgetDef["style"].contains("font") 
             && widgetDef["style"]["font"].is_object() 
             && widgetDef["style"]["font"]["name"].is_string() 
@@ -123,18 +125,34 @@ std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, React
     return maybeStyle;
 };
 
+void StyledWidget::ReplaceStyle(BaseStyle& newStyle) {
+    m_style.reset();
+    m_style.emplace(std::make_unique<BaseStyle>(newStyle));
+};
+
+void StyledWidget::Patch(const json& widgetPatchDef, ReactImgui* view) {
+    auto maybeNewStyle = StyledWidget::ExtractStyle(widgetPatchDef, view);
+
+    if (maybeNewStyle.has_value()) {
+        ReplaceStyle(maybeNewStyle.value());
+    }
+};
+
 bool StyledWidget::HasCustomStyles() {
     return m_style.has_value();
 };
 
+// Assumes m_style is not null, you should call HasCustomStyles() first
 bool StyledWidget::HasCustomFont(ReactImgui* view) {
     return m_style.value()->maybeFontIndex.has_value() && view->IsFontIndexValid(m_style.value()->maybeFontIndex.value());
 };
 
+// Assumes m_style is not null, you should call HasCustomStyles() first
 bool StyledWidget::HasCustomColors() {
     return m_style.value()->maybeColors.has_value();
 };
 
+// Assumes m_style is not null, you should call HasCustomStyles() first
 bool StyledWidget::HasCustomStyleVars() {
     return m_style.value()->maybeStyleVars.has_value();
 };
