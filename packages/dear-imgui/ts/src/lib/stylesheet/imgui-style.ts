@@ -2,6 +2,10 @@ import { ImGuiCol, ImGuiDir, ImGuiHoveredFlags, ImVec2 } from "../wasm/wasm-app-
 
 export type HEXA = [string, number];
 
+export type StyleVarValue = number | ImVec2;
+
+export type StyleColValue = string | HEXA;
+
 // This is a more or less accurate representation of ImGuiStyle
 export type ImGuiStyle = {
     alpha: number; // Global alpha applies to everything in Dear ImGui.

@@ -28,10 +28,6 @@
 
 using json = nlohmann::json;
 
-ImGuiCol Widget::GetImGuiCol() {
-    return ImGuiCol_COUNT;
-};
-
 // todo: seems redundant
 void Widget::HandleChildren(ReactImgui* view) {
     view->RenderChildren(m_id);
@@ -41,9 +37,8 @@ void Widget::PreRender(ReactImgui* view) {};
 
 void Widget::PostRender(ReactImgui* view) {};
 
-StyledWidget::StyleTuple StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
-    std::optional<int> maybeFontIndex;
-    std::optional<ImVec4> maybeColor;
+std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
+    std::optional<BaseStyle> maybeStyle;
         
     if (widgetDef.contains("style") && widgetDef["style"].is_object()) {
         if (widgetDef["style"].contains("font") 
@@ -51,51 +46,139 @@ StyledWidget::StyleTuple StyledWidget::ExtractStyle(const json& widgetDef, React
             && widgetDef["style"]["font"]["name"].is_string() 
             && widgetDef["style"]["font"]["size"].is_number_unsigned()) {
 
-            maybeFontIndex.emplace(view->GetFontIndex(
+            if (!maybeStyle.has_value()) {
+                maybeStyle.emplace(BaseStyle{});
+            }
+
+            maybeStyle.value().maybeFontIndex.emplace(view->GetFontIndex(
                 widgetDef["style"]["font"]["name"].template get<std::string>(), 
                 widgetDef["style"]["font"]["size"].template get<int>()
             ));
         }
 
-        if (widgetDef["style"].contains("color") 
-            && widgetDef["style"]["color"].is_string()) {
+        if (widgetDef["style"].contains("colors") 
+            && widgetDef["style"]["colors"].is_object()) {
 
-            auto color = widgetDef["style"]["color"].template get<std::string>();
+            StyleColors colors;
 
-            if (color.size() == 6) {
-                maybeColor.emplace(HEXAtoIV4(color.c_str()));
+            for (auto& [key, item] : widgetDef["style"]["colors"].items()) {
+                if (item.is_string()) {
+                    auto color = item.template get<std::string>();
+
+                    if (color.size() == 6) {
+                        colors[stoi(key)] = HEXAtoIV4(color.c_str());
+                    }
+                } else if (item.is_array() && item.size() == 2
+                    && item[0].is_string() && item[1].is_number_unsigned()) { // hex + alpha
+                    auto color = item[0].template get<std::string>();
+                    auto alpha = item[1].template get<float>();
+
+                    if (color.size() == 6) {
+                        colors[stoi(key)] = HEXAtoIV4(color.c_str(), alpha);
+                    }
+                }
+            }
+
+            if (colors.size() > 0) {
+                if (!maybeStyle.has_value()) {
+                    maybeStyle.emplace(BaseStyle{});
+                }
+
+                maybeStyle.value().maybeColors.emplace(colors);
+            }
+        }
+
+        if (widgetDef["style"].contains("vars") 
+            && widgetDef["style"]["vars"].is_object()) {
+            StyleVars styleVars;
+
+            for (auto& [key, item] : widgetDef["style"]["vars"].items()) {
+                StyleVarValue value;
+
+                if (item.is_array() && item.size() == 2
+                     && item[0].is_number_unsigned() && item[1].is_number_unsigned()) { // ImVec2
+                    value = ImVec2(
+                        item[0].template get<float>(), 
+                        item[1].template get<float>()
+                    );
+                } else if (item.is_number_unsigned()) { // float
+                    value = item.template get<float>();
+                }
+
+                if (value.index() != 0) {
+                    styleVars[stoi(key)] = value;
+                }
+            }
+
+            if (styleVars.size() > 0) {
+                if (!maybeStyle.has_value()) {
+                    maybeStyle.emplace(BaseStyle{});
+                }
+
+                maybeStyle.value().maybeStyleVars.emplace(styleVars);
             }
         }
     }
 
-    return {maybeFontIndex, maybeColor};
+    return maybeStyle;
+};
+
+bool StyledWidget::HasCustomStyles() {
+    return m_style.has_value();
 };
 
 bool StyledWidget::HasCustomFont(ReactImgui* view) {
-    return m_style->maybeFontIndex.has_value() && view->IsFontIndexValid(m_style->maybeFontIndex.value());
+    return m_style.value()->maybeFontIndex.has_value() && view->IsFontIndexValid(m_style.value()->maybeFontIndex.value());
 };
 
-bool StyledWidget::HasCustomColor() {
-    return m_style->maybeColor.has_value();
+bool StyledWidget::HasCustomColors() {
+    return m_style.value()->maybeColors.has_value();
+};
+
+bool StyledWidget::HasCustomStyleVars() {
+    return m_style.value()->maybeStyleVars.has_value();
 };
 
 void StyledWidget::PreRender(ReactImgui* view) {
-    if (HasCustomFont(view)) {
-        view->PushFont(m_style->maybeFontIndex.value());
-    }
+    if (HasCustomStyles()) {
+        if (HasCustomFont(view)) {
+            view->PushFont(m_style.value()->maybeFontIndex.value());
+        }
 
-    if (HasCustomColor()) {
-        ImGui::PushStyleColor(GetImGuiCol(), m_style->maybeColor.value());
+        if (HasCustomColors()) {
+            for (auto const& [key, val] : m_style.value()->maybeColors.value()) {
+                ImGui::PushStyleColor(key, val);
+            }
+        }
+
+        if (HasCustomStyleVars()) {
+            for (auto const& [key, val] : m_style.value()->maybeStyleVars.value()) {
+                if (std::holds_alternative<float>(val)) {
+                    ImGui::PushStyleVar(key, std::get<float>(val));
+                } else if (std::holds_alternative<ImVec2>(val)) {
+                    ImGui::PushStyleVar(key, std::get<ImVec2>(val));
+                } else {
+                    // todo: throw?
+                }
+            }
+        }
     }
 };
 
 void StyledWidget::PostRender(ReactImgui* view) {
-    if (HasCustomFont(view)) {
-        view->PopFont();
-    }
+    if (HasCustomStyles()) {
+        if (HasCustomFont(view)) {
+            view->PopFont();
+        }
 
-    if (HasCustomColor()) {
-        ImGui::PopStyleColor();
+        if (HasCustomColors()) {
+            ImGui::PopStyleColor(m_style.value()->maybeColors.value().size());
+        }
+
+        if (HasCustomStyleVars()) {
+            // Big, big assumption that this will match exactly the number of style vars being pushed above... Maybe we should actually keep track
+            ImGui::PopStyleVar(m_style.value()->maybeStyleVars.value().size());
+        }
     }
 };
 
@@ -162,10 +245,6 @@ void Indent::Render(ReactImgui* view) {
     ImGui::Unindent();
 };
 
-void Unindent::Render(ReactImgui* view) {
-    ImGui::Unindent();
-};
-
 void SeparatorText::Render(ReactImgui* view) {
     ImGui::SeparatorText(m_label.c_str());
 };
@@ -178,10 +257,6 @@ void UnformattedText::Render(ReactImgui* view) {
     ImGui::TextUnformatted(m_text.c_str());
 };
 
-ImGuiCol UnformattedText::GetImGuiCol() {
-    return ImGuiCol_Text;
-};
-
 std::unique_ptr<UnformattedText> UnformattedText::makeWidget(const json& widgetDef, ReactImgui* view) {
     if (widgetDef.is_object()) {
         auto id = widgetDef["id"].template get<int>();
@@ -189,7 +264,6 @@ std::unique_ptr<UnformattedText> UnformattedText::makeWidget(const json& widgetD
 
         // todo: extract and reuse
         auto style = StyledWidget::ExtractStyle(widgetDef, view);
-        
 
         return std::make_unique<UnformattedText>(id, text, style);
     }
@@ -269,8 +343,7 @@ void InputText::Render(ReactImgui* view) {
     ImGui::PopID();
 };
 
-int InputText::InputTextCb(ImGuiInputTextCallbackData* data)
-{
+int InputText::InputTextCb(ImGuiInputTextCallbackData* data) {
     if (data->EventFlag == ImGuiInputTextFlags_CallbackEdit) {
         auto pInputText = reinterpret_cast<InputText*>(data->UserData);
 
@@ -287,6 +360,19 @@ void Checkbox::Render(ReactImgui* view) {
         view->m_onBooleanValueChange(m_id, m_checked);
     }
     ImGui::PopID();
+};
+
+std::unique_ptr<Button> Button::makeWidget(const json& widgetDef, ReactImgui* view) {
+    if (widgetDef.is_object()) {
+        auto id = widgetDef["id"].template get<int>();
+        auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+
+        auto style = StyledWidget::ExtractStyle(widgetDef, view);
+        
+        return Button::makeWidget(id, label, style);
+    }
+
+    throw std::invalid_argument("Invalid JSON data");
 };
 
 void Button::Render(ReactImgui* view) {

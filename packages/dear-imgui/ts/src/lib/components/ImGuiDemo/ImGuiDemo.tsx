@@ -8,11 +8,15 @@ import { ClippedMultiLineTextRendererImperativeHandle } from "../ReactImgui/Clip
 import faIconMap from "../../fa-icons";
 import RWStyleSheet from "../../stylesheet/stylesheet";
 import { Tables } from "./Tables/Tables";
+import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 
 const styleSheet = RWStyleSheet.create({
     ut: {
-        color: "ff6e59",
+        colors: { [ImGuiCol.Text]: "ff6e59" },
         font: { name: "roboto-regular", size: 24 },
+    },
+    inputWindow: {
+        vars: { [ImGuiStyleVar.WindowPadding]: [20, 10] },
     },
 });
 
@@ -132,7 +136,12 @@ export const ImGuiDemo = () => {
                 </ReactImgui.SameLine>
             </ReactImgui.DIWindow>
 
-            <ReactImgui.DIWindow title="input widgets" width={820} height={600}>
+            <ReactImgui.DIWindow
+                title="input widgets"
+                width={820}
+                height={600}
+                style={styleSheet.inputWindow}
+            >
                 <ReactImgui.SameLine>
                     <ReactImgui.Child width={400} height={0}>
                         <ReactImgui.InputText
