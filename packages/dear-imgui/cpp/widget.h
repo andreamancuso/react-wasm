@@ -63,19 +63,21 @@ class Widget {
 
 class StyledWidget : public Widget {
     public:
-        std::unique_ptr<BaseStyle> m_style;
+        std::optional<std::unique_ptr<BaseStyle>> m_style;
 
         static BaseStyle ExtractStyle(const json& widgetDef, ReactImgui* view);
 
         StyledWidget(int id) : Widget(id) {}
 
         StyledWidget(int id, BaseStyle& style) : Widget(id) {
-            m_style = std::make_unique<BaseStyle>(style);
+            m_style.emplace(std::make_unique<BaseStyle>(style));
         }
 
         void PreRender(ReactImgui* view);
 
         void PostRender(ReactImgui* view);
+
+        bool HasCustomStyles();
 
         bool HasCustomFont(ReactImgui* view);
 

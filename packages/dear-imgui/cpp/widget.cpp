@@ -113,35 +113,41 @@ BaseStyle StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
     return BaseStyle{maybeColors, maybeStyleVars, maybeFontIndex};
 };
 
+bool StyledWidget::HasCustomStyles() {
+    return m_style.has_value();
+};
+
 bool StyledWidget::HasCustomFont(ReactImgui* view) {
-    return m_style->maybeFontIndex.has_value() && view->IsFontIndexValid(m_style->maybeFontIndex.value());
+    return m_style.value()->maybeFontIndex.has_value() && view->IsFontIndexValid(m_style.value()->maybeFontIndex.value());
 };
 
 bool StyledWidget::HasCustomColors() {
-    return m_style->maybeColors.has_value();
+    return m_style.value()->maybeColors.has_value();
 };
 
 bool StyledWidget::HasCustomStyleVars() {
-    return m_style->maybeStyleVars.has_value();
+    return m_style.value()->maybeStyleVars.has_value();
 };
 
 void StyledWidget::PreRender(ReactImgui* view) {
-    if (HasCustomFont(view)) {
-        view->PushFont(m_style->maybeFontIndex.value());
-    }
-
-    if (HasCustomColors()) {
-        for (auto const& [key, val] : m_style->maybeColors.value()) {
-            ImGui::PushStyleColor(key, val);
+    if (HasCustomStyles()) {
+        if (HasCustomFont(view)) {
+            view->PushFont(m_style.value()->maybeFontIndex.value());
         }
-    }
 
-    if (HasCustomStyleVars()) {
-        for (auto const& [key, val] : m_style->maybeStyleVars.value()) {
-            if (std::holds_alternative<float>(val)) {
-                ImGui::PushStyleVar(key, std::get<float>(val));
-            } else if (std::holds_alternative<ImVec2>(val)) {
-                ImGui::PushStyleVar(key, std::get<ImVec2>(val));
+        if (HasCustomColors()) {
+            for (auto const& [key, val] : m_style.value()->maybeColors.value()) {
+                ImGui::PushStyleColor(key, val);
+            }
+        }
+
+        if (HasCustomStyleVars()) {
+            for (auto const& [key, val] : m_style.value()->maybeStyleVars.value()) {
+                if (std::holds_alternative<float>(val)) {
+                    ImGui::PushStyleVar(key, std::get<float>(val));
+                } else if (std::holds_alternative<ImVec2>(val)) {
+                    ImGui::PushStyleVar(key, std::get<ImVec2>(val));
+                }
             }
         }
     }
@@ -153,12 +159,12 @@ void StyledWidget::PostRender(ReactImgui* view) {
     }
 
     if (HasCustomColors()) {
-        ImGui::PopStyleColor(m_style->maybeColors.value().size());
+        ImGui::PopStyleColor(m_style.value()->maybeColors.value().size());
     }
 
     if (HasCustomStyleVars()) {
         // Big, big assumption that this will match exactly the number of style vars being pushed above... Maybe we should actually keep track
-        ImGui::PopStyleVar(m_style->maybeStyleVars.value().size());
+        ImGui::PopStyleVar(m_style.value()->maybeStyleVars.value().size());
     }
 };
 
