@@ -68,7 +68,6 @@ void ReactImgui::SetUpWidgetCreatorFunctions() {
     m_widget_init_fn["SameLine"] = &makeWidget<SameLine>;
     m_widget_init_fn["Separator"] = &makeWidget<Separator>;
     m_widget_init_fn["Indent"] = &makeWidget<Indent>;
-    m_widget_init_fn["Unindent"] = &makeWidget<Unindent>;
     m_widget_init_fn["SeparatorText"] = &makeWidget<SeparatorText>;
     m_widget_init_fn["BulletText"] = &makeWidget<BulletText>;
     m_widget_init_fn["UnformattedText"] = &makeWidget<UnformattedText>;

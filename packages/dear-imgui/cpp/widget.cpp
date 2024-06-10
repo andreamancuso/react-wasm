@@ -114,7 +114,7 @@ std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, React
                 if (!maybeStyle.has_value()) {
                     maybeStyle.emplace(BaseStyle{});
                 }
-                
+
                 maybeStyle.value().maybeStyleVars.emplace(styleVars);
             }
         }
@@ -243,10 +243,6 @@ void Indent::Render(ReactImgui* view) {
     ImGui::Unindent();
 };
 
-void Unindent::Render(ReactImgui* view) {
-    ImGui::Unindent();
-};
-
 void SeparatorText::Render(ReactImgui* view) {
     ImGui::SeparatorText(m_label.c_str());
 };
@@ -266,7 +262,6 @@ std::unique_ptr<UnformattedText> UnformattedText::makeWidget(const json& widgetD
 
         // todo: extract and reuse
         auto style = StyledWidget::ExtractStyle(widgetDef, view);
-        
 
         return std::make_unique<UnformattedText>(id, text, style);
     }

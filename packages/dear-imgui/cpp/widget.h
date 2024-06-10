@@ -234,38 +234,42 @@ class SameLine final : public Widget {
         void Patch(const json& val) {}
 };
 
-class Separator final : public Widget {
+class Separator final : public StyledWidget {
     public:
-        static std::unique_ptr<Separator> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
+        static std::unique_ptr<Separator> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
                 
-                return std::make_unique<Separator>(id);
+                return std::make_unique<Separator>(id, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        Separator(int id) : Widget(id) {}
+        Separator(int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {}
 
         void Render(ReactImgui* view);
 
         void Patch(const json& val) {}
 };
 
-class Indent final : public Widget {
+class Indent final : public StyledWidget {
     public:
-        static std::unique_ptr<Indent> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
+        static std::unique_ptr<Indent> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
                 
-                return std::make_unique<Indent>(id);
+                return std::make_unique<Indent>(id, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        Indent(int id) : Widget(id) {
+        Indent(int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Indent";
             m_handlesChildrenWithinRenderMethod = true;
         }
@@ -275,29 +279,7 @@ class Indent final : public Widget {
         void Patch(const json& val) {}
 };
 
-// Likely unused
-class Unindent final : public Widget {
-    public:
-        static std::unique_ptr<Unindent> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
-                
-                return std::make_unique<Unindent>(id);
-            }
-
-            throw std::invalid_argument("Invalid JSON data");
-        }
-
-        Unindent(int id) : Widget(id) {
-            m_type = "Unindent";
-        }
-
-        void Render(ReactImgui* view);
-
-        void Patch(const json& val) {}
-};
-
-class SeparatorText final : public Widget {
+class SeparatorText final : public StyledWidget {
     public:
         std::string m_label;
 
@@ -306,13 +288,15 @@ class SeparatorText final : public Widget {
                 auto id = widgetDef["id"].template get<int>();
                 std::string label = widgetDef["label"].template get<std::string>();
 
-                return std::make_unique<SeparatorText>(id, label);
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
+
+                return std::make_unique<SeparatorText>(id, label, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        SeparatorText(int id, std::string& label) : Widget(id) {
+        SeparatorText(int id, std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "SeparatorText";
             m_label = label;
         }
@@ -328,7 +312,7 @@ class SeparatorText final : public Widget {
         }
 };
 
-class BulletText final : public Widget {
+class BulletText final : public StyledWidget {
     public:
         std::string m_text;
 
@@ -337,13 +321,15 @@ class BulletText final : public Widget {
                 auto id = widgetDef["id"].template get<int>();
                 std::string text = widgetDef["text"].template get<std::string>();
 
-                return std::make_unique<BulletText>(id, text);
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
+
+                return std::make_unique<BulletText>(id, text, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        BulletText(int id, std::string& text) : Widget(id) {
+        BulletText(int id, std::string& text, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "BulletText";
             m_text = text;
         }
@@ -358,7 +344,6 @@ class BulletText final : public Widget {
             }
         }
 };
-
 
 class UnformattedText final : public StyledWidget {
     public:
@@ -382,7 +367,7 @@ class UnformattedText final : public StyledWidget {
         }
 };
 
-class DisabledText final : public Widget {
+class DisabledText final : public StyledWidget {
     public:
         std::string m_text;
 
@@ -391,13 +376,15 @@ class DisabledText final : public Widget {
                 auto id = widgetDef["id"].template get<int>();
                 std::string text = widgetDef["text"].template get<std::string>();
 
-                return std::make_unique<DisabledText>(id, text);
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
+
+                return std::make_unique<DisabledText>(id, text, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        DisabledText(int id, std::string& text) : Widget(id) {
+        DisabledText(int id, std::string& text, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "DisabledText";
             m_text = text;
         }
