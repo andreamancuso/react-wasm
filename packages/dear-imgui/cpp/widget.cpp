@@ -37,10 +37,8 @@ void Widget::PreRender(ReactImgui* view) {};
 
 void Widget::PostRender(ReactImgui* view) {};
 
-BaseStyle StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
-    std::optional<StyleColors> maybeColors;
-    std::optional<StyleVars> maybeStyleVars;
-    std::optional<int> maybeFontIndex;
+std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
+    std::optional<BaseStyle> maybeStyle;
         
     if (widgetDef.contains("style") && widgetDef["style"].is_object()) {
         if (widgetDef["style"].contains("font") 
@@ -48,7 +46,11 @@ BaseStyle StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
             && widgetDef["style"]["font"]["name"].is_string() 
             && widgetDef["style"]["font"]["size"].is_number_unsigned()) {
 
-            maybeFontIndex.emplace(view->GetFontIndex(
+            if (!maybeStyle.has_value()) {
+                maybeStyle.emplace(BaseStyle{});
+            }
+
+            maybeStyle.value().maybeFontIndex.emplace(view->GetFontIndex(
                 widgetDef["style"]["font"]["name"].template get<std::string>(), 
                 widgetDef["style"]["font"]["size"].template get<int>()
             ));
@@ -78,7 +80,11 @@ BaseStyle StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
             }
 
             if (colors.size() > 0) {
-                maybeColors.emplace(colors);
+                if (!maybeStyle.has_value()) {
+                    maybeStyle.emplace(BaseStyle{});
+                }
+
+                maybeStyle.value().maybeColors.emplace(colors);
             }
         }
 
@@ -105,12 +111,16 @@ BaseStyle StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
             }
 
             if (styleVars.size() > 0) {
-                maybeStyleVars.emplace(styleVars);
+                if (!maybeStyle.has_value()) {
+                    maybeStyle.emplace(BaseStyle{});
+                }
+                
+                maybeStyle.value().maybeStyleVars.emplace(styleVars);
             }
         }
     }
 
-    return BaseStyle{maybeColors, maybeStyleVars, maybeFontIndex};
+    return maybeStyle;
 };
 
 bool StyledWidget::HasCustomStyles() {

@@ -65,12 +65,14 @@ class StyledWidget : public Widget {
     public:
         std::optional<std::unique_ptr<BaseStyle>> m_style;
 
-        static BaseStyle ExtractStyle(const json& widgetDef, ReactImgui* view);
+        static std::optional<BaseStyle> ExtractStyle(const json& widgetDef, ReactImgui* view);
 
         StyledWidget(int id) : Widget(id) {}
 
-        StyledWidget(int id, BaseStyle& style) : Widget(id) {
-            m_style.emplace(std::make_unique<BaseStyle>(style));
+        StyledWidget(int id, std::optional<BaseStyle>& maybeStyle) : Widget(id) {
+            if (maybeStyle.has_value()) {
+                m_style.emplace(std::make_unique<BaseStyle>(maybeStyle.value()));
+            }
         }
 
         void PreRender(ReactImgui* view);
@@ -153,7 +155,7 @@ class Window final : public StyledWidget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        Window(int id, std::string title, float width, float height, BaseStyle& style) : StyledWidget(id, style) {
+        Window(int id, std::string title, float width, float height, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Window";
             m_handlesChildrenWithinRenderMethod = true;
 
@@ -197,7 +199,7 @@ class Child final : public StyledWidget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        Child(int id, float width, float height, BaseStyle& style) : StyledWidget(id, style) {
+        Child(int id, float width, float height, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Child";
             m_handlesChildrenWithinRenderMethod = true;
 
@@ -364,7 +366,7 @@ class UnformattedText final : public StyledWidget {
 
         static std::unique_ptr<UnformattedText> makeWidget(const json& widgetDef, ReactImgui* view);
 
-        UnformattedText(int id, std::string& text, BaseStyle& style) : StyledWidget(id, style) {
+        UnformattedText(int id, std::string& text, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "UnformattedText";
             m_text = text;
         }
@@ -793,7 +795,7 @@ class Checkbox final : public Widget {
 
 class Button final : public StyledWidget {
     protected:
-        Button(int id, std::string& label, BaseStyle& style) : StyledWidget(id, style) {
+        Button(int id, std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Button";
             m_label = label;
         }
@@ -803,7 +805,7 @@ class Button final : public StyledWidget {
 
         static std::unique_ptr<Button> makeWidget(const json& widgetDef, ReactImgui* view);
 
-        inline static std::unique_ptr<Button> makeWidget(int id, std::string& label, BaseStyle& style) {
+        inline static std::unique_ptr<Button> makeWidget(int id, std::string& label, std::optional<BaseStyle>& style) {
             Button instance(id, label, style);
             return std::make_unique<Button>(std::move(instance));
         }
