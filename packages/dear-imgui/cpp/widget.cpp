@@ -37,12 +37,6 @@ void Widget::PreRender(ReactImgui* view) {};
 
 void Widget::PostRender(ReactImgui* view) {};
 
-// void ExtractScalarStyleVar(const json& styleVarsDef, std::string key, ImGuiStyleVar varId, std::unordered_map<ImGuiStyleVar, float>& map) {
-//     if (styleVarsDef.contains(key) && styleVarsDef[key].is_number_unsigned()) {
-//         map[varId] = styleVarsDef[key].template get<float>();
-//     }
-// }
-
 BaseStyle StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
     std::optional<StyleColors> maybeColors;
     std::optional<StyleVars> maybeStyleVars;
@@ -101,14 +95,8 @@ BaseStyle StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
                         item[0].template get<float>(), 
                         item[1].template get<float>()
                     );
-
-                    // value.emplace(ImVec2(
-                    //     item[0].template get<float>(), 
-                    //     item[1].template get<float>()
-                    // ));
                 } else if (item.is_number_unsigned()) { // float
                     value = item.template get<float>();
-                    // value.emplace(item.template get<float>());
                 }
 
                 if (value.index() != 0) {
@@ -340,8 +328,7 @@ void InputText::Render(ReactImgui* view) {
     ImGui::PopID();
 };
 
-int InputText::InputTextCb(ImGuiInputTextCallbackData* data)
-{
+int InputText::InputTextCb(ImGuiInputTextCallbackData* data) {
     if (data->EventFlag == ImGuiInputTextFlags_CallbackEdit) {
         auto pInputText = reinterpret_cast<InputText*>(data->UserData);
 
