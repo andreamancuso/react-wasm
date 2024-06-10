@@ -400,19 +400,21 @@ class DisabledText final : public StyledWidget {
         }
 };
 
-class TabBar final : public Widget {
+class TabBar final : public StyledWidget {
     public:
-        static std::unique_ptr<TabBar> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
+        static std::unique_ptr<TabBar> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
                 
-                return std::make_unique<TabBar>(id);
+                return std::make_unique<TabBar>(id, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        TabBar(int id) : Widget(id) {
+        TabBar(int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "TabBar";
             m_handlesChildrenWithinRenderMethod = true;
         }
@@ -422,7 +424,7 @@ class TabBar final : public Widget {
         void Patch(const json& val) {}
 };
 
-class TabItem final : public Widget {
+class TabItem final : public StyledWidget {
     public:
         std::string m_label;
 
@@ -431,13 +433,15 @@ class TabItem final : public Widget {
                 auto id = widgetDef["id"].template get<int>();
                 std::string label = widgetDef["label"].template get<std::string>();
 
-                return std::make_unique<TabItem>(id, label);
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
+
+                return std::make_unique<TabItem>(id, label, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        TabItem(int id, std::string& label) : Widget(id) {
+        TabItem(int id, std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "TabItem";
             m_handlesChildrenWithinRenderMethod = true;
             m_label = label;
@@ -454,7 +458,7 @@ class TabItem final : public Widget {
         }
 };
 
-class CollapsingHeader final : public Widget {
+class CollapsingHeader final : public StyledWidget {
     public:
         std::string m_label;
 
@@ -463,13 +467,15 @@ class CollapsingHeader final : public Widget {
                 auto id = widgetDef["id"].template get<int>();
                 std::string label = widgetDef["label"].template get<std::string>();
 
-                return std::make_unique<CollapsingHeader>(id, label);
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
+
+                return std::make_unique<CollapsingHeader>(id, label, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        CollapsingHeader(int id, std::string& label) : Widget(id) {
+        CollapsingHeader(int id, std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "CollapsingHeader";
             m_handlesChildrenWithinRenderMethod = true;
             m_label = label;
@@ -486,7 +492,7 @@ class CollapsingHeader final : public Widget {
         }
 };
 
-class TextWrap final : public Widget {
+class TextWrap final : public StyledWidget {
     public:
         double m_width;
 
@@ -495,13 +501,15 @@ class TextWrap final : public Widget {
                 auto id = widgetDef["id"].template get<int>();
                 double width = widgetDef["width"].template get<double>();
 
-                return std::make_unique<TextWrap>(id, width);
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
+
+                return std::make_unique<TextWrap>(id, width, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        TextWrap(int id, double& width) : Widget(id) {
+        TextWrap(int id, double& width, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "TextWrap";
             m_handlesChildrenWithinRenderMethod = true;
             m_width = width;
@@ -518,19 +526,21 @@ class TextWrap final : public Widget {
         }
 };
 
-class ItemTooltip final : public Widget {
+class ItemTooltip final : public StyledWidget {
     public:
-        static std::unique_ptr<ItemTooltip> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
+        static std::unique_ptr<ItemTooltip> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
                 
-                return std::make_unique<ItemTooltip>(id);
+                return std::make_unique<ItemTooltip>(id, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        ItemTooltip(int id) : Widget(id) {
+        ItemTooltip(int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "ItemTooltip";
             m_handlesChildrenWithinRenderMethod = true;
         }
@@ -540,7 +550,7 @@ class ItemTooltip final : public Widget {
         void Patch(const json& val) {}
 };
 
-class TreeNode final : public Widget {
+class TreeNode final : public StyledWidget {
     public:
         std::string m_label;
 
@@ -549,13 +559,15 @@ class TreeNode final : public Widget {
                 auto id = widgetDef["id"].template get<int>();
                 std::string label = widgetDef["label"].template get<std::string>();
 
-                return std::make_unique<TreeNode>(id, label);
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
+
+                return std::make_unique<TreeNode>(id, label, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        TreeNode(int id, std::string& label) : Widget(id) {
+        TreeNode(int id, std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "TreeNode";
             m_handlesChildrenWithinRenderMethod = true;
             m_label = label;
@@ -572,16 +584,16 @@ class TreeNode final : public Widget {
         }
 };
 
-class Combo final : public Widget {
+class Combo final : public StyledWidget {
     protected:
-        Combo(int id, std::string& label, int defaultValue, const json& options) : Widget(id) {
+        Combo(int id, std::string& label, int defaultValue, const json& options, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Combo";
             m_selectedIndex = defaultValue;
             m_label = label;
             m_itemsSeparatedByZeros = Combo::getItemsSeparatedByZeros(options);
         }
         
-        Combo(int id, std::string& label, int defaultValue, std::string& optionsList) : Widget(id) {
+        Combo(int id, std::string& label, int defaultValue, std::string& optionsList, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Combo";
             m_selectedIndex = defaultValue;
             m_label = label;
@@ -657,26 +669,28 @@ class Combo final : public Widget {
         std::string m_label;
         std::unique_ptr<char[]> m_itemsSeparatedByZeros; // Relevant for 'basic' combo only
 
-        static std::unique_ptr<Combo> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
-                auto defaultValue = val.contains("defaultValue") && val["defaultValue"].is_number() ? val["defaultValue"].template get<int>() : 0;
-                auto label = val["label"].template get<std::string>();
-                auto optionsList = val["optionsList"].template get<std::string>();
+        static std::unique_ptr<Combo> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_number() ? widgetDef["defaultValue"].template get<int>() : 0;
+                auto label = widgetDef["label"].template get<std::string>();
+                auto optionsList = widgetDef["optionsList"].template get<std::string>();
 
-                return Combo::makeWidget(id, label, defaultValue, optionsList);
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
+
+                return Combo::makeWidget(id, label, defaultValue, optionsList, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<Combo> makeWidget(int id, std::string& label, int defaultValue, const json& options) {
-            Combo instance(id, label, defaultValue, options);
+        static std::unique_ptr<Combo> makeWidget(int id, std::string& label, int defaultValue, const json& options, std::optional<BaseStyle>& style) {
+            Combo instance(id, label, defaultValue, options, style);
             return std::make_unique<Combo>(std::move(instance));
         }
 
-        static std::unique_ptr<Combo> makeWidget(int id, std::string& label, int defaultValue, std::string optionsList) {
-            Combo instance(id, label, defaultValue, optionsList);
+        static std::unique_ptr<Combo> makeWidget(int id, std::string& label, int defaultValue, std::string optionsList, std::optional<BaseStyle>& style) {
+            Combo instance(id, label, defaultValue, optionsList, style);
             return std::make_unique<Combo>(std::move(instance));
         }
 
