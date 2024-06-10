@@ -705,13 +705,13 @@ class Combo final : public StyledWidget {
         }
 };
 
-class InputText final : public Widget {
+class InputText final : public StyledWidget {
     protected:
         inline static ImGuiInputTextFlags inputTextFlags = ImGuiInputTextFlags_CallbackEdit | ImGuiInputTextFlags_NoUndoRedo;
 
         static int InputTextCb(ImGuiInputTextCallbackData* data);
 
-        InputText(int id, std::string& defaultValue, std::string& label) : Widget(id) {
+        InputText(int id, std::string& defaultValue, std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "InputText";
             m_bufferPointer = std::make_unique<char[]>(100);
             m_defaultValue = defaultValue;
@@ -725,20 +725,22 @@ class InputText final : public Widget {
         std::string m_defaultValue;
         std::string m_label;
 
-        inline static std::unique_ptr<InputText> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
-                auto defaultValue = val.contains("defaultValue") && val["defaultValue"].is_string() ? val["defaultValue"].template get<std::string>() : "";
-                auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
+        inline static std::unique_ptr<InputText> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_string() ? widgetDef["defaultValue"].template get<std::string>() : "";
+                auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
 
-                return InputText::makeWidget(id, defaultValue, label);
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
+
+                return InputText::makeWidget(id, defaultValue, label, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        inline static std::unique_ptr<InputText> makeWidget(int id, std::string& defaultValue, std::string& label) {
-            InputText instance(id, defaultValue, label);
+        inline static std::unique_ptr<InputText> makeWidget(int id, std::string& defaultValue, std::string& label, std::optional<BaseStyle>& style) {
+            InputText instance(id, defaultValue, label, style);
             return std::make_unique<InputText>(std::move(instance));
         }
 
@@ -754,9 +756,9 @@ class InputText final : public Widget {
         
 };
 
-class Checkbox final : public Widget {
+class Checkbox final : public StyledWidget {
     protected:
-        Checkbox(int id, std::string& label, bool defaultChecked) : Widget(id) {
+        Checkbox(int id, std::string& label, bool defaultChecked, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Checkbox";
             m_checked = defaultChecked;
             m_label = label;
@@ -766,20 +768,22 @@ class Checkbox final : public Widget {
         bool m_checked;
         std::string m_label;
 
-        inline static std::unique_ptr<Checkbox> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
-                auto defaultChecked = val.contains("defaultChecked") && val["defaultChecked"].is_boolean() ? val["defaultChecked"].template get<bool>() : false;
-                auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
+        inline static std::unique_ptr<Checkbox> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                auto defaultChecked = widgetDef.contains("defaultChecked") && widgetDef["defaultChecked"].is_boolean() ? widgetDef["defaultChecked"].template get<bool>() : false;
+                auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
 
-                return Checkbox::makeWidget(id, label, defaultChecked);
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
+
+                return Checkbox::makeWidget(id, label, defaultChecked, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        inline static std::unique_ptr<Checkbox> makeWidget(int id, std::string& label, bool defaultChecked) {
-            Checkbox instance(id, label, defaultChecked);
+        inline static std::unique_ptr<Checkbox> makeWidget(int id, std::string& label, bool defaultChecked, std::optional<BaseStyle>& style) {
+            Checkbox instance(id, label, defaultChecked, style);
             return std::make_unique<Checkbox>(std::move(instance));
         }
 
@@ -824,9 +828,9 @@ class Button final : public StyledWidget {
         }
 };
 
-class Slider final : public Widget {
+class Slider final : public StyledWidget {
     protected:
-        Slider(int id, std::string& label, float defaultValue, float min, float max, std::string& sliderType) : Widget(id) {
+        Slider(int id, std::string& label, float defaultValue, float min, float max, std::string& sliderType, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Slider";
             m_sliderType = sliderType;
             m_label = label;
@@ -842,23 +846,25 @@ class Slider final : public Widget {
         float m_max;
         std::string m_label;
 
-        inline static std::unique_ptr<Slider> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
-                auto defaultValue = val.contains("defaultValue") && val["defaultValue"].is_number() ? val["defaultValue"].template get<float>() : 0.0f;
-                auto min = val.contains("min") && val["min"].is_number() ? val["min"].template get<float>() : 0.0f;
-                auto max = val.contains("max") && val["max"].is_number() ? val["max"].template get<float>() : 10.0f;
-                auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
-                auto sliderType = val.contains("sliderType") && val["sliderType"].is_string() ? val["sliderType"].template get<std::string>() : "default";
+        inline static std::unique_ptr<Slider> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_number() ? widgetDef["defaultValue"].template get<float>() : 0.0f;
+                auto min = widgetDef.contains("min") && widgetDef["min"].is_number() ? widgetDef["min"].template get<float>() : 0.0f;
+                auto max = widgetDef.contains("max") && widgetDef["max"].is_number() ? widgetDef["max"].template get<float>() : 10.0f;
+                auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+                auto sliderType = widgetDef.contains("sliderType") && widgetDef["sliderType"].is_string() ? widgetDef["sliderType"].template get<std::string>() : "default";
 
-                return Slider::makeWidget(id, label, defaultValue, min, max, sliderType);
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
+
+                return Slider::makeWidget(id, label, defaultValue, min, max, sliderType, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        inline static std::unique_ptr<Slider> makeWidget(int id, std::string& label, float defaultValue, float min, float max, std::string& sliderType) {
-            Slider instance(id, label, defaultValue, min, max, sliderType);
+        inline static std::unique_ptr<Slider> makeWidget(int id, std::string& label, float defaultValue, float min, float max, std::string& sliderType, std::optional<BaseStyle>& style) {
+            Slider instance(id, label, defaultValue, min, max, sliderType, style);
             return std::make_unique<Slider>(std::move(instance));
         }
 
@@ -879,9 +885,9 @@ class Slider final : public Widget {
         }
 };
 
-class MultiSlider final : public Widget {
+class MultiSlider final : public StyledWidget {
     protected:
-        MultiSlider(int id, std::string& label, float min, float max, int numValues, int decimalDigits) : Widget(id) {
+        MultiSlider(int id, std::string& label, float min, float max, int numValues, int decimalDigits, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "MultiSlider";
             m_label = label;
             m_numValues = numValues;
@@ -899,28 +905,31 @@ class MultiSlider final : public Widget {
         int m_decimalDigits;
         std::string m_label;
 
-        inline static std::unique_ptr<MultiSlider> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
-                auto numValues = val.contains("numValues") && val["numValues"].is_number() ? val["numValues"].template get<int>() : 2;
-                auto decimalDigits = val.contains("decimalDigits") && val["decimalDigits"].is_number() ? val["decimalDigits"].template get<int>() : 0;
+        inline static std::unique_ptr<MultiSlider> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                auto numValues = widgetDef.contains("numValues") && widgetDef["numValues"].is_number() ? widgetDef["numValues"].template get<int>() : 2;
+                auto decimalDigits = widgetDef.contains("decimalDigits") && widgetDef["decimalDigits"].is_number() ? widgetDef["decimalDigits"].template get<int>() : 0;
                 
-                auto min = val.contains("min") && val["min"].is_number() ? val["min"].template get<float>() : 0.0f;
-                auto max = val.contains("max") && val["max"].is_number() ? val["max"].template get<float>() : 10.0f;
-                auto label = val.contains("label") && val["label"].is_string() ? val["label"].template get<std::string>() : "";
+                auto min = widgetDef.contains("min") && widgetDef["min"].is_number() ? widgetDef["min"].template get<float>() : 0.0f;
+                auto max = widgetDef.contains("max") && widgetDef["max"].is_number() ? widgetDef["max"].template get<float>() : 10.0f;
+                auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
+
                 
-                if (val.contains("defaultValues") && val["defaultValues"].is_array() && val["defaultValues"].size() == numValues) {
-                    return MultiSlider::makeWidget(id, label, min, max, numValues, decimalDigits, val["defaultValues"]);
+                if (widgetDef.contains("defaultValues") && widgetDef["defaultValues"].is_array() && widgetDef["defaultValues"].size() == numValues) {
+                    return MultiSlider::makeWidget(id, label, min, max, numValues, decimalDigits, widgetDef["defaultValues"], style);
                 } else {
-                    return MultiSlider::makeWidget(id, label, min, max, numValues, decimalDigits);
+                    return MultiSlider::makeWidget(id, label, min, max, numValues, decimalDigits, style);
                 }
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<MultiSlider> makeWidget(int id, std::string& label, float min, float max, int numValues, int decimalDigits, const json& defaultValues) {
-            MultiSlider instance(id, label, min, max, numValues, decimalDigits);
+        static std::unique_ptr<MultiSlider> makeWidget(int id, std::string& label, float min, float max, int numValues, int decimalDigits, const json& defaultValues, std::optional<BaseStyle>& style) {
+            MultiSlider instance(id, label, min, max, numValues, decimalDigits, style);
 
             for (auto& [key, item] : defaultValues.items()) {
                 instance.m_values[stoi(key)] = item.template get<float>();
@@ -929,8 +938,8 @@ class MultiSlider final : public Widget {
             return std::make_unique<MultiSlider>(std::move(instance));
         }
 
-        static std::unique_ptr<MultiSlider> makeWidget(int id, std::string& label, float min, float max, int numValues, int decimalDigits) {
-            MultiSlider instance(id, label, min, max, numValues, decimalDigits);
+        static std::unique_ptr<MultiSlider> makeWidget(int id, std::string& label, float min, float max, int numValues, int decimalDigits, std::optional<BaseStyle>& style) {
+            MultiSlider instance(id, label, min, max, numValues, decimalDigits, style);
 
             return std::make_unique<MultiSlider>(std::move(instance));
         }
@@ -956,7 +965,7 @@ class MultiSlider final : public Widget {
 };
 
 // todo: for those use cases where we expect large quantities of data, should we preallocate?
-class Table final : public Widget {
+class Table final : public StyledWidget {
     typedef struct { 
         std::optional<std::string> fieldId;
         std::string heading;
@@ -965,7 +974,7 @@ class Table final : public Widget {
     protected:
         ImGuiTableFlags m_flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
 
-        Table(int id, std::vector<TableColumn>& columns, std::optional<int> clipRows) : Widget(id) {
+        Table(int id, std::vector<TableColumn>& columns, std::optional<int> clipRows, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Table";
             m_columns = columns;
             m_clipRows = 0;
@@ -980,34 +989,36 @@ class Table final : public Widget {
         std::vector<TableColumn> m_columns;
         int m_clipRows;
 
-        inline static std::unique_ptr<Table> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
+        inline static std::unique_ptr<Table> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
 
-                if (val.contains("columns") && val["columns"].is_array()) {
+                if (widgetDef.contains("columns") && widgetDef["columns"].is_array()) {
                     std::optional<int> clipRows;
                     std::vector<TableColumn> columns;
 
-                    if (val.contains("clipRows") && val["clipRows"].is_number_integer()) {
-                        clipRows.emplace(val["clipRows"].template get<int>());
+                    if (widgetDef.contains("clipRows") && widgetDef["clipRows"].is_number_integer()) {
+                        clipRows.emplace(widgetDef["clipRows"].template get<int>());
                     }
 
-                    for (auto& [key, item] : val["columns"].items()) {
+                    for (auto& [key, item] : widgetDef["columns"].items()) {
                         columns.push_back({
                             std::make_optional(item["fieldId"].template get<std::string>()),
                             item["heading"].template get<std::string>()
                         });
                     }
 
-                    return Table::makeWidget(id, columns, clipRows);
+                    auto style = StyledWidget::ExtractStyle(widgetDef, view);
+
+                    return Table::makeWidget(id, columns, clipRows, style);
                 }
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<Table> makeWidget(int id, std::vector<TableColumn>& columns, std::optional<int> clipRows) {
-            Table instance(id, columns, clipRows);
+        static std::unique_ptr<Table> makeWidget(int id, std::vector<TableColumn>& columns, std::optional<int> clipRows, std::optional<BaseStyle>& style) {
+            Table instance(id, columns, clipRows, style);
 
             return std::make_unique<Table>(std::move(instance));
         }
@@ -1032,9 +1043,9 @@ class Table final : public Widget {
 };
 
 // todo: should we preallocate buffer size?
-class ClippedMultiLineTextRenderer final : public Widget {
+class ClippedMultiLineTextRenderer final : public StyledWidget {
     protected:
-        ClippedMultiLineTextRenderer(int id) : Widget(id) {
+        ClippedMultiLineTextRenderer(int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "ClippedMultiLineTextRenderer";
         }
 
@@ -1042,18 +1053,20 @@ class ClippedMultiLineTextRenderer final : public Widget {
         ImVector<int> m_lineOffsets;
         ImGuiTextBuffer m_textBuffer;
 
-        inline static std::unique_ptr<ClippedMultiLineTextRenderer> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
+        inline static std::unique_ptr<ClippedMultiLineTextRenderer> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
 
-                return ClippedMultiLineTextRenderer::makeWidget(id);
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
+
+                return ClippedMultiLineTextRenderer::makeWidget(id, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<ClippedMultiLineTextRenderer> makeWidget(int id) {
-            ClippedMultiLineTextRenderer instance(id);
+        static std::unique_ptr<ClippedMultiLineTextRenderer> makeWidget(int id, std::optional<BaseStyle>& style) {
+            ClippedMultiLineTextRenderer instance(id, style);
 
             return std::make_unique<ClippedMultiLineTextRenderer>(std::move(instance));
         }
