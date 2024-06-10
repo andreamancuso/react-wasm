@@ -157,6 +157,8 @@ void StyledWidget::PreRender(ReactImgui* view) {
                     ImGui::PushStyleVar(key, std::get<float>(val));
                 } else if (std::holds_alternative<ImVec2>(val)) {
                     ImGui::PushStyleVar(key, std::get<ImVec2>(val));
+                } else {
+                    // todo: throw?
                 }
             }
         }
