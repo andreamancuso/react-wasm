@@ -66,7 +66,8 @@ BaseStyle StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
                     if (color.size() == 6) {
                         colors[stoi(key)] = HEXAtoIV4(color.c_str());
                     }
-                } else if (item.is_array() && item.size() == 2) { // hex + alpha
+                } else if (item.is_array() && item.size() == 2
+                    && item[0].is_string() && item[1].is_number_unsigned()) { // hex + alpha
                     auto color = item[0].template get<std::string>();
                     auto alpha = item[1].template get<float>();
 
@@ -81,8 +82,6 @@ BaseStyle StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
             }
         }
 
-        // StyleVars
-
         if (widgetDef["style"].contains("vars") 
             && widgetDef["style"]["vars"].is_object()) {
             StyleVars styleVars;
@@ -90,7 +89,8 @@ BaseStyle StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
             for (auto& [key, item] : widgetDef["style"]["vars"].items()) {
                 StyleVarValue value;
 
-                if (item.is_array() && item.size() == 2) { // ImVec2
+                if (item.is_array() && item.size() == 2
+                     && item[0].is_number_unsigned() && item[1].is_number_unsigned()) { // ImVec2
                     value = ImVec2(
                         item[0].template get<float>(), 
                         item[1].template get<float>()

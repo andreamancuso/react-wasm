@@ -8,7 +8,6 @@
 // - Introduction, links and more at the top of imgui.cpp
 
 #include <optional>
-#include <variant>
 #include <tuple>
 #include <cstring>
 #include <string>
@@ -64,14 +63,14 @@ class Widget {
 
 class StyledWidget : public Widget {
     public:
-        // typedef std::tuple<std::optional<int>, std::optional<ImVec4>> StyleTuple;
-
         std::unique_ptr<BaseStyle> m_style;
 
         static BaseStyle ExtractStyle(const json& widgetDef, ReactImgui* view);
 
-        StyledWidget(int id) : Widget(id) {
-            // m_style = std::make_unique<Style>();
+        StyledWidget(int id) : Widget(id) {}
+
+        StyledWidget(int id, BaseStyle& style) : Widget(id) {
+            m_style = std::make_unique<BaseStyle>(style);
         }
 
         void PreRender(ReactImgui* view);
@@ -129,7 +128,7 @@ class Group final : public Widget {
         void Patch(const json& val) {}
 };
 
-class Window final : public Widget {
+class Window final : public StyledWidget {
     public:
         ImGuiWindowFlags m_flags = ImGuiWindowFlags_None;
         bool m_open;
@@ -137,20 +136,22 @@ class Window final : public Widget {
         float m_width;
         float m_height;
 
-        static std::unique_ptr<Window> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
-                auto title = val["title"].template get<std::string>();
-                auto width = val["width"].template get<float>();
-                auto height = val["height"].template get<float>();
+        static std::unique_ptr<Window> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
+                auto title = widgetDef["title"].template get<std::string>();
+                auto width = widgetDef["width"].template get<float>();
+                auto height = widgetDef["height"].template get<float>();
+
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
                 
-                return std::make_unique<Window>(id, title, width, height);
+                return std::make_unique<Window>(id, title, width, height, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        Window(int id, std::string title, float width, float height) : Widget(id) {
+        Window(int id, std::string title, float width, float height, BaseStyle& style) : StyledWidget(id, style) {
             m_type = "Window";
             m_handlesChildrenWithinRenderMethod = true;
 
@@ -165,34 +166,36 @@ class Window final : public Widget {
         void Patch(const json& val) {}
 };
 
-class Child final : public Widget {
+class Child final : public StyledWidget {
     public:
         ImGuiChildFlags m_flags = ImGuiChildFlags_None;
         ImGuiWindowFlags m_window_flags = ImGuiWindowFlags_None;
         float m_width;
         float m_height;
 
-        static std::unique_ptr<Child> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
+        static std::unique_ptr<Child> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object()) {
+                auto id = widgetDef["id"].template get<int>();
                 float width = 0;
                 auto height = 0;
 
-                if (val.contains("width") && val["width"].is_number()) {
-                    width = val["width"].template get<float>();
+                if (widgetDef.contains("width") && widgetDef["width"].is_number()) {
+                    width = widgetDef["width"].template get<float>();
                 }
 
-                if (val.contains("height") && val["height"].is_number()) {
-                    height = val["height"].template get<float>();
+                if (widgetDef.contains("height") && widgetDef["height"].is_number()) {
+                    height = widgetDef["height"].template get<float>();
                 }
+
+                auto style = StyledWidget::ExtractStyle(widgetDef, view);
                 
-                return std::make_unique<Child>(id, width, height);
+                return std::make_unique<Child>(id, width, height, style);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        Child(int id, float width, float height) : Widget(id) {
+        Child(int id, float width, float height, BaseStyle& style) : StyledWidget(id, style) {
             m_type = "Child";
             m_handlesChildrenWithinRenderMethod = true;
 
@@ -359,11 +362,9 @@ class UnformattedText final : public StyledWidget {
 
         static std::unique_ptr<UnformattedText> makeWidget(const json& widgetDef, ReactImgui* view);
 
-        UnformattedText(int id, std::string& text, BaseStyle& style) : StyledWidget(id) {
+        UnformattedText(int id, std::string& text, BaseStyle& style) : StyledWidget(id, style) {
             m_type = "UnformattedText";
             m_text = text;
-
-            m_style = std::make_unique<BaseStyle>(style);
         }
 
         void Render(ReactImgui* view);
@@ -790,17 +791,13 @@ class Checkbox final : public Widget {
 
 class Button final : public StyledWidget {
     protected:
-        Button(int id, std::string& label, BaseStyle& style) : StyledWidget(id) {
+        Button(int id, std::string& label, BaseStyle& style) : StyledWidget(id, style) {
             m_type = "Button";
             m_label = label;
-
-            m_style = std::make_unique<BaseStyle>(style);
         }
 
     public:
         std::string m_label;
-
-        // static ButtonStyle ExtractStyle(const json& widgetDef, ReactImgui* view);
 
         static std::unique_ptr<Button> makeWidget(const json& widgetDef, ReactImgui* view);
 
