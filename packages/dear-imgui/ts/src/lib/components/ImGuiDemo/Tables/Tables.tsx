@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { TableImperativeHandle } from "../../ReactImgui/Table";
 import RWStyleSheet from "src/lib/stylesheet/stylesheet";
+import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 
 const sampleData = [
     { id: "1", name: "Name" },
@@ -13,7 +14,8 @@ const sampleData = [
 
 const styleSheet = RWStyleSheet.create({
     primaryButton: {
-        color: "ff6e59",
+        colors: { [ImGuiCol.Button]: "ff6e59" },
+        vars: { [ImGuiStyleVar.FramePadding]: [40, 3] },
         // font: { name: "roboto-regular", size: 24 },
     },
 });

@@ -28,10 +28,6 @@
 
 using json = nlohmann::json;
 
-ImGuiCol Widget::GetImGuiCol() {
-    return ImGuiCol_COUNT;
-};
-
 // todo: seems redundant
 void Widget::HandleChildren(ReactImgui* view) {
     view->RenderChildren(m_id);
@@ -41,16 +37,16 @@ void Widget::PreRender(ReactImgui* view) {};
 
 void Widget::PostRender(ReactImgui* view) {};
 
-void ExtractScalarStyleVar(const json& styleVarsDef, std::string key, ImGuiStyleVar varId, std::unordered_map<ImGuiStyleVar, float>& map) {
-    if (styleVarsDef.contains(key) && styleVarsDef[key].is_number_unsigned()) {
-        map[varId] = styleVarsDef[key].template get<float>();
-    }
-}
+// void ExtractScalarStyleVar(const json& styleVarsDef, std::string key, ImGuiStyleVar varId, std::unordered_map<ImGuiStyleVar, float>& map) {
+//     if (styleVarsDef.contains(key) && styleVarsDef[key].is_number_unsigned()) {
+//         map[varId] = styleVarsDef[key].template get<float>();
+//     }
+// }
 
-template <typename T>
-T StyledWidget<T>::ExtractStyle(const json& widgetDef, ReactImgui* view) {
+BaseStyle StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
+    std::optional<StyleColors> maybeColors;
+    std::optional<StyleVars> maybeStyleVars;
     std::optional<int> maybeFontIndex;
-    std::optional<ImVec4> maybeColor;
         
     if (widgetDef.contains("style") && widgetDef["style"].is_object()) {
         if (widgetDef["style"].contains("font") 
@@ -64,58 +60,117 @@ T StyledWidget<T>::ExtractStyle(const json& widgetDef, ReactImgui* view) {
             ));
         }
 
-        if (widgetDef["style"].contains("color") 
-            && widgetDef["style"]["color"].is_string()) {
+        if (widgetDef["style"].contains("colors") 
+            && widgetDef["style"]["colors"].is_object()) {
 
-            auto color = widgetDef["style"]["color"].template get<std::string>();
+            StyleColors colors;
 
-            if (color.size() == 6) {
-                maybeColor.emplace(HEXAtoIV4(color.c_str()));
+            for (auto& [key, item] : widgetDef["style"]["colors"].items()) {
+                if (item.is_string()) {
+                    auto color = item.template get<std::string>();
+
+                    if (color.size() == 6) {
+                        colors[stoi(key)] = HEXAtoIV4(color.c_str());
+                    }
+                } else if (item.is_array() && item.size() == 2) { // hex + alpha
+                    auto color = item[0].template get<std::string>();
+                    auto alpha = item[1].template get<float>();
+
+                    if (color.size() == 6) {
+                        colors[stoi(key)] = HEXAtoIV4(color.c_str(), alpha);
+                    }
+                }
+            }
+
+            if (colors.size() > 0) {
+                maybeColors.emplace(colors);
             }
         }
 
-        // if (widgetDef["style"].contains("vars")) {
-        //     std::unordered_map<ImGuiStyleVar, float> scalarStyleVars;
-        //     auto styleVars = widgetDef["style"]["vars"];
-            
-        //     ExtractScalarStyleVar(styleVars, "alpha", ImGuiStyleVar_Alpha, scalarStyleVars);
-        //     ExtractScalarStyleVar(styleVars, "alpha", ImGuiStyleVar_DisabledAlpha, scalarStyleVars);
-        //     ExtractScalarStyleVar(styleVars, "alpha", ImGuiStyleVar_WindowRounding, scalarStyleVars);
-        // }
+        // StyleVars
+
+        if (widgetDef["style"].contains("vars") 
+            && widgetDef["style"]["vars"].is_object()) {
+            StyleVars styleVars;
+
+            for (auto& [key, item] : widgetDef["style"]["vars"].items()) {
+                StyleVarValue value;
+
+                if (item.is_array() && item.size() == 2) { // ImVec2
+                    value = ImVec2(
+                        item[0].template get<float>(), 
+                        item[1].template get<float>()
+                    );
+
+                    // value.emplace(ImVec2(
+                    //     item[0].template get<float>(), 
+                    //     item[1].template get<float>()
+                    // ));
+                } else if (item.is_number_unsigned()) { // float
+                    value = item.template get<float>();
+                    // value.emplace(item.template get<float>());
+                }
+
+                if (value.index() != 0) {
+                    styleVars[stoi(key)] = value;
+                }
+            }
+
+            if (styleVars.size() > 0) {
+                maybeStyleVars.emplace(styleVars);
+            }
+        }
     }
 
-    return T{maybeFontIndex, maybeColor};
+    return BaseStyle{maybeColors, maybeStyleVars, maybeFontIndex};
 };
 
-template <typename T>
-bool StyledWidget<T>::HasCustomFont(ReactImgui* view) {
+bool StyledWidget::HasCustomFont(ReactImgui* view) {
     return m_style->maybeFontIndex.has_value() && view->IsFontIndexValid(m_style->maybeFontIndex.value());
 };
 
-template <typename T>
-bool StyledWidget<T>::HasCustomColor() {
-    return m_style->maybeColor.has_value();
+bool StyledWidget::HasCustomColors() {
+    return m_style->maybeColors.has_value();
 };
 
-template <typename T>
-void StyledWidget<T>::PreRender(ReactImgui* view) {
+bool StyledWidget::HasCustomStyleVars() {
+    return m_style->maybeStyleVars.has_value();
+};
+
+void StyledWidget::PreRender(ReactImgui* view) {
     if (HasCustomFont(view)) {
         view->PushFont(m_style->maybeFontIndex.value());
     }
 
-    if (HasCustomColor()) {
-        ImGui::PushStyleColor(GetImGuiCol(), m_style->maybeColor.value());
+    if (HasCustomColors()) {
+        for (auto const& [key, val] : m_style->maybeColors.value()) {
+            ImGui::PushStyleColor(key, val);
+        }
+    }
+
+    if (HasCustomStyleVars()) {
+        for (auto const& [key, val] : m_style->maybeStyleVars.value()) {
+            if (std::holds_alternative<float>(val)) {
+                ImGui::PushStyleVar(key, std::get<float>(val));
+            } else if (std::holds_alternative<ImVec2>(val)) {
+                ImGui::PushStyleVar(key, std::get<ImVec2>(val));
+            }
+        }
     }
 };
 
-template <typename T>
-void StyledWidget<T>::PostRender(ReactImgui* view) {
+void StyledWidget::PostRender(ReactImgui* view) {
     if (HasCustomFont(view)) {
         view->PopFont();
     }
 
-    if (HasCustomColor()) {
-        ImGui::PopStyleColor();
+    if (HasCustomColors()) {
+        ImGui::PopStyleColor(m_style->maybeColors.value().size());
+    }
+
+    if (HasCustomStyleVars()) {
+        // Big, big assumption that this will match exactly the number of style vars being pushed above... Maybe we should actually keep track
+        ImGui::PopStyleVar(m_style->maybeStyleVars.value().size());
     }
 };
 
@@ -196,10 +251,6 @@ void BulletText::Render(ReactImgui* view) {
 
 void UnformattedText::Render(ReactImgui* view) {
     ImGui::TextUnformatted(m_text.c_str());
-};
-
-ImGuiCol UnformattedText::GetImGuiCol() {
-    return ImGuiCol_Text;
 };
 
 std::unique_ptr<UnformattedText> UnformattedText::makeWidget(const json& widgetDef, ReactImgui* view) {
@@ -309,20 +360,12 @@ void Checkbox::Render(ReactImgui* view) {
     ImGui::PopID();
 };
 
-// ButtonStyle Button::ExtractStyle(const json& widgetDef, ReactImgui* view) {
-//     return StyledWidget::ExtractStyle(widgetDef, view);
-// };
-
-ImGuiCol Button::GetImGuiCol() {
-    return ImGuiCol_Button;
-};
-
 std::unique_ptr<Button> Button::makeWidget(const json& widgetDef, ReactImgui* view) {
     if (widgetDef.is_object()) {
         auto id = widgetDef["id"].template get<int>();
         auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
 
-        auto style = StyledWidget<ButtonStyle>::ExtractStyle(widgetDef, view);
+        auto style = StyledWidget::ExtractStyle(widgetDef, view);
         
         return Button::makeWidget(id, label, style);
     }

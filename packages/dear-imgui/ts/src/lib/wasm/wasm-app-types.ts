@@ -61,6 +61,41 @@ export enum ImGuiCol {
     COUNT,
 }
 
+export enum ImGuiStyleVar {
+    Alpha, // float     Alpha
+    DisabledAlpha, // float     DisabledAlpha
+    WindowPadding, // ImVec2    WindowPadding
+    WindowRounding, // float     WindowRounding
+    WindowBorderSize, // float     WindowBorderSize
+    WindowMinSize, // ImVec2    WindowMinSize
+    WindowTitleAlign, // ImVec2    WindowTitleAlign
+    ChildRounding, // float     ChildRounding
+    ChildBorderSize, // float     ChildBorderSize
+    PopupRounding, // float     PopupRounding
+    PopupBorderSize, // float     PopupBorderSize
+    FramePadding, // ImVec2    FramePadding
+    FrameRounding, // float     FrameRounding
+    FrameBorderSize, // float     FrameBorderSize
+    ItemSpacing, // ImVec2    ItemSpacing
+    ItemInnerSpacing, // ImVec2    ItemInnerSpacing
+    IndentSpacing, // float     IndentSpacing
+    CellPadding, // ImVec2    CellPadding
+    ScrollbarSize, // float     ScrollbarSize
+    ScrollbarRounding, // float     ScrollbarRounding
+    GrabMinSize, // float     GrabMinSize
+    GrabRounding, // float     GrabRounding
+    TabRounding, // float     TabRounding
+    TabBorderSize, // float     TabBorderSize
+    TabBarBorderSize, // float     TabBarBorderSize
+    TableAngledHeadersAngle, // float  TableAngledHeadersAngle
+    TableAngledHeadersTextAlign, // ImVec2 TableAngledHeadersTextAlign
+    ButtonTextAlign, // ImVec2    ButtonTextAlign
+    SelectableTextAlign, // ImVec2    SelectableTextAlign
+    SeparatorTextBorderSize, // float  SeparatorTextBorderSize
+    SeparatorTextAlign, // ImVec2    SeparatorTextAlign
+    SeparatorTextPadding, // ImVec2    SeparatorTextPadding
+}
+
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
     let HEAPF32: any;
@@ -574,39 +609,6 @@ export type ImGuiBackendFlags =
 export interface ImGuiStyleVarValue<T extends number> {
     value: T;
 }
-export type ImGuiStyleVar =
-    | ImGuiStyleVarValue<0>
-    | ImGuiStyleVarValue<1>
-    | ImGuiStyleVarValue<2>
-    | ImGuiStyleVarValue<3>
-    | ImGuiStyleVarValue<4>
-    | ImGuiStyleVarValue<5>
-    | ImGuiStyleVarValue<6>
-    | ImGuiStyleVarValue<7>
-    | ImGuiStyleVarValue<8>
-    | ImGuiStyleVarValue<9>
-    | ImGuiStyleVarValue<10>
-    | ImGuiStyleVarValue<11>
-    | ImGuiStyleVarValue<12>
-    | ImGuiStyleVarValue<13>
-    | ImGuiStyleVarValue<14>
-    | ImGuiStyleVarValue<15>
-    | ImGuiStyleVarValue<16>
-    | ImGuiStyleVarValue<17>
-    | ImGuiStyleVarValue<18>
-    | ImGuiStyleVarValue<19>
-    | ImGuiStyleVarValue<20>
-    | ImGuiStyleVarValue<21>
-    | ImGuiStyleVarValue<22>
-    | ImGuiStyleVarValue<23>
-    | ImGuiStyleVarValue<24>
-    | ImGuiStyleVarValue<25>
-    | ImGuiStyleVarValue<27>
-    | ImGuiStyleVarValue<28>
-    | ImGuiStyleVarValue<29>
-    | ImGuiStyleVarValue<30>
-    | ImGuiStyleVarValue<31>
-    | ImGuiStyleVarValue<32>;
 
 export interface ImGuiButtonFlagsValue<T extends number> {
     value: T;

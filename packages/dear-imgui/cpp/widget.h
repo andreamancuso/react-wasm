@@ -8,6 +8,7 @@
 // - Introduction, links and more at the top of imgui.cpp
 
 #include <optional>
+#include <variant>
 #include <tuple>
 #include <cstring>
 #include <string>
@@ -30,14 +31,9 @@ using json = nlohmann::json;
 class ReactImgui;
 
 struct BaseStyle {
+    std::optional<StyleColors> maybeColors;
+    std::optional<StyleVars> maybeStyleVars;
     std::optional<int> maybeFontIndex;
-    std::optional<ImVec4> maybeColor;
-};
-
-struct ButtonStyle : BaseStyle {
-    std::optional<int> maybeFrameRounding;
-    std::optional<ImVec2> maybeFramePadding;
-    std::optional<ImVec2> maybeButtonTextAlign;
 };
 
 class Widget {
@@ -64,18 +60,15 @@ class Widget {
         virtual void PostRender(ReactImgui* view);
 
         virtual void Patch(const json& val) = 0;
-
-        virtual ImGuiCol GetImGuiCol();
 };
 
-template <typename T>
 class StyledWidget : public Widget {
     public:
         // typedef std::tuple<std::optional<int>, std::optional<ImVec4>> StyleTuple;
 
-        std::unique_ptr<T> m_style;
+        std::unique_ptr<BaseStyle> m_style;
 
-        static T ExtractStyle(const json& widgetDef, ReactImgui* view);
+        static BaseStyle ExtractStyle(const json& widgetDef, ReactImgui* view);
 
         StyledWidget(int id) : Widget(id) {
             // m_style = std::make_unique<Style>();
@@ -87,7 +80,9 @@ class StyledWidget : public Widget {
 
         bool HasCustomFont(ReactImgui* view);
 
-        bool HasCustomColor();
+        bool HasCustomColors();
+
+        bool HasCustomStyleVars();
 };
 
 class Fragment final : public Widget {
@@ -358,7 +353,7 @@ class BulletText final : public Widget {
 };
 
 
-class UnformattedText final : public StyledWidget<BaseStyle> {
+class UnformattedText final : public StyledWidget {
     public:
         std::string m_text;
 
@@ -372,8 +367,6 @@ class UnformattedText final : public StyledWidget<BaseStyle> {
         }
 
         void Render(ReactImgui* view);
-
-        ImGuiCol GetImGuiCol();
 
         void Patch(const json& val) {
             if (val.is_object()) {
@@ -795,13 +788,13 @@ class Checkbox final : public Widget {
         }
 };
 
-class Button final : public StyledWidget<ButtonStyle> {
+class Button final : public StyledWidget {
     protected:
-        Button(int id, std::string& label, ButtonStyle& style) : StyledWidget(id) {
+        Button(int id, std::string& label, BaseStyle& style) : StyledWidget(id) {
             m_type = "Button";
             m_label = label;
 
-            m_style = std::make_unique<ButtonStyle>(style);
+            m_style = std::make_unique<BaseStyle>(style);
         }
 
     public:
@@ -811,7 +804,7 @@ class Button final : public StyledWidget<ButtonStyle> {
 
         static std::unique_ptr<Button> makeWidget(const json& widgetDef, ReactImgui* view);
 
-        inline static std::unique_ptr<Button> makeWidget(int id, std::string& label, ButtonStyle& style) {
+        inline static std::unique_ptr<Button> makeWidget(int id, std::string& label, BaseStyle& style) {
             Button instance(id, label, style);
             return std::make_unique<Button>(std::move(instance));
         }

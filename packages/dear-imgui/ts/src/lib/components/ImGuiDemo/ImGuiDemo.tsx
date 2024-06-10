@@ -8,10 +8,11 @@ import { ClippedMultiLineTextRendererImperativeHandle } from "../ReactImgui/Clip
 import faIconMap from "../../fa-icons";
 import RWStyleSheet from "../../stylesheet/stylesheet";
 import { Tables } from "./Tables/Tables";
+import { ImGuiCol } from "src/lib/wasm/wasm-app-types";
 
 const styleSheet = RWStyleSheet.create({
     ut: {
-        color: "ff6e59",
+        colors: { [ImGuiCol.Text]: "ff6e59" },
         font: { name: "roboto-regular", size: 24 },
     },
 });
