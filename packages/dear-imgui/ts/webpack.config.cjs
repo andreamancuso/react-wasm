@@ -51,7 +51,6 @@ module.exports = [
                         },
                     ],
                 },
-                ,
                 {
                     test: /\.(data)$/,
                     // exclude: [path.resolve(__dirname, "react-native")],

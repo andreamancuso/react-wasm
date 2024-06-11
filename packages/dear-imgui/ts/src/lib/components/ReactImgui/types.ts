@@ -1,14 +1,11 @@
-import { FunctionComponent, JSXElementConstructor, ReactElement } from "react";
+import { FunctionComponent, JSXElementConstructor, ReactElement, SyntheticEvent } from "react";
 import { ReactImgui } from "./components";
 import { MainComponentProps } from "../ReactImgui";
 import { StyleRules } from "src/lib/stylesheet/stylesheet";
+import { ImVec2 } from "src/lib/wasm/wasm-app-types";
 
 export type Primitive = string | number | boolean;
 
-export type Vec2 = {
-    x: number;
-    y: number;
-};
 export type SliderTypes = "default" | "angle";
 
 export type FontDef = {
@@ -20,6 +17,27 @@ export type StyleProps = {
     style?: StyleRules;
 };
 
+export type TabItemChangeEvent = SyntheticEvent<WidgetReactElement<"TabItem">, { value: boolean }>;
+
+export type InputTextChangeEvent = SyntheticEvent<
+    WidgetReactElement<"InputText">,
+    { value: string }
+>;
+
+export type ComboChangeEvent = SyntheticEvent<WidgetReactElement<"Combo">, { value: number }>;
+
+export type SliderChangeEvent = SyntheticEvent<WidgetReactElement<"Slider">, { value: number }>;
+
+export type MultiSliderChangeEvent = SyntheticEvent<
+    WidgetReactElement<"MultiSlider">,
+    { value: Primitive[] }
+>;
+
+export type CheckboxChangeEvent = SyntheticEvent<
+    WidgetReactElement<"Checkbox">,
+    { value: boolean }
+>;
+
 export type WidgetPropsMap = {
     Unknown: {};
     Fragment: {};
@@ -27,7 +45,10 @@ export type WidgetPropsMap = {
     DIWindow: StyleProps & { title: string; width: number; height: number };
     Group: StyleProps & {};
     TabBar: StyleProps & {};
-    TabItem: StyleProps & { label: string; onOpenChange?: (value: boolean) => void };
+    TabItem: StyleProps & {
+        label: string;
+        onOpenChange?: (event: TabItemChangeEvent) => void;
+    };
     SameLine: {};
     ItemTooltip: StyleProps & {};
     TextWrap: StyleProps & { width: number };
@@ -52,7 +73,7 @@ export type WidgetPropsMap = {
     InputText: StyleProps & {
         defaultValue?: string;
         label?: string;
-        onChange?: (value: string) => void;
+        onChange?: (event: InputTextChangeEvent) => void;
     };
     CollapsingHeader: StyleProps & {
         label?: string;
@@ -65,7 +86,7 @@ export type WidgetPropsMap = {
         options?: { value: number; label: string }[];
         optionsList?: string;
         defaultValue?: number;
-        onChange?: (value: number) => void;
+        onChange?: (event: ComboChangeEvent) => void;
     };
     Slider: StyleProps & {
         sliderType: SliderTypes;
@@ -73,7 +94,7 @@ export type WidgetPropsMap = {
         defaultValue?: number;
         min?: number;
         max?: number;
-        onChange?: (value: number) => void;
+        onChange?: (event: SliderChangeEvent) => void;
     };
     MultiSlider: StyleProps & {
         numValues: 2 | 3 | 4;
@@ -82,17 +103,17 @@ export type WidgetPropsMap = {
         min?: number;
         max?: number;
         decimalDigits?: number;
-        onChange?: (values: Primitive[]) => void;
+        onChange?: (event: MultiSliderChangeEvent) => void;
     };
     Checkbox: StyleProps & {
         defaultChecked?: boolean;
         label?: string;
-        onChange?: (value: boolean) => void;
+        onChange?: (event: CheckboxChangeEvent) => void;
     };
     Button: StyleProps & {
         onClick?: () => void;
         label?: string;
-        size?: Vec2;
+        size?: ImVec2;
     };
     Table: StyleProps & {
         columns: { heading: string; fieldId?: string }[];

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { SyntheticEvent, useCallback, useMemo, useRef, useState } from "react";
 import { HelpMarker } from "./HelpMarker/HelpMarker";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { UserGuide } from "./UserGuide/UserGuide";
@@ -9,6 +9,7 @@ import faIconMap from "../../fa-icons";
 import RWStyleSheet from "../../stylesheet/stylesheet";
 import { Tables } from "./Tables/Tables";
 import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
+import { WidgetReactElement } from "../ReactImgui/types";
 
 export const ImGuiDemo = () => {
     const [color, setColor] = useState("ff6e59");
@@ -42,11 +43,14 @@ export const ImGuiDemo = () => {
         0, 0, 0, 0,
     ]);
 
-    const handleInputTextChanged = useCallback((event: any) => {
-        if (event?.nativeEvent) {
-            setText(String(event?.nativeEvent.value));
-        }
-    }, []);
+    const handleInputTextChanged = useCallback(
+        (event: SyntheticEvent<WidgetReactElement<"InputText">, { value: string }>) => {
+            if (event?.nativeEvent) {
+                setText(String(event?.nativeEvent.value));
+            }
+        },
+        [],
+    );
 
     const handleTripleSliderValueChanged = useCallback((event: any) => {
         if (event.nativeEvent) {
