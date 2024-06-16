@@ -43,6 +43,27 @@ std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, React
     std::optional<BaseStyle> maybeStyle;
         
     if (widgetDef.is_object() && widgetDef.contains("style") && widgetDef["style"].is_object()) {
+
+        if (widgetDef["style"].contains("width") 
+            && widgetDef["style"]["width"].is_number()) {
+
+            if (!maybeStyle.has_value()) {
+                maybeStyle.emplace(BaseStyle{});
+            }
+
+            maybeStyle.value().maybeWidth.emplace(widgetDef["style"]["width"].template get<float>());
+        }
+
+        if (widgetDef["style"].contains("height") 
+            && widgetDef["style"]["height"].is_number_unsigned()) {
+
+            if (!maybeStyle.has_value()) {
+                maybeStyle.emplace(BaseStyle{});
+            }
+
+            maybeStyle.value().maybeHeight.emplace(widgetDef["style"]["height"].template get<float>());
+        }
+
         if (widgetDef["style"].contains("font") 
             && widgetDef["style"]["font"].is_object() 
             && widgetDef["style"]["font"]["name"].is_string() 
@@ -148,6 +169,16 @@ bool StyledWidget::HasCustomFont(ReactImgui* view) {
 };
 
 // Assumes m_style is not null, you should call HasCustomStyles() first
+bool StyledWidget::HasCustomWidth() {
+    return m_style.value()->maybeWidth.has_value();
+};
+
+// Assumes m_style is not null, you should call HasCustomStyles() first
+bool StyledWidget::HasCustomHeight() {
+    return m_style.value()->maybeHeight.has_value();
+};
+
+// Assumes m_style is not null, you should call HasCustomStyles() first
 bool StyledWidget::HasCustomColors() {
     return m_style.value()->maybeColors.has_value();
 };
@@ -157,8 +188,36 @@ bool StyledWidget::HasCustomStyleVars() {
     return m_style.value()->maybeStyleVars.has_value();
 };
 
+float StyledWidget::GetComputedWidth(ReactImgui* view) {
+    if (m_style.has_value() && m_style.value()->maybeWidth.has_value()) {
+        ImGuiStyle& imguiStyle = view->GetStyle();
+
+        return (ImGui::GetWindowContentRegionMax().x * m_style.value()->maybeWidth.value()) - imguiStyle.ItemSpacing.x;
+    }
+
+    return 0;
+};
+
+float StyledWidget::GetComputedHeight(ReactImgui* view) {
+    if (m_style.has_value() && m_style.value()->maybeHeight.has_value()) {
+        ImGuiStyle& imguiStyle = view->GetStyle();
+
+        return (ImGui::GetWindowContentRegionMax().y * m_style.value()->maybeHeight.value()) - imguiStyle.ItemSpacing.y;
+    }
+
+    return 0;
+};
+
 void StyledWidget::PreRender(ReactImgui* view) {
     if (HasCustomStyles()) {
+        if (HasCustomWidth()) {
+            ImGui::PushItemWidth(GetComputedWidth(view));
+        }
+
+        // if (HasCustomHeight()) {
+            // todo: might make more sense to add widget-specific implementations
+        // }
+
         if (HasCustomFont(view)) {
             view->PushFont(m_style.value()->maybeFontIndex.value());
         }
@@ -185,6 +244,14 @@ void StyledWidget::PreRender(ReactImgui* view) {
 
 void StyledWidget::PostRender(ReactImgui* view) {
     if (HasCustomStyles()) {
+        if (HasCustomWidth()) {
+            ImGui::PopItemWidth();
+        }
+        
+        // if (HasCustomHeight()) {
+            // todo: might make more sense to add widget-specific implementations
+        // }
+
         if (HasCustomFont(view)) {
             view->PopFont();
         }
@@ -393,9 +460,21 @@ std::unique_ptr<Button> Button::makeWidget(const json& widgetDef, ReactImgui* vi
     throw std::invalid_argument("Invalid JSON data");
 };
 
+// size is passed as part of rendering the widget
+bool Button::HasCustomWidth() {
+    return false;
+}
+
+bool Button::HasCustomHeight() {
+    return false;
+}
+
 void Button::Render(ReactImgui* view) {
     ImGui::PushID(m_id);
-    if (ImGui::Button(m_label.c_str())) {
+
+    ImGuiStyle& imguiStyle = view->GetStyle();
+
+    if (ImGui::Button(m_label.c_str(), ImVec2(GetComputedWidth(view), GetComputedHeight(view)))) {
         view->m_onClick(m_id);
     }
     ImGui::PopID();

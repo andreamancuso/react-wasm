@@ -33,6 +33,8 @@ struct BaseStyle {
     std::optional<StyleColors> maybeColors;
     std::optional<StyleVars> maybeStyleVars;
     std::optional<int> maybeFontIndex;
+    std::optional<float> maybeWidth;
+    std::optional<float> maybeHeight;
 };
 
 class Widget {
@@ -84,6 +86,14 @@ class StyledWidget : public Widget {
         bool HasCustomFont(ReactImgui* view);
 
         bool HasCustomColors();
+
+        virtual bool HasCustomWidth();
+
+        virtual bool HasCustomHeight();
+
+        float GetComputedWidth(ReactImgui* view);
+
+        float GetComputedHeight(ReactImgui* view);
 
         bool HasCustomStyleVars();
 
@@ -844,10 +854,26 @@ class Button final : public StyledWidget {
         Button(int id, std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Button";
             m_label = label;
+            m_size = ImVec2();
+
+            UpdateSize();
+        }
+
+        void UpdateSize() {
+            if (m_style.has_value()) {
+                if (m_style.value()->maybeWidth.has_value()) {
+                    m_size.x = m_style.value()->maybeWidth.value();
+                }
+                if (m_style.value()->maybeHeight.has_value()) {
+                    m_size.y = m_style.value()->maybeHeight.value();
+                }
+            }
         }
 
     public:
         std::string m_label;
+
+        ImVec2 m_size;
 
         static std::unique_ptr<Button> makeWidget(const json& widgetDef, ReactImgui* view);
 
@@ -860,9 +886,14 @@ class Button final : public StyledWidget {
 
         void Render(ReactImgui* view);
 
+        bool HasCustomWidth();
+
+        bool HasCustomHeight();
+
         void Patch(const json& widgetPatchDef, ReactImgui* view) {
             if (widgetPatchDef.is_object()) {
                 StyledWidget::Patch(widgetPatchDef, view);
+                UpdateSize();
 
                 if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
                     m_label = widgetPatchDef["label"].template get<std::string>();

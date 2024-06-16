@@ -16,7 +16,10 @@ const styleSheet = RWStyleSheet.create({
     primaryButton: {
         colors: { [ImGuiCol.Button]: "ff6e59" },
         vars: { [ImGuiStyleVar.FramePadding]: [40, 3] },
-        // font: { name: "roboto-regular", size: 24 },
+        width: 0.5,
+    },
+    secondaryButton: {
+        width: 0.5,
     },
 });
 
@@ -77,16 +80,16 @@ export const Tables = () => {
     return (
         <ReactImgui.Fragment>
             <ReactImgui.SameLine>
-                <ReactImgui.Child width={250} height={-40}>
+                <ReactImgui.Child width={250} height={-60}>
                     <ReactImgui.Table ref={tableRef1} columns={tableColumns} clipRows={10} />
                 </ReactImgui.Child>
-                <ReactImgui.Child width={250} height={-40}>
+                <ReactImgui.Child width={250} height={-60}>
                     <ReactImgui.Table ref={tableRef2} columns={tableColumns} clipRows={10} />
                 </ReactImgui.Child>
-                <ReactImgui.Child width={250} height={-40}>
+                <ReactImgui.Child width={250} height={-60}>
                     <ReactImgui.Table ref={tableRef3} columns={tableColumns} clipRows={10} />
                 </ReactImgui.Child>
-                <ReactImgui.Child width={250} height={-40}>
+                <ReactImgui.Child width={250} height={-60}>
                     <ReactImgui.Table ref={tableRef4} columns={tableColumns} clipRows={10} />
                 </ReactImgui.Child>
             </ReactImgui.SameLine>
@@ -99,6 +102,7 @@ export const Tables = () => {
                 <ReactImgui.Button
                     onClick={handleStopAppendingDataToTableClick}
                     label="Stop adding data"
+                    style={styleSheet.secondaryButton}
                 />
             </ReactImgui.SameLine>
         </ReactImgui.Fragment>

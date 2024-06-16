@@ -2,6 +2,8 @@ import { ImGuiCol, ImGuiStyleVar, ImVec2 } from "../wasm/wasm-app-types";
 import { StyleColValue, StyleVarValue } from "./imgui-style";
 
 export type StyleRules = {
+    width?: number; // Currently % based; supported on a subset of widgets
+    height?: number; // Currently % based; supported on a subset of widgets
     font?: {
         name: string;
         size: number;
