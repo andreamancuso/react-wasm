@@ -7,3 +7,6 @@
 [submodule "packages/dear-imgui/cpp/deps/vcpkg"]
 	path = packages/dear-imgui/cpp/deps/vcpkg
 	url = https://github.com/andreamancuso/vcpkg.git
+[submodule "packages/dear-imgui/cpp/deps/ReactivePlusPlus"]
+	path = packages/dear-imgui/cpp/deps/ReactivePlusPlus
+	url = https://github.com/victimsnino/ReactivePlusPlus.git

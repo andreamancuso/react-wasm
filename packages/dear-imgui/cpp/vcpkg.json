@@ -17,7 +17,6 @@
         },
         "implot",
         "nlohmann-json",
-        "opengl-registry",
-        "reactiveplusplus"
+        "opengl-registry"
     ]
 }
