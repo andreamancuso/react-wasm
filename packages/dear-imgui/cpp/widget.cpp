@@ -208,9 +208,12 @@ float StyledWidget::GetComputedHeight(ReactImgui* view) {
     return 0;
 };
 
+// This allegedly vertically aligns text ImGui::AlignTextToFramePadding();
+
 void StyledWidget::PreRender(ReactImgui* view) {
     if (HasCustomStyles()) {
         if (HasCustomWidth()) {
+            // Apparently ImGui::PushItemWidth(-FLT_MIN); is the equivalent of text-align: right;
             ImGui::PushItemWidth(GetComputedWidth(view));
         }
 
@@ -474,6 +477,7 @@ void Button::Render(ReactImgui* view) {
 
     ImGuiStyle& imguiStyle = view->GetStyle();
 
+    // Apparently ImGui::Button(label, ImVec2(-FLT_MIN, 0.0f)); is the equivalent of width: 100%
     if (ImGui::Button(m_label.c_str(), ImVec2(GetComputedWidth(view), GetComputedHeight(view)))) {
         view->m_onClick(m_id);
     }
