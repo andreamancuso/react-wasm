@@ -35,6 +35,7 @@ struct BaseStyle {
     std::optional<int> maybeFontIndex;
     std::optional<float> maybeWidth;
     std::optional<float> maybeHeight;
+    std::optional<HorizontalAlignment> maybeHorizontalAlignment;
 };
 
 class Widget {
@@ -96,6 +97,10 @@ class StyledWidget : public Widget {
         float GetComputedHeight(ReactImgui* view);
 
         bool HasCustomStyleVars();
+
+        bool HasCustomHorizontalAlignment();
+
+        bool HasRightHorizontalAlignment();
 
         void ReplaceStyle(BaseStyle& newStyle);
 

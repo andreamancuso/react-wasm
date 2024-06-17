@@ -161,15 +161,14 @@ export const ImGuiDemo = () => {
                 height={600}
                 style={styleSheet.inputWindow}
             >
-                <ReactImgui.SameLine>
-                    <ReactImgui.Child width={400} height={0}>
-                        <ReactImgui.InputText
-                            defaultValue={text}
-                            onChange={handleInputTextChanged}
-                        />
-                        <ReactImgui.UnformattedText text={text} />
-                    </ReactImgui.Child>
-                </ReactImgui.SameLine>
+                <ReactImgui.Child width={400} height={0}>
+                    <ReactImgui.InputText
+                        defaultValue={text}
+                        onChange={handleInputTextChanged}
+                        style={{ width: 0.8 }}
+                    />
+                    <ReactImgui.UnformattedText text={text} />
+                </ReactImgui.Child>
             </ReactImgui.DIWindow>
 
             <ReactImgui.DIWindow title="tables" width={1000} height={600}>

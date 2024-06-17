@@ -11,6 +11,14 @@
 
 using json = nlohmann::json;
 
+enum HorizontalAlignment
+{
+    // HorizontalAlignment_None    = -1,
+    HorizontalAlignment_Left    = 0,
+    HorizontalAlignment_Right   = 1,
+    HorizontalAlignment_Center  = 2 // Wondering this will ever be supported the way I'd like
+};
+
 typedef std::unordered_map<std::string, std::string> TableRow;
 typedef std::vector<TableRow> TableData;
 

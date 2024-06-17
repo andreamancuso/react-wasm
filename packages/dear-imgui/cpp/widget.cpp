@@ -43,23 +43,30 @@ std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, React
     std::optional<BaseStyle> maybeStyle;
         
     if (widgetDef.is_object() && widgetDef.contains("style") && widgetDef["style"].is_object()) {
+        // Perhaps a bit optimistic, but also rather convenient
+        maybeStyle.emplace(BaseStyle{});
+
+        // if (widgetDef["style"].contains("align") 
+        //     && widgetDef["style"]["align"].is_string()) {
+
+        //     auto align = widgetDef["style"]["align"].template get<std::string>();
+
+        //     if (align == "left") {
+        //         maybeStyle.value().maybeHorizontalAlignment.emplace(HorizontalAlignment_Left);
+        //     }
+        //     if (align == "right") {
+        //         maybeStyle.value().maybeHorizontalAlignment.emplace(HorizontalAlignment_Right);
+        //     }
+        // }
 
         if (widgetDef["style"].contains("width") 
             && widgetDef["style"]["width"].is_number()) {
-
-            if (!maybeStyle.has_value()) {
-                maybeStyle.emplace(BaseStyle{});
-            }
 
             maybeStyle.value().maybeWidth.emplace(widgetDef["style"]["width"].template get<float>());
         }
 
         if (widgetDef["style"].contains("height") 
             && widgetDef["style"]["height"].is_number_unsigned()) {
-
-            if (!maybeStyle.has_value()) {
-                maybeStyle.emplace(BaseStyle{});
-            }
 
             maybeStyle.value().maybeHeight.emplace(widgetDef["style"]["height"].template get<float>());
         }
@@ -68,10 +75,6 @@ std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, React
             && widgetDef["style"]["font"].is_object() 
             && widgetDef["style"]["font"]["name"].is_string() 
             && widgetDef["style"]["font"]["size"].is_number_unsigned()) {
-
-            if (!maybeStyle.has_value()) {
-                maybeStyle.emplace(BaseStyle{});
-            }
 
             maybeStyle.value().maybeFontIndex.emplace(view->GetFontIndex(
                 widgetDef["style"]["font"]["name"].template get<std::string>(), 
@@ -103,10 +106,6 @@ std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, React
             }
 
             if (colors.size() > 0) {
-                if (!maybeStyle.has_value()) {
-                    maybeStyle.emplace(BaseStyle{});
-                }
-
                 maybeStyle.value().maybeColors.emplace(colors);
             }
         }
@@ -134,10 +133,6 @@ std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, React
             }
 
             if (styleVars.size() > 0) {
-                if (!maybeStyle.has_value()) {
-                    maybeStyle.emplace(BaseStyle{});
-                }
-
                 maybeStyle.value().maybeStyleVars.emplace(styleVars);
             }
         }
@@ -179,6 +174,16 @@ bool StyledWidget::HasCustomHeight() {
 };
 
 // Assumes m_style is not null, you should call HasCustomStyles() first
+bool StyledWidget::HasCustomHorizontalAlignment() {
+    return m_style.value()->maybeHorizontalAlignment.has_value();
+};
+
+// Assumes m_style is not null, you should call HasCustomStyles() first
+bool StyledWidget::HasRightHorizontalAlignment() {
+    return HasCustomHorizontalAlignment() && m_style.value()->maybeHorizontalAlignment.value() == HorizontalAlignment_Right;
+};
+
+// Assumes m_style is not null, you should call HasCustomStyles() first
 bool StyledWidget::HasCustomColors() {
     return m_style.value()->maybeColors.has_value();
 };
@@ -189,10 +194,14 @@ bool StyledWidget::HasCustomStyleVars() {
 };
 
 float StyledWidget::GetComputedWidth(ReactImgui* view) {
-    if (m_style.has_value() && m_style.value()->maybeWidth.has_value()) {
-        ImGuiStyle& imguiStyle = view->GetStyle();
+    if (m_style.has_value()) {
+        auto style = m_style.value().get();
 
-        return (ImGui::GetWindowContentRegionMax().x * m_style.value()->maybeWidth.value()) - imguiStyle.ItemSpacing.x;
+        if (style->maybeWidth.has_value()) {
+            ImGuiStyle& imguiStyle = view->GetStyle();
+
+            return (ImGui::GetWindowContentRegionMax().x * style->maybeWidth.value()) - imguiStyle.ItemSpacing.x;
+        }
     }
 
     return 0;
@@ -213,9 +222,11 @@ float StyledWidget::GetComputedHeight(ReactImgui* view) {
 void StyledWidget::PreRender(ReactImgui* view) {
     if (HasCustomStyles()) {
         if (HasCustomWidth()) {
-            // Apparently ImGui::PushItemWidth(-FLT_MIN); is the equivalent of text-align: right;
             ImGui::PushItemWidth(GetComputedWidth(view));
         }
+        // else if (HasRightHorizontalAlignment()) {
+            // ImGui::PushItemWidth(-FLT_MIN);
+        // }
 
         // if (HasCustomHeight()) {
             // todo: might make more sense to add widget-specific implementations
@@ -250,7 +261,10 @@ void StyledWidget::PostRender(ReactImgui* view) {
         if (HasCustomWidth()) {
             ImGui::PopItemWidth();
         }
-        
+        // else if (HasRightHorizontalAlignment()) {
+            // ImGui::PopItemWidth();
+        // }
+
         // if (HasCustomHeight()) {
             // todo: might make more sense to add widget-specific implementations
         // }
