@@ -1,7 +1,7 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { MapImperativeHandle } from "../../ReactImgui/Map";
-import { ComboChangeEvent, InputTextChangeEvent } from "../../ReactImgui/types";
+import { ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 
 export const Maps = () => {
     const mapRef = useRef<MapImperativeHandle>(null);
@@ -28,14 +28,33 @@ export const Maps = () => {
     }, []);
 
     return (
-        <ReactImgui.Fragment>
-            <ReactImgui.SameLine>
+        <ReactImgui.Node
+            style={{
+                width: "100%",
+                height: "100%",
+                flexDirection: "column",
+                gap: { row: 5 },
+            }}
+        >
+            <ReactImgui.Node
+                style={{
+                    width: "100%",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: { column: 15 },
+                }}
+            >
                 <ReactImgui.UnformattedText text={`Center: ${center[0]}, ${center[1]}`} />
                 <ReactImgui.Button onClick={locate} label="Locate" />
-
                 <ReactImgui.Button onClick={renderMap} label="Render" />
-            </ReactImgui.SameLine>
-            <ReactImgui.Map ref={mapRef} />
-        </ReactImgui.Fragment>
+            </ReactImgui.Node>
+            {/* <ReactImgui.Separator />
+            <ReactImgui.SeparatorText
+                label="label"
+                style={{ vars: { [ImGuiStyleVar.SeparatorTextBorderSize]: 1 } }}
+            />
+            <ReactImgui.BulletText text="Sections below are demonstrating many aspects of the library." /> */}
+            <ReactImgui.Map ref={mapRef} style={{ flex: 1 }} />
+        </ReactImgui.Node>
     );
 };

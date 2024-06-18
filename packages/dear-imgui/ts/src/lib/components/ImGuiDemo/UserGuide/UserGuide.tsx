@@ -12,20 +12,20 @@ export const UserGuide = () => (
         {/* if (io.FontAllowUserScaling) */}
         {/* ImGui::BulletText("CTRL+Mouse Wheel to zoom window contents."); */}
         <ReactImgui.BulletText text={`While inputing text:\n`} />
-        <ReactImgui.Indent>
+        <ReactImgui.Node style={{ padding: { left: 20 } }}>
             <ReactImgui.BulletText text="CTRL+Left/Right to word jump." />
             <ReactImgui.BulletText text="CTRL+A or double-click to select all." />
             <ReactImgui.BulletText text="CTRL+X/C/V to use clipboard cut/copy/paste." />
             <ReactImgui.BulletText text="CTRL+Z,CTRL+Y to undo/redo." />
             <ReactImgui.BulletText text="ESCAPE to revert." />
-        </ReactImgui.Indent>
+        </ReactImgui.Node>
         <ReactImgui.BulletText text="With keyboard navigation enabled:" />
-        <ReactImgui.Indent>
+        <ReactImgui.Node style={{ padding: { left: 20 } }}>
             <ReactImgui.BulletText text="Arrow keys to navigate." />
             <ReactImgui.BulletText text="Space to activate a widget." />
             <ReactImgui.BulletText text="Return to input text into a widget." />
             <ReactImgui.BulletText text="Escape to deactivate a widget, close popup, exit child window." />
             <ReactImgui.BulletText text="Alt to jump to the menu layer of a window." />
-        </ReactImgui.Indent>
+        </ReactImgui.Node>
     </>
 );

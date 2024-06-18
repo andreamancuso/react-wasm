@@ -11,9 +11,9 @@ export const TabRounding = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Slider label="TabRounding" min={0} max={12} onChange={handleValueChanged} />
             <ReactImgui.UnformattedText text={`(${value})`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

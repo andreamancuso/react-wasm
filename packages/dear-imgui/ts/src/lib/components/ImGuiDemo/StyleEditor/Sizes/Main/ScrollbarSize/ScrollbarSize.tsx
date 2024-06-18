@@ -11,7 +11,7 @@ export const ScrollbarSize = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Slider
                 label="ScrollbarSize"
                 onChange={handleValueChanged}
@@ -19,6 +19,6 @@ export const ScrollbarSize = () => {
                 max={20}
             />
             <ReactImgui.UnformattedText text={`[${value}]`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

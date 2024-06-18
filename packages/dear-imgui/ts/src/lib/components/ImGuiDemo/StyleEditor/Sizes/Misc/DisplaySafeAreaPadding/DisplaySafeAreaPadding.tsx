@@ -12,7 +12,7 @@ export const DisplaySafeAreaPadding = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.MultiSlider
                 label="DisplaySafeAreaPadding"
                 onChange={handleValueChanged}
@@ -22,6 +22,6 @@ export const DisplaySafeAreaPadding = () => {
             />
             <HelpMarker text="Adjust if you cannot see the edges of your screen (e.g. on a TV where scaling has not been configured)." />
             {value && <ReactImgui.UnformattedText text={`[${value[0]},${value[1]}]`} />}
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

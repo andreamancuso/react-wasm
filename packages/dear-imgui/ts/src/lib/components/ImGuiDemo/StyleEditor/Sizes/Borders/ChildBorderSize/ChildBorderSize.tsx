@@ -11,7 +11,7 @@ export const ChildBorderSize = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Slider
                 label="ChildBorderSize"
                 min={0}
@@ -19,6 +19,6 @@ export const ChildBorderSize = () => {
                 onChange={handleValueChanged}
             />
             <ReactImgui.UnformattedText text={`(${value})`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

@@ -11,7 +11,7 @@ export const ScrollbarRounding = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Slider
                 label="ScrollbarRounding"
                 min={0}
@@ -19,6 +19,6 @@ export const ScrollbarRounding = () => {
                 onChange={handleValueChanged}
             />
             <ReactImgui.UnformattedText text={`(${value})`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

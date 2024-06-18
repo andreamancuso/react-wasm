@@ -11,14 +11,15 @@ export const FrameBorderSize = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Slider
                 label="FrameBorderSize"
                 min={0}
                 max={1}
                 onChange={handleValueChanged}
+                sliderType="default"
             />
             <ReactImgui.UnformattedText text={`(${value})`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

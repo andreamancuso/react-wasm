@@ -10,6 +10,7 @@ import { Tables } from "./Tables/Tables";
 import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 import { WidgetReactElement } from "../ReactImgui/types";
 import { Maps } from "./Maps/Maps";
+import { StyleSelector } from "./StyleEditor/StyleSelector/StyleSelector";
 
 export const ImGuiDemo = () => {
     const [color, setColor] = useState("ff6e59");
@@ -84,8 +85,112 @@ export const ImGuiDemo = () => {
     }, [clippedMultiLineTextRendererRef]);
 
     return (
-        <ReactImgui.Fragment>
-            <ReactImgui.UnformattedText
+        <ReactImgui.Node
+            root
+            style={{
+                flexDirection: "column",
+                height: "100%",
+                gap: { row: 10 },
+                padding: {
+                    all: 20,
+                },
+            }}
+        >
+            {/* <ReactImgui.Node
+                style={{
+                    width: "100%",
+                    height: 400,
+                    flexDirection: "row",
+                    gap: { column: 5 },
+                }}
+            >
+                <ReactImgui.Node
+                    style={{
+                        width: "45%",
+                        height: "100%",
+                    }}
+                >
+                    <Maps />
+                </ReactImgui.Node>
+            </ReactImgui.Node> */}
+
+            <ReactImgui.UnformattedText text="Before" />
+            <ReactImgui.UnformattedText text="Before" />
+
+            <ReactImgui.TabBar style={{ width: "50%" }}>
+                <ReactImgui.TabItem label="Tab 1">
+                    <ReactImgui.UnformattedText text="Inside 1-1" />
+                    <ReactImgui.UnformattedText text="Inside 1-2" />
+                </ReactImgui.TabItem>
+
+                <ReactImgui.TabItem label="Tab 2">
+                    <ReactImgui.UnformattedText text="Inside 2-1" />
+                    <ReactImgui.TabBar style={{ width: "50%" }}>
+                        <ReactImgui.TabItem label="Tab 1-1">
+                            <ReactImgui.UnformattedText text="Inside 2-1-1" />
+                            <ReactImgui.UnformattedText text="Inside 2-1-2" />
+                        </ReactImgui.TabItem>
+                        <ReactImgui.TabItem label="Tab 2-1">
+                            <ReactImgui.UnformattedText text="Inside 2-2-1" />
+                            <ReactImgui.UnformattedText text="Inside 2-2-2" />
+                        </ReactImgui.TabItem>
+                    </ReactImgui.TabBar>
+                    <ReactImgui.UnformattedText text="Inside 2-2" />
+                </ReactImgui.TabItem>
+
+                <ReactImgui.TabItem label="Tab 3">
+                    <ReactImgui.UnformattedText text="Inside 3-1" />
+                    <ReactImgui.UnformattedText text="Inside 3-2" />
+                </ReactImgui.TabItem>
+
+                <ReactImgui.TabItem label="Tab 4">
+                    <ReactImgui.UnformattedText text="Inside 4-1" />
+                    <ReactImgui.UnformattedText text="Inside 4-2" />
+                </ReactImgui.TabItem>
+            </ReactImgui.TabBar>
+
+            <ReactImgui.UnformattedText text="After 1" />
+            <ReactImgui.UnformattedText text="After 2" />
+            <ReactImgui.UnformattedText text="After 3" />
+
+            <ReactImgui.CollapsingHeader label="Collapsing header 1">
+                <ReactImgui.UnformattedText text="Content of collapsing header 1 - 1" />
+
+                <ReactImgui.CollapsingHeader label="Collapsing header 1">
+                    <ReactImgui.UnformattedText text="Content of collapsing header 1 - 1 - 1" />
+
+                    <ReactImgui.UnformattedText text="Content of collapsing header 1 - 1 - 2" />
+                </ReactImgui.CollapsingHeader>
+
+                <ReactImgui.UnformattedText text="Content of collapsing header 1 - 2" />
+            </ReactImgui.CollapsingHeader>
+
+            <ReactImgui.UnformattedText text="After 1" />
+            <ReactImgui.UnformattedText text="After 2" />
+            <ReactImgui.UnformattedText text="After 3" />
+
+            <ReactImgui.TreeNode label="Tree Node">
+                <ReactImgui.UnformattedText text="Coming soon!" />
+            </ReactImgui.TreeNode>
+
+            <ReactImgui.UnformattedText text="After TreeNode 1" />
+            <ReactImgui.UnformattedText text="After TreeNode 2" />
+            <ReactImgui.UnformattedText text="After TreeNode 3" />
+
+            <StyleSelector />
+
+            <ReactImgui.UnformattedText text="After Style Selector 1" />
+
+            {/* <ReactImgui.Node
+                style={{
+                    width: "45%",
+                    height: "100%",
+                }}
+            >
+                <Tables />
+            </ReactImgui.Node> */}
+
+            {/* <ReactImgui.UnformattedText
                 text={`dear imgui says hello! ${faIconMap["address-book"]} ${faIconMap["wine-bottle"]}`}
                 style={styleSheet.title}
             />
@@ -127,19 +232,19 @@ export const ImGuiDemo = () => {
                 <ReactImgui.UnformattedText text="Coming soon!" />
             </ReactImgui.CollapsingHeader>
             <ReactImgui.CollapsingHeader label="Widgets">
-                <ReactImgui.SameLine>
+                <ReactImgui.Node style={{ flexDirection: "row" }}>
                     <ReactImgui.UnformattedText text="Triple Slider" />
                     <ReactImgui.MultiSlider
                         numValues={3}
                         onChange={handleTripleSliderValueChanged}
                     />
                     <ReactImgui.UnformattedText text={tripleSliderValue.join(", ")} />
-                </ReactImgui.SameLine>
-                <ReactImgui.SameLine>
+                </ReactImgui.Node>
+                <ReactImgui.Node style={{ flexDirection: "row" }}>
                     <ReactImgui.UnformattedText text="Quadruple Slider" />
                     <ReactImgui.MultiSlider numValues={4} onChange={handleQuadSliderValueChanged} />
                     <ReactImgui.UnformattedText text={quadSliderValue.join(", ")} />
-                </ReactImgui.SameLine>
+                </ReactImgui.Node>
             </ReactImgui.CollapsingHeader>
 
             <ReactImgui.DIWindow title="clipped multi line text renderer" width={820} height={600}>
@@ -149,10 +254,10 @@ export const ImGuiDemo = () => {
                         style={styleSheet.clippedText}
                     />
                 </ReactImgui.Child>
-                <ReactImgui.SameLine>
+                <ReactImgui.Node style={{ flexDirection: "row" }}>
                     <ReactImgui.Button onClick={handleAppendTextToTextRenderer} label="Add text" />
                     <ReactImgui.Button onClick={handleToggleColorClicked} label="Toggle color" />
-                </ReactImgui.SameLine>
+                </ReactImgui.Node>
             </ReactImgui.DIWindow>
 
             <ReactImgui.DIWindow
@@ -169,15 +274,15 @@ export const ImGuiDemo = () => {
                     />
                     <ReactImgui.UnformattedText text={text} />
                 </ReactImgui.Child>
-            </ReactImgui.DIWindow>
+            </ReactImgui.DIWindow> */}
 
-            <ReactImgui.DIWindow title="tables" width={1000} height={600}>
-                <Tables />
-            </ReactImgui.DIWindow>
+            {/* <ReactImgui.DIWindow title="tables" width={1000} height={600}> */}
 
-            <ReactImgui.DIWindow title="map" width={500} height={500}>
-                <Maps />
-            </ReactImgui.DIWindow>
-        </ReactImgui.Fragment>
+            {/* </ReactImgui.DIWindow> */}
+
+            {/* <ReactImgui.DIWindow title="map" width={500} height={500}> */}
+
+            {/* </ReactImgui.DIWindow> */}
+        </ReactImgui.Node>
     );
 };

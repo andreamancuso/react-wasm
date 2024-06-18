@@ -18,7 +18,7 @@ export const ColorButtonPosition = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Combo
                 label="ColorButtonPosition"
                 options={options}
@@ -26,6 +26,6 @@ export const ColorButtonPosition = () => {
                 defaultValue={selectedIndex}
             />
             <ReactImgui.UnformattedText text={`Selected index: ${selectedIndex}`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

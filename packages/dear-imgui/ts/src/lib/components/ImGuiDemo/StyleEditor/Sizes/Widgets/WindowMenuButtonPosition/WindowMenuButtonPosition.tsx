@@ -19,7 +19,7 @@ export const WindowMenuButtonPosition = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Combo
                 label="WindowMenuButtonPosition"
                 options={options}
@@ -27,6 +27,6 @@ export const WindowMenuButtonPosition = () => {
                 defaultValue={selectedIndex}
             />
             <ReactImgui.UnformattedText text={`Selected index: ${selectedIndex}`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

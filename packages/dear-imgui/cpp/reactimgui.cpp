@@ -1,18 +1,7 @@
-// Dear ImGui: standalone example application for Emscripten, using GLFW + WebGPU
-// (Emscripten is a C++-to-javascript compiler, used to publish executables for the web. See https://emscripten.org/)
-
-// Learn about Dear ImGui:
-// - FAQ                  https://dearimgui.com/faq
-// - Getting Started      https://dearimgui.com/getting-started
-// - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
-// - Introduction, links and more at the top of imgui.cpp
-
 #include <cstring>
 #include <string>
 #include <functional>
-#include <concepts>
 #include <sstream>
-#include <emscripten.h>
 #include <emscripten/bind.h>
 #include <rpp/rpp.hpp>
 #include "imgui.h"
@@ -22,20 +11,25 @@
 #include "implot_internal.h"
 #include <nlohmann/json.hpp>
 
-
+#include "layout_node.h"
 
 #include "mapgenerator.h"
 
+#include "shared.h"
 #include "reactimgui.h"
 #include "implotview.h"
 #include "widget.h"
-#include "shared.h"
+
 
 using json = nlohmann::json;
 
-template <typename T, typename std::enable_if<std::is_base_of<Widget, T>::value, int>::type = 0>
-std::unique_ptr<T> makeWidget(const json& val, ReactImgui* view) {
-    return T::makeWidget(val, view);
+template <typename T, typename std::enable_if<std::is_base_of<Widget, T>::value, int>::type>
+std::unique_ptr<T> makeWidget(const json& val, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+    return T::makeWidget(val, maybeStyle, view);
+}
+
+std::unique_ptr<Element> makeElement(const json& val, ReactImgui* view) {
+    return Element::makeElement(val, view);
 }
 
 ReactImgui::ReactImgui(
@@ -44,7 +38,7 @@ ReactImgui::ReactImgui(
     std::string& rawFontDefs,
     std::optional<std::string>& rawStyleOverridesDefs
 ) : ImPlotView(newWindowId, newGlWindowTitle, rawFontDefs) {
-    SetUpWidgetCreatorFunctions();
+    SetUpElementCreatorFunctions();
     SetUpFloatFormatChars();
 
     if (rawStyleOverridesDefs.has_value()) {
@@ -57,99 +51,135 @@ void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glf
     ImGuiView::SetUp(pCanvasSelector, device, glfwWindow, wgpu_preferred_fmt);
 };
 
-void ReactImgui::SetUpWidgetCreatorFunctions() {
-    m_widget_init_fn["Combo"] = &makeWidget<Combo>;
-    m_widget_init_fn["Slider"] = &makeWidget<Slider>;
-    m_widget_init_fn["InputText"] = &makeWidget<InputText>;
-    m_widget_init_fn["MultiSlider"] = &makeWidget<MultiSlider>;
-    m_widget_init_fn["Checkbox"] = &makeWidget<Checkbox>;
-    m_widget_init_fn["Button"] = &makeWidget<Button>;
-    m_widget_init_fn["Fragment"] = &makeWidget<Fragment>;
-    m_widget_init_fn["Group"] = &makeWidget<Group>;
-    m_widget_init_fn["Child"] = &makeWidget<Child>;
-    m_widget_init_fn["DIWindow"] = &makeWidget<Window>;
-    m_widget_init_fn["SameLine"] = &makeWidget<SameLine>;
-    m_widget_init_fn["Separator"] = &makeWidget<Separator>;
-    m_widget_init_fn["Indent"] = &makeWidget<Indent>;
-    m_widget_init_fn["SeparatorText"] = &makeWidget<SeparatorText>;
-    m_widget_init_fn["BulletText"] = &makeWidget<BulletText>;
-    m_widget_init_fn["UnformattedText"] = &makeWidget<UnformattedText>;
-    m_widget_init_fn["DisabledText"] = &makeWidget<DisabledText>;
-    m_widget_init_fn["TabBar"] = &makeWidget<TabBar>;
-    m_widget_init_fn["TabItem"] = &makeWidget<TabItem>;
-    m_widget_init_fn["CollapsingHeader"] = &makeWidget<CollapsingHeader>;
-    m_widget_init_fn["TextWrap"] = &makeWidget<TextWrap>;
-    m_widget_init_fn["ItemTooltip"] = &makeWidget<ItemTooltip>;
-    m_widget_init_fn["TreeNode"] = &makeWidget<TreeNode>;
-    m_widget_init_fn["Table"] = &makeWidget<Table>;
-    m_widget_init_fn["ClippedMultiLineTextRenderer"] = &makeWidget<ClippedMultiLineTextRenderer>;
-    m_widget_init_fn["Map"] = &makeWidget<Map>;
+void ReactImgui::SetUpElementCreatorFunctions() {
+    m_element_init_fn["Group"] = &makeWidget<Group>;
+    m_element_init_fn["Child"] = &makeWidget<Child>;
+    m_element_init_fn["DIWindow"] = &makeWidget<Window>;
+    m_element_init_fn["Separator"] = &makeWidget<Separator>;
+
+    m_element_init_fn["CollapsingHeader"] = &makeWidget<CollapsingHeader>;
+    m_element_init_fn["TabBar"] = &makeWidget<TabBar>;
+    m_element_init_fn["TabItem"] = &makeWidget<TabItem>;
+    m_element_init_fn["TreeNode"] = &makeWidget<TreeNode>;
+
+    m_element_init_fn["Table"] = &makeWidget<Table>;
+    m_element_init_fn["ClippedMultiLineTextRenderer"] = &makeWidget<ClippedMultiLineTextRenderer>;
+    m_element_init_fn["Map"] = &makeWidget<Map>;
+
+    m_element_init_fn["ItemTooltip"] = &makeWidget<ItemTooltip>;
+
+    m_element_init_fn["Combo"] = &makeWidget<Combo>;
+    m_element_init_fn["Slider"] = &makeWidget<Slider>;
+    m_element_init_fn["InputText"] = &makeWidget<InputText>;
+    m_element_init_fn["MultiSlider"] = &makeWidget<MultiSlider>;
+    m_element_init_fn["Checkbox"] = &makeWidget<Checkbox>;
+    m_element_init_fn["Button"] = &makeWidget<Button>;
+    
+    m_element_init_fn["SeparatorText"] = &makeWidget<SeparatorText>;
+    m_element_init_fn["BulletText"] = &makeWidget<BulletText>;
+    m_element_init_fn["UnformattedText"] = &makeWidget<UnformattedText>;
+    m_element_init_fn["DisabledText"] = &makeWidget<DisabledText>;
+    m_element_init_fn["TextWrap"] = &makeWidget<TextWrap>;
 };
 
-void ReactImgui::RenderWidgetById(int id) {
-    m_widgets[id]->PreRender(this);
-    m_widgets[id]->Render(this);
-    m_widgets[id]->PostRender(this);
+void ReactImgui::RenderElementById(const int id) {
+    if (m_elements[id]->ShouldRender(this)) {
+        m_elements[id]->m_layoutNode->SetDisplay(YGDisplayFlex);
+
+        m_elements[id]->PreRender(this);
+        m_elements[id]->Render(this);
+        m_elements[id]->PostRender(this);
+    } else {
+        m_elements[id]->m_layoutNode->SetDisplay(YGDisplayNone);
+    }
 };
 
-void ReactImgui::RenderWidgets(int id) {
-    if (m_widgets.contains(id)) {
-        RenderWidgetById(id);
+void ReactImgui::RenderElements(const int id) {
+    if (m_elements.contains(id)) {
+        RenderElementById(id);
     }
 
-    if (!m_widgets.contains(id) || m_widgets[id]->m_handlesChildrenWithinRenderMethod == false) {
+    if (!m_elements.contains(id) || m_elements[id]->m_handlesChildrenWithinRenderMethod == false) {
         RenderChildren(id);
     }
 };
 
-void ReactImgui::RenderChildren(int id) {
+void ReactImgui::RenderChildren(const int id) {
     if (m_hierarchy.contains(id)) {
-        if (m_hierarchy[id].size() > 0) {
-            for (auto& childId : m_hierarchy[id]) {
-                RenderWidgets(childId);
+        if (!m_hierarchy[id].empty()) {
+            for (const auto& childId : m_hierarchy[id]) {
+                RenderElements(childId);
             }
         }
     }
 };
 
-void ReactImgui::InitWidget(const json& widgetDef) {
-    std::string type = widgetDef["type"].template get<std::string>();
-    if (m_widget_init_fn.contains(type)) {
-        int id = widgetDef["id"].template get<int>();
-
-        const std::lock_guard<std::mutex> widgetLock(m_widgets_mutex);
-        const std::lock_guard<std::mutex> hierarchyLock(m_hierarchy_mutex);
-
-        m_widgets[id] = m_widget_init_fn[type](widgetDef, this);
-        m_hierarchy[id] = std::vector<int>();
-
-        if (type == "Table") {
-            const std::lock_guard<std::mutex> lock(m_tableSubjectsMutex);
-
-            m_tableSubjects[id] = rpp::subjects::replay_subject<TableData>{100};
-
-            // auto handler = std::bind(&ReactImgui::HandleBufferedTableData, this, id, std::placeholders::_1);
-            auto handler = std::bind(&ReactImgui::HandleTableData, this, id, std::placeholders::_1);
-
-            // todo: restore buffer() usage
-            // m_tableSubjects[id].get_observable() | rpp::ops::buffer(50) | rpp::ops::subscribe(handler);
-            m_tableSubjects[id].get_observable() | rpp::ops::subscribe(handler);
+void ReactImgui::SetChildrenDisplay(const int id, const YGDisplay display) {
+    if (m_hierarchy.contains(id)) {
+        if (!m_hierarchy[id].empty()) {
+            for (const auto& childId : m_hierarchy[id]) {
+                if (m_elements.contains(childId)) {
+                    m_elements[childId]->m_layoutNode->SetDisplay(display);
+                }
+            }
         }
-    } else {
-        printf("unrecognised widget type: '%s'\n", type.c_str());
     }
 };
 
-void ReactImgui::HandleTableData(int id, TableData val) {
-    // printf("%d\n", (int)val.size());
+void ReactImgui::InitElement(const json& elementDef) {
+    if (elementDef.is_object() && elementDef.contains("type")) {
+        std::string type = elementDef["type"].template get<std::string>();
 
-    static_cast<Table*>(m_widgets[id].get())->AppendData(val);
+        if (m_element_init_fn.contains(type) || type == "Node") {
+            int id = elementDef["id"].template get<int>();
+
+            const std::lock_guard<std::mutex> elementLock(m_elements_mutex);
+            const std::lock_guard<std::mutex> hierarchyLock(m_hierarchy_mutex);
+
+            if (type == "Node") {
+                m_elements[id] = makeElement(elementDef, this);
+            } else if (m_element_init_fn.contains(type)) {
+                m_elements[id] = m_element_init_fn[type](elementDef, StyledWidget::ExtractStyle(elementDef, this), this);
+            }
+
+            m_elements[id]->Init();
+            
+            m_hierarchy[id] = std::vector<int>();
+
+            if (elementDef.is_object() && elementDef.contains("style") && elementDef["style"].is_object()) {
+                m_elements[id]->m_layoutNode->ApplyStyle(elementDef["style"]);
+            }
+
+            if (type == "Table") {
+                const std::lock_guard<std::mutex> lock(m_tableSubjectsMutex);
+
+                m_tableSubjects[id] = rpp::subjects::replay_subject<TableData>{100};
+
+                // auto handler = std::bind(&ReactImgui::HandleBufferedTableData, this, id, std::placeholders::_1);
+                auto handler = std::bind(&ReactImgui::HandleTableData, this, id, std::placeholders::_1);
+
+                // todo: restore buffer() usage
+                // m_tableSubjects[id].get_observable() | rpp::ops::buffer(50) | rpp::ops::subscribe(handler);
+                m_tableSubjects[id].get_observable() | rpp::ops::subscribe(handler);
+            }
+        } else {
+            printf("unrecognised element type: '%s'\n", type.c_str());
+        }
+    } else {
+        printf("received JSON either not an object or does not contain type property\n");
+    }
 };
 
-void ReactImgui::HandleBufferedTableData(int id, std::vector<TableData> val) {
+void ReactImgui::HandleTableData(const int id, TableData val) {
+    // printf("%d\n", (int)val.size());
+
+    static_cast<Table*>(m_elements[id].get())->AppendData(val);
+};
+
+void ReactImgui::HandleBufferedTableData(const int id, const std::vector<TableData>& val) {
     // printf("%d\n", (int)val.size()); // I'm seeing 50 the first time this gets called, then 1 subsequent times...
 
-    const std::lock_guard<std::mutex> widgetLock(m_widgets_mutex);
+    const std::lock_guard<std::mutex> elementLock(m_elements_mutex);
 
     size_t totalSize = 0;
 
@@ -165,16 +195,16 @@ void ReactImgui::HandleBufferedTableData(int id, std::vector<TableData> val) {
         data.insert(data.end(), chunk.begin(), chunk.end());
     }
 
-    static_cast<Table*>(m_widgets[id].get())->AppendData(data);
+    dynamic_cast<Table*>(m_elements[id].get())->AppendData(data);
 };
 
 void ReactImgui::SetEventHandlers(
-    OnTextChangedCallback onInputTextChangeFn,
-    OnComboChangedCallback onComboChangeFn,
-    OnNumericValueChangedCallback onNumericValueChangeFn,
-    OnMultipleNumericValuesChangedCallback onMultiValueChangeFn,
-    OnBooleanValueChangedCallback onBooleanValueChangeFn,
-    OnClickCallback onClickFn
+    const OnTextChangedCallback onInputTextChangeFn,
+    const OnComboChangedCallback onComboChangeFn,
+    const OnNumericValueChangedCallback onNumericValueChangeFn,
+    const OnMultipleNumericValuesChangedCallback onMultiValueChangeFn,
+    const OnBooleanValueChangedCallback onBooleanValueChangeFn,
+    const OnClickCallback onClickFn
 ) {
     m_onInputTextChange = onInputTextChangeFn;
     m_onComboChange = onComboChangeFn;
@@ -239,7 +269,42 @@ void ReactImgui::PrepareForRender() {
     }
 };
 
-void ReactImgui::Render(int window_width, int window_height) {
+void ReactImgui::RenderElementTree(const int id) {
+    if (m_elements.contains(id)) {
+        // float left = YGNodeLayoutGetLeft(m_elements[id]->m_layoutNode->m_node);
+        // float top = YGNodeLayoutGetTop(m_elements[id]->m_layoutNode->m_node);
+        const float width = YGNodeLayoutGetWidth(m_elements[id]->m_layoutNode->m_node);
+        // float height = YGNodeLayoutGetHeight(m_elements[id]->m_layoutNode->m_node);
+
+        if (!YGFloatIsUndefined(width)) {
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+
+            ImGui::Text("%d", id);
+
+            ImGui::TableNextColumn();
+
+            ImGui::Text("%zu", m_elements[id]->m_layoutNode->GetChildCount());
+
+            ImGui::TableNextColumn();
+
+            ImGui::Text("l: %f t: %f w: %f h: %f", 
+                YGNodeLayoutGetLeft(m_elements[id]->m_layoutNode->m_node), 
+                YGNodeLayoutGetTop(m_elements[id]->m_layoutNode->m_node), 
+                YGNodeLayoutGetWidth(m_elements[id]->m_layoutNode->m_node), 
+                YGNodeLayoutGetHeight(m_elements[id]->m_layoutNode->m_node)
+            );
+        }
+    }
+
+    if (m_hierarchy.contains(id)) {
+        for (const auto& childId : m_hierarchy[id]) {
+            RenderElementTree(childId);
+        }
+    }
+};
+
+void ReactImgui::Render(const int window_width, const int window_height) {
     SetCurrentContext();
 
     // ImGuiIO& io = ImGui::GetIO();
@@ -247,7 +312,7 @@ void ReactImgui::Render(int window_width, int window_height) {
     ImGui_ImplWGPU_NewFrame();
     ImGui_ImplGlfw_NewFrame();
 
-    const std::lock_guard<std::mutex> widgetsLock(m_widgets_mutex);
+    const std::lock_guard<std::mutex> elementsLock(m_elements_mutex);
     const std::lock_guard<std::mutex> hierarchyLock(m_hierarchy_mutex);
 
     ImGui::NewFrame();
@@ -255,28 +320,51 @@ void ReactImgui::Render(int window_width, int window_height) {
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2(window_width, window_height));
 
-    ImGui::Begin(m_windowId, NULL, m_window_flags);
+    ImGui::Begin(m_windowId, nullptr, m_window_flags);
 
-    RenderWidgets();
+    RenderElements();
+
+    // *** DEBUG ***
+    // RenderDebugWindow();
+    // *** END DEBUG ***
 
     ImGui::End();
     ImGui::Render();
 };
 
+void ReactImgui::RenderDebugWindow() {
+    ImGui::SetNextWindowSize(ImVec2(800, 700));
+    ImGui::Begin("element-tree", NULL);
+
+    if (ImGui::BeginTable("Elements", 3, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody)) {
+        ImGui::TableSetupColumn("Widget ID", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("Child Count", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("Properties", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch);
+
+        ImGui::TableHeadersRow();
+
+        RenderElementTree();
+
+        ImGui::EndTable();
+    }
+    
+    ImGui::End();
+}
+
 template <typename T>
-void ReactImgui::ExtractNumberFromStyleDef(const json& styleDef, std::string key, T& value) {
+void ReactImgui::ExtractNumberFromStyleDef(const json& styleDef, const std::string key, T& value) {
     if (styleDef.contains(key) && styleDef[key].is_number_unsigned()) {
         value = styleDef[key].template get<T>();
     }
 };
 
-void ReactImgui::ExtractBooleanFromStyleDef(const json& styleDef, std::string key, bool& value) {
+void ReactImgui::ExtractBooleanFromStyleDef(const json& styleDef, const std::string key, bool& value) {
     if (styleDef.contains(key) && styleDef[key].is_number_unsigned()) {
         value = styleDef[key].template get<bool>();
     }
 };
 
-void ReactImgui::ExtractImVec2FromStyleDef(const json& styleDef, std::string key, ImVec2& value) {
+void ReactImgui::ExtractImVec2FromStyleDef(const json& styleDef, const std::string key, ImVec2& value) {
     if (styleDef.contains(key)  && styleDef[key].is_array() && styleDef[key].size() == 2) {
         value.x = styleDef[key][0].template get<float>();
         value.y = styleDef[key][1].template get<float>();
@@ -357,30 +445,58 @@ void ReactImgui::PatchStyle(const json& styleDef) {
     }
 };
 
-void ReactImgui::SetWidget(std::string& widgetJsonAsString) {
-    InitWidget(json::parse(widgetJsonAsString));
+void ReactImgui::SetElement(std::string& elementJsonAsString) {
+    InitElement(json::parse(elementJsonAsString));
 };
 
-void ReactImgui::PatchWidget(int id, std::string& widgetJsonAsString) {
-    const std::lock_guard<std::mutex> lock(m_widgets_mutex);
+void ReactImgui::PatchElement(const int id, std::string& elementJsonAsString) {
+    const std::lock_guard<std::mutex> lock(m_elements_mutex);
 
-    if (m_widgets.contains(id)) {
-        auto widgetDef = json::parse(widgetJsonAsString);
-        auto pWidget = m_widgets[id].get();
+    if (m_elements.contains(id)) {
+        auto elementDef = json::parse(elementJsonAsString);
+        auto pElement = m_elements[id].get();
 
-        pWidget->Patch(widgetDef, this);
+        pElement->Patch(elementDef, this);
     }
 };
 
-void ReactImgui::SetChildren(int id, const std::vector<int>& childrenIds) {
-    const std::lock_guard<std::mutex> lock(m_hierarchy_mutex);
-    m_hierarchy[id] = childrenIds;
+void ReactImgui::SetChildren(const int parentId, const std::vector<int>& childrenIds) {
+    const std::lock_guard<std::mutex> elementsLock(m_hierarchy_mutex);
+    const std::lock_guard<std::mutex> hierarchyLock(m_elements_mutex);
+
+    if (m_elements.contains(parentId)) {
+        YGNodeRemoveAllChildren(m_elements[parentId]->m_layoutNode->m_node);
+
+        const auto size = childrenIds.size();
+
+        for (int i = 0; i < size; i++) {
+            const auto childId = childrenIds[i];
+
+            if (m_elements.contains(childId)) {
+                m_elements[parentId]->m_layoutNode->InsertChild(m_elements[childId]->m_layoutNode.get(), i);
+            }
+        }
+    }
+
+    m_hierarchy[parentId] = childrenIds;
 };
 
 void ReactImgui::AppendChild(int parentId, int childId) {
     if (m_hierarchy.contains(parentId)) {
         if ( std::find(m_hierarchy[parentId].begin(), m_hierarchy[parentId].end(), childId) == m_hierarchy[parentId].end() ) {
             const std::lock_guard<std::mutex> lock(m_hierarchy_mutex);
+            const std::lock_guard<std::mutex> elementsLock(m_hierarchy_mutex);
+
+            if (!m_elements[childId]->m_isRoot) {
+                auto parentNode = YGNodeGetParent(m_elements[childId]->m_layoutNode->m_node);
+
+                if (!parentNode) {
+                    const auto childCount = m_elements[parentId]->m_layoutNode->GetChildCount();
+
+                    m_elements[parentId]->m_layoutNode->InsertChild(m_elements[childId]->m_layoutNode.get(), childCount);
+                }
+            }
+
             m_hierarchy[parentId].push_back(childId);
         }
     }
@@ -404,17 +520,17 @@ json ReactImgui::GetAvailableFonts() {
     return fonts;
 };
 
-void ReactImgui::AppendDataToTable(int id, std::string& rawData) {
+void ReactImgui::AppendDataToTable(const int id, std::string& data) {
     if (m_tableSubjects.contains(id)) {
         const std::lock_guard<std::mutex> lock(m_tableSubjectsMutex);
-        auto parsedData = json::parse(rawData);
+        auto parsedData = json::parse(data);
 
         if (parsedData.is_array()) {
-            TableData data = TableData();
+            auto tableData = TableData();
 
             for (auto& [parsedItemKey, parsedRow] : parsedData.items()) {
                 if (parsedRow.is_object()) {
-                    TableRow row = TableRow();
+                    auto row = TableRow();
 
                     for (auto& [parsedRowFieldKey, parsedRowFieldValue] : parsedRow.items()) {
                         if (parsedRowFieldValue.is_string()) {
@@ -422,12 +538,12 @@ void ReactImgui::AppendDataToTable(int id, std::string& rawData) {
                         }
                     }
 
-                    data.push_back(row);
+                    tableData.push_back(row);
                 }
             }
 
             // printf("About to add data to subject\n");
-            m_tableSubjects[id].get_observer().on_next(data);
+            m_tableSubjects[id].get_observer().on_next(tableData);
             // printf("Added data to subject\n");
         }
     } else {
@@ -443,13 +559,10 @@ void ReactImgui::RenderMap(int id, double centerX, double centerY, int zoom) {
 
     m_mapGeneratorJobCounter++;
 
-    m_mapGeneratorJobs[m_mapGeneratorJobCounter] = std::make_unique<MapGenerator>(options, [this] (void* data, size_t numBytes) {
-        int width;
-        int height;
-        WGPUTextureView my_image_texture = 0;
-        Texture texture;
+    m_mapGeneratorJobs[m_mapGeneratorJobCounter] = std::make_unique<MapGenerator>(options, [this] (const void* data, const size_t numBytes) {
+        Texture texture{};
 
-        bool ret = LoadTexture(m_device, data, numBytes, width, height, &texture);
+        const bool ret = LoadTexture(m_device, data, static_cast<int>(numBytes), &texture);
         IM_ASSERT(ret);
 
         // TODO: add proper texture management
@@ -463,14 +576,15 @@ void ReactImgui::RenderMap(int id, double centerX, double centerY, int zoom) {
     m_mapGeneratorJobs[m_mapGeneratorJobCounter]->Render(std::make_tuple(centerX, centerY), zoom);
 };
 
-void ReactImgui::AppendTextToClippedMultiLineTextRenderer(int id, std::string& rawData) {
-    const std::lock_guard<std::mutex> lock(m_widgets_mutex);
+// todo: switch to ReactivePlusPlus's BehaviorSubject
+void ReactImgui::AppendTextToClippedMultiLineTextRenderer(const int id, const std::string& data) {
+    const std::lock_guard<std::mutex> lock(m_elements_mutex);
 
-    if (m_widgets.contains(id) && m_widgets[id]->m_type == "ClippedMultiLineTextRenderer") {
-        static_cast<ClippedMultiLineTextRenderer*>(m_widgets[id].get())->AppendText(rawData.c_str());
+    if (m_elements.contains(id) && std::strcmp(m_elements[id]->GetElementType(), "widget") != 0) {
+        const auto element = dynamic_cast<Widget*>(m_elements[id].get());
+
+        if (element->m_type == "ClippedMultiLineTextRenderer") {
+            dynamic_cast<ClippedMultiLineTextRenderer*>(m_elements[id].get())->AppendText(data.c_str());
+        }
     }
-};
-
-float ReactImgui::GetTextLineHeightWithSpacing() {
-    return ImGui::GetTextLineHeightWithSpacing();
 };

@@ -11,7 +11,7 @@ export const ChildRounding = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Slider
                 label="ChildRounding"
                 min={0}
@@ -19,6 +19,6 @@ export const ChildRounding = () => {
                 onChange={handleValueChanged}
             />
             <ReactImgui.UnformattedText text={`(${value})`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

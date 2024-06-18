@@ -11,7 +11,7 @@ export const TabBorderSize = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Slider
                 label="TabBorderSize"
                 min={0}
@@ -19,6 +19,6 @@ export const TabBorderSize = () => {
                 onChange={handleValueChanged}
             />
             <ReactImgui.UnformattedText text={`(${value})`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

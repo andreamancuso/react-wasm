@@ -11,7 +11,7 @@ export const WindowRounding = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Slider
                 label="WindowRounding"
                 min={0}
@@ -19,6 +19,6 @@ export const WindowRounding = () => {
                 onChange={handleValueChanged}
             />
             <ReactImgui.UnformattedText text={`(${value})`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

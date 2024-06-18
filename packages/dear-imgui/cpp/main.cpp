@@ -1,8 +1,6 @@
 #include <set>
 #include <optional>
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_wgpu.h"
 #include "implot.h"
 #include "implot_internal.h"
 #include <emscripten.h>
@@ -59,13 +57,13 @@ json IntSetToJson(const std::set<int>& data) {
 
 class WasmRunner {
     protected:
-        GLWasm* m_glWasm;
-        ReactImgui* m_view;
+        GLWasm* m_glWasm{};
+        ReactImgui* m_view{};
 
     public:
-        WasmRunner() {}
+        WasmRunner() = default;
 
-        static void OnTextChanged(int id, std::string value) {
+        static void OnTextChanged(const int id, const std::string& value) {
             EM_ASM_ARGS(
                 { Module.eventHandlers.onTextChange($0, UTF8ToString($1)); },
                 id,
@@ -73,7 +71,7 @@ class WasmRunner {
             );
         }
 
-        static void OnComboChanged(int id, int value) {
+        static void OnComboChanged(const int id, const int value) {
             EM_ASM_ARGS(
                 { Module.eventHandlers.onComboChange($0, $1); },
                 id,
@@ -81,7 +79,7 @@ class WasmRunner {
             );
         }
 
-        static void OnNumericValueChanged(int id, int value) {
+        static void OnNumericValueChanged(const int id, const float value) {
             EM_ASM_ARGS(
                 { Module.eventHandlers.onNumericValueChange($0, $1); },
                 id,
@@ -89,7 +87,7 @@ class WasmRunner {
             );
         }
 
-        static void OnBooleanValueChanged(int id, bool value) {
+        static void OnBooleanValueChanged(const int id, const bool value) {
             EM_ASM_ARGS(
                 { Module.eventHandlers.onBooleanValueChange($0, $1); },
                 id,
@@ -98,7 +96,7 @@ class WasmRunner {
         }
 
         // todo: improve
-        static void OnMultipleNumericValuesChanged(int id, float* values, int numValues) {
+        static void OnMultipleNumericValuesChanged(const int id, const float* values, const int numValues) {
             if (numValues == 2) {
                 EM_ASM_ARGS(
                     { 
@@ -126,7 +124,7 @@ class WasmRunner {
             }
         }
 
-        static void OnClick(int id) {
+        static void OnClick(int const id) {
             EM_ASM_ARGS(
                 { Module.eventHandlers.onClick($0); },
                 id
@@ -160,12 +158,12 @@ class WasmRunner {
             m_glWasm->SetWindowSize(width, height);
         }
 
-        void setWidget(std::string& widgetJsonAsString) {
-            m_view->SetWidget(widgetJsonAsString);
+        void setElement(std::string& elementJsonAsString) {
+            m_view->SetElement(elementJsonAsString);
         }
 
-        void patchWidget(int id, std::string& widgetJsonAsString) {
-            m_view->PatchWidget(id, widgetJsonAsString);
+        void patchElement(int id, std::string& elementJsonAsString) {
+            m_view->PatchElement(id, elementJsonAsString);
         }
 
         void setChildren(int id, const std::vector<int>& childrenIds) {
@@ -194,10 +192,6 @@ class WasmRunner {
 
         void appendTextToClippedMultiLineTextRenderer(int id, std::string& data) {
             m_view->AppendTextToClippedMultiLineTextRenderer(id, data);
-        }
-
-        float getTextLineHeightWithSpacing() {
-            m_view->GetTextLineHeightWithSpacing();
         }
 
         std::string getStyle() {
@@ -297,12 +291,12 @@ void resizeWindow(int width, int height) {
     pRunner->resizeWindow(width, height);
 }
 
-void setWidget(std::string widgetsJson) {
-    pRunner->setWidget(widgetsJson);
+void setElement(std::string elementJson) {
+    pRunner->setElement(elementJson);
 }
 
-void patchWidget(int id, std::string widgetsJson) {
-    pRunner->patchWidget(id, widgetsJson);
+void patchElement(int id, std::string elementJson) {
+    pRunner->patchElement(id, elementJson);
 }
 
 void setChildren(int id, std::string childrenIds) {
@@ -329,10 +323,6 @@ void appendTextToClippedMultiLineTextRenderer(int id, std::string data) {
     pRunner->appendTextToClippedMultiLineTextRenderer(id, data);
 }
 
-float getTextLineHeightWithSpacing() {
-    pRunner->getTextLineHeightWithSpacing();
-}
-
 std::string getStyle() {
     return pRunner->getStyle();
 }
@@ -344,15 +334,14 @@ void patchStyle(std::string styleDef) {
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("exit", &_exit);
     emscripten::function("resizeWindow", &resizeWindow);
-    emscripten::function("setWidget", &setWidget);
-    emscripten::function("patchWidget", &patchWidget);
+    emscripten::function("setElement", &setElement);
+    emscripten::function("patchElement", &patchElement);
     emscripten::function("setChildren", &setChildren);
     emscripten::function("appendChild", &appendChild);
     emscripten::function("getChildren", &getChildren);
     emscripten::function("appendDataToTable", &appendDataToTable);
     emscripten::function("renderMap", &renderMap);
     emscripten::function("appendTextToClippedMultiLineTextRenderer", &appendTextToClippedMultiLineTextRenderer);
-    emscripten::function("getTextLineHeightWithSpacing", &getTextLineHeightWithSpacing);
     emscripten::function("getStyle", &getStyle);
     emscripten::function("patchStyle", &patchStyle);
 

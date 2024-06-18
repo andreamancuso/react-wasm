@@ -1,4 +1,3 @@
-// #include "IconsMaterialDesignIcons.h"
 #include "IconsFontAwesome6.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -6,7 +5,6 @@
 #include <format>
 #include <GLFW/glfw3.h>
 #include <webgpu/webgpu.h>
-#include <webgpu/webgpu_cpp.h>
 #include <nlohmann/json.hpp>
 
 #include "./shared.h"

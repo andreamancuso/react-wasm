@@ -11,9 +11,9 @@ export const GrabMinSize = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Slider label="GrabMinSize" onChange={handleValueChanged} min={1} max={20} />
             <ReactImgui.UnformattedText text={`[${value}]`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

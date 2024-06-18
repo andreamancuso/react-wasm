@@ -5,12 +5,10 @@ import { Button } from "./Button";
 import { Checkbox } from "./Checkbox";
 import { CollapsingHeader } from "./CollapsingHeader";
 import { Combo } from "./Combo";
-import { Fragment } from "./Fragment";
-import { Indent } from "./Indent";
+import { Node } from "./Node";
 import { InputText } from "./InputText";
 import { ItemTooltip } from "./ItemTooltip";
 import { MultiSlider } from "./MultiSlider";
-import { SameLine } from "./SameLine";
 import { Separator } from "./Separator";
 import { SeparatorText } from "./SeparatorText";
 import { Slider } from "./Slider";
@@ -30,14 +28,12 @@ import { ClippedMultiLineTextRenderer } from "./ClippedMultiLineTextRenderer";
 
 export const components = {
     UnformattedText,
-    SameLine,
     Unknown,
     InputText,
     CollapsingHeader,
     TreeNode,
     SeparatorText,
     BulletText,
-    Indent,
     DisabledText,
     ItemTooltip,
     TextWrap,
@@ -47,7 +43,6 @@ export const components = {
     Checkbox,
     Button,
     Separator,
-    Fragment,
     DIWindow,
     Child,
     Group,
@@ -56,6 +51,7 @@ export const components = {
     Table,
     ClippedMultiLineTextRenderer,
     Map: MapComponent,
+    Node,
 } as const;
 
 export const ReactImgui = attachSubComponents("ReactImgui", MainComponent, components);

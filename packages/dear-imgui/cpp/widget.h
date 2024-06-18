@@ -1,27 +1,14 @@
-// Dear ImGui: standalone example application for Emscripten, using GLFW + WebGPU
-// (Emscripten is a C++-to-javascript compiler, used to publish executables for the web. See https://emscripten.org/)
-
-// Learn about Dear ImGui:
-// - FAQ                  https://dearimgui.com/faq
-// - Getting Started      https://dearimgui.com/getting-started
-// - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
-// - Introduction, links and more at the top of imgui.cpp
-
 #include <optional>
-#include <tuple>
 #include <cstring>
 #include <string>
 #include <sstream>
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_wgpu.h"
-#include "implot.h"
-#include "implot_internal.h"
 #include <nlohmann/json.hpp>
 
 #include "shared.h"
+#include "element.h"
 
 using json = nlohmann::json;
 
@@ -33,35 +20,33 @@ struct BaseStyle {
     std::optional<StyleColors> maybeColors;
     std::optional<StyleVars> maybeStyleVars;
     std::optional<int> maybeFontIndex;
-    std::optional<float> maybeWidth;
-    std::optional<float> maybeHeight;
     std::optional<HorizontalAlignment> maybeHorizontalAlignment;
 };
 
-class Widget {
+class Widget : public Element {
     public:
-        int m_id;
         std::string m_type;
-        bool m_handlesChildrenWithinRenderMethod;
 
         // todo: does this belong here?
         inline static OnTextChangedCallback onInputTextChange_;
 
-        Widget(int id) {
-            m_id = id;
-            m_type = "Unknown";
-            m_handlesChildrenWithinRenderMethod = false;
-        }
+        explicit Widget(int id);
 
-        void HandleChildren(ReactImgui* view);
+        const char* GetElementType() override;
 
-        virtual void PreRender(ReactImgui* view);
+        void HandleChildren(ReactImgui* view) override;
 
-        virtual void Render(ReactImgui* view) = 0;
+        void SetChildrenDisplay(ReactImgui* view, YGDisplay display) const;
 
-        virtual void PostRender(ReactImgui* view);
+        void SetChildrenAsDisplayFlex(ReactImgui* view) const;
 
-        virtual void Patch(const json& widgetPatchDef, ReactImgui* view);
+        void PreRender(ReactImgui* view) override;
+
+        void Render(ReactImgui* view) override;
+
+        void PostRender(ReactImgui* view) override;
+
+        void Patch(const json& elementPatchDef, ReactImgui* view) override;
 };
 
 class StyledWidget : public Widget {
@@ -70,83 +55,50 @@ class StyledWidget : public Widget {
 
         static std::optional<BaseStyle> ExtractStyle(const json& widgetDef, ReactImgui* view);
 
-        StyledWidget(int id) : Widget(id) {}
+        explicit StyledWidget(int id);
 
-        StyledWidget(int id, std::optional<BaseStyle>& maybeStyle) : Widget(id) {
-            if (maybeStyle.has_value()) {
-                m_style.emplace(std::make_unique<BaseStyle>(maybeStyle.value()));
-            }
-        }
+        StyledWidget(int id, std::optional<BaseStyle>& maybeStyle);
 
-        void PreRender(ReactImgui* view);
+        void PreRender(ReactImgui* view) override;
 
-        void PostRender(ReactImgui* view);
+        void PostRender(ReactImgui* view) override;
 
-        bool HasCustomStyles();
+        [[nodiscard]] bool HasCustomStyles() const;
 
-        bool HasCustomFont(ReactImgui* view);
+        bool HasCustomFont(ReactImgui* view) const;
 
-        bool HasCustomColors();
+        [[nodiscard]] bool HasCustomColors() const;
 
         virtual bool HasCustomWidth();
 
         virtual bool HasCustomHeight();
 
-        float GetComputedWidth(ReactImgui* view);
+        [[nodiscard]] bool HasCustomStyleVars() const;
 
-        float GetComputedHeight(ReactImgui* view);
+        [[nodiscard]] bool HasCustomHorizontalAlignment() const;
 
-        bool HasCustomStyleVars();
-
-        bool HasCustomHorizontalAlignment();
-
-        bool HasRightHorizontalAlignment();
+        [[nodiscard]] bool HasRightHorizontalAlignment() const;
 
         void ReplaceStyle(BaseStyle& newStyle);
 
-        virtual void Patch(const json& widgetPatchDef, ReactImgui* view);
-};
-
-class Fragment final : public Widget {
-    public:
-        static std::unique_ptr<Fragment> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                auto id = widgetDef["id"].template get<int>();
-                
-                return std::make_unique<Fragment>(id);
-            }
-
-            throw std::invalid_argument("Invalid JSON data");
-        }
-
-        Fragment(int id) : Widget(id) {
-            m_type = "Fragment";
-            m_handlesChildrenWithinRenderMethod = true;
-        }
-
-        void Render(ReactImgui* view);
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 };
 
 class Group final : public StyledWidget {
     public:
-        static std::unique_ptr<Group> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<Group> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-                
-                return std::make_unique<Group>(id, style);
+                return std::make_unique<Group>(id, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        Group(int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
-            m_type = "Group";
-            m_handlesChildrenWithinRenderMethod = true;
-        }
+        Group(int id, std::optional<BaseStyle>& style);
 
-        void Render(ReactImgui* view);
+        void Render(ReactImgui* view) override;
 };
 
 class Window final : public StyledWidget {
@@ -157,48 +109,24 @@ class Window final : public StyledWidget {
         float m_width;
         float m_height;
 
-        static std::unique_ptr<Window> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<Window> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 auto title = widgetDef["title"].template get<std::string>();
                 auto width = widgetDef["width"].template get<float>();
                 auto height = widgetDef["height"].template get<float>();
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-                
-                return std::make_unique<Window>(id, title, width, height, style);
+                return std::make_unique<Window>(id, title, width, height, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        Window(int id, std::string title, float width, float height, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
-            m_type = "Window";
-            m_handlesChildrenWithinRenderMethod = true;
+        Window(int id, const std::string& title, float width, float height, std::optional<BaseStyle>& style);
 
-            m_title = title;
-            m_width = width;
-            m_height = height;
-            m_open = true;
-        }
+        void Render(ReactImgui* view) override;
 
-        void Render(ReactImgui* view);
-
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
-
-                if (widgetPatchDef["title"].is_string()) {
-                    m_title = widgetPatchDef["title"].template get<std::string>();
-                }
-                if (widgetPatchDef["width"].is_string()) {
-                    m_width = widgetPatchDef["width"].template get<float>();
-                }
-                if (widgetPatchDef["height"].is_string()) {
-                    m_height = widgetPatchDef["height"].template get<float>();
-                }
-            }
-        }
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 };
 
 class Child final : public StyledWidget {
@@ -208,11 +136,11 @@ class Child final : public StyledWidget {
         float m_width;
         float m_height;
 
-        static std::unique_ptr<Child> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<Child> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 float width = 0;
-                auto height = 0;
+                float height = 0;
 
                 if (widgetDef.contains("width") && widgetDef["width"].is_number()) {
                     width = widgetDef["width"].template get<float>();
@@ -222,441 +150,321 @@ class Child final : public StyledWidget {
                     height = widgetDef["height"].template get<float>();
                 }
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-                
-                return std::make_unique<Child>(id, width, height, style);
+                return std::make_unique<Child>(id, width, height, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        Child(int id, float width, float height, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
-            m_type = "Child";
-            m_handlesChildrenWithinRenderMethod = true;
+        Child(int id, float width, float height, std::optional<BaseStyle>& style);
 
-            m_width = width;
-            m_height = height;
-        }
+        void Render(ReactImgui* view) override;
 
-        void Render(ReactImgui* view);
-
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
-
-                if (widgetPatchDef["width"].is_string()) {
-                    m_width = widgetPatchDef["width"].template get<float>();
-                }
-                if (widgetPatchDef["height"].is_string()) {
-                    m_height = widgetPatchDef["height"].template get<float>();
-                }
-            }
-        }
-};
-
-class SameLine final : public Widget {
-    public:
-        static std::unique_ptr<SameLine> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                auto id = widgetDef["id"].template get<int>();
-                
-                return std::make_unique<SameLine>(id);
-            }
-
-            throw std::invalid_argument("Invalid JSON data");
-        }
-
-        SameLine(int id) : Widget(id) {
-            m_type = "SameLine";
-            m_handlesChildrenWithinRenderMethod = true;
-        }
-
-        void Render(ReactImgui* view);
-
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {}
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 };
 
 class Separator final : public StyledWidget {
     public:
-        static std::unique_ptr<Separator> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<Separator> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-                
-                return std::make_unique<Separator>(id, style);
+                return std::make_unique<Separator>(id, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        Separator(int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {}
+        static YGSize Measure(YGNodeConstRef node, const float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
+            YGSize size;
+            
+            size.width = width;
+            // TODO: we likely need to compute this based on the associated font, based on the widget's style
+            size.height = 1.0f;
 
-        void Render(ReactImgui* view);
-};
-
-class Indent final : public StyledWidget {
-    public:
-        static std::unique_ptr<Indent> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                auto id = widgetDef["id"].template get<int>();
-
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-                
-                return std::make_unique<Indent>(id, style);
-            }
-
-            throw std::invalid_argument("Invalid JSON data");
+            return size;
         }
 
-        Indent(int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
-            m_type = "Indent";
-            m_handlesChildrenWithinRenderMethod = true;
-        }
+        Separator(const int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {}
 
-        void Render(ReactImgui* view);
+        void Render(ReactImgui* view) override;
+
+        void Init() override {
+            Element::Init();
+
+            YGNodeSetContext(m_layoutNode->m_node, this);
+            YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);
+        }
 };
 
 class SeparatorText final : public StyledWidget {
     public:
         std::string m_label;
 
-        static std::unique_ptr<SeparatorText> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<SeparatorText> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
-                std::string label = widgetDef["label"].template get<std::string>();
+                auto label = widgetDef["label"].template get<std::string>();
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-
-                return std::make_unique<SeparatorText>(id, label, style);
+                return std::make_unique<SeparatorText>(id, label, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        SeparatorText(int id, std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+        static YGSize Measure(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
+            YGSize size;
+            
+            size.width = width;
+            size.height = ImGui::GetFontSize();
+
+            return size;
+        }
+
+        SeparatorText(const int id, const std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "SeparatorText";
             m_label = label;
         }
 
-        void Render(ReactImgui* view);
+        void Render(ReactImgui* view) override;
 
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
-                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-                    m_label = widgetPatchDef["label"].template get<std::string>();
-                }
-            }
+        void Init() override {
+            Element::Init();
+
+            YGNodeSetContext(m_layoutNode->m_node, this);
+            YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);
         }
 };
 
-class BulletText final : public StyledWidget {
+class Text : public StyledWidget {
     public:
         std::string m_text;
 
-        static std::unique_ptr<BulletText> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                auto id = widgetDef["id"].template get<int>();
-                std::string text = widgetDef["text"].template get<std::string>();
-
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-
-                return std::make_unique<BulletText>(id, text, style);
-            }
-
-            throw std::invalid_argument("Invalid JSON data");
+        Text(int id, const std::string& text, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+            m_text = text;
         }
 
-        BulletText(int id, std::string& text, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+        static YGSize Measure(const YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
+            const auto widget = static_cast<Text*>(YGNodeGetContext(node));
+        
+            YGSize size;
+            
+            size.width = ImGui::CalcTextSize(widget->m_text.c_str()).x;
+            size.height = ImGui::GetFontSize();
+
+            return size;
+        }
+
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
+
+        void Init() override {
+            Element::Init();
+
+            YGNodeSetContext(m_layoutNode->m_node, this);
+            YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);
+        }
+};
+
+class BulletText final : public Text {
+    public:
+        static std::unique_ptr<BulletText> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view);
+
+        BulletText(const int id, const std::string& text, std::optional<BaseStyle>& style) : Text(id, text, style) {
             m_type = "BulletText";
-            m_text = text;
         }
 
-        void Render(ReactImgui* view);
-
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
-
-                if (widgetPatchDef.contains("text") && widgetPatchDef["text"].is_string()) {
-                    m_text = widgetPatchDef["text"].template get<std::string>();
-                }
-            }
-        }
+        void Render(ReactImgui* view) override;
 };
 
-class UnformattedText final : public StyledWidget {
+class UnformattedText final : public Text {
     public:
-        std::string m_text;
+        static std::unique_ptr<UnformattedText> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view);
 
-        static std::unique_ptr<UnformattedText> makeWidget(const json& widgetDef, ReactImgui* view);
-
-        UnformattedText(int id, std::string& text, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+        UnformattedText(const int id, const std::string& text, std::optional<BaseStyle>& style) : Text(id, text, style) {
             m_type = "UnformattedText";
-            m_text = text;
         }
 
-        void Render(ReactImgui* view);
-
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
-
-                if (widgetPatchDef.contains("text") && widgetPatchDef["text"].is_string()) {
-                    m_text = widgetPatchDef["text"].template get<std::string>();
-                }
-            }
-        }
+        void Render(ReactImgui* view) override;
 };
 
-class DisabledText final : public StyledWidget {
+class DisabledText final : public Text {
     public:
-        std::string m_text;
+        static std::unique_ptr<DisabledText> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view);
 
-        static std::unique_ptr<DisabledText> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                auto id = widgetDef["id"].template get<int>();
-                std::string text = widgetDef["text"].template get<std::string>();
-
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-
-                return std::make_unique<DisabledText>(id, text, style);
-            }
-
-            throw std::invalid_argument("Invalid JSON data");
-        }
-
-        DisabledText(int id, std::string& text, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+        DisabledText(const int id, const std::string& text, std::optional<BaseStyle>& style) : Text(id, text, style) {
             m_type = "DisabledText";
-            m_text = text;
         }
 
-        void Render(ReactImgui* view);
-
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
-
-                if (widgetPatchDef.contains("text") && widgetPatchDef["text"].is_string()) {
-                    m_text = widgetPatchDef["text"].template get<std::string>();
-                }
-            }
-        }
+        void Render(ReactImgui* view) override;
 };
 
 class TabBar final : public StyledWidget {
     public:
-        static std::unique_ptr<TabBar> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<TabBar> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-                
-                return std::make_unique<TabBar>(id, style);
+                return std::make_unique<TabBar>(id, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        TabBar(int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
-            m_type = "TabBar";
-            m_handlesChildrenWithinRenderMethod = true;
-        }
+        TabBar(int id, std::optional<BaseStyle>& style);
 
-        void Render(ReactImgui* view);
+        void Render(ReactImgui* view) override;
+
+        bool HasCustomWidth() override;
+
+        bool HasCustomHeight() override;
+        
+        void Init() override {
+            YGNodeStyleSetPadding(m_layoutNode->m_node, YGEdgeTop, 25.0f);
+        }
 };
 
 class TabItem final : public StyledWidget {
     public:
         std::string m_label;
 
-        static std::unique_ptr<TabItem> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<TabItem> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
-                std::string label = widgetDef["label"].template get<std::string>();
+                auto label = widgetDef["label"].template get<std::string>();
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-
-                return std::make_unique<TabItem>(id, label, style);
+                return std::make_unique<TabItem>(id, label, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        TabItem(int id, std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
-            m_type = "TabItem";
-            m_handlesChildrenWithinRenderMethod = true;
-            m_label = label;
-        }
+        TabItem(int id, const std::string& label, std::optional<BaseStyle>& style);
 
-        void Render(ReactImgui* view);
+        void Render(ReactImgui* view) override;
 
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
-                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-                    m_label = widgetPatchDef["label"].template get<std::string>();
-                }
-            }
-        }
+        bool HasCustomWidth() override;
+
+        bool HasCustomHeight() override;
 };
 
 class CollapsingHeader final : public StyledWidget {
     public:
         std::string m_label;
 
-        static std::unique_ptr<CollapsingHeader> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<CollapsingHeader> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
-                std::string label = widgetDef["label"].template get<std::string>();
+                const auto label = widgetDef["label"].template get<std::string>();
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-
-                return std::make_unique<CollapsingHeader>(id, label, style);
+                return std::make_unique<CollapsingHeader>(id, label, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        CollapsingHeader(int id, std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
-            m_type = "CollapsingHeader";
-            m_handlesChildrenWithinRenderMethod = true;
-            m_label = label;
-        }
+        CollapsingHeader(int id, const std::string& label, std::optional<BaseStyle>& style);
 
-        void Render(ReactImgui* view);
+        void Render(ReactImgui* view) override;
 
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
-                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-                    m_label = widgetPatchDef["label"].template get<std::string>();
-                }
-            }
-        }
+        bool HasCustomWidth() override;
+
+        bool HasCustomHeight() override;
 };
 
 class TextWrap final : public StyledWidget {
     public:
-        double m_width;
+        float m_width;
 
-        static std::unique_ptr<TextWrap> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<TextWrap> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 double width = widgetDef["width"].template get<double>();
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-
-                return std::make_unique<TextWrap>(id, width, style);
+                return std::make_unique<TextWrap>(id, width, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        TextWrap(int id, double& width, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
-            m_type = "TextWrap";
-            m_handlesChildrenWithinRenderMethod = true;
-            m_width = width;
-        }
+        TextWrap(int id, const float& width, std::optional<BaseStyle>& style);
 
-        void Render(ReactImgui* view);
+        void Render(ReactImgui* view) override;
 
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
-
-                if (widgetPatchDef.contains("width") && widgetPatchDef["width"].is_string()) {
-                    m_width = widgetPatchDef["width"].template get<double>();
-                }
-            }
-        }
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 };
 
 class ItemTooltip final : public StyledWidget {
     public:
-        static std::unique_ptr<ItemTooltip> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<ItemTooltip> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-                
-                return std::make_unique<ItemTooltip>(id, style);
+                return std::make_unique<ItemTooltip>(id, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        ItemTooltip(int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
-            m_type = "ItemTooltip";
-            m_handlesChildrenWithinRenderMethod = true;
-        }
+        ItemTooltip(int id, std::optional<BaseStyle>& style);
 
-        void Render(ReactImgui* view);
+        void Render(ReactImgui* view) override;
 };
 
 class TreeNode final : public StyledWidget {
     public:
         std::string m_label;
 
-        static std::unique_ptr<TreeNode> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<TreeNode> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 std::string label = widgetDef["label"].template get<std::string>();
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-
-                return std::make_unique<TreeNode>(id, label, style);
+                return std::make_unique<TreeNode>(id, label, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        TreeNode(int id, std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
-            m_type = "TreeNode";
-            m_handlesChildrenWithinRenderMethod = true;
-            m_label = label;
-        }
+        TreeNode(int id, const std::string& label, std::optional<BaseStyle>& style);
 
-        void Render(ReactImgui* view);
+        void Render(ReactImgui* view) override;
 
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
-                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-                    m_label = widgetPatchDef["label"].template get<std::string>();
-                }
-            }
-        }
+        bool HasCustomWidth() override;
+
+        bool HasCustomHeight() override;
 };
 
 class Combo final : public StyledWidget {
     protected:
-        Combo(int id, std::string& label, int defaultValue, const json& options, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+        Combo(const int id, const std::string& label, const int defaultValue, const json& options, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Combo";
             m_selectedIndex = defaultValue;
             m_label = label;
-            m_itemsSeparatedByZeros = Combo::getItemsSeparatedByZeros(options);
+            m_itemsSeparatedByZeros = getItemsSeparatedByZeros(options);
         }
         
-        Combo(int id, std::string& label, int defaultValue, std::string& optionsList, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+        Combo(const int id, const std::string& label, const int defaultValue, const std::string& optionsList, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Combo";
             m_selectedIndex = defaultValue;
             m_label = label;
-            m_itemsSeparatedByZeros = Combo::getItemsSeparatedByZeros(optionsList);
+            m_itemsSeparatedByZeros = getItemsSeparatedByZeros(optionsList);
         }
 
         /**
          * Takes array of [{value: number; label: string}] and converts into "label\0label\0label\0" (double NULL character at the end)
          * because this is what ImGui:Combo() expects
         */
-        inline static std::unique_ptr<char[]> getItemsSeparatedByZeros(const json& options) {
+        static std::unique_ptr<char[]> getItemsSeparatedByZeros(const json& options) {
             auto optionsIterator = options.items();
-            int itemsStringLength = options.size() + 1; // Account for one NULL character for each option plus the final NULL character
+            auto itemsStringLength = options.size() + 1; // Account for one NULL character for each option plus the final NULL character
 
             for (auto it = optionsIterator.begin(); it != optionsIterator.end(); ++it) {
                 itemsStringLength += strlen(it.value()["label"].template get<std::string>().c_str());
@@ -665,7 +473,7 @@ class Combo final : public StyledWidget {
             auto itemsSeparatedByZerosUniquePtr = std::make_unique<char[]>(itemsStringLength);
             auto itemsSeparatedByZeros = itemsSeparatedByZerosUniquePtr.get();
 
-            int offset = 0;
+            unsigned long offset = 0;
 
             for (auto it = optionsIterator.begin(); it != optionsIterator.end(); ++it) {
                 
@@ -683,10 +491,10 @@ class Combo final : public StyledWidget {
          * Takes comma-delimited string of options "label,label,label" and converts into "label\0label\0label\0" (double NULL character at the end)
          * because this is what ImGui:Combo() expects
         */
-        inline static std::unique_ptr<char[]> getItemsSeparatedByZeros(std::string& optionsList) {
+        static std::unique_ptr<char[]> getItemsSeparatedByZeros(const std::string& optionsList) {
             std::string delimiter = ",";
 
-            int itemsStringLength = 1;  // Account for final NULL character
+            unsigned long itemsStringLength = 1;  // Account for final NULL character
             std::vector<std::string> options;
             std::string token;
             std::stringstream input;
@@ -698,13 +506,13 @@ class Combo final : public StyledWidget {
             }
 
             auto itemsSeparatedByZerosUniquePtr = std::make_unique<char[]>(itemsStringLength);
-            auto itemsSeparatedByZeros = itemsSeparatedByZerosUniquePtr.get();
+            const auto itemsSeparatedByZeros = itemsSeparatedByZerosUniquePtr.get();
             
-            int offset = 0;
+            unsigned long offset = 0;
 
-            for (auto it = options.begin(); it != options.end(); ++it) {
+            for (auto & option : options) {
 
-                auto label = it->c_str();
+                const auto label = option.c_str();
 
                 memcpy(&itemsSeparatedByZeros[offset], label, strlen(label) + 1);
 
@@ -719,41 +527,49 @@ class Combo final : public StyledWidget {
         std::string m_label;
         std::unique_ptr<char[]> m_itemsSeparatedByZeros; // Relevant for 'basic' combo only
 
-        static std::unique_ptr<Combo> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<Combo> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                auto id = widgetDef["id"].template get<int>();
-                auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_number() ? widgetDef["defaultValue"].template get<int>() : 0;
-                auto label = widgetDef["label"].template get<std::string>();
-                auto optionsList = widgetDef["optionsList"].template get<std::string>();
+                const auto id = widgetDef["id"].template get<int>();
+                const auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_number() ? widgetDef["defaultValue"].template get<int>() : 0;
+                const auto label = widgetDef["label"].template get<std::string>();
+                const auto optionsList = widgetDef["optionsList"].template get<std::string>();
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-
-                return Combo::makeWidget(id, label, defaultValue, optionsList, style);
+                return makeWidget(id, label, defaultValue, optionsList, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<Combo> makeWidget(int id, std::string& label, int defaultValue, const json& options, std::optional<BaseStyle>& style) {
+        static std::unique_ptr<Combo> makeWidget(const int id, const std::string& label, const int defaultValue, const json& options, std::optional<BaseStyle>& style) {
             Combo instance(id, label, defaultValue, options, style);
             return std::make_unique<Combo>(std::move(instance));
         }
 
-        static std::unique_ptr<Combo> makeWidget(int id, std::string& label, int defaultValue, std::string optionsList, std::optional<BaseStyle>& style) {
+        static std::unique_ptr<Combo> makeWidget(const int id, const std::string& label, const int defaultValue, std::string optionsList, std::optional<BaseStyle>& style) {
             Combo instance(id, label, defaultValue, optionsList, style);
             return std::make_unique<Combo>(std::move(instance));
         }
 
-        void Render(ReactImgui* view);
+        static YGSize Measure(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
+            YGSize size;
 
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
+            // TODO: we may want to define default widths similarly to how browsers do
+            size.width = ImGui::GetFontSize() * 10;
+            // TODO: we likely need to compute this based on the associated font, based on the widget's style
+            size.height = ImGui::GetFrameHeight();
 
-                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-                    m_label = widgetPatchDef["label"].template get<std::string>();
-                }
-            }
+            return size;
+        }
+
+        void Render(ReactImgui* view) override;
+
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
+
+        void Init() override {
+            Element::Init();
+
+            YGNodeSetContext(m_layoutNode->m_node, this);
+            YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);
         }
 };
 
@@ -763,13 +579,15 @@ class InputText final : public StyledWidget {
 
         static int InputTextCb(ImGuiInputTextCallbackData* data);
 
-        InputText(int id, std::string& defaultValue, std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+        InputText(const int id, const std::string& defaultValue, const std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "InputText";
             m_bufferPointer = std::make_unique<char[]>(100);
             m_defaultValue = defaultValue;
             m_label = label;
 
-            strncpy(m_bufferPointer.get(), defaultValue.c_str(), 99);
+            if (!defaultValue.empty()) {
+                strncpy(m_bufferPointer.get(), defaultValue.c_str(), 99);
+            }
         }
 
     public:
@@ -777,42 +595,49 @@ class InputText final : public StyledWidget {
         std::string m_defaultValue;
         std::string m_label;
 
-        inline static std::unique_ptr<InputText> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<InputText> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                auto id = widgetDef["id"].template get<int>();
-                auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_string() ? widgetDef["defaultValue"].template get<std::string>() : "";
-                auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+                const auto id = widgetDef["id"].template get<int>();
+                const auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_string() ? widgetDef["defaultValue"].template get<std::string>() : "";
+                const auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-
-                return InputText::makeWidget(id, defaultValue, label, style);
+                return makeWidget(id, defaultValue, label, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        inline static std::unique_ptr<InputText> makeWidget(int id, std::string& defaultValue, std::string& label, std::optional<BaseStyle>& style) {
+        static std::unique_ptr<InputText> makeWidget(const int id, const std::string& defaultValue, const std::string& label, std::optional<BaseStyle>& style) {
             InputText instance(id, defaultValue, label, style);
             return std::make_unique<InputText>(std::move(instance));
         }
 
-        void Render(ReactImgui* view);
+        static YGSize Measure(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
+            YGSize size;
+            
+            // TODO: we may want to define default widths similarly to how browsers do
+            size.width = ImGui::GetFontSize() * 10;
+            // TODO: we likely need to compute this based on the associated font, based on the widget's style
+            size.height = ImGui::GetFrameHeight();
 
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
-
-                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-                    m_label = widgetPatchDef["label"].template get<std::string>();
-                }
-            }
+            return size;
         }
-        
+
+        void Render(ReactImgui* view) override;
+
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
+
+        void Init() override {
+            Element::Init();
+
+            YGNodeSetContext(m_layoutNode->m_node, this);
+            YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);
+        }
 };
 
 class Checkbox final : public StyledWidget {
     protected:
-        Checkbox(int id, std::string& label, bool defaultChecked, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+        Checkbox(const int id, const std::string& label, const bool defaultChecked, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Checkbox";
             m_checked = defaultChecked;
             m_label = label;
@@ -822,94 +647,98 @@ class Checkbox final : public StyledWidget {
         bool m_checked;
         std::string m_label;
 
-        inline static std::unique_ptr<Checkbox> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<Checkbox> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                auto id = widgetDef["id"].template get<int>();
-                auto defaultChecked = widgetDef.contains("defaultChecked") && widgetDef["defaultChecked"].is_boolean() ? widgetDef["defaultChecked"].template get<bool>() : false;
-                auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+                const auto id = widgetDef["id"].template get<int>();
+                const auto defaultChecked = widgetDef.contains("defaultChecked") && widgetDef["defaultChecked"].is_boolean() ? widgetDef["defaultChecked"].template get<bool>() : false;
+                const auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-
-                return Checkbox::makeWidget(id, label, defaultChecked, style);
+                return makeWidget(id, label, defaultChecked, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        inline static std::unique_ptr<Checkbox> makeWidget(int id, std::string& label, bool defaultChecked, std::optional<BaseStyle>& style) {
+        static std::unique_ptr<Checkbox> makeWidget(const int id,  const std::string& label, const bool defaultChecked, std::optional<BaseStyle>& style) {
             Checkbox instance(id, label, defaultChecked, style);
             return std::make_unique<Checkbox>(std::move(instance));
         }
 
-        void Render(ReactImgui* view);
+        static YGSize Measure(const YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
+            YGSize size;
 
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
+            const auto frameHeight = ImGui::GetFrameHeight();
 
-                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-                    m_label = widgetPatchDef["label"].template get<std::string>();
-                }
-            }
+            size.width = frameHeight;
+            size.height = frameHeight;
+
+            return size;
+        }
+
+        void Render(ReactImgui* view) override;
+
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
+
+        void Init() override {
+            Element::Init();
+
+            YGNodeSetContext(m_layoutNode->m_node, this);
+            YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);
         }
 };
 
 class Button final : public StyledWidget {
     protected:
-        Button(int id, std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+        Button(const int id, const std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Button";
             m_label = label;
-            m_size = ImVec2();
-
-            UpdateSize();
         }
-
-        void UpdateSize() {
-            if (m_style.has_value()) {
-                if (m_style.value()->maybeWidth.has_value()) {
-                    m_size.x = m_style.value()->maybeWidth.value();
-                }
-                if (m_style.value()->maybeHeight.has_value()) {
-                    m_size.y = m_style.value()->maybeHeight.value();
-                }
-            }
-        }
-
     public:
         std::string m_label;
 
-        ImVec2 m_size;
+        static std::unique_ptr<Button> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view);
 
-        static std::unique_ptr<Button> makeWidget(const json& widgetDef, ReactImgui* view);
-
-        inline static std::unique_ptr<Button> makeWidget(int id, std::string& label, std::optional<BaseStyle>& style) {
+        static std::unique_ptr<Button> makeWidget(const int id, const std::string& label, std::optional<BaseStyle>& style) {
             Button instance(id, label, style);
+
             return std::make_unique<Button>(std::move(instance));
+        }
+
+        static YGSize Measure(const YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
+            const auto widget = static_cast<Button*>(YGNodeGetContext(node));
+            
+            YGSize size;
+            
+            const ImGuiStyle& style = ImGui::GetStyle();
+            
+            // TODO: we may want to define default widths similarly to how browsers do
+            size.width = (style.FramePadding.x * 2.0f) + ImGui::CalcTextSize(widget->m_label.c_str()).x;
+            size.height = ImGui::GetFrameHeight();
+
+            return size;
         }
 
         ImGuiCol GetImGuiCol();
 
-        void Render(ReactImgui* view);
+        void Render(ReactImgui* view) override;
 
-        bool HasCustomWidth();
+        bool HasCustomWidth() override;
 
-        bool HasCustomHeight();
+        bool HasCustomHeight() override;
 
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
-                UpdateSize();
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
-                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-                    m_label = widgetPatchDef["label"].template get<std::string>();
-                }
-            }
+        void Init() override {
+            Element::Init();
+
+            YGNodeSetContext(m_layoutNode->m_node, this);
+            YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);
         }
 };
 
 class Slider final : public StyledWidget {
     protected:
-        Slider(int id, std::string& label, float defaultValue, float min, float max, std::string& sliderType, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+        Slider(const int id, const std::string& label, const float defaultValue, const float min, const float max, const std::string& sliderType, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Slider";
             m_sliderType = sliderType;
             m_label = label;
@@ -925,50 +754,50 @@ class Slider final : public StyledWidget {
         float m_max;
         std::string m_label;
 
-        inline static std::unique_ptr<Slider> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<Slider> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                auto id = widgetDef["id"].template get<int>();
-                auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_number() ? widgetDef["defaultValue"].template get<float>() : 0.0f;
-                auto min = widgetDef.contains("min") && widgetDef["min"].is_number() ? widgetDef["min"].template get<float>() : 0.0f;
-                auto max = widgetDef.contains("max") && widgetDef["max"].is_number() ? widgetDef["max"].template get<float>() : 10.0f;
-                auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
-                auto sliderType = widgetDef.contains("sliderType") && widgetDef["sliderType"].is_string() ? widgetDef["sliderType"].template get<std::string>() : "default";
+                const auto id = widgetDef["id"].template get<int>();
+                const auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_number() ? widgetDef["defaultValue"].template get<float>() : 0.0f;
+                const auto min = widgetDef.contains("min") && widgetDef["min"].is_number() ? widgetDef["min"].template get<float>() : 0.0f;
+                const auto max = widgetDef.contains("max") && widgetDef["max"].is_number() ? widgetDef["max"].template get<float>() : 10.0f;
+                const auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+                const auto sliderType = widgetDef.contains("sliderType") && widgetDef["sliderType"].is_string() ? widgetDef["sliderType"].template get<std::string>() : "default";
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-
-                return Slider::makeWidget(id, label, defaultValue, min, max, sliderType, style);
+                return makeWidget(id, label, defaultValue, min, max, sliderType, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        inline static std::unique_ptr<Slider> makeWidget(int id, std::string& label, float defaultValue, float min, float max, std::string& sliderType, std::optional<BaseStyle>& style) {
+        static std::unique_ptr<Slider> makeWidget(const int id, const std::string& label, const float defaultValue, const float min, const float max, const std::string& sliderType, std::optional<BaseStyle>& style) {
             Slider instance(id, label, defaultValue, min, max, sliderType, style);
             return std::make_unique<Slider>(std::move(instance));
         }
 
-        void Render(ReactImgui* view);
+        static YGSize Measure(const YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
+            YGSize size;
 
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
+            size.width = 60.0f;
+            size.height = ImGui::GetFrameHeight();
 
-                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-                    m_label = widgetPatchDef["label"].template get<std::string>();
-                }
-                if (widgetPatchDef.contains("min") && widgetPatchDef["min"].is_number()) {
-                    m_min = widgetPatchDef["min"].template get<float>();
-                }
-                if (widgetPatchDef.contains("max") && widgetPatchDef["max"].is_number()) {
-                    m_max = widgetPatchDef["max"].template get<float>();
-                }
-            }
+            return size;
+        }
+
+        void Render(ReactImgui* view) override;
+
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
+
+        void Init() override {
+            Element::Init();
+
+            YGNodeSetContext(m_layoutNode->m_node, this);
+            YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);
         }
 };
 
 class MultiSlider final : public StyledWidget {
     protected:
-        MultiSlider(int id, std::string& label, float min, float max, int numValues, int decimalDigits, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+        MultiSlider(const int id, const std::string& label, const float min, const float max, const int numValues, const int decimalDigits, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "MultiSlider";
             m_label = label;
             m_numValues = numValues;
@@ -986,30 +815,27 @@ class MultiSlider final : public StyledWidget {
         int m_decimalDigits;
         std::string m_label;
 
-        inline static std::unique_ptr<MultiSlider> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<MultiSlider> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                auto id = widgetDef["id"].template get<int>();
-                auto numValues = widgetDef.contains("numValues") && widgetDef["numValues"].is_number() ? widgetDef["numValues"].template get<int>() : 2;
-                auto decimalDigits = widgetDef.contains("decimalDigits") && widgetDef["decimalDigits"].is_number() ? widgetDef["decimalDigits"].template get<int>() : 0;
+                const auto id = widgetDef["id"].template get<int>();
+                const auto numValues = widgetDef.contains("numValues") && widgetDef["numValues"].is_number() ? widgetDef["numValues"].template get<int>() : 2;
+                const auto decimalDigits = widgetDef.contains("decimalDigits") && widgetDef["decimalDigits"].is_number() ? widgetDef["decimalDigits"].template get<int>() : 0;
                 
-                auto min = widgetDef.contains("min") && widgetDef["min"].is_number() ? widgetDef["min"].template get<float>() : 0.0f;
-                auto max = widgetDef.contains("max") && widgetDef["max"].is_number() ? widgetDef["max"].template get<float>() : 10.0f;
-                auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+                const auto min = widgetDef.contains("min") && widgetDef["min"].is_number() ? widgetDef["min"].template get<float>() : 0.0f;
+                const auto max = widgetDef.contains("max") && widgetDef["max"].is_number() ? widgetDef["max"].template get<float>() : 10.0f;
+                const auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-
-                
                 if (widgetDef.contains("defaultValues") && widgetDef["defaultValues"].is_array() && widgetDef["defaultValues"].size() == numValues) {
-                    return MultiSlider::makeWidget(id, label, min, max, numValues, decimalDigits, widgetDef["defaultValues"], style);
+                    return makeWidget(id, label, min, max, numValues, decimalDigits, widgetDef["defaultValues"], maybeStyle);
                 } else {
-                    return MultiSlider::makeWidget(id, label, min, max, numValues, decimalDigits, style);
+                    return makeWidget(id, label, min, max, numValues, decimalDigits, maybeStyle);
                 }
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<MultiSlider> makeWidget(int id, std::string& label, float min, float max, int numValues, int decimalDigits, const json& defaultValues, std::optional<BaseStyle>& style) {
+        static std::unique_ptr<MultiSlider> makeWidget(const int id, const std::string& label, const float min, const float max, const int numValues, const int decimalDigits, const json& defaultValues, std::optional<BaseStyle>& style) {
             MultiSlider instance(id, label, min, max, numValues, decimalDigits, style);
 
             for (auto& [key, item] : defaultValues.items()) {
@@ -1019,31 +845,32 @@ class MultiSlider final : public StyledWidget {
             return std::make_unique<MultiSlider>(std::move(instance));
         }
 
-        static std::unique_ptr<MultiSlider> makeWidget(int id, std::string& label, float min, float max, int numValues, int decimalDigits, std::optional<BaseStyle>& style) {
+        static std::unique_ptr<MultiSlider> makeWidget(const int id, const std::string& label, const float min, const float max, const int numValues, const int decimalDigits, std::optional<BaseStyle>& style) {
             MultiSlider instance(id, label, min, max, numValues, decimalDigits, style);
 
             return std::make_unique<MultiSlider>(std::move(instance));
         }
 
-        void Render(ReactImgui* view);
+        static YGSize Measure(const YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
+            const auto widget = static_cast<MultiSlider*>(YGNodeGetContext(node));
 
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
+            YGSize size;
 
-                if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-                    m_label = widgetPatchDef["label"].template get<std::string>();
-                }
-                if (widgetPatchDef.contains("min") && widgetPatchDef["min"].is_number()) {
-                    m_min = widgetPatchDef["min"].template get<float>();
-                }
-                if (widgetPatchDef.contains("max") && widgetPatchDef["max"].is_number()) {
-                    m_max = widgetPatchDef["max"].template get<float>();
-                }
-                if (widgetPatchDef.contains("decimalDigits") && widgetPatchDef["decimalDigits"].is_number()) {
-                    m_decimalDigits = widgetPatchDef["decimalDigits"].template get<int>();
-                }
-            }
+            size.width = static_cast<float>(widget->m_numValues) * 60.0f;
+            size.height = ImGui::GetFrameHeight();
+
+            return size;
+        }
+
+        void Render(ReactImgui* view) override;
+
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
+
+        void Init() override {
+            Element::Init();
+
+            YGNodeSetContext(m_layoutNode->m_node, this);
+            YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);
         }
 };
 
@@ -1057,7 +884,7 @@ class Table final : public StyledWidget {
     protected:
         ImGuiTableFlags m_flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
 
-        Table(int id, std::vector<TableColumn>& columns, std::optional<int> clipRows, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+        Table(const int id, const std::vector<TableColumn>& columns, const std::optional<int> clipRows, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Table";
             m_columns = columns;
             m_clipRows = 0;
@@ -1070,11 +897,11 @@ class Table final : public StyledWidget {
     public:
         TableData m_data;
         std::vector<TableColumn> m_columns;
-        int m_clipRows;
+        int m_clipRows; // todo: potentially redundant?
 
-        inline static std::unique_ptr<Table> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<Table> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                auto id = widgetDef["id"].template get<int>();
+                const auto id = widgetDef["id"].template get<int>();
 
                 if (widgetDef.contains("columns") && widgetDef["columns"].is_array()) {
                     std::optional<int> clipRows;
@@ -1091,29 +918,37 @@ class Table final : public StyledWidget {
                         });
                     }
 
-                    auto style = StyledWidget::ExtractStyle(widgetDef, view);
-
-                    return Table::makeWidget(id, columns, clipRows, style);
+                    return makeWidget(id, columns, clipRows, maybeStyle);
                 }
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<Table> makeWidget(int id, std::vector<TableColumn>& columns, std::optional<int> clipRows, std::optional<BaseStyle>& style) {
+        static std::unique_ptr<Table> makeWidget(const int id, const std::vector<TableColumn>& columns, std::optional<int> clipRows, std::optional<BaseStyle>& style) {
             Table instance(id, columns, clipRows, style);
 
             return std::make_unique<Table>(std::move(instance));
         }
 
-        void Render(ReactImgui* view);
+        static YGSize Measure(const YGNodeConstRef node, const float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
+            const auto widget = static_cast<Table*>(YGNodeGetContext(node));
 
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
-                // not sure what can be patched - presumably the columns? though that'd likely force us to clear the data
+            YGSize size;
+
+            size.width = width / 2;
+            if (widget->m_clipRows > 0) {
+                size.height = ImGui::GetFontSize() * static_cast<float>(widget->m_clipRows);
+            } else {
+                size.height = ImGui::GetFontSize() * 5;
             }
+
+            return size;
         }
+
+        void Render(ReactImgui* view) override;
+
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
         void SetData(TableData& data) {
             m_data.clear();
@@ -1122,14 +957,21 @@ class Table final : public StyledWidget {
 
         void AppendData(TableData& data) {
             m_data.insert(m_data.end(), data.begin(), data.end());
+        }
 
+        // TODO: this is repeated a million times
+        void Init() override {
+            Element::Init();
+
+            YGNodeSetContext(m_layoutNode->m_node, this);
+            YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);
         }
 };
 
 // todo: should we preallocate buffer size?
 class ClippedMultiLineTextRenderer final : public StyledWidget {
     protected:
-        ClippedMultiLineTextRenderer(int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+        ClippedMultiLineTextRenderer(const int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "ClippedMultiLineTextRenderer";
         }
 
@@ -1137,13 +979,11 @@ class ClippedMultiLineTextRenderer final : public StyledWidget {
         ImVector<int> m_lineOffsets;
         ImGuiTextBuffer m_textBuffer;
 
-        inline static std::unique_ptr<ClippedMultiLineTextRenderer> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<ClippedMultiLineTextRenderer> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                auto id = widgetDef["id"].template get<int>();
+                const auto id = widgetDef["id"].template get<int>();
 
-                auto style = StyledWidget::ExtractStyle(widgetDef, view);
-
-                return ClippedMultiLineTextRenderer::makeWidget(id, style);
+                return makeWidget(id, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
@@ -1155,14 +995,22 @@ class ClippedMultiLineTextRenderer final : public StyledWidget {
             return std::make_unique<ClippedMultiLineTextRenderer>(std::move(instance));
         }
 
-        void Render(ReactImgui* view);
+        static YGSize Measure(const YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
+            const auto widget = static_cast<Button*>(YGNodeGetContext(node));
 
-        void Patch(const json& widgetPatchDef, ReactImgui* view) {
-            if (widgetPatchDef.is_object()) {
-                StyledWidget::Patch(widgetPatchDef, view);
-                // not sure what can be patched
-            }
+            YGSize size;
+
+            const ImGuiStyle& style = ImGui::GetStyle();
+
+            size.width = width;
+            size.height = ImGui::GetFrameHeight() * 10.0f;
+
+            return size;
         }
+
+        void Render(ReactImgui* view) override;
+
+        void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
         void Clear() {
             m_lineOffsets.clear();
@@ -1180,32 +1028,43 @@ class ClippedMultiLineTextRenderer final : public StyledWidget {
 
             m_textBuffer.append(str);
 
-            for (int new_size = m_textBuffer.size(); old_size < new_size; old_size++)
+            for (const int new_size = m_textBuffer.size(); old_size < new_size; old_size++)
                 if (m_textBuffer[old_size] == '\n')
                     m_lineOffsets.push_back(old_size + 1);
         }
+
+        void Init() override {
+            Element::Init();
+
+            YGNodeSetContext(m_layoutNode->m_node, this);
+            YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);
+        }
 };
 
-class Map final : public Widget {
+class Map final : public StyledWidget {
     private:
         ImVec2 m_offset;
 
     public:
-        static std::unique_ptr<Map> makeWidget(const json& widgetDef, ReactImgui* view) {
+        static std::unique_ptr<Map> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 
-                return std::make_unique<Map>(id);
+                return std::make_unique<Map>(id, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        Map(int id) : Widget(id) {
+        bool HasCustomWidth() override;
+
+        bool HasCustomHeight() override;
+
+        Map(const int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Map";
 
             m_offset = ImVec2(0.0f, 0.0f);
         }
 
-        void Render(ReactImgui* view);
+        void Render(ReactImgui* view) override;
 };

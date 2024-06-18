@@ -25,7 +25,7 @@ export const BorderControl = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Checkbox
                 label="WindowBorder"
                 onChange={handleWindowBorderChanged}
@@ -44,6 +44,6 @@ export const BorderControl = () => {
                 defaultChecked={popupBorder}
             />
             <ReactImgui.UnformattedText text={popupBorder ? "[enabled]" : "[disabled]"} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

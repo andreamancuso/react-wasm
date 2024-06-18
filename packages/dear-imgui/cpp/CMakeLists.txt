@@ -87,9 +87,16 @@ set(LIBTIFF_SRC
 )
 
 if (DEFINED EMSCRIPTEN)
+    # Copied from yoga's CMakeLists.txt 
+    file(GLOB YOGA_SRC CONFIGURE_DEPENDS
+        ${DEPS}/yoga/yoga/*.cpp
+        ${DEPS}/yoga/yoga/**/*.cpp)
+
 	add_executable(reactDearImgui main.cpp
         shared.cpp
+        element.cpp
         widget.cpp
+        layout_node.cpp
         reactimgui.cpp
         ${DEPS}/wasm-glfw3-boilerplate/view.cpp
         ${DEPS}/wasm-glfw3-boilerplate/glwasm.cpp
@@ -98,6 +105,7 @@ if (DEFINED EMSCRIPTEN)
         ${OSM_STATIC_MAP_GENERATOR_SRC}
         ${LEPTONICA_SRC}
         ${LIBTIFF_SRC}
+        ${YOGA_SRC}
     )
 
     target_include_directories(
@@ -108,6 +116,7 @@ if (DEFINED EMSCRIPTEN)
         ${DEPS}/ReactivePlusPlus/src/rpp
 
         ${Stb_INCLUDE_DIR}
+        ${DEPS}/yoga
 
         ${DEPS}/osm-static-map-generator/cpp
         ${DEPS}/osm-static-map-generator/cpp/deps/leptonica/src

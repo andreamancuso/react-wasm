@@ -28,23 +28,23 @@ export const StyleEditor = () => {
     );
 
     return (
-        <ReactImgui.Fragment>
+        <ReactImgui.Node>
             <StyleSelector />
             <FontSelector />
             <FrameRounding />
             <BorderControl />
-            <ReactImgui.SameLine>
+            <ReactImgui.Node style={{ flexDirection: "row" }}>
                 <ReactImgui.Button label="Save Ref" onClick={addItem} />
                 <ReactImgui.Button label="Add Many" onClick={addManyItems} />
                 <ReactImgui.Button label="Revert Ref" onClick={resetItems} />
                 <HelpMarker text='Save/Revert in local non-persistent storage. Default Colors definition are not affected. Use "Export" below to save them somewhere.' />
                 <ReactImgui.UnformattedText text={`${items.length}`} />
-            </ReactImgui.SameLine>
+            </ReactImgui.Node>
             {items.map((item, index) => (
-                <ReactImgui.SameLine key={index}>
+                <ReactImgui.Node style={{ flexDirection: "row" }} key={index}>
                     <ReactImgui.UnformattedText text={`${item}`} />
                     <ReactImgui.Button onClick={() => removeItem(index)} label="X" />
-                </ReactImgui.SameLine>
+                </ReactImgui.Node>
             ))}
             <ReactImgui.Separator />
             <ReactImgui.TabBar>
@@ -74,6 +74,6 @@ export const StyleEditor = () => {
                     <ReactImgui.UnformattedText text="Coming soon!" />
                 </ReactImgui.TabItem>
             </ReactImgui.TabBar>
-        </ReactImgui.Fragment>
+        </ReactImgui.Node>
     );
 };

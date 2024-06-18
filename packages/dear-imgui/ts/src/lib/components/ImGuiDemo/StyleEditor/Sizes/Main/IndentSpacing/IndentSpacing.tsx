@@ -11,7 +11,7 @@ export const IndentSpacing = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Slider
                 label="IndentSpacing"
                 onChange={handleValueChanged}
@@ -19,6 +19,6 @@ export const IndentSpacing = () => {
                 max={30}
             />
             <ReactImgui.UnformattedText text={`[${value}]`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };
