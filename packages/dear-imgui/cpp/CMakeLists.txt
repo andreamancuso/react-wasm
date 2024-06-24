@@ -32,7 +32,27 @@ find_package(libuv CONFIG REQUIRED)
 set(DEPS ${CMAKE_CURRENT_SOURCE_DIR}/deps)
 set(CMAKE_EXECUTABLE_SUFFIX ".mjs")
 
+# Maplibre
+set(MLN_RENDER_BACKEND_OPENGL)
+
 if (DEFINED EMSCRIPTEN)
+
+    file(GLOB MAPLIBRE_SOURCES CONFIGURE_DEPENDS
+        ${DEPS}/maplibre-native/src/mbgl/gfx/*.cpp
+        ${DEPS}/maplibre-native/src/mbgl/gl/*.cpp
+        ${DEPS}/maplibre-native/src/mbgl/map/*.cpp
+        ${DEPS}/maplibre-native/src/mbgl/tile/*.cpp
+        ${DEPS}/maplibre-native/src/mbgl/util/*.cpp
+        ${DEPS}/maplibre-native/platform/default/src/mbgl/gfx/*.cpp
+        ${DEPS}/maplibre-native/platform/default/src/mbgl/gl/*.cpp
+        ${DEPS}/maplibre-native/platform/default/src/mbgl/util/*.cpp
+    )
+
+    file(GLOB NUNICODE_SOURCES CONFIGURE_DEPENDS
+        ${DEPS}/nunicode/libnu/*.c
+        ${DEPS}/nunicode/libnu/gen/*.c
+    )
+
 	add_executable(reactDearImgui main.cpp
         shared.cpp
         widget.cpp
@@ -41,9 +61,24 @@ if (DEFINED EMSCRIPTEN)
         ${DEPS}/wasm-glfw3-boilerplate/glwasm.cpp
         imguiview.cpp
         implotview.cpp
+        ${NUNICODE_SOURCES}
+        ${MAPLIBRE_SOURCES}
     )
 
-    target_include_directories(reactDearImgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${DEPS}/wasm-glfw3-boilerplate ${DEPS}/IconFontCppHeaders ${DEPS}/ReactivePlusPlus/src/rpp ${DEPS}/ReactivePlusPlus/src/rpp ${DEPS}/maplibre-native/include ${DEPS}/maplibre-native/platform/default/include ${DEPS}/mapbox-base/include)
+    target_include_directories(reactDearImgui PRIVATE 
+        ${CMAKE_CURRENT_SOURCE_DIR} 
+        ${DEPS}/wasm-glfw3-boilerplate 
+        ${DEPS}/IconFontCppHeaders 
+        ${DEPS}/ReactivePlusPlus/src/rpp 
+        ${DEPS}/ReactivePlusPlus/src/rpp 
+        ${DEPS}/nunicode
+        ${DEPS}/shelf-pack-cpp/include
+        ${DEPS}/unique_resource
+        ${DEPS}/mapbox-base/include 
+        ${DEPS}/maplibre-native/src 
+        ${DEPS}/maplibre-native/include 
+        ${DEPS}/maplibre-native/platform/default/include
+    )
 
     # https://github.com/emscripten-core/emscripten/issues/18476
     # -c -fexperimental-library

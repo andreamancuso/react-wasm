@@ -15,6 +15,8 @@
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include <rpp/rpp.hpp>
+#include <mbgl/util/type_list.hpp>
+#include <mbgl/gfx/command_encoder.hpp>
 #include <mbgl/map/map.hpp>
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
@@ -61,7 +63,7 @@ void ReactImgui::SetUpObservables() {
     const uint32_t height = 512;
     auto mapTilerConfiguration = mbgl::TileServerOptions::MapTilerConfiguration();
 
-    // mbgl::HeadlessFrontend frontend({width, height}, static_cast<float>(pixelRatio));
+    mbgl::HeadlessFrontend frontend({width, height}, static_cast<float>(pixelRatio));
 
     // mbgl::Map map(frontend,
     //         mbgl::MapObserver::nullObserver(),

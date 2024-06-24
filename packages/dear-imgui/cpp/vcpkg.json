@@ -20,6 +20,10 @@
         "opengl-registry",
         "libuv",
         "mapbox-geometry",
-        "mapbox-variant"
+        "mapbox-variant",
+        "mapbox-geojson-cpp",
+        "rapidjson",
+        "zlib",
+        "boost-crc"
     ]
 }
