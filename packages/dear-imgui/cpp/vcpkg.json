@@ -17,6 +17,9 @@
         },
         "implot",
         "nlohmann-json",
-        "opengl-registry"
+        "opengl-registry",
+        "libuv",
+        "mapbox-geometry",
+        "mapbox-variant"
     ]
 }

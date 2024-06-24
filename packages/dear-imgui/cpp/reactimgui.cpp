@@ -15,6 +15,9 @@
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include <rpp/rpp.hpp>
+#include <mbgl/map/map.hpp>
+#include <mbgl/map/map_options.hpp>
+#include <mbgl/gfx/headless_frontend.hpp>
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
@@ -48,10 +51,26 @@ ReactImgui::ReactImgui(
         m_shouldLoadDefaultStyle = false;
         PatchStyle(json::parse(rawStyleOverridesDefs.value()));
     }
+
+    
 }
 
 void ReactImgui::SetUpObservables() {
-    // Do we need this?
+    const double pixelRatio = 1;
+    const uint32_t width = 512;
+    const uint32_t height = 512;
+    auto mapTilerConfiguration = mbgl::TileServerOptions::MapTilerConfiguration();
+
+    // mbgl::HeadlessFrontend frontend({width, height}, static_cast<float>(pixelRatio));
+
+    // mbgl::Map map(frontend,
+    //         mbgl::MapObserver::nullObserver(),
+    //         mbgl::MapOptions()
+    //             .withMapMode(mbgl::MapMode::Static)
+    //             .withSize(frontend.getSize())
+    //             .withPixelRatio(static_cast<float>(pixelRatio)),
+    //         mbgl::ResourceOptions()
+    //             .withTileServerOptions(mapTilerConfiguration));
 };
 
 void ReactImgui::SetUpWidgetCreatorFunctions() {
