@@ -27,6 +27,8 @@
         "boost-crc",
         "libwebp",
         "libjpeg-turbo",
-        "pngpp"
+        "pngpp",
+        "boost-geometry",
+        "mapbox-geojson-vt-cpp"
     ]
 }
