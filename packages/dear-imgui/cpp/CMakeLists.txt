@@ -22,6 +22,8 @@ project(reactDearImgui LANGUAGES C CXX)
 add_definitions(-std=c++23)
 set(CMAKE_CXX_STANDARD 23)
 
+set(MLN_WITH_CORE_ONLY ON)
+set(MLN_WITH_WERROR OFF)
 set(DEPS ${CMAKE_CURRENT_SOURCE_DIR}/deps)
 add_subdirectory(${DEPS}/maplibre-native)
 
@@ -31,9 +33,6 @@ find_package(imgui REQUIRED)
 find_package(implot REQUIRED)
 find_package(libuv CONFIG REQUIRED)
 find_package(JPEG REQUIRED)
-
-set(MLN_WITH_CORE_ONLY ON)
-set(MLN_WITH_WERROR OFF)
 # find_package(RPP REQUIRED)
 
 
@@ -68,7 +67,7 @@ if (DEFINED EMSCRIPTEN)
     # https://github.com/emscripten-core/emscripten/issues/18476
     # -c -fexperimental-library
 
-	set_target_properties(reactDearImgui PROPERTIES COMPILE_FLAGS "-O0 -Wno-error=deprecated-declarations -Wall -Wformat -s DISABLE_EXCEPTION_CATCHING=0")
+	set_target_properties(reactDearImgui PROPERTIES COMPILE_FLAGS "-O0 -Wno-error=deprecated-declarations -Wformat -s DISABLE_EXCEPTION_CATCHING=0")
     set_target_properties(reactDearImgui PROPERTIES LINK_FLAGS "--no-heap-copy --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/../fonts@/fonts -O0 -lembind --emit-tsd interface.d.ts -lhtml5.js -lhtml5_webgl.js -lglfw.js -s ENVIRONMENT='web' -s MODULARIZE=1 -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s USE_GLFW=3 -s USE_WEBGPU=1 -s NO_EXIT_RUNTIME=0 -s STANDALONE_WASM=0 -s EXIT_RUNTIME=1 -s ASSERTIONS=1 -s STACK_OVERFLOW_CHECK=2 -s MIN_WEBGL_VERSION=2 -s MAX_WEBGL_VERSION=2 -s DISABLE_EXCEPTION_CATCHING=0 -s SINGLE_FILE=1")
     set_target_properties(reactDearImgui PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../ts/src/lib/wasm)
     target_link_libraries(reactDearImgui PRIVATE imgui::imgui implot::implot nlohmann_json::nlohmann_json $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv> JPEG::JPEG mbgl-core)
