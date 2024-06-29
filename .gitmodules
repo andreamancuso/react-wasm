@@ -10,15 +10,6 @@
 [submodule "packages/dear-imgui/cpp/deps/vcpkg"]
 	path = packages/dear-imgui/cpp/deps/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
-[submodule "packages/dear-imgui/cpp/deps/maplibre-native"]
-	path = packages/dear-imgui/cpp/deps/maplibre-native
-	url = https://github.com/maplibre/maplibre-native.git
 [submodule "packages/dear-imgui/cpp/deps/mapbox-base"]
 	path = packages/dear-imgui/cpp/deps/mapbox-base
 	url = https://github.com/mapbox/mapbox-base.git
-[submodule "packages/dear-imgui/cpp/deps/unique_resource"]
-	path = packages/dear-imgui/cpp/deps/unique_resource
-	url = https://github.com/okdshin/unique_resource.git
-[submodule "packages/dear-imgui/cpp/deps/shelf-pack-cpp"]
-	path = packages/dear-imgui/cpp/deps/shelf-pack-cpp
-	url = https://github.com/mapbox/shelf-pack-cpp.git
