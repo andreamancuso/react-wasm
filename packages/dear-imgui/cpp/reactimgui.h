@@ -11,12 +11,10 @@
 #include <string>
 #include <sstream>
 #include <mutex>
+#include <pthread.h>
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include <rpp/rpp.hpp>
-// #include <mbgl/map/map.hpp>
-// #include <mbgl/map/map_options.hpp>
-// #include <mbgl/gfx/headless_frontend.hpp>
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
@@ -83,6 +81,12 @@ class ReactImgui : public ImPlotView {
             OnBooleanValueChangedCallback onBooleanValueChangeFn,
             OnClickCallback onClickFn
         );
+
+        void InitMapStuff();
+
+        void InitMap();
+
+        void LoadMapStyle();
 
         void SetUpObservables();
 

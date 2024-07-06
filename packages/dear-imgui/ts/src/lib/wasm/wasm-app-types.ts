@@ -835,6 +835,7 @@ export type ImGuiViewportFlags =
 
 interface EmbindModule {
     exit(): void;
+    initMapStuff(): void;
     resizeWindow(_0: number, _1: number): void;
     setWidget(_0: EmbindString): void;
     patchWidget(_0: number, _1: EmbindString): void;

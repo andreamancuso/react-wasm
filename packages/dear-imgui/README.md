@@ -84,3 +84,5 @@ Please note, not all browsers are currently supported.
 Terminating the WASM process throws an `ExitStatus` exception - this is expected, so long as the status is `0` then it's all good.
 
 `Pthread` support was recently added. At the time of writing this causes Webpack to issue a warning on startup. The warning can be dismissed by clicking on the close (X) button. Enabling the `-s STRICT` linker flag should fix it, however this currently introduces our issues.
+
+Manually patch reactDearImgui.mjs -> worker = new Worker(new URL("reactDearImgui.mjs", import.meta.url).href, workerOptions);

@@ -32,6 +32,8 @@ EMSCRIPTEN_DECLARE_VAL_TYPE(OnMultiValueChangeType);
 EMSCRIPTEN_DECLARE_VAL_TYPE(OnBooleanValueChangeType);
 EMSCRIPTEN_DECLARE_VAL_TYPE(OnClickType);
 
+
+
 template <typename T> 
 std::vector<T> JsonToVector(std::string& data) {
     auto parsedData = json::parse(data);
@@ -276,6 +278,10 @@ class WasmRunner {
         void patchStyle(std::string& styleDef) {
             m_view->PatchStyle(json::parse(styleDef));
         }
+
+        void initMapStuff() {
+            m_view->InitMapStuff();
+        }
 };
 
 static std::unique_ptr<WasmRunner> pRunner = std::make_unique<WasmRunner>();
@@ -344,6 +350,10 @@ void patchStyle(std::string styleDef) {
     return pRunner->patchStyle(styleDef);
 }
 
+void initMapStuff() {
+    return pRunner->initMapStuff();
+}
+
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("exit", &_exit);
     emscripten::function("resizeWindow", &resizeWindow);
@@ -357,6 +367,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("getTextLineHeightWithSpacing", &getTextLineHeightWithSpacing);
     emscripten::function("getStyle", &getStyle);
     emscripten::function("patchStyle", &patchStyle);
+    emscripten::function("initMapStuff", &initMapStuff);
 
     // emscripten::class_<WasmRunner>("WasmRunner")
     // .constructor<OnInputTextChangeType, OnComboChangeType, OnNumericValueChangeType, OnMultiValueChangeType, OnBooleanValueChangeType, OnClickType>()
@@ -601,20 +612,20 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .value("COUNT", ImGuiDataType_COUNT)
         ;
 
-    emscripten::enum_<ImGuiDir_>("ImGuiDir")
-        .value("None", ImGuiDir_None)
-        .value("Left", ImGuiDir_Left)
-        .value("Right", ImGuiDir_Right)
-        .value("Up", ImGuiDir_Up)
-        .value("Down", ImGuiDir_Down)
-        .value("COUNT", ImGuiDir_COUNT)
-        ;
+    // emscripten::enum_<ImGuiDir_>("ImGuiDir")
+    //     .value("None", ImGuiDir_None)
+    //     .value("Left", ImGuiDir_Left)
+    //     .value("Right", ImGuiDir_Right)
+    //     .value("Up", ImGuiDir_Up)
+    //     .value("Down", ImGuiDir_Down)
+    //     .value("COUNT", ImGuiDir_COUNT)
+    //     ;
 
-    emscripten::enum_<ImGuiSortDirection_>("ImGuiSortDirection")
-        .value("None", ImGuiSortDirection_None)
-        .value("Ascending", ImGuiSortDirection_Ascending)
-        .value("Descending", ImGuiSortDirection_Descending)
-        ;
+    // emscripten::enum_<ImGuiSortDirection_>("ImGuiSortDirection")
+    //     .value("None", ImGuiSortDirection_None)
+    //     .value("Ascending", ImGuiSortDirection_Ascending)
+    //     .value("Descending", ImGuiSortDirection_Descending)
+    //     ;
 
     emscripten::enum_<ImGuiKey>("ImGuiKey")
         .value("None", ImGuiKey_None)
@@ -817,14 +828,14 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .value("RendererHasVtxOffset", ImGuiBackendFlags_RendererHasVtxOffset)
         ;
 
-    emscripten::enum_<ImGuiButtonFlags_>("ImGuiButtonFlags")
-        .value("None", ImGuiButtonFlags_None)
-        .value("MouseButtonLeft", ImGuiButtonFlags_MouseButtonLeft)
-        .value("MouseButtonRight", ImGuiButtonFlags_MouseButtonRight)
-        .value("MouseButtonMiddle", ImGuiButtonFlags_MouseButtonMiddle)
-        .value("MouseButtonMask_", ImGuiButtonFlags_MouseButtonMask_)
-        .value("MouseButtonDefault_", ImGuiButtonFlags_MouseButtonDefault_)
-        ;
+    // emscripten::enum_<ImGuiButtonFlags_>("ImGuiButtonFlags")
+    //     .value("None", ImGuiButtonFlags_None)
+    //     .value("MouseButtonLeft", ImGuiButtonFlags_MouseButtonLeft)
+    //     .value("MouseButtonRight", ImGuiButtonFlags_MouseButtonRight)
+    //     .value("MouseButtonMiddle", ImGuiButtonFlags_MouseButtonMiddle)
+    //     .value("MouseButtonMask_", ImGuiButtonFlags_MouseButtonMask_)
+    //     .value("MouseButtonDefault_", ImGuiButtonFlags_MouseButtonDefault_)
+    //     ;
 
     emscripten::enum_<ImGuiColorEditFlags_>("ImGuiColorEditFlags")
         .value("None", ImGuiColorEditFlags_None)

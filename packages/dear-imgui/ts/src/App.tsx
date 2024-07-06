@@ -4,6 +4,8 @@ import { ReactImgui } from "./lib/components/ReactImgui/components";
 import getWasmModule from "./lib/wasm/reactDearImgui.mjs";
 // @ts-ignore
 import wasmDataPackage from "./lib/wasm/reactDearImgui.data";
+// @ts-ignore
+import wasm from "./lib/wasm/reactDearImgui.wasm";
 import { ImGuiDemo } from "./lib";
 import { GetWasmModule, ImGuiCol } from "./lib/wasm/wasm-app-types";
 import { ImGuiStyleForPatching } from "./lib/stylesheet/imgui-style";
@@ -104,6 +106,7 @@ function App() {
         <div id="app" ref={containerRef}>
             <ReactImgui
                 getWasmModule={getWasmModule as GetWasmModule}
+                wasm={wasm as string}
                 wasmDataPackage={wasmDataPackage as string}
                 containerRef={containerRef}
                 fontDefs={fontDefs}

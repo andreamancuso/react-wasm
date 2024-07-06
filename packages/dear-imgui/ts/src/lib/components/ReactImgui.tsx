@@ -13,6 +13,7 @@ import { ImGuiStyleForPatching } from "../stylesheet/imgui-style";
 export type MainComponentProps = PropsWithChildren & {
     containerRef?: React.RefObject<HTMLElement>;
     getWasmModule: GetWasmModule;
+    wasm: string;
     wasmDataPackage: string;
     fontDefs?: FontDef[];
     defaultFont?: { name: string; size: number };
@@ -23,17 +24,20 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
     containerRef,
     children,
     getWasmModule,
+    wasm,
     wasmDataPackage,
     fontDefs,
     defaultFont,
     styleOverrides,
 }: MainComponentProps) => {
+    const offScreenCanvasRef = useRef<HTMLCanvasElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const isWasmModuleLoading = useRef(false);
     const [wasmModule, setWasmModule] = useState<MainModule | undefined>();
 
     const canvasId = useMemo(() => `canvas-${uuidv4()}`, []);
+    const offScreenCanvasId = useMemo(() => `offscreenCanvas`, []);
 
     const { eventHandlers } = useDearImguiWasm(ReactNativePrivateInterface);
     const fonts = useDearImguiFonts(fontDefs);
@@ -58,8 +62,17 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                     const moduleArg: any = {
                         canvas: canvasRef.current,
                         arguments: args,
-                        locateFile: (_path: string) => {
-                            return wasmDataPackage;
+                        locateFile: (path: string) => {
+                            console.log(path);
+
+                            switch (path) {
+                                case "reactDearImgui.wasm":
+                                    return wasm;
+                                case "reactDearImgui.data":
+                                    return wasmDataPackage;
+                                default:
+                                    return path;
+                            }
                         },
                         eventHandlers,
                     };
@@ -71,6 +84,8 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                     } catch (exception) {
                         console.log("Unable to initialize the WASM correctly", exception);
                     }
+
+                    localModule.initMapStuff();
                 };
 
                 load();
@@ -137,6 +152,7 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
             {wasmModule && (
                 <ReactNativeWrapper wasmModule={wasmModule}>{children}</ReactNativeWrapper>
             )}
+            {/* <canvas ref={offScreenCanvasRef} id={offScreenCanvasId} /> */}
             <canvas ref={canvasRef} id={canvasId} />
         </>
     );
