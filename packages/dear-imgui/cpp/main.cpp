@@ -146,12 +146,13 @@ class WasmRunner {
             );
         }
 
-        void run(std::string& canvasSelector, std::string& rawFontDefs, std::optional<std::string>& rawStyleOverridesDefs) {
+        void run(std::string& canvasSelector, std::string& rawFontDefs, std::optional<std::string>& rawStyleOverridesDefs, std::optional<std::string>& rawMaplibreStyle) {
             m_view = new ReactImgui(
                 "ReactImgui", 
                 "ReactImgui",
                 rawFontDefs,
-                rawStyleOverridesDefs
+                rawStyleOverridesDefs,
+                rawMaplibreStyle
             );
             m_view->SetEventHandlers(
                 OnTextChanged,
@@ -291,13 +292,19 @@ int main(int argc, char* argv[]) {
     std::string canvasSelector = argv[1];
     std::string rawFontDefs = argv[2];
     std::optional<std::string> rawStyleOverridesDefs;
+    std::optional<std::string> rawMaplibreStyle;
 
     if (argc > 2) {
         // third argument is style overrides
         rawStyleOverridesDefs.emplace(std::string(argv[3]));
     }
 
-    pRunner->run(canvasSelector, rawFontDefs, rawStyleOverridesDefs);
+    if (argc > 3) {
+        // fourth argument is maplibre style
+        rawMaplibreStyle.emplace(std::string(argv[4]));
+    }
+
+    pRunner->run(canvasSelector, rawFontDefs, rawStyleOverridesDefs, rawMaplibreStyle);
 
     return 0;
 }

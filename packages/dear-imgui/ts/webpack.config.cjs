@@ -42,7 +42,7 @@ module.exports = [
                     use: [MiniCssExtractPlugin.loader, "css-loader"],
                 },
                 {
-                    test: /\.(ico|icns|eot|woff|woff2|jpe?g|png)$/,
+                    test: /\.(ico|icns|eot|woff|woff2|jpe?g|png|map)$/,
                     // exclude: [path.resolve(__dirname, "react-native")],
                     use: [
                         {

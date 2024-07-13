@@ -19,6 +19,7 @@
 #include <emscripten/bind.h>
 #include <emscripten/console.h>
 #include <rpp/rpp.hpp>
+
 #include <mbgl/util/type_list.hpp>
 #include <mbgl/map/map.hpp>
 #include <mbgl/map/map_options.hpp>
@@ -30,6 +31,11 @@
 #include <mbgl/actor/mailbox.hpp>
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/image.hpp>
+#include <mbgl/util/run_loop.hpp>
+#include <mbgl/gfx/backend.hpp>
+#include <mbgl/storage/network_status.hpp>
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
@@ -57,18 +63,21 @@ pthread_t loadStyleThread;
 std::unordered_map<int, std::unique_ptr<mbgl::Map>> maps;
 
 void *InitMapThread(void *arg) {
-    // auto view = reinterpret_cast<ReactImgui*>(arg);
+    auto view = reinterpret_cast<ReactImgui*>(arg);
 
     const double pixelRatio = 1;
     const uint32_t width = 512;
     const uint32_t height = 512;
-    const double zoom = 0;
-    const double bearing = 0;
-    const double pitch = 0;
+    const double zoom = 10;
+    const double bearing = 10;
+    const double pitch = 10;
     const double lat = 45.9341;
     const double lon = 8.9711;
 
-    auto tileServerOptions = mbgl::TileServerOptions::MapTilerConfiguration();
+    const std::string cache_file = ":memory:";
+    const std::string asset_root = ".";
+
+    auto tileServerOptions = mbgl::TileServerOptions::DefaultConfiguration();
 
     std::string style = tileServerOptions.defaultStyles().at(0).getUrl();
 
@@ -83,7 +92,11 @@ void *InitMapThread(void *arg) {
                 .withSize(frontend.getSize())
                 .withPixelRatio(static_cast<float>(pixelRatio)),
             mbgl::ResourceOptions()
+                .withCachePath(cache_file)
+                .withAssetPath(asset_root)
                 .withTileServerOptions(tileServerOptions));
+
+    mbgl::NetworkStatus::Set(mbgl::NetworkStatus::Status::Online);
 
     // maps[0] = std::make_unique<mbgl::Map>(frontend,
     //         mbgl::MapObserver::nullObserver(),
@@ -97,12 +110,20 @@ void *InitMapThread(void *arg) {
     // int rc = pthread_create(&loadStyleThread, NULL, LoadStyleThread, arg);
     // assert(rc == 0);
 
-    // maps[0]->getStyle().loadURL(style);
-    map.getStyle().loadURL("maptiler://maps/streets");
-    // 
+    auto& styleObject = map.getStyle();
+    // styleObject.loadURL(style);
+    styleObject.loadJSON(view->m_rawMaplibreStyle);
+    // map.getStyle().loadURL("maptiler://maps/streets");
+    // map.getStyle().loadURL("maplibre://maps/style");
+
+    map.jumpTo(mbgl::CameraOptions().withCenter(mbgl::LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch));
 
     // frontend.renderOnce(*maps[0].get());
-    frontend.renderOnce(map);
+    // frontend.renderOnce(map);
+
+    auto imageData = mbgl::encodePNG(frontend.render(map).image);
+
+    printf("InitMapThread: %d\n", imageData.length());
 
     // pthread_exit((void*)0);
 
@@ -124,7 +145,8 @@ ReactImgui::ReactImgui(
     const char* newWindowId, 
     const char* newGlWindowTitle, 
     std::string& rawFontDefs,
-    std::optional<std::string>& rawStyleOverridesDefs
+    std::optional<std::string>& rawStyleOverridesDefs,
+    std::optional<std::string>& rawMaplibreStyle
 ) : ImPlotView(newWindowId, newGlWindowTitle, rawFontDefs) {
     SetUpWidgetCreatorFunctions();
     SetUpFloatFormatChars();
@@ -134,10 +156,12 @@ ReactImgui::ReactImgui(
         m_shouldLoadDefaultStyle = false;
         PatchStyle(json::parse(rawStyleOverridesDefs.value()));
     }
+
+    m_rawMaplibreStyle = rawMaplibreStyle.value_or("");
 }
 
 void ReactImgui::InitMapStuff() {
-    int rc = pthread_create(&initMapThread, NULL, InitMapThread, static_cast<void*>(0));
+    int rc = pthread_create(&initMapThread, NULL, InitMapThread, static_cast<void*>(this));
     assert(rc == 0);
 };
 
