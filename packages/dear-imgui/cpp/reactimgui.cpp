@@ -12,9 +12,30 @@
 #include <functional>
 #include <concepts>
 #include <sstream>
+#include <thread>
+#include <iostream>
+#include <pthread.h>
 #include <emscripten.h>
 #include <emscripten/bind.h>
+#include <emscripten/console.h>
 #include <rpp/rpp.hpp>
+
+#include <mbgl/util/type_list.hpp>
+#include <mbgl/map/map.hpp>
+#include <mbgl/map/map_options.hpp>
+#include <mbgl/style/style.hpp>
+#include <mbgl/gfx/headless_frontend.hpp>
+#include <mbgl/map/camera.hpp>
+#include <mbgl/util/geo.hpp>
+#include <mbgl/actor/message.hpp>
+#include <mbgl/actor/mailbox.hpp>
+#include <mbgl/actor/scheduler.hpp>
+#include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/image.hpp>
+#include <mbgl/util/run_loop.hpp>
+#include <mbgl/gfx/backend.hpp>
+#include <mbgl/storage/network_status.hpp>
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_wgpu.h"
@@ -34,25 +55,125 @@ std::unique_ptr<T> makeWidget(const json& val, ReactImgui* view) {
     return T::makeWidget(val, view);
 }
 
+void *LoadStyleThread(void *arg);
+
+pthread_t initMapThread;
+pthread_t loadStyleThread;
+
+std::unordered_map<int, std::unique_ptr<mbgl::Map>> maps;
+
+void *InitMapThread(void *arg) {
+    auto view = reinterpret_cast<ReactImgui*>(arg);
+
+    const double pixelRatio = 1;
+    const uint32_t width = 512;
+    const uint32_t height = 512;
+    const double zoom = 10;
+    const double bearing = 10;
+    const double pitch = 10;
+    const double lat = 45.9341;
+    const double lon = 8.9711;
+
+    const std::string cache_file = ":memory:";
+    const std::string asset_root = ".";
+
+    auto tileServerOptions = mbgl::TileServerOptions::DefaultConfiguration();
+
+    std::string style = tileServerOptions.defaultStyles().at(0).getUrl();
+
+    mbgl::util::RunLoop loop;
+
+    mbgl::HeadlessFrontend frontend({width, height}, static_cast<float>(pixelRatio));
+
+    mbgl::Map map(frontend,
+            mbgl::MapObserver::nullObserver(),
+            mbgl::MapOptions()
+                .withMapMode(mbgl::MapMode::Static)
+                .withSize(frontend.getSize())
+                .withPixelRatio(static_cast<float>(pixelRatio)),
+            mbgl::ResourceOptions()
+                .withCachePath(cache_file)
+                .withAssetPath(asset_root)
+                .withTileServerOptions(tileServerOptions));
+
+    mbgl::NetworkStatus::Set(mbgl::NetworkStatus::Status::Online);
+
+    // maps[0] = std::make_unique<mbgl::Map>(frontend,
+    //         mbgl::MapObserver::nullObserver(),
+    //         mbgl::MapOptions()
+    //             .withMapMode(mbgl::MapMode::Static)
+    //             .withSize(frontend.getSize())
+    //             .withPixelRatio(static_cast<float>(pixelRatio)),
+    //         mbgl::ResourceOptions()
+    //             .withTileServerOptions(tileServerOptions));
+
+    // int rc = pthread_create(&loadStyleThread, NULL, LoadStyleThread, arg);
+    // assert(rc == 0);
+
+    auto& styleObject = map.getStyle();
+    // styleObject.loadURL(style);
+    styleObject.loadJSON(view->m_rawMaplibreStyle);
+    // map.getStyle().loadURL("maptiler://maps/streets");
+    // map.getStyle().loadURL("maplibre://maps/style");
+
+    map.jumpTo(mbgl::CameraOptions().withCenter(mbgl::LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch));
+
+    // frontend.renderOnce(*maps[0].get());
+    // frontend.renderOnce(map);
+
+    auto imageData = mbgl::encodePNG(frontend.render(map).image);
+
+    printf("InitMapThread: %d\n", imageData.length());
+
+    // pthread_exit((void*)0);
+
+    return 0;
+}
+
+void *LoadStyleThread(void *arg) {
+    printf("LoadStyleThread\n");
+
+    auto view = reinterpret_cast<ReactImgui*>(arg);
+
+    view->LoadMapStyle();
+
+    pthread_exit((void*)0);
+}
+
+
 ReactImgui::ReactImgui(
     const char* newWindowId, 
     const char* newGlWindowTitle, 
     std::string& rawFontDefs,
-    std::optional<std::string>& rawStyleOverridesDefs
+    std::optional<std::string>& rawStyleOverridesDefs,
+    std::optional<std::string>& rawMaplibreStyle
 ) : ImPlotView(newWindowId, newGlWindowTitle, rawFontDefs) {
     SetUpWidgetCreatorFunctions();
     SetUpFloatFormatChars();
-    SetUpObservables();
+    // SetUpObservables();
 
     if (rawStyleOverridesDefs.has_value()) {
         m_shouldLoadDefaultStyle = false;
         PatchStyle(json::parse(rawStyleOverridesDefs.value()));
     }
+
+    m_rawMaplibreStyle = rawMaplibreStyle.value_or("");
 }
 
-void ReactImgui::SetUpObservables() {
-    // Do we need this?
+void ReactImgui::InitMapStuff() {
+    int rc = pthread_create(&initMapThread, NULL, InitMapThread, static_cast<void*>(this));
+    assert(rc == 0);
 };
+
+void ReactImgui::InitMap() {
+    
+};
+
+void ReactImgui::LoadMapStyle() {
+    // m_map->getStyle().loadURL(m_style);
+};
+
+void ReactImgui::SetUpObservables() {};
 
 void ReactImgui::SetUpWidgetCreatorFunctions() {
     m_widget_init_fn["Combo"] = &makeWidget<Combo>;
@@ -290,7 +411,7 @@ void ReactImgui::PatchStyle(const json& styleDef) {
         ExtractNumberFromStyleDef<float>(styleDef, "windowBorderSize", style->WindowBorderSize);
         ExtractImVec2FromStyleDef(styleDef, "windowMinSize", style->WindowMinSize);
         ExtractImVec2FromStyleDef(styleDef, "windowTitleAlign", style->WindowTitleAlign);
-        ExtractNumberFromStyleDef<int>(styleDef, "windowMenuButtonPosition", style->WindowMenuButtonPosition);
+        // ExtractNumberFromStyleDef<int>(styleDef, "windowMenuButtonPosition", style->WindowMenuButtonPosition);
         ExtractNumberFromStyleDef<float>(styleDef, "childRounding", style->ChildRounding);
         ExtractNumberFromStyleDef<float>(styleDef, "childBorderSize", style->ChildBorderSize);
         ExtractNumberFromStyleDef<float>(styleDef, "popupRounding", style->PopupRounding);
@@ -315,7 +436,7 @@ void ReactImgui::PatchStyle(const json& styleDef) {
         ExtractNumberFromStyleDef<float>(styleDef, "tabBarBorderSize", style->TabBarBorderSize);
         ExtractNumberFromStyleDef<float>(styleDef, "tableAngledHeadersAngle", style->TableAngledHeadersAngle);
         ExtractImVec2FromStyleDef(styleDef, "tableAngledHeadersTextAlign", style->TableAngledHeadersTextAlign);
-        ExtractNumberFromStyleDef<int>(styleDef, "colorButtonPosition", style->ColorButtonPosition);
+        // ExtractNumberFromStyleDef<int>(styleDef, "colorButtonPosition", style->ColorButtonPosition);
         ExtractImVec2FromStyleDef(styleDef, "buttonTextAlign", style->ButtonTextAlign);
         ExtractImVec2FromStyleDef(styleDef, "selectableTextAlign", style->SelectableTextAlign);
         ExtractNumberFromStyleDef<float>(styleDef, "separatorTextBorderSize", style->SeparatorTextBorderSize);
@@ -334,6 +455,14 @@ void ReactImgui::PatchStyle(const json& styleDef) {
         ExtractNumberFromStyleDef<float>(styleDef, "hoverDelayNormal", style->HoverDelayNormal);
         ExtractNumberFromStyleDef<int>(styleDef, "hoverFlagsForTooltipMouse", style->HoverFlagsForTooltipMouse);
         ExtractNumberFromStyleDef<int>(styleDef, "hoverFlagsForTooltipNav", style->HoverFlagsForTooltipNav);
+
+        if (styleDef.contains("windowMenuButtonPosition") && styleDef["windowMenuButtonPosition"].is_number_unsigned()) {
+            style->WindowMenuButtonPosition = (ImGuiDir)styleDef["windowMenuButtonPosition"].template get<int>();
+        }
+
+        if (styleDef.contains("colorButtonPosition") && styleDef["colorButtonPosition"].is_number_unsigned()) {
+            style->ColorButtonPosition = (ImGuiDir)styleDef["colorButtonPosition"].template get<int>();
+        }
 
         if (styleDef.contains("colors") && styleDef["colors"].is_object()) {
             ImVec4* colors = style->Colors;

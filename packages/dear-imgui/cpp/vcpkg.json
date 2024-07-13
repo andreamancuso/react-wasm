@@ -1,22 +1,5 @@
 {
-    "vcpkg-configuration": {
-        "overlay-ports": [
-            "./vcpkg-overlay-ports/imgui"
-        ]
-    },
     "name": "reactdearimgui",
     "version-string": "1.0.0",
-    "dependencies": [
-        {
-            "name": "imgui",
-            "features": [
-                "glfw-binding",
-                "opengl3-binding",
-                "wgpu-binding"
-            ]
-        },
-        "implot",
-        "nlohmann-json",
-        "opengl-registry"
-    ]
+    "dependencies": []
 }

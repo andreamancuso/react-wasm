@@ -20,10 +20,10 @@ module.exports = [
                 "Cross-Origin-Opener-Policy": "same-origin",
             },
         },
-        experiments: {
-            asyncWebAssembly: true,
-            syncWebAssembly: true,
-        },
+        // experiments: {
+        //     asyncWebAssembly: true,
+        //     syncWebAssembly: true,
+        // },
         resolve: {
             extensions: [".ts", ".tsx", ".js", ".mjs", ".css"],
             modules: [path.resolve(__dirname, "./"), path.resolve(__dirname, "./node_modules/")],
@@ -42,7 +42,7 @@ module.exports = [
                     use: [MiniCssExtractPlugin.loader, "css-loader"],
                 },
                 {
-                    test: /\.(ico|icns|eot|woff|woff2|jpe?g|png)$/,
+                    test: /\.(ico|icns|eot|woff|woff2|jpe?g|png|map)$/,
                     // exclude: [path.resolve(__dirname, "react-native")],
                     use: [
                         {
@@ -52,7 +52,7 @@ module.exports = [
                     ],
                 },
                 {
-                    test: /\.(data)$/,
+                    test: /\.(data|wasm)$/,
                     // exclude: [path.resolve(__dirname, "react-native")],
                     use: [
                         {

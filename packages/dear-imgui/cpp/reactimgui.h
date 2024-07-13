@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <mutex>
+#include <pthread.h>
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include <rpp/rpp.hpp>
@@ -51,6 +52,7 @@ class ReactImgui : public ImPlotView {
         void HandleBufferedTableData(int id, std::vector<TableData> val);
 
     public:
+        std::string m_rawMaplibreStyle;
         std::unordered_map<int, std::vector<int>> m_hierarchy;
         std::mutex m_hierarchy_mutex;
 
@@ -67,7 +69,8 @@ class ReactImgui : public ImPlotView {
             const char* newWindowId, 
             const char* newGlWindowTitle, 
             std::string& rawFontDefs,
-            std::optional<std::string>& rawStyleOverridesDefs
+            std::optional<std::string>& rawStyleOverridesDefs,
+            std::optional<std::string>& rawMaplibreStyle
         );
 
         void RenderWidgetById(int id);
@@ -80,6 +83,12 @@ class ReactImgui : public ImPlotView {
             OnBooleanValueChangedCallback onBooleanValueChangeFn,
             OnClickCallback onClickFn
         );
+
+        void InitMapStuff();
+
+        void InitMap();
+
+        void LoadMapStyle();
 
         void SetUpObservables();
 
