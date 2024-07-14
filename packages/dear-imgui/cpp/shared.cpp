@@ -2,7 +2,16 @@
 #include <optional>
 #include <sstream>
 #include <iomanip>
+
+#include <emscripten/html5_webgpu.h>
+
+#include <webgpu/webgpu.h>
+#include <webgpu/webgpu_cpp.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include "imgui.h"
+#include "imgui_impl_wgpu.h"
 #include "shared.h"
 
 #pragma once
@@ -85,3 +94,70 @@ json IV4toJsonHEXATuple(ImVec4 imVec4) {
 
     return j;
 };
+
+// borrowed from https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
+bool LoadTextureFromFile(WGPUDevice device, const char* filename, Texture* texture)
+{
+    // Load from file
+    int image_width = 0;
+    int image_height = 0;
+    unsigned char* image_data = stbi_load(filename, &image_width, &image_height, NULL, 4);
+
+    if (stbi_failure_reason()) {
+        printf("stbi_failure_reason: %s\n", stbi_failure_reason());
+    }
+
+    if (image_data == NULL)
+        return false;
+
+    WGPUTextureView view;
+    {
+        WGPUTextureDescriptor tex_desc = {};
+        tex_desc.label = "texture";
+        tex_desc.dimension = WGPUTextureDimension_2D;
+        tex_desc.size.width = image_width;
+        tex_desc.size.height = image_height;
+        tex_desc.size.depthOrArrayLayers = 1;
+        tex_desc.sampleCount = 1;
+        tex_desc.format = WGPUTextureFormat_RGBA8Unorm;
+        tex_desc.mipLevelCount = 1;
+        tex_desc.usage = WGPUTextureUsage_CopyDst | WGPUTextureUsage_TextureBinding;
+            
+        auto tex = wgpuDeviceCreateTexture(device, &tex_desc);
+
+        WGPUTextureViewDescriptor tex_view_desc = {};
+        tex_view_desc.format = WGPUTextureFormat_RGBA8Unorm;
+        tex_view_desc.dimension = WGPUTextureViewDimension_2D;
+        tex_view_desc.baseMipLevel = 0;
+        tex_view_desc.mipLevelCount = 1;
+        tex_view_desc.baseArrayLayer = 0;
+        tex_view_desc.arrayLayerCount = 1;
+        tex_view_desc.aspect = WGPUTextureAspect_All;
+        view = wgpuTextureCreateView(tex, &tex_view_desc);
+    
+        WGPUImageCopyTexture dst_view = {};
+        dst_view.texture = tex;
+        dst_view.mipLevel = 0;
+        dst_view.origin = { 0, 0, 0 };
+        dst_view.aspect = WGPUTextureAspect_All;
+        WGPUTextureDataLayout layout = {};
+        layout.offset = 0;
+        layout.bytesPerRow = image_width * 4;
+        layout.rowsPerImage = image_height;
+        WGPUExtent3D size = { (uint32_t)image_width, (uint32_t)image_height, 1 };
+
+        auto q = wgpuDeviceGetQueue(device);
+
+        wgpuQueueWriteTexture(q, &dst_view, image_data, (uint32_t)(image_width * 4 * image_height), &layout, &size);
+
+        wgpuQueueRelease(q);
+    }
+
+    stbi_image_free(image_data);
+
+    texture->textureView = view;
+    texture->width = image_width;
+    texture->height = image_height;
+
+    return true;
+}

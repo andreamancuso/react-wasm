@@ -2,6 +2,7 @@
 #include <variant>
 #include <optional>
 #include <nlohmann/json.hpp>
+#include <webgpu/webgpu.h>
 #include "imgui.h"
 
 #pragma once
@@ -43,5 +44,13 @@ json IV4toJson(ImVec4 imVec4);
 json IV4toJsonTuple(ImVec4 imVec4);
 json IV4toJsonRGBATuple(ImVec4 imVec4);
 json IV4toJsonHEXATuple(ImVec4 imVec4);
+
+struct Texture {
+    WGPUTextureView textureView;
+    int width;
+    int height;
+};
+
+bool LoadTextureFromFile(WGPUDevice device, const char* filename, Texture* texture);
 
 #endif

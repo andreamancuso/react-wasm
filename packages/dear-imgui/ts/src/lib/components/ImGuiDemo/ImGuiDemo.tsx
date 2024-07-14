@@ -174,6 +174,10 @@ export const ImGuiDemo = () => {
             <ReactImgui.DIWindow title="tables" width={1000} height={600}>
                 <Tables />
             </ReactImgui.DIWindow>
+
+            <ReactImgui.DIWindow title="fake map" width={1000} height={600}>
+                <ReactImgui.Map />
+            </ReactImgui.DIWindow>
         </ReactImgui.Fragment>
     );
 };

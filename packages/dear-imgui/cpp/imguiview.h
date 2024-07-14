@@ -53,7 +53,7 @@ class ImGuiView : public View {
                     if (item.is_object()) {
                         if (item.contains("name") && item.contains("size") && item["name"].is_string() && item["size"].is_number_unsigned()) {
                             auto fontName = item["name"].template get<std::string>();
-                            auto pathToFont = std::format("fonts/{}.ttf", fontName.c_str());
+                            auto pathToFont = std::format("assets/fonts/{}.ttf", fontName.c_str());
                             auto fontSize = item["size"].template get<int>();
 
                             if (!m_fontDefMap.contains(fontName)) {
@@ -76,8 +76,8 @@ class ImGuiView : public View {
                             icons_config.MergeMode = true; 
                             icons_config.PixelSnapH = true; 
                             icons_config.GlyphMinAdvanceX = iconFontSize;
-                            auto pathToFaFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_FAS);
-                            // auto pathToMdiFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_MDI);
+                            auto pathToFaFontFile = std::format("assets/fonts/{}", FONT_ICON_FILE_NAME_FAS);
+                            // auto pathToMdiFontFile = std::format("assets/fonts/{}", FONT_ICON_FILE_NAME_MDI);
                             
                             io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges);
                             // io.Fonts->AddFontFromFileTTF(pathToMdiFontFile.c_str(), fontSize, &icons_config, icons_ranges);
@@ -113,7 +113,7 @@ class ImGuiView : public View {
                 icons_config.MergeMode = true; 
                 icons_config.PixelSnapH = true; 
                 icons_config.GlyphMinAdvanceX = iconFontSize;
-                auto pathToFaFontFile = std::format("fonts/{}", FONT_ICON_FILE_NAME_FAS);
+                auto pathToFaFontFile = std::format("assets/fonts/{}", FONT_ICON_FILE_NAME_FAS);
                 
                 m_loadedFonts.push_back(
                     io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges)
@@ -169,6 +169,8 @@ class ImGuiView : public View {
 
         void SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) {
             IMGUI_CHECKVERSION();
+
+            m_device = device;
 
             ImGui_ImplWGPU_InitInfo init_info;
             init_info.Device = device;

@@ -109,9 +109,9 @@ class StyledWidget : public Widget {
 
 class Fragment final : public Widget {
     public:
-        static std::unique_ptr<Fragment> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
+        static std::unique_ptr<Fragment> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
+                auto id = widgetDef["id"].template get<int>();
                 
                 return std::make_unique<Fragment>(id);
             }
@@ -130,7 +130,7 @@ class Fragment final : public Widget {
 class Group final : public StyledWidget {
     public:
         static std::unique_ptr<Group> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
 
                 auto style = StyledWidget::ExtractStyle(widgetDef, view);
@@ -158,7 +158,7 @@ class Window final : public StyledWidget {
         float m_height;
 
         static std::unique_ptr<Window> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 auto title = widgetDef["title"].template get<std::string>();
                 auto width = widgetDef["width"].template get<float>();
@@ -209,7 +209,7 @@ class Child final : public StyledWidget {
         float m_height;
 
         static std::unique_ptr<Child> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 float width = 0;
                 auto height = 0;
@@ -256,9 +256,9 @@ class Child final : public StyledWidget {
 
 class SameLine final : public Widget {
     public:
-        static std::unique_ptr<SameLine> makeWidget(const json& val, ReactImgui* view) {
-            if (val.is_object()) {
-                auto id = val["id"].template get<int>();
+        static std::unique_ptr<SameLine> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
+                auto id = widgetDef["id"].template get<int>();
                 
                 return std::make_unique<SameLine>(id);
             }
@@ -279,7 +279,7 @@ class SameLine final : public Widget {
 class Separator final : public StyledWidget {
     public:
         static std::unique_ptr<Separator> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
 
                 auto style = StyledWidget::ExtractStyle(widgetDef, view);
@@ -298,7 +298,7 @@ class Separator final : public StyledWidget {
 class Indent final : public StyledWidget {
     public:
         static std::unique_ptr<Indent> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
 
                 auto style = StyledWidget::ExtractStyle(widgetDef, view);
@@ -322,7 +322,7 @@ class SeparatorText final : public StyledWidget {
         std::string m_label;
 
         static std::unique_ptr<SeparatorText> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 std::string label = widgetDef["label"].template get<std::string>();
 
@@ -357,7 +357,7 @@ class BulletText final : public StyledWidget {
         std::string m_text;
 
         static std::unique_ptr<BulletText> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 std::string text = widgetDef["text"].template get<std::string>();
 
@@ -416,7 +416,7 @@ class DisabledText final : public StyledWidget {
         std::string m_text;
 
         static std::unique_ptr<DisabledText> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 std::string text = widgetDef["text"].template get<std::string>();
 
@@ -449,7 +449,7 @@ class DisabledText final : public StyledWidget {
 class TabBar final : public StyledWidget {
     public:
         static std::unique_ptr<TabBar> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
 
                 auto style = StyledWidget::ExtractStyle(widgetDef, view);
@@ -473,7 +473,7 @@ class TabItem final : public StyledWidget {
         std::string m_label;
 
         static std::unique_ptr<TabItem> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 std::string label = widgetDef["label"].template get<std::string>();
 
@@ -509,7 +509,7 @@ class CollapsingHeader final : public StyledWidget {
         std::string m_label;
 
         static std::unique_ptr<CollapsingHeader> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 std::string label = widgetDef["label"].template get<std::string>();
 
@@ -545,7 +545,7 @@ class TextWrap final : public StyledWidget {
         double m_width;
 
         static std::unique_ptr<TextWrap> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 double width = widgetDef["width"].template get<double>();
 
@@ -579,7 +579,7 @@ class TextWrap final : public StyledWidget {
 class ItemTooltip final : public StyledWidget {
     public:
         static std::unique_ptr<ItemTooltip> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
 
                 auto style = StyledWidget::ExtractStyle(widgetDef, view);
@@ -603,7 +603,7 @@ class TreeNode final : public StyledWidget {
         std::string m_label;
 
         static std::unique_ptr<TreeNode> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 std::string label = widgetDef["label"].template get<std::string>();
 
@@ -720,7 +720,7 @@ class Combo final : public StyledWidget {
         std::unique_ptr<char[]> m_itemsSeparatedByZeros; // Relevant for 'basic' combo only
 
         static std::unique_ptr<Combo> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_number() ? widgetDef["defaultValue"].template get<int>() : 0;
                 auto label = widgetDef["label"].template get<std::string>();
@@ -778,7 +778,7 @@ class InputText final : public StyledWidget {
         std::string m_label;
 
         inline static std::unique_ptr<InputText> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_string() ? widgetDef["defaultValue"].template get<std::string>() : "";
                 auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
@@ -823,7 +823,7 @@ class Checkbox final : public StyledWidget {
         std::string m_label;
 
         inline static std::unique_ptr<Checkbox> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 auto defaultChecked = widgetDef.contains("defaultChecked") && widgetDef["defaultChecked"].is_boolean() ? widgetDef["defaultChecked"].template get<bool>() : false;
                 auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
@@ -926,7 +926,7 @@ class Slider final : public StyledWidget {
         std::string m_label;
 
         inline static std::unique_ptr<Slider> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_number() ? widgetDef["defaultValue"].template get<float>() : 0.0f;
                 auto min = widgetDef.contains("min") && widgetDef["min"].is_number() ? widgetDef["min"].template get<float>() : 0.0f;
@@ -987,7 +987,7 @@ class MultiSlider final : public StyledWidget {
         std::string m_label;
 
         inline static std::unique_ptr<MultiSlider> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
                 auto numValues = widgetDef.contains("numValues") && widgetDef["numValues"].is_number() ? widgetDef["numValues"].template get<int>() : 2;
                 auto decimalDigits = widgetDef.contains("decimalDigits") && widgetDef["decimalDigits"].is_number() ? widgetDef["decimalDigits"].template get<int>() : 0;
@@ -1073,7 +1073,7 @@ class Table final : public StyledWidget {
         int m_clipRows;
 
         inline static std::unique_ptr<Table> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
 
                 if (widgetDef.contains("columns") && widgetDef["columns"].is_array()) {
@@ -1138,7 +1138,7 @@ class ClippedMultiLineTextRenderer final : public StyledWidget {
         ImGuiTextBuffer m_textBuffer;
 
         inline static std::unique_ptr<ClippedMultiLineTextRenderer> makeWidget(const json& widgetDef, ReactImgui* view) {
-            if (widgetDef.is_object()) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 auto id = widgetDef["id"].template get<int>();
 
                 auto style = StyledWidget::ExtractStyle(widgetDef, view);
@@ -1184,4 +1184,28 @@ class ClippedMultiLineTextRenderer final : public StyledWidget {
                 if (m_textBuffer[old_size] == '\n')
                     m_lineOffsets.push_back(old_size + 1);
         }
+};
+
+class Map final : public Widget {
+    private:
+        ImVec2 m_offset;
+
+    public:
+        static std::unique_ptr<Map> makeWidget(const json& widgetDef, ReactImgui* view) {
+            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
+                auto id = widgetDef["id"].template get<int>();
+                
+                return std::make_unique<Map>(id);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
+        Map(int id) : Widget(id) {
+            m_type = "Map";
+
+            m_offset = ImVec2(0.0f, 0.0f);
+        }
+
+        void Render(ReactImgui* view);
 };

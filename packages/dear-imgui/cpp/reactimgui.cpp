@@ -42,7 +42,6 @@ ReactImgui::ReactImgui(
 ) : ImPlotView(newWindowId, newGlWindowTitle, rawFontDefs) {
     SetUpWidgetCreatorFunctions();
     SetUpFloatFormatChars();
-    SetUpObservables();
 
     if (rawStyleOverridesDefs.has_value()) {
         m_shouldLoadDefaultStyle = false;
@@ -50,8 +49,23 @@ ReactImgui::ReactImgui(
     }
 }
 
-void ReactImgui::SetUpObservables() {
-    // Do we need this?
+void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) {
+    ImGuiView::SetUp(pCanvasSelector, device, glfwWindow, wgpu_preferred_fmt);
+
+    SetUpTextures();
+};
+
+void ReactImgui::SetUpTextures() {
+    int my_image_width = 0;
+    int my_image_height = 0;
+    WGPUTextureView my_image_texture = 0;
+    Texture texture;
+    bool ret = LoadTextureFromFile(m_device, "assets/sample-raster-map.png", &texture);
+    IM_ASSERT(ret);
+
+    m_textures[0] = std::make_unique<Texture>(texture);
+
+    printf("Loaded texture, width: %d, height: %d\n", m_textures[0]->width, m_textures[0]->height);
 };
 
 void ReactImgui::SetUpWidgetCreatorFunctions() {
@@ -80,6 +94,7 @@ void ReactImgui::SetUpWidgetCreatorFunctions() {
     m_widget_init_fn["TreeNode"] = &makeWidget<TreeNode>;
     m_widget_init_fn["Table"] = &makeWidget<Table>;
     m_widget_init_fn["ClippedMultiLineTextRenderer"] = &makeWidget<ClippedMultiLineTextRenderer>;
+    m_widget_init_fn["Map"] = &makeWidget<Map>;
 };
 
 void ReactImgui::RenderWidgetById(int id) {

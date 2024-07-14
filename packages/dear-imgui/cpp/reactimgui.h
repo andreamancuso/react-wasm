@@ -38,6 +38,7 @@ class ReactImgui : public ImPlotView {
         std::unordered_map<std::string, std::function<std::unique_ptr<Widget>(const json&, ReactImgui*)>> m_widget_init_fn;
 
         std::unordered_map<int, std::unique_ptr<Widget>> m_widgets;
+        
         std::mutex m_widgets_mutex;
 
         void InitWidget(const json& widgetDef);
@@ -56,6 +57,8 @@ class ReactImgui : public ImPlotView {
 
         std::unordered_map<int, std::unique_ptr<char[]>> m_floatFormatChars;
 
+        std::unordered_map<int, std::unique_ptr<Texture>> m_textures;
+
         OnTextChangedCallback m_onInputTextChange;
         OnComboChangedCallback m_onComboChange;
         OnNumericValueChangedCallback m_onNumericValueChange;
@@ -72,6 +75,8 @@ class ReactImgui : public ImPlotView {
 
         void RenderWidgetById(int id);
 
+        void SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt);
+
         void SetEventHandlers(
             OnTextChangedCallback onInputTextChangeFn,
             OnComboChangedCallback onComboChangeFn,
@@ -81,7 +86,7 @@ class ReactImgui : public ImPlotView {
             OnClickCallback onClickFn
         );
 
-        void SetUpObservables();
+        void SetUpTextures();
 
         void PrepareForRender();
 
