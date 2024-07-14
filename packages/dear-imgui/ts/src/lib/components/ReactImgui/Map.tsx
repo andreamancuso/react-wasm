@@ -1,5 +1,5 @@
 import { WidgetFunctionComponent, WidgetPropsMap } from "./types";
 
-export const Map: WidgetFunctionComponent<WidgetPropsMap["Map"]> = () => {
+export const MapComponent: WidgetFunctionComponent<WidgetPropsMap["Map"]> = () => {
     return <widget type="Map" />;
 };
