@@ -146,13 +146,13 @@ class WasmRunner {
             );
         }
 
-        void run(std::string& canvasSelector, std::string& rawFontDefs, std::optional<std::string>& rawStyleOverridesDefs, std::optional<std::string>& rawMaplibreStyle) {
+        void run(std::string& canvasSelector, std::string& rawFontDefs, std::optional<std::string>& rawStyleOverridesDefs, std::optional<std::string>& rawSceneYaml) {
             m_view = new ReactImgui(
                 "ReactImgui", 
                 "ReactImgui",
                 rawFontDefs,
                 rawStyleOverridesDefs,
-                rawMaplibreStyle
+                rawSceneYaml
             );
             m_view->SetEventHandlers(
                 OnTextChanged,
@@ -292,7 +292,7 @@ int main(int argc, char* argv[]) {
     std::string canvasSelector = argv[1];
     std::string rawFontDefs = argv[2];
     std::optional<std::string> rawStyleOverridesDefs;
-    std::optional<std::string> rawMaplibreStyle;
+    std::optional<std::string> rawSceneYaml;
 
     if (argc > 2) {
         // third argument is style overrides
@@ -301,10 +301,10 @@ int main(int argc, char* argv[]) {
 
     if (argc > 3) {
         // fourth argument is maplibre style
-        rawMaplibreStyle.emplace(std::string(argv[4]));
+        rawSceneYaml.emplace(std::string(argv[4]));
     }
 
-    pRunner->run(canvasSelector, rawFontDefs, rawStyleOverridesDefs, rawMaplibreStyle);
+    pRunner->run(canvasSelector, rawFontDefs, rawStyleOverridesDefs, rawSceneYaml);
 
     return 0;
 }

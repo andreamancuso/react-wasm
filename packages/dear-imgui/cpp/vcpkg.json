@@ -1,5 +1,7 @@
 {
     "name": "reactdearimgui",
     "version-string": "1.0.0",
-    "dependencies": []
+    "dependencies": [
+        "mapbox-variant"
+    ]
 }

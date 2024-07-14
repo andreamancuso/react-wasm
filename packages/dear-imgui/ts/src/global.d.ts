@@ -9,3 +9,8 @@ declare global {
         }
     }
 }
+
+declare module "*.yaml" {
+    const content: any;
+    export default content;
+}

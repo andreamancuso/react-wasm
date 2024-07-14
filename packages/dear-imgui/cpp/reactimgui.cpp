@@ -8,6 +8,7 @@
 // - Introduction, links and more at the top of imgui.cpp
 
 #include <cstring>
+#include <type_traits>
 #include <string>
 #include <functional>
 #include <concepts>
@@ -20,21 +21,8 @@
 #include <emscripten/console.h>
 #include <rpp/rpp.hpp>
 
-#include <mbgl/util/type_list.hpp>
-#include <mbgl/map/map.hpp>
-#include <mbgl/map/map_options.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/map/camera.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/actor/message.hpp>
-#include <mbgl/actor/mailbox.hpp>
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/gfx/backend.hpp>
-#include <mbgl/storage/network_status.hpp>
+#include <emscriptenPlatform.h>
+#include <glfwApp.h>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -55,98 +43,12 @@ std::unique_ptr<T> makeWidget(const json& val, ReactImgui* view) {
     return T::makeWidget(val, view);
 }
 
-void *LoadStyleThread(void *arg);
-
-pthread_t initMapThread;
-pthread_t loadStyleThread;
-
-std::unordered_map<int, std::unique_ptr<mbgl::Map>> maps;
-
-void *InitMapThread(void *arg) {
-    auto view = reinterpret_cast<ReactImgui*>(arg);
-
-    const double pixelRatio = 1;
-    const uint32_t width = 512;
-    const uint32_t height = 512;
-    const double zoom = 10;
-    const double bearing = 10;
-    const double pitch = 10;
-    const double lat = 45.9341;
-    const double lon = 8.9711;
-
-    const std::string cache_file = ":memory:";
-    const std::string asset_root = ".";
-
-    auto tileServerOptions = mbgl::TileServerOptions::DefaultConfiguration();
-
-    std::string style = tileServerOptions.defaultStyles().at(0).getUrl();
-
-    mbgl::util::RunLoop loop;
-
-    mbgl::HeadlessFrontend frontend({width, height}, static_cast<float>(pixelRatio));
-
-    mbgl::Map map(frontend,
-            mbgl::MapObserver::nullObserver(),
-            mbgl::MapOptions()
-                .withMapMode(mbgl::MapMode::Static)
-                .withSize(frontend.getSize())
-                .withPixelRatio(static_cast<float>(pixelRatio)),
-            mbgl::ResourceOptions()
-                .withCachePath(cache_file)
-                .withAssetPath(asset_root)
-                .withTileServerOptions(tileServerOptions));
-
-    mbgl::NetworkStatus::Set(mbgl::NetworkStatus::Status::Online);
-
-    // maps[0] = std::make_unique<mbgl::Map>(frontend,
-    //         mbgl::MapObserver::nullObserver(),
-    //         mbgl::MapOptions()
-    //             .withMapMode(mbgl::MapMode::Static)
-    //             .withSize(frontend.getSize())
-    //             .withPixelRatio(static_cast<float>(pixelRatio)),
-    //         mbgl::ResourceOptions()
-    //             .withTileServerOptions(tileServerOptions));
-
-    // int rc = pthread_create(&loadStyleThread, NULL, LoadStyleThread, arg);
-    // assert(rc == 0);
-
-    auto& styleObject = map.getStyle();
-    // styleObject.loadURL(style);
-    styleObject.loadJSON(view->m_rawMaplibreStyle);
-    // map.getStyle().loadURL("maptiler://maps/streets");
-    // map.getStyle().loadURL("maplibre://maps/style");
-
-    map.jumpTo(mbgl::CameraOptions().withCenter(mbgl::LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch));
-
-    // frontend.renderOnce(*maps[0].get());
-    // frontend.renderOnce(map);
-
-    auto imageData = mbgl::encodePNG(frontend.render(map).image);
-
-    printf("InitMapThread: %d\n", imageData.length());
-
-    // pthread_exit((void*)0);
-
-    return 0;
-}
-
-void *LoadStyleThread(void *arg) {
-    printf("LoadStyleThread\n");
-
-    auto view = reinterpret_cast<ReactImgui*>(arg);
-
-    view->LoadMapStyle();
-
-    pthread_exit((void*)0);
-}
-
-
 ReactImgui::ReactImgui(
     const char* newWindowId, 
     const char* newGlWindowTitle, 
     std::string& rawFontDefs,
     std::optional<std::string>& rawStyleOverridesDefs,
-    std::optional<std::string>& rawMaplibreStyle
+    std::optional<std::string>& rawSceneYaml
 ) : ImPlotView(newWindowId, newGlWindowTitle, rawFontDefs) {
     SetUpWidgetCreatorFunctions();
     SetUpFloatFormatChars();
@@ -157,12 +59,13 @@ ReactImgui::ReactImgui(
         PatchStyle(json::parse(rawStyleOverridesDefs.value()));
     }
 
-    m_rawMaplibreStyle = rawMaplibreStyle.value_or("");
+    m_rawSceneYaml = rawSceneYaml.value_or("");
+
+    printf("Received %d characters\n", m_rawSceneYaml.length());
 }
 
 void ReactImgui::InitMapStuff() {
-    int rc = pthread_create(&initMapThread, NULL, InitMapThread, static_cast<void*>(this));
-    assert(rc == 0);
+    Tangram::GlfwApp::create(std::make_unique<Tangram::EmscriptenPlatform>(), 1024, 768);
 };
 
 void ReactImgui::InitMap() {
@@ -170,7 +73,7 @@ void ReactImgui::InitMap() {
 };
 
 void ReactImgui::LoadMapStyle() {
-    // m_map->getStyle().loadURL(m_style);
+    
 };
 
 void ReactImgui::SetUpObservables() {};

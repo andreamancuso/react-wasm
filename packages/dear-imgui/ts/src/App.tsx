@@ -12,6 +12,8 @@ import { ImGuiStyleForPatching } from "./lib/stylesheet/imgui-style";
 
 import "./App.css";
 
+const sceneYaml: string = require("./scene.yaml");
+
 export const themeColors = {
     black: "1a1a1a",
     darkGrey: "5a5a5a",
@@ -112,6 +114,7 @@ function App() {
                 fontDefs={fontDefs}
                 defaultFont={defaultFont}
                 styleOverrides={styleOverrides}
+                sceneYaml={sceneYaml}
             >
                 <ImGuiDemo />
             </ReactImgui>

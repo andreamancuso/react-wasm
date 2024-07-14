@@ -5,13 +5,17 @@
             "includePath": [
                 "${workspaceFolder}/packages/dear-imgui/cpp/**",
                 "${workspaceFolder}/packages/dear-imgui/cpp/deps",
-                "${workspaceFolder}/packages/dear-imgui/cpp/deps/emscripten/system/include",
-                "${workspaceFolder}/packages/dear-imgui/cpp/deps/glfw/include",
-                "${workspaceFolder}/packages/dear-imgui/cpp/deps/OpenGL-Registry/api",
                 "${workspaceFolder}/packages/dear-imgui/cpp/deps/wasm-glfw3-boilerplate",
-                "${workspaceFolder}/packages/dear-imgui/cpp/deps/emscripten/system/include"
+                "${workspaceFolder}/packages/dear-imgui/cpp/../../../../tangram-es-fork/core/include/tangram",
+                "${workspaceFolder}/packages/dear-imgui/cpp/../../../../tangram-es-fork/core/deps",
+                "${workspaceFolder}/packages/dear-imgui/cpp/../../../../tangram-es-fork/platforms/common",
+                "${workspaceFolder}/packages/dear-imgui/cpp/../../../../tangram-es-fork/platforms/emscripten/include"
             ],
-            "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
             "windowsSdkVersion": "10.0.22621.0",
             "compilerPath": "cl.exe",
             "cStandard": "c23",
@@ -20,8 +24,14 @@
         },
         {
             "name": "emscripten",
-            "includePath": ["${workspaceFolder}/**"],
-            "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
             "windowsSdkVersion": "10.0.22621.0",
             "compilerPath": "cl.exe",
             "cStandard": "c23",
