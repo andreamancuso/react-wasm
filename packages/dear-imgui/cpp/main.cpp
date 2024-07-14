@@ -276,6 +276,10 @@ class WasmRunner {
         void patchStyle(std::string& styleDef) {
             m_view->PatchStyle(json::parse(styleDef));
         }
+
+        void setUpTextures() {
+            m_view->SetUpTextures();
+        }
 };
 
 static std::unique_ptr<WasmRunner> pRunner = std::make_unique<WasmRunner>();
@@ -344,6 +348,10 @@ void patchStyle(std::string styleDef) {
     return pRunner->patchStyle(styleDef);
 }
 
+void setUpTextures() {
+    return pRunner->setUpTextures();
+}
+
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("exit", &_exit);
     emscripten::function("resizeWindow", &resizeWindow);
@@ -357,6 +365,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("getTextLineHeightWithSpacing", &getTextLineHeightWithSpacing);
     emscripten::function("getStyle", &getStyle);
     emscripten::function("patchStyle", &patchStyle);
+    emscripten::function("setUpTextures", &setUpTextures);
 
     // emscripten::class_<WasmRunner>("WasmRunner")
     // .constructor<OnInputTextChangeType, OnComboChangeType, OnNumericValueChangeType, OnMultiValueChangeType, OnBooleanValueChangeType, OnClickType>()

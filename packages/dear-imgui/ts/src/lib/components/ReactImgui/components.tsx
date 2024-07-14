@@ -20,6 +20,7 @@ import { DisabledText } from "./DisabledText";
 import { TextWrap } from "./TextWrap";
 import { TreeNode } from "./TreeNode";
 import { UnformattedText } from "./UnformattedText";
+import { Map } from "./Map";
 import { Unknown } from "./Unknown";
 import { Table } from "./Table";
 import { Child } from "./Child";
@@ -54,6 +55,7 @@ export const components = {
     TabItem,
     Table,
     ClippedMultiLineTextRenderer,
+    Map,
 } as const;
 
 export const ReactImgui = attachSubComponents("ReactImgui", MainComponent, components);

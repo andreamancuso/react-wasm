@@ -1185,3 +1185,32 @@ class ClippedMultiLineTextRenderer final : public StyledWidget {
                     m_lineOffsets.push_back(old_size + 1);
         }
 };
+
+class Map final : public Widget {
+    private:
+        ImVec2 m_size;
+        ImVec2 m_offset;
+        double m_ratio;
+
+    public:
+        static std::unique_ptr<Map> makeWidget(const json& val, ReactImgui* view) {
+            if (val.is_object()) {
+                auto id = val["id"].template get<int>();
+                
+                return std::make_unique<Map>(id);
+            }
+
+            throw std::invalid_argument("Invalid JSON data");
+        }
+
+        Map(int id) : Widget(id) {
+            m_type = "Map";
+
+            m_size = ImVec2(100.0f, 100.0f);
+            m_offset = ImVec2(0.0f, 0.0f);
+
+            m_ratio = 3840.0f / 1825.0f;
+        }
+
+        void Render(ReactImgui* view);
+};

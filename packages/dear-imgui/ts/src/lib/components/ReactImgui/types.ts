@@ -39,6 +39,7 @@ export type CheckboxChangeEvent = SyntheticEvent<
 >;
 
 export type WidgetPropsMap = {
+    Map: {};
     Unknown: {};
     Fragment: {};
     Child: StyleProps & { width?: number; height?: number };
