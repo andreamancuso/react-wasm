@@ -1,4 +1,11 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+// @ts-ignore
+import Pbf from "pbf";
+// @ts-ignore
+import { VectorTile } from "@mapbox/vector-tile";
+
+import osmtogeojson from "osmtogeojson";
+
 import { ReactImgui } from "./lib/components/ReactImgui/components";
 // @ts-ignore
 import getWasmModule from "./lib/wasm/reactDearImgui.mjs";
@@ -99,6 +106,63 @@ function App() {
         }),
         [],
     );
+
+    useEffect(() => {
+        const retrievePbfAsset = async () => {
+            const response = await fetch("/assets/test.pbf");
+            const pbfBlob = await response.blob();
+            const pbfArrayBuffer = await pbfBlob.arrayBuffer();
+
+            const pbf = new Pbf(pbfArrayBuffer);
+            const vectorTile = new VectorTile(pbf);
+
+            const firstFeature = vectorTile.layers.admin.feature(0);
+
+            console.log(firstFeature.toGeoJSON(0, 0, 0));
+        };
+
+        const retrieveOsmAsset = async () => {
+            const response = await fetch("/assets/maroggia.osm");
+            const osmXmlText = await response.text();
+
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(osmXmlText, "text/xml");
+
+            console.log(osmtogeojson(xmlDoc));
+
+            // https://a.tile.openstreetmap.org/10/45/8.png [a,b,c]
+            // https://tile.openstreetmap.org/10/45/8.png [a,b,c]
+        };
+
+        const loadTiles = async () => {
+            const baseImage = new Jimp(600, 400, "#000000");
+
+            const response = await fetch("https://tile.openstreetmap.org/10/45/8.png");
+            const tileBlob = await response.blob();
+            const tileArrayBuffer = await tileBlob.arrayBuffer();
+
+            const image = await Jimp.read(tileArrayBuffer as Buffer);
+
+            const result = await baseImage.composite(image, 0, 0).getBufferAsync(Jimp.MIME_PNG);
+
+            const blob = new window.Blob([result], { type: Jimp.MIME_PNG });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            document.body.appendChild(a);
+            a.setAttribute("style", "display: none");
+            a.href = url;
+            a.download = "map.png";
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        };
+
+        // retrievePbfAsset();
+        // retrieveOsmAsset();
+
+        loadTiles();
+    }, []);
 
     return (
         <div id="app" ref={containerRef}>

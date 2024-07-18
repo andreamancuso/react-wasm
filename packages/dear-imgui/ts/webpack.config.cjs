@@ -20,6 +20,9 @@ module.exports = [
                 "Cross-Origin-Opener-Policy": "same-origin",
             },
         },
+        output: {
+            publicPath: "/",
+        },
         experiments: {
             asyncWebAssembly: true,
             syncWebAssembly: true,
@@ -62,6 +65,13 @@ module.exports = [
                             },
                         },
                     ],
+                },
+                {
+                    test: /\.(osm|pbf)$/,
+                    type: "asset/resource",
+                    generator: {
+                        filename: "assets/[name][ext]",
+                    },
                 },
             ],
         },
