@@ -26,7 +26,7 @@ find_package(OpenGL REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(imgui REQUIRED)
 find_package(implot REQUIRED)
-find_package(Stb REQUIRED)
+
 # find_package(RPP REQUIRED)
 
 set(DEPS ${CMAKE_CURRENT_SOURCE_DIR}/deps)
@@ -43,7 +43,13 @@ if (DEFINED EMSCRIPTEN)
         implotview.cpp
     )
 
-    target_include_directories(reactDearImgui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${DEPS}/wasm-glfw3-boilerplate ${DEPS}/IconFontCppHeaders ${DEPS}/ReactivePlusPlus/src/rpp ${Stb_INCLUDE_DIR})
+    target_include_directories(
+        reactDearImgui PRIVATE 
+        ${CMAKE_CURRENT_SOURCE_DIR} 
+        ${DEPS}/wasm-glfw3-boilerplate 
+        ${DEPS}/IconFontCppHeaders 
+        ${DEPS}/ReactivePlusPlus/src/rpp 
+    )
 
     # https://github.com/emscripten-core/emscripten/issues/18476
     # -c -fexperimental-library

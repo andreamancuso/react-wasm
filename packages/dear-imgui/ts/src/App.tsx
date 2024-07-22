@@ -134,34 +134,8 @@ function App() {
             // https://tile.openstreetmap.org/10/45/8.png [a,b,c]
         };
 
-        const loadTiles = async () => {
-            const baseImage = new Jimp(600, 400, "#000000");
-
-            const response = await fetch("https://tile.openstreetmap.org/10/45/8.png");
-            const tileBlob = await response.blob();
-            const tileArrayBuffer = await tileBlob.arrayBuffer();
-
-            const image = await Jimp.read(tileArrayBuffer as Buffer);
-
-            const result = await baseImage.composite(image, 0, 0).getBufferAsync(Jimp.MIME_PNG);
-
-            const blob = new window.Blob([result], { type: Jimp.MIME_PNG });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            document.body.appendChild(a);
-            a.setAttribute("style", "display: none");
-            a.href = url;
-            a.download = "map.png";
-            a.click();
-
-            window.URL.revokeObjectURL(url);
-            a.remove();
-        };
-
         // retrievePbfAsset();
         // retrieveOsmAsset();
-
-        loadTiles();
     }, []);
 
     return (

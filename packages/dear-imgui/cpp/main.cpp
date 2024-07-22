@@ -1,12 +1,3 @@
-// Dear ImGui: standalone example application for Emscripten, using GLFW + WebGPU
-// (Emscripten is a C++-to-javascript compiler, used to publish executables for the web. See https://emscripten.org/)
-
-// Learn about Dear ImGui:
-// - FAQ                  https://dearimgui.com/faq
-// - Getting Started      https://dearimgui.com/getting-started
-// - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
-// - Introduction, links and more at the top of imgui.cpp
-
 #include <set>
 #include <optional>
 #include "imgui.h"
@@ -14,10 +5,8 @@
 #include "imgui_impl_wgpu.h"
 #include "implot.h"
 #include "implot_internal.h"
-#ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/bind.h>
-#endif
 #include <nlohmann/json.hpp>
 
 #include "glwasm.cpp"
@@ -199,6 +188,10 @@ class WasmRunner {
             m_view->AppendDataToTable(id, data);
         }
 
+        void renderMap(int id, double centerX, double centerY, int zoom) {
+            m_view->RenderMap(id, centerX, centerY, zoom);
+        }
+
         void appendTextToClippedMultiLineTextRenderer(int id, std::string& data) {
             m_view->AppendTextToClippedMultiLineTextRenderer(id, data);
         }
@@ -276,10 +269,6 @@ class WasmRunner {
         void patchStyle(std::string& styleDef) {
             m_view->PatchStyle(json::parse(styleDef));
         }
-
-        void setUpTextures() {
-            m_view->SetUpTextures();
-        }
 };
 
 static std::unique_ptr<WasmRunner> pRunner = std::make_unique<WasmRunner>();
@@ -332,6 +321,10 @@ void appendDataToTable(int id, std::string data) {
     pRunner->appendDataToTable(id, data);
 }
 
+void renderMap(int id, double centerX, double centerY, int zoom) {
+    pRunner->renderMap(id, centerX, centerY, zoom);
+}
+
 void appendTextToClippedMultiLineTextRenderer(int id, std::string data) {
     pRunner->appendTextToClippedMultiLineTextRenderer(id, data);
 }
@@ -348,10 +341,6 @@ void patchStyle(std::string styleDef) {
     return pRunner->patchStyle(styleDef);
 }
 
-void setUpTextures() {
-    return pRunner->setUpTextures();
-}
-
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("exit", &_exit);
     emscripten::function("resizeWindow", &resizeWindow);
@@ -361,11 +350,11 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("appendChild", &appendChild);
     emscripten::function("getChildren", &getChildren);
     emscripten::function("appendDataToTable", &appendDataToTable);
+    emscripten::function("renderMap", &renderMap);
     emscripten::function("appendTextToClippedMultiLineTextRenderer", &appendTextToClippedMultiLineTextRenderer);
     emscripten::function("getTextLineHeightWithSpacing", &getTextLineHeightWithSpacing);
     emscripten::function("getStyle", &getStyle);
     emscripten::function("patchStyle", &patchStyle);
-    emscripten::function("setUpTextures", &setUpTextures);
 
     // emscripten::class_<WasmRunner>("WasmRunner")
     // .constructor<OnInputTextChangeType, OnComboChangeType, OnNumericValueChangeType, OnMultiValueChangeType, OnBooleanValueChangeType, OnClickType>()

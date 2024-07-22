@@ -5,12 +5,14 @@ import { ImGuiStyle } from "./stylesheet/imgui-style";
 export class WidgetRegistrationService {
     private wasmModule: MainModule;
     private tables: Set<string>;
+    private maps: Set<string>;
     private fabricWidgetsMapping: Map<string, number>;
     private fonts: string[];
 
     constructor(wasmModule: MainModule) {
         this.wasmModule = wasmModule;
         this.tables = new Set();
+        this.maps = new Set();
         this.fabricWidgetsMapping = new Map();
         this.fonts = [];
     }
@@ -51,11 +53,27 @@ export class WidgetRegistrationService {
         this.tables.delete(id);
     }
 
+    registerMap(id: string) {
+        this.maps.add(id);
+    }
+
+    unregisterMap(id: string) {
+        this.maps.delete(id);
+    }
+
     appendDataToTable(id: string, data: any) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
             // todo: we may want to standardize method names
             this.wasmModule.appendDataToTable(fabricWidgetId, JSON.stringify(data));
+        }
+    }
+
+    renderMap(id: string, centerX: number, centerY: number, zoom: number) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            // todo: we may want to standardize method names
+            this.wasmModule.renderMap(fabricWidgetId, centerX, centerY, zoom);
         }
     }
 
