@@ -5,7 +5,7 @@ import { ComboChangeEvent, InputTextChangeEvent } from "../../ReactImgui/types";
 
 export const Maps = () => {
     const mapRef = useRef<MapImperativeHandle>(null);
-    const [center, setCenter] = useState<[number, number]>([8.971061, 45.932741]);
+    const [center, setCenter] = useState<[number, number]>([-74.006, 40.7128]);
     const [zoom, setZoom] = useState(15);
 
     const renderMap = useCallback(() => {
