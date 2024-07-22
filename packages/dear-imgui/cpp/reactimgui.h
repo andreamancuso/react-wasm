@@ -21,6 +21,8 @@
 #include "implot_internal.h"
 #include <nlohmann/json.hpp>
 
+#include "mapgenerator.h"
+
 using json = nlohmann::json;
 
 #include "shared.h"
@@ -32,6 +34,9 @@ class Widget;
 
 class ReactImgui : public ImPlotView {
     private:
+        int m_mapGeneratorJobCounter = 0;
+        std::unordered_map<int, std::unique_ptr<MapGenerator>> m_mapGeneratorJobs;
+
         std::unordered_map<int, rpp::subjects::replay_subject<TableData>> m_tableSubjects;
         std::mutex m_tableSubjectsMutex;
 

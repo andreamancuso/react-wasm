@@ -22,6 +22,10 @@
 #include "implot_internal.h"
 #include <nlohmann/json.hpp>
 
+
+
+#include "mapgenerator.h"
+
 #include "reactimgui.h"
 #include "implotview.h"
 #include "widget.h"
@@ -435,20 +439,30 @@ void ReactImgui::AppendDataToTable(int id, std::string& rawData) {
 void ReactImgui::RenderMap(int id, double centerX, double centerY, int zoom) {
     printf("%d %f %f %d\n", id, centerX, centerY, zoom);
 
-    return;
+    MapGeneratorOptions options;
+    options.m_width = 600;
+    options.m_height = 600;
 
-    const char* data;
-    int width = 0;
-    int height = 0;
-    size_t numBytes = 0;
-    WGPUTextureView my_image_texture = 0;
-    Texture texture;
-    bool ret = LoadTexture(m_device, data, numBytes, width, height, &texture);
-    IM_ASSERT(ret);
+    m_mapGeneratorJobCounter++;
 
-    m_textures[0] = std::make_unique<Texture>(texture);
+    m_mapGeneratorJobs[m_mapGeneratorJobCounter] = std::make_unique<MapGenerator>(options, [this] (void* data, size_t numBytes) {
+        int width;
+        int height;
+        WGPUTextureView my_image_texture = 0;
+        Texture texture;
 
-    printf("Loaded texture, width: %d, height: %d\n", m_textures[0]->width, m_textures[0]->height);
+        bool ret = LoadTexture(m_device, data, numBytes, width, height, &texture);
+        IM_ASSERT(ret);
+
+        // TODO: add proper texture management
+        m_textures[0] = std::make_unique<Texture>(texture);
+
+        printf("Loaded texture, width: %d, height: %d\n", m_textures[0]->width, m_textures[0]->height);
+
+        // TODO: remove job from map
+    });
+
+    m_mapGeneratorJobs[m_mapGeneratorJobCounter]->Render(std::make_tuple(centerX, centerY), zoom);
 };
 
 void ReactImgui::AppendTextToClippedMultiLineTextRenderer(int id, std::string& rawData) {

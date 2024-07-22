@@ -8,6 +8,9 @@
 #include <webgpu/webgpu.h>
 #include <webgpu/webgpu_cpp.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include "imgui.h"
 #include "imgui_impl_wgpu.h"
 #include "shared.h"
@@ -94,10 +97,13 @@ json IV4toJsonHEXATuple(ImVec4 imVec4) {
 };
 
 // borrowed from https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
-bool LoadTexture(WGPUDevice device, const char* data, size_t numBytes, const int width, const int height, Texture* texture)
+bool LoadTexture(WGPUDevice device, const void* data, size_t numBytes, int width, int height,Texture* texture)
 {
     if (data == NULL)
         return false;
+
+    // TODO: figure out why we need the STB library to load image data for us, seems like I'm missing a step when using leptonica
+    auto stbiData = stbi_load_from_memory((const stbi_uc*)data, numBytes, &width, &height, NULL, 4);
 
     WGPUTextureView view;
     {
@@ -110,6 +116,8 @@ bool LoadTexture(WGPUDevice device, const char* data, size_t numBytes, const int
         tex_desc.sampleCount = 1;
         tex_desc.format = WGPUTextureFormat_RGBA8Unorm;
         tex_desc.mipLevelCount = 1;
+        tex_desc.viewFormatCount = 0;
+        tex_desc.viewFormats = nullptr;
         tex_desc.usage = WGPUTextureUsage_CopyDst | WGPUTextureUsage_TextureBinding;
             
         auto tex = wgpuDeviceCreateTexture(device, &tex_desc);
@@ -137,7 +145,7 @@ bool LoadTexture(WGPUDevice device, const char* data, size_t numBytes, const int
 
         auto queue = wgpuDeviceGetQueue(device);
 
-        wgpuQueueWriteTexture(queue, &dst_view, data, (uint32_t)(width * 4 * height), &layout, &size);
+        wgpuQueueWriteTexture(queue, &dst_view, stbiData, (uint32_t)(width * 4 * height), &layout, &size);
 
         wgpuQueueRelease(queue);
     }
@@ -145,6 +153,8 @@ bool LoadTexture(WGPUDevice device, const char* data, size_t numBytes, const int
     texture->textureView = view;
     texture->width = width;
     texture->height = height;
+
+    stbi_image_free(stbiData);
 
     return true;
 }

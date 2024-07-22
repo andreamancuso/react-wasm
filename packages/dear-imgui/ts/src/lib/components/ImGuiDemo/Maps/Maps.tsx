@@ -1,11 +1,12 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { MapImperativeHandle } from "../../ReactImgui/Map";
+import { ComboChangeEvent, InputTextChangeEvent } from "../../ReactImgui/types";
 
 export const Maps = () => {
     const mapRef = useRef<MapImperativeHandle>(null);
-    const [center, setCenter] = useState<[number, number]>([0, 0]);
-    const [zoom, setZoom] = useState(1);
+    const [center, setCenter] = useState<[number, number]>([8.971061, 45.932741]);
+    const [zoom, setZoom] = useState(15);
 
     const renderMap = useCallback(() => {
         if (mapRef.current) {
@@ -26,6 +27,7 @@ export const Maps = () => {
             <ReactImgui.SameLine>
                 <ReactImgui.UnformattedText text={`Center: ${center[0]}, ${center[1]}`} />
                 <ReactImgui.Button onClick={locate} label="Locate" />
+
                 <ReactImgui.Button onClick={renderMap} label="Render" />
             </ReactImgui.SameLine>
             <ReactImgui.Map ref={mapRef} />

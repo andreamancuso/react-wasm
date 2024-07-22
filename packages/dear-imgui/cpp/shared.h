@@ -51,6 +51,6 @@ struct Texture {
     int height;
 };
 
-bool LoadTexture(WGPUDevice device, const char* data, size_t numBytes, const int width, const int height, Texture* texture);
+bool LoadTexture(WGPUDevice device, const void* data, size_t numBytes, const int width, const int height, Texture* texture);
 
 #endif
