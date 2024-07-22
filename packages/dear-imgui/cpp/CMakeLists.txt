@@ -19,7 +19,6 @@ execute_process(
 
 project(reactDearImgui LANGUAGES C CXX)
 
-add_definitions(-std=c++23)
 set(CMAKE_CXX_STANDARD 23)
 
 find_package(OpenGL REQUIRED)
@@ -32,6 +31,60 @@ find_package(implot REQUIRED)
 set(DEPS ${CMAKE_CURRENT_SOURCE_DIR}/deps)
 set(CMAKE_EXECUTABLE_SUFFIX ".mjs")
 
+file(GLOB LEPTONICA_SRC "${DEPS}/osm-static-map-generator/cpp/deps/leptonica/src/*.c")
+
+set(OSM_STATIC_MAP_GENERATOR_SRC
+    ${DEPS}/osm-static-map-generator/cpp/shared.cpp
+    ${DEPS}/osm-static-map-generator/cpp/tiledownloader.cpp
+    ${DEPS}/osm-static-map-generator/cpp/mapgenerator.cpp
+)
+
+set(LIBTIFF_SRC
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_aux.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_close.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_codec.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_color.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_compress.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_dir.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_dirinfo.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_dirread.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_dirwrite.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_dumpmode.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_error.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_extension.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_fax3.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_fax3sm.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_flush.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_getimage.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_hash_set.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_jbig.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_jpeg.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_jpeg_12.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_lerc.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_luv.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_lzma.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_lzw.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_next.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_ojpeg.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_open.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_packbits.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_pixarlog.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_predict.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_print.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_read.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_strip.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_swab.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_thunder.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_tile.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_version.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_warning.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_webp.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_write.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_zip.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_zstd.c
+    ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff/tif_unix.c
+)
+
 if (DEFINED EMSCRIPTEN)
 	add_executable(reactDearImgui main.cpp
         shared.cpp
@@ -41,6 +94,9 @@ if (DEFINED EMSCRIPTEN)
         ${DEPS}/wasm-glfw3-boilerplate/glwasm.cpp
         imguiview.cpp
         implotview.cpp
+        ${OSM_STATIC_MAP_GENERATOR_SRC}
+        ${LEPTONICA_SRC}
+        ${LIBTIFF_SRC}
     )
 
     target_include_directories(
@@ -48,14 +104,19 @@ if (DEFINED EMSCRIPTEN)
         ${CMAKE_CURRENT_SOURCE_DIR} 
         ${DEPS}/wasm-glfw3-boilerplate 
         ${DEPS}/IconFontCppHeaders 
-        ${DEPS}/ReactivePlusPlus/src/rpp 
+        ${DEPS}/ReactivePlusPlus/src/rpp
+
+        ${DEPS}/osm-static-map-generator/cpp
+        ${DEPS}/osm-static-map-generator/cpp/deps/leptonica/src
+        ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/libtiff
+        ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/port
     )
 
     # https://github.com/emscripten-core/emscripten/issues/18476
     # -c -fexperimental-library
 
-	set_target_properties(reactDearImgui PROPERTIES COMPILE_FLAGS "-O0 -Wall -Wformat -s DISABLE_EXCEPTION_CATCHING=0")
-    set_target_properties(reactDearImgui PROPERTIES LINK_FLAGS "--no-heap-copy --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/../assets@/assets -O0 -lembind --emit-tsd interface.d.ts -lhtml5.js -lhtml5_webgl.js -lglfw.js -s ENVIRONMENT='web' -s MODULARIZE=1 -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s USE_GLFW=3 -s USE_WEBGPU=1 -s NO_EXIT_RUNTIME=0 -s STANDALONE_WASM=0 -s EXIT_RUNTIME=1 -s ASSERTIONS=1 -s STACK_OVERFLOW_CHECK=2 -s DISABLE_EXCEPTION_CATCHING=0 -s SINGLE_FILE=1")
+	set_target_properties(reactDearImgui PROPERTIES COMPILE_FLAGS "-O0 -Wall -Wformat  -Wno-implicit-int -s DISABLE_EXCEPTION_CATCHING=0 --use-port=libjpeg --use-port=libpng")
+    set_target_properties(reactDearImgui PROPERTIES LINK_FLAGS "--no-heap-copy --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/../assets@/assets -O0 -lembind --emit-tsd interface.d.ts --use-port=libjpeg --use-port=libpng -lhtml5.js -lhtml5_webgl.js -lglfw.js -s ENVIRONMENT='web' -s MODULARIZE=1 -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s USE_GLFW=3 -s USE_WEBGPU=1 -s NO_EXIT_RUNTIME=0 -s STANDALONE_WASM=0 -s EXIT_RUNTIME=1 -s ASSERTIONS=1 -s STACK_OVERFLOW_CHECK=2 -s DISABLE_EXCEPTION_CATCHING=0 -s SINGLE_FILE=1")
     set_target_properties(reactDearImgui PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../ts/src/lib/wasm)
     target_link_libraries(reactDearImgui PRIVATE imgui::imgui implot::implot nlohmann_json::nlohmann_json)
 
