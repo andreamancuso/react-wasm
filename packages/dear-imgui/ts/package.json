@@ -14,8 +14,6 @@
     "scripts": {
         "convert-fa-yaml-to-json": "tsx ./scripts/convert-fa-yaml-to-json.ts",
         "extract-rn-fabric-renderer": "tsx ./scripts/extract-rn-fabric-renderer.ts",
-        "osm": "tsx ./scripts/osm.ts",
-        "pbf": "tsx ./scripts/pbf.ts",
         "start": "webpack serve",
         "build:workers": "webpack --config-name fabric-worker",
         "build:library": "rimraf ./build && yarn tsup && yarn copy-wasm-to-build-folder",

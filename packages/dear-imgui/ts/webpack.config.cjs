@@ -66,13 +66,6 @@ module.exports = [
                         },
                     ],
                 },
-                {
-                    test: /\.(osm|pbf)$/,
-                    type: "asset/resource",
-                    generator: {
-                        filename: "assets/[name][ext]",
-                    },
-                },
             ],
         },
         plugins: [

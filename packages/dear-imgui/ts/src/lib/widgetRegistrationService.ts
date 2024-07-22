@@ -72,7 +72,6 @@ export class WidgetRegistrationService {
     renderMap(id: string, centerX: number, centerY: number, zoom: number) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
-            // todo: we may want to standardize method names
             this.wasmModule.renderMap(fabricWidgetId, centerX, centerY, zoom);
         }
     }
