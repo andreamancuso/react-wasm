@@ -437,8 +437,6 @@ void ReactImgui::AppendDataToTable(int id, std::string& rawData) {
 };
 
 void ReactImgui::RenderMap(int id, double centerX, double centerY, int zoom) {
-    printf("%d %f %f %d\n", id, centerX, centerY, zoom);
-
     MapGeneratorOptions options;
     options.m_width = 600;
     options.m_height = 600;

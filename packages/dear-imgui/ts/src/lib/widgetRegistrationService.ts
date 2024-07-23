@@ -64,22 +64,36 @@ export class WidgetRegistrationService {
     appendDataToTable(id: string, data: any) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
-            // todo: we may want to standardize method names
-            this.wasmModule.appendDataToTable(fabricWidgetId, JSON.stringify(data));
+            try {
+                this.wasmModule.appendDataToTable(fabricWidgetId, JSON.stringify(data));
+            } catch (error) {
+                // todo: propagate this?
+                console.error(error);
+            }
         }
     }
 
     renderMap(id: string, centerX: number, centerY: number, zoom: number) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
-            this.wasmModule.renderMap(fabricWidgetId, centerX, centerY, zoom);
+            try {
+                this.wasmModule.renderMap(fabricWidgetId, centerX, centerY, zoom);
+            } catch (error) {
+                // todo: propagate this?
+                console.error(error);
+            }
         }
     }
 
     appendTextToClippedMultiLineTextRenderer(id: string, text: string) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
-            this.wasmModule.appendTextToClippedMultiLineTextRenderer(fabricWidgetId, text);
+            try {
+                this.wasmModule.appendTextToClippedMultiLineTextRenderer(fabricWidgetId, text);
+            } catch (error) {
+                // todo: propagate this?
+                console.error(error);
+            }
         }
     }
 }

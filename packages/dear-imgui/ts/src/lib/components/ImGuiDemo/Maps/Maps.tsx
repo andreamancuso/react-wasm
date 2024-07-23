@@ -16,9 +16,14 @@ export const Maps = () => {
 
     const locate = useCallback(() => {
         if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                setCenter([position.coords.longitude, position.coords.latitude]);
-            });
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setCenter([position.coords.longitude, position.coords.latitude]);
+                },
+                (error) => {
+                    console.error("Error getting geolocation:", error);
+                },
+            );
         }
     }, []);
 
