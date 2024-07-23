@@ -140,7 +140,8 @@ type WidgetsRequiringId =
     | "MultiSlider"
     | "Button"
     | "Table"
-    | "ClippedMultiLineTextRenderer";
+    | "ClippedMultiLineTextRenderer"
+    | "Map";
 
 export type WidgetReactNode =
     | WidgetReactElementsFlat

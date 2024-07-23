@@ -20,6 +20,9 @@ module.exports = [
                 "Cross-Origin-Opener-Policy": "same-origin",
             },
         },
+        output: {
+            publicPath: "/",
+        },
         experiments: {
             asyncWebAssembly: true,
             syncWebAssembly: true,

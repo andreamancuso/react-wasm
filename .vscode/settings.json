@@ -117,7 +117,10 @@
         "__config": "cpp",
         "semaphore": "cpp",
         "*.tcc": "cpp",
-        "numbers": "cpp"
+        "numbers": "cpp",
+        "source_location": "cpp",
+        "stdfloat": "cpp",
+        "typeindex": "cpp"
     },
     "prettier.prettierPath": "./packages/dear-imgui/ts/node_modules/prettier",
     "prettier.configPath": "./packages/dear-imgui/ts/.prettierrc.json",

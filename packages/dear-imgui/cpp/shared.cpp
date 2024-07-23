@@ -10,6 +10,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
 #include "imgui.h"
 #include "imgui_impl_wgpu.h"
 #include "shared.h"
@@ -96,31 +97,27 @@ json IV4toJsonHEXATuple(ImVec4 imVec4) {
 };
 
 // borrowed from https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
-bool LoadTextureFromFile(WGPUDevice device, const char* filename, Texture* texture)
+bool LoadTexture(WGPUDevice device, const void* data, size_t numBytes, int width, int height,Texture* texture)
 {
-    // Load from file
-    int image_width = 0;
-    int image_height = 0;
-    unsigned char* image_data = stbi_load(filename, &image_width, &image_height, NULL, 4);
-
-    if (stbi_failure_reason()) {
-        printf("stbi_failure_reason: %s\n", stbi_failure_reason());
-    }
-
-    if (image_data == NULL)
+    if (data == NULL)
         return false;
+
+    // TODO: figure out why we need the STB library to load image data for us, seems like I'm missing a step when using leptonica
+    auto stbiData = stbi_load_from_memory((const stbi_uc*)data, numBytes, &width, &height, NULL, 4);
 
     WGPUTextureView view;
     {
         WGPUTextureDescriptor tex_desc = {};
         tex_desc.label = "texture";
         tex_desc.dimension = WGPUTextureDimension_2D;
-        tex_desc.size.width = image_width;
-        tex_desc.size.height = image_height;
+        tex_desc.size.width = width;
+        tex_desc.size.height = height;
         tex_desc.size.depthOrArrayLayers = 1;
         tex_desc.sampleCount = 1;
         tex_desc.format = WGPUTextureFormat_RGBA8Unorm;
         tex_desc.mipLevelCount = 1;
+        tex_desc.viewFormatCount = 0;
+        tex_desc.viewFormats = nullptr;
         tex_desc.usage = WGPUTextureUsage_CopyDst | WGPUTextureUsage_TextureBinding;
             
         auto tex = wgpuDeviceCreateTexture(device, &tex_desc);
@@ -142,22 +139,22 @@ bool LoadTextureFromFile(WGPUDevice device, const char* filename, Texture* textu
         dst_view.aspect = WGPUTextureAspect_All;
         WGPUTextureDataLayout layout = {};
         layout.offset = 0;
-        layout.bytesPerRow = image_width * 4;
-        layout.rowsPerImage = image_height;
-        WGPUExtent3D size = { (uint32_t)image_width, (uint32_t)image_height, 1 };
+        layout.bytesPerRow = width * 4;
+        layout.rowsPerImage = height;
+        WGPUExtent3D size = { (uint32_t)width, (uint32_t)height, 1 };
 
-        auto q = wgpuDeviceGetQueue(device);
+        auto queue = wgpuDeviceGetQueue(device);
 
-        wgpuQueueWriteTexture(q, &dst_view, image_data, (uint32_t)(image_width * 4 * image_height), &layout, &size);
+        wgpuQueueWriteTexture(queue, &dst_view, stbiData, (uint32_t)(width * 4 * height), &layout, &size);
 
-        wgpuQueueRelease(q);
+        wgpuQueueRelease(queue);
     }
 
-    stbi_image_free(image_data);
-
     texture->textureView = view;
-    texture->width = image_width;
-    texture->height = image_height;
+    texture->width = width;
+    texture->height = height;
+
+    stbi_image_free(stbiData);
 
     return true;
 }

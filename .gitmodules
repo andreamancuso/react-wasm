@@ -10,3 +10,6 @@
 [submodule "packages/dear-imgui/cpp/deps/vcpkg"]
 	path = packages/dear-imgui/cpp/deps/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "packages/dear-imgui/cpp/deps/osm-static-map-generator"]
+	path = packages/dear-imgui/cpp/deps/osm-static-map-generator
+	url = https://github.com/andreamancuso/osm-static-map-generator.git

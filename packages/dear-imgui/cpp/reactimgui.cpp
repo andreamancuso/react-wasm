@@ -22,6 +22,10 @@
 #include "implot_internal.h"
 #include <nlohmann/json.hpp>
 
+
+
+#include "mapgenerator.h"
+
 #include "reactimgui.h"
 #include "implotview.h"
 #include "widget.h"
@@ -51,21 +55,6 @@ ReactImgui::ReactImgui(
 
 void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) {
     ImGuiView::SetUp(pCanvasSelector, device, glfwWindow, wgpu_preferred_fmt);
-
-    SetUpTextures();
-};
-
-void ReactImgui::SetUpTextures() {
-    int my_image_width = 0;
-    int my_image_height = 0;
-    WGPUTextureView my_image_texture = 0;
-    Texture texture;
-    bool ret = LoadTextureFromFile(m_device, "assets/sample-raster-map.png", &texture);
-    IM_ASSERT(ret);
-
-    m_textures[0] = std::make_unique<Texture>(texture);
-
-    printf("Loaded texture, width: %d, height: %d\n", m_textures[0]->width, m_textures[0]->height);
 };
 
 void ReactImgui::SetUpWidgetCreatorFunctions() {
@@ -445,6 +434,33 @@ void ReactImgui::AppendDataToTable(int id, std::string& rawData) {
         // todo: should we lock beforehand?
         // todo: should we throw here, or return a boolean to indicate whether the append operation was successfully 'queued' success or failure
     }
+};
+
+void ReactImgui::RenderMap(int id, double centerX, double centerY, int zoom) {
+    MapGeneratorOptions options;
+    options.m_width = 600;
+    options.m_height = 600;
+
+    m_mapGeneratorJobCounter++;
+
+    m_mapGeneratorJobs[m_mapGeneratorJobCounter] = std::make_unique<MapGenerator>(options, [this] (void* data, size_t numBytes) {
+        int width;
+        int height;
+        WGPUTextureView my_image_texture = 0;
+        Texture texture;
+
+        bool ret = LoadTexture(m_device, data, numBytes, width, height, &texture);
+        IM_ASSERT(ret);
+
+        // TODO: add proper texture management
+        m_textures[0] = std::make_unique<Texture>(texture);
+
+        printf("Loaded texture, width: %d, height: %d\n", m_textures[0]->width, m_textures[0]->height);
+
+        // TODO: remove job from map
+    });
+
+    m_mapGeneratorJobs[m_mapGeneratorJobCounter]->Render(std::make_tuple(centerX, centerY), zoom);
 };
 
 void ReactImgui::AppendTextToClippedMultiLineTextRenderer(int id, std::string& rawData) {

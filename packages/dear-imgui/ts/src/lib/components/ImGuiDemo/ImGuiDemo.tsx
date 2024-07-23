@@ -3,13 +3,13 @@ import { HelpMarker } from "./HelpMarker/HelpMarker";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { UserGuide } from "./UserGuide/UserGuide";
 import { StyleEditor } from "./StyleEditor/StyleEditor";
-import { TableImperativeHandle } from "../ReactImgui/Table";
 import { ClippedMultiLineTextRendererImperativeHandle } from "../ReactImgui/ClippedMultiLineTextRenderer";
 import faIconMap from "../../fa-icons";
 import RWStyleSheet from "../../stylesheet/stylesheet";
 import { Tables } from "./Tables/Tables";
 import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 import { WidgetReactElement } from "../ReactImgui/types";
+import { Maps } from "./Maps/Maps";
 
 export const ImGuiDemo = () => {
     const [color, setColor] = useState("ff6e59");
@@ -175,8 +175,8 @@ export const ImGuiDemo = () => {
                 <Tables />
             </ReactImgui.DIWindow>
 
-            <ReactImgui.DIWindow title="fake map" width={1000} height={600}>
-                <ReactImgui.Map />
+            <ReactImgui.DIWindow title="map" width={500} height={500}>
+                <Maps />
             </ReactImgui.DIWindow>
         </ReactImgui.Fragment>
     );
