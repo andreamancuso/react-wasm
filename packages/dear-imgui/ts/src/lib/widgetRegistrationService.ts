@@ -17,10 +17,6 @@ export class WidgetRegistrationService {
         this.fonts = [];
     }
 
-    getTextLineHeightWithSpacing(): number {
-        return this.getTextLineHeightWithSpacing();
-    }
-
     setFonts(fonts: string[]) {
         this.fonts = fonts;
     }

@@ -11,7 +11,7 @@ export const SeparatorTextBorderSize = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Slider
                 label="SeparatorTextBorderSize"
                 onChange={handleValueChanged}
@@ -19,6 +19,6 @@ export const SeparatorTextBorderSize = () => {
                 max={10}
             />
             <ReactImgui.UnformattedText text={`[${value}]`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

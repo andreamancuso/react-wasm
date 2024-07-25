@@ -16,14 +16,14 @@ export const Widgets = () => {
             <WindowTitleAlign />
             <WindowMenuButtonPosition />
             <ColorButtonPosition />
-            <ReactImgui.SameLine>
+            <ReactImgui.Node style={{ flexDirection: "row" }}>
                 <ButtonTextAlign />
                 <HelpMarker text="Alignment applies when a button is larger than its text content." />
-            </ReactImgui.SameLine>
-            <ReactImgui.SameLine>
+            </ReactImgui.Node>
+            <ReactImgui.Node style={{ flexDirection: "row" }}>
                 <SelectableTextAlign />
                 <HelpMarker text="Alignment applies when a selectable is larger than its text content." />
-            </ReactImgui.SameLine>
+            </ReactImgui.Node>
             <SeparatorTextBorderSize />
             <SeparatorTextAlign />
             <SeparatorTextPadding />

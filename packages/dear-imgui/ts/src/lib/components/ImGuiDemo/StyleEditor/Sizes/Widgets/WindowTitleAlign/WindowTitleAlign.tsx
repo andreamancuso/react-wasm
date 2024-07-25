@@ -11,7 +11,7 @@ export const WindowTitleAlign = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.MultiSlider
                 label="WindowTitleAlign"
                 onChange={handleValueChanged}
@@ -21,6 +21,6 @@ export const WindowTitleAlign = () => {
                 max={1}
             />
             {value && <ReactImgui.UnformattedText text={`[${value[0]},${value[1]}]`} />}
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

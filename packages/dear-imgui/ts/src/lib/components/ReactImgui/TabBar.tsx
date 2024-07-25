@@ -15,15 +15,17 @@ export const TabBar: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap[
     const widgetRegistratonService = useWidgetRegistrationService();
     const idRef = useRef(widgetRegistratonService.generateId());
 
-    const tabs = useMemo(
-        () =>
-            Array.isArray(children)
-                ? children.filter(
-                      (child): child is WidgetReactElement<"TabItem"> => child.type === TabItem,
-                  )
-                : [],
-        [children],
-    );
+    const tabs = useMemo(() => {
+        if (children) {
+            const localChildren = Array.isArray(children) ? children : [children];
+
+            return localChildren.filter(
+                (child): child is WidgetReactElement<"TabItem"> => child.type === TabItem,
+            );
+        }
+
+        return [];
+    }, [children]);
 
     return (
         <widget type="TabBar" id={idRef.current} style={style}>

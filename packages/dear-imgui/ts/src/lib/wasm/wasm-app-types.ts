@@ -97,6 +97,7 @@ export enum ImGuiStyleVar {
 }
 
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
+// TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
     let HEAPF32: any;
     let HEAPF64: any;
@@ -832,15 +833,14 @@ export type ImGuiViewportFlags =
 interface EmbindModule {
     exit(): void;
     resizeWindow(_0: number, _1: number): void;
-    setWidget(_0: EmbindString): void;
-    patchWidget(_0: number, _1: EmbindString): void;
+    setElement(_0: EmbindString): void;
+    patchElement(_0: number, _1: EmbindString): void;
     setChildren(_0: number, _1: EmbindString): void;
     appendChild(_0: number, _1: number): void;
     getChildren(_0: number): string;
     appendDataToTable(_0: number, _1: EmbindString): void;
     renderMap(_0: number, _1: number, _2: number, _3: number): void;
     appendTextToClippedMultiLineTextRenderer(_0: number, _1: EmbindString): void;
-    getTextLineHeightWithSpacing(): number;
     getStyle(): string;
     patchStyle(_0: EmbindString): void;
     ImGuiWindowFlags: {

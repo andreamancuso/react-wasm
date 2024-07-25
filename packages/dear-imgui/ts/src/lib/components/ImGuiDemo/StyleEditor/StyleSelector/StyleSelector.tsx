@@ -26,15 +26,14 @@ export const StyleSelector = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row", alignItems: "center", gap: { column: 5 } }}>
             <ReactImgui.Combo
                 label="Colors"
                 options={options}
                 onChange={handleStyleChanged}
                 defaultValue={1}
-                style={{ width: 0.5 }}
             />
             <ReactImgui.UnformattedText text={`Selected style index: ${selectedStyleIndex}`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

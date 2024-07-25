@@ -11,7 +11,7 @@ export const TableAngledHeadersAngle = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Slider
                 label="TableAngledHeadersAngle"
                 min={-50} // degrees
@@ -20,6 +20,6 @@ export const TableAngledHeadersAngle = () => {
                 sliderType="angle" // value is in radians
             />
             <ReactImgui.UnformattedText text={`(${value})`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

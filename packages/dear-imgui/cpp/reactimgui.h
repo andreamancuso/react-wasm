@@ -1,24 +1,7 @@
-// Dear ImGui: standalone example application for Emscripten, using GLFW + WebGPU
-// (Emscripten is a C++-to-javascript compiler, used to publish executables for the web. See https://emscripten.org/)
-
-// Learn about Dear ImGui:
-// - FAQ                  https://dearimgui.com/faq
-// - Getting Started      https://dearimgui.com/getting-started
-// - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
-// - Introduction, links and more at the top of imgui.cpp
-
-#include <cstring>
 #include <string>
-#include <sstream>
 #include <mutex>
-#include <emscripten.h>
-#include <emscripten/bind.h>
 #include <rpp/rpp.hpp>
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_wgpu.h"
-#include "implot.h"
-#include "implot_internal.h"
 #include <nlohmann/json.hpp>
 
 #include "mapgenerator.h"
@@ -26,11 +9,14 @@
 using json = nlohmann::json;
 
 #include "shared.h"
+#include "element.h"
 #include "implotview.h"
 
 #pragma once
 
 class Widget;
+class LayoutNode;
+struct BaseStyle;
 
 class ReactImgui : public ImPlotView {
     private:
@@ -40,21 +26,20 @@ class ReactImgui : public ImPlotView {
         std::unordered_map<int, rpp::subjects::replay_subject<TableData>> m_tableSubjects;
         std::mutex m_tableSubjectsMutex;
 
-        std::unordered_map<std::string, std::function<std::unique_ptr<Widget>(const json&, ReactImgui*)>> m_widget_init_fn;
+        std::unordered_map<std::string, std::function<std::unique_ptr<Element>(const json&, std::optional<BaseStyle>, ReactImgui*)>> m_element_init_fn;
 
-        std::unordered_map<int, std::unique_ptr<Widget>> m_widgets;
-        
-        std::mutex m_widgets_mutex;
+        std::unordered_map<int, std::unique_ptr<Element>> m_elements;
+        std::mutex m_elements_mutex;
 
-        void InitWidget(const json& widgetDef);
+        void InitElement(const json& elementDef);
         
         void SetUpFloatFormatChars();
 
-        void SetUpWidgetCreatorFunctions();
+        void SetUpElementCreatorFunctions();
         
         void HandleTableData(int id, TableData val);
         
-        void HandleBufferedTableData(int id, std::vector<TableData> val);
+        void HandleBufferedTableData(int id, const std::vector<TableData>& val);
 
     public:
         std::unordered_map<int, std::vector<int>> m_hierarchy;
@@ -78,9 +63,9 @@ class ReactImgui : public ImPlotView {
             std::optional<std::string>& rawStyleOverridesDefs
         );
 
-        void RenderWidgetById(int id);
+        void RenderElementById(int id);
 
-        void SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt);
+        void SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) override;
 
         void SetEventHandlers(
             OnTextChangedCallback onInputTextChangeFn,
@@ -91,17 +76,23 @@ class ReactImgui : public ImPlotView {
             OnClickCallback onClickFn
         );
 
-        void PrepareForRender();
+        void PrepareForRender() override;
 
-        void Render(int window_width, int window_height);
+        void RenderDebugWindow();
+
+        void Render(int window_width, int window_height) override;
+
+        void SetChildrenDisplay(int id, YGDisplay display);
 
         void RenderChildren(int id);
 
-        void RenderWidgets(int id = 0);
+        void RenderElementTree(int id = 0);
 
-        void SetWidget(std::string& widgetJsonAsString);
+        void RenderElements(int id = 0);
 
-        void PatchWidget(int id, std::string& widgetJsonAsString);
+        void SetElement(std::string& elementJsonAsString);
+
+        void PatchElement(int id, std::string& elementJsonAsString);
 
         void SetChildren(int id, const std::vector<int>& childIds);
 
@@ -111,9 +102,7 @@ class ReactImgui : public ImPlotView {
 
         void RenderMap(int id, double centerX, double centerY, int zoom);
 
-        void AppendTextToClippedMultiLineTextRenderer(int id, std::string& data);
-
-        float GetTextLineHeightWithSpacing();
+        void AppendTextToClippedMultiLineTextRenderer(int id, const std::string& data);
 
         std::vector<int> GetChildren(int id);
 
@@ -129,3 +118,7 @@ class ReactImgui : public ImPlotView {
         void PatchStyle(const json& styleDef);
 };
 
+template <typename T, typename std::enable_if<std::is_base_of<Widget, T>::value, int>::type = 0>
+std::unique_ptr<T> makeWidget(const json& val, std::optional<BaseStyle> maybeStyle, ReactImgui* view);
+
+std::unique_ptr<Element> makeElement(const json& val, ReactImgui* view);

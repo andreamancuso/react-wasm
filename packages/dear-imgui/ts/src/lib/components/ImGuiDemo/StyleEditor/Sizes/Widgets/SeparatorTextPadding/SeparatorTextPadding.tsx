@@ -11,7 +11,7 @@ export const SeparatorTextPadding = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.MultiSlider
                 label="SeparatorTextPadding"
                 onChange={handleValueChanged}
@@ -20,6 +20,6 @@ export const SeparatorTextPadding = () => {
                 max={40}
             />
             {value && <ReactImgui.UnformattedText text={`[${value[0]},${value[1]}]`} />}
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

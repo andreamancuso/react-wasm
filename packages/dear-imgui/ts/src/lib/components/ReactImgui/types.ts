@@ -3,6 +3,7 @@ import { ReactImgui } from "./components";
 import { MainComponentProps } from "../ReactImgui";
 import { StyleRules } from "src/lib/stylesheet/stylesheet";
 import { ImVec2 } from "src/lib/wasm/wasm-app-types";
+import { YogaStyle } from "src/lib/stylesheet/yoga-style";
 
 export type Primitive = string | number | boolean;
 
@@ -14,7 +15,7 @@ export type FontDef = {
 };
 
 export type StyleProps = {
-    style?: StyleRules;
+    style?: StyleRules & YogaStyle;
 };
 
 export type TabItemChangeEvent = SyntheticEvent<WidgetReactElement<"TabItem">, { value: boolean }>;
@@ -39,9 +40,7 @@ export type CheckboxChangeEvent = SyntheticEvent<
 >;
 
 export type WidgetPropsMap = {
-    Map: {};
     Unknown: {};
-    Fragment: {};
     Child: StyleProps & { width?: number; height?: number };
     DIWindow: StyleProps & { title: string; width: number; height: number };
     Group: StyleProps & {};
@@ -50,7 +49,6 @@ export type WidgetPropsMap = {
         label: string;
         onOpenChange?: (event: TabItemChangeEvent) => void;
     };
-    SameLine: {};
     ItemTooltip: StyleProps & {};
     TextWrap: StyleProps & { width: number };
     Indent: StyleProps & {};
@@ -90,7 +88,7 @@ export type WidgetPropsMap = {
         onChange?: (event: ComboChangeEvent) => void;
     };
     Slider: StyleProps & {
-        sliderType: SliderTypes;
+        sliderType?: SliderTypes;
         label: string;
         defaultValue?: number;
         min?: number;
@@ -122,6 +120,7 @@ export type WidgetPropsMap = {
         clipRows?: number;
     };
     ClippedMultiLineTextRenderer: StyleProps & {};
+    Map: StyleProps & {};
 };
 
 type WidgetKeys = keyof WidgetPropsMap;
@@ -170,10 +169,12 @@ export type ReactElementWidget<
     ? { [L in keyof Omit<P, "children">]: P[L] } & {
           id: string;
           type: K;
+          root?: boolean;
           children?: WidgetReactNode;
       } & { onChange?: any; onClick?: any }
     : { [L in keyof Omit<P, "children">]: P[L] } & {
           type: K;
+          root?: boolean;
           children?: WidgetReactNode;
       };
 
@@ -182,6 +183,12 @@ type ReactElementWidgets = {
 };
 
 export type ReactElementWidgetsFlat = ReactElementWidgets[keyof ReactElementWidgets];
+
+export type YogaNode = {
+    root?: boolean;
+    style?: YogaStyle;
+    children?: WidgetReactNode;
+};
 
 export type ImguiWidget<
     K extends WidgetKeys,

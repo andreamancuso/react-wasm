@@ -40,7 +40,7 @@ function App() {
     const styleOverrides: ImGuiStyleForPatching = useMemo(
         () => ({
             // frameBorderSize: 1,
-            // windowPadding: [20, 20],
+            // framePadding: [0, 0],
             colors: {
                 [ImGuiCol.Text]: [themeColors.black, 1],
                 [ImGuiCol.TextDisabled]: [themeColors.darkGrey, 1],
@@ -69,7 +69,7 @@ function App() {
                 [ImGuiCol.Header]: [themeColors.veryLightGrey, 1],
                 [ImGuiCol.HeaderHovered]: [themeColors.lightGrey, 1],
                 [ImGuiCol.HeaderActive]: [themeColors.grey, 1],
-                [ImGuiCol.Separator]: [themeColors.superLightGrey, 1],
+                [ImGuiCol.Separator]: [themeColors.black, 1],
                 [ImGuiCol.SeparatorHovered]: [themeColors.veryLightGrey, 1],
                 [ImGuiCol.SeparatorActive]: [themeColors.lightGrey, 1],
                 [ImGuiCol.ResizeGrip]: [themeColors.veryLightGrey, 1],

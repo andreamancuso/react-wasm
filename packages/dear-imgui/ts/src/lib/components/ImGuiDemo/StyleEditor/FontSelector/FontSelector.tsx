@@ -15,7 +15,7 @@ export const FontSelector = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Combo
                 label="Colors"
                 options={options}
@@ -23,6 +23,6 @@ export const FontSelector = () => {
                 defaultValue={selectedFontIndex}
             />
             <ReactImgui.UnformattedText text={`Selected font index: ${selectedFontIndex}`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

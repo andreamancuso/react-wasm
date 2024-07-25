@@ -11,7 +11,7 @@ export const FramePadding = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.MultiSlider
                 label="FramePadding"
                 onChange={handleValueChanged}
@@ -20,6 +20,6 @@ export const FramePadding = () => {
                 max={20}
             />
             {value && <ReactImgui.UnformattedText text={`[${value[0]},${value[1]}]`} />}
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };

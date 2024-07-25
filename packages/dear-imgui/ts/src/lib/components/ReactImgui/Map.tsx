@@ -7,7 +7,7 @@ export type MapImperativeHandle = {
 };
 
 export const MapComponent = forwardRef<MapImperativeHandle, WidgetPropsMap["Map"]>(
-    (_props: WidgetPropsMap["Map"], ref) => {
+    ({ style }: WidgetPropsMap["Map"], ref) => {
         const widgetRegistratonService = useWidgetRegistrationService();
         const idRef = useRef(widgetRegistratonService.generateId());
 
@@ -27,6 +27,6 @@ export const MapComponent = forwardRef<MapImperativeHandle, WidgetPropsMap["Map"
             [],
         );
 
-        return <widget type="Map" id={idRef.current} />;
+        return <widget type="Map" id={idRef.current} style={style} />;
     },
 );

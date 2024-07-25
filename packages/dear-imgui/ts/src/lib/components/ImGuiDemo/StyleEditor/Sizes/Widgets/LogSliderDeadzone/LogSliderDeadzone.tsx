@@ -11,7 +11,7 @@ export const LogSliderDeadzone = () => {
     }, []);
 
     return (
-        <ReactImgui.SameLine>
+        <ReactImgui.Node style={{ flexDirection: "row" }}>
             <ReactImgui.Slider
                 label="LogSliderDeadzone"
                 onChange={handleValueChanged}
@@ -19,6 +19,6 @@ export const LogSliderDeadzone = () => {
                 max={12}
             />
             <ReactImgui.UnformattedText text={`[${value}]`} />
-        </ReactImgui.SameLine>
+        </ReactImgui.Node>
     );
 };
