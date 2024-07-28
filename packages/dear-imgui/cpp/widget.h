@@ -444,109 +444,44 @@ class TreeNode final : public StyledWidget {
 
 class Combo final : public StyledWidget {
     protected:
-        Combo(const int id, const std::string& label, const int defaultValue, const json& options, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+        Combo(const int id, const std::string& placeholder, const int initialSelectedIndex, const std::vector<std::string>& options, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
             m_type = "Combo";
-            m_selectedIndex = defaultValue;
-            m_label = label;
-            m_itemsSeparatedByZeros = getItemsSeparatedByZeros(options);
-        }
-        
-        Combo(const int id, const std::string& label, const int defaultValue, const std::string& optionsList, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
-            m_type = "Combo";
-            m_selectedIndex = defaultValue;
-            m_label = label;
-            m_itemsSeparatedByZeros = getItemsSeparatedByZeros(optionsList);
-        }
-
-        /**
-         * Takes array of [{value: number; label: string}] and converts into "label\0label\0label\0" (double NULL character at the end)
-         * because this is what ImGui:Combo() expects
-        */
-        static std::unique_ptr<char[]> getItemsSeparatedByZeros(const json& options) {
-            auto optionsIterator = options.items();
-            auto itemsStringLength = options.size() + 1; // Account for one NULL character for each option plus the final NULL character
-
-            for (auto it = optionsIterator.begin(); it != optionsIterator.end(); ++it) {
-                itemsStringLength += strlen(it.value()["label"].template get<std::string>().c_str());
-            }
-
-            auto itemsSeparatedByZerosUniquePtr = std::make_unique<char[]>(itemsStringLength);
-            auto itemsSeparatedByZeros = itemsSeparatedByZerosUniquePtr.get();
-
-            unsigned long offset = 0;
-
-            for (auto it = optionsIterator.begin(); it != optionsIterator.end(); ++it) {
-                
-                auto label = it.value()["label"].template get<std::string>().c_str();
-
-                memcpy(&itemsSeparatedByZeros[offset], label, strlen(label) + 1);
-
-                offset += strlen(label) + 1;
-            }
-
-            return itemsSeparatedByZerosUniquePtr;
-        }
-
-        /**
-         * Takes comma-delimited string of options "label,label,label" and converts into "label\0label\0label\0" (double NULL character at the end)
-         * because this is what ImGui:Combo() expects
-        */
-        static std::unique_ptr<char[]> getItemsSeparatedByZeros(const std::string& optionsList) {
-            std::string delimiter = ",";
-
-            unsigned long itemsStringLength = 1;  // Account for final NULL character
-            std::vector<std::string> options;
-            std::string token;
-            std::stringstream input;
-            input << optionsList;
-
-            while (std::getline(input, token, ',')) {
-                options.push_back(token);
-                itemsStringLength += strlen(token.c_str()) + 1; // Account for NULL character
-            }
-
-            auto itemsSeparatedByZerosUniquePtr = std::make_unique<char[]>(itemsStringLength);
-            const auto itemsSeparatedByZeros = itemsSeparatedByZerosUniquePtr.get();
-            
-            unsigned long offset = 0;
-
-            for (auto & option : options) {
-
-                const auto label = option.c_str();
-
-                memcpy(&itemsSeparatedByZeros[offset], label, strlen(label) + 1);
-
-                offset += strlen(label) + 1;
-            }
-
-            return itemsSeparatedByZerosUniquePtr;
+            m_selectedIndex = initialSelectedIndex;
+            m_placeholder = placeholder;
+            m_options = options;
         }
 
     public:
-        int m_selectedIndex;
-        std::string m_label;
-        std::unique_ptr<char[]> m_itemsSeparatedByZeros; // Relevant for 'basic' combo only
+        int m_selectedIndex = -1;
+        std::string m_placeholder;
+        std::vector<std::string> m_options;
 
         static std::unique_ptr<Combo> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 const auto id = widgetDef["id"].template get<int>();
-                const auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_number() ? widgetDef["defaultValue"].template get<int>() : 0;
-                const auto label = widgetDef["label"].template get<std::string>();
-                const auto optionsList = widgetDef["optionsList"].template get<std::string>();
+                const auto initialSelectedIndex = widgetDef.contains("initialSelectedIndex") && widgetDef["initialSelectedIndex"].is_number()
+                    ? widgetDef["initialSelectedIndex"].template get<int>()
+                    : -1;
+                const auto placeholder = widgetDef.contains("placeholder") ? widgetDef["placeholder"].template get<std::string>() : "";
 
-                return makeWidget(id, label, defaultValue, optionsList, maybeStyle);
+                std::vector<std::string> options;
+
+                if (widgetDef.contains("options") && widgetDef["options"].is_array()) {
+                    for (const auto &[key, item] : widgetDef["options"].items()) {
+                        if (item.is_string()) {
+                            options.emplace_back(item.template get<std::string>());
+                        }
+                    }
+                }
+
+                return makeWidget(id, placeholder, initialSelectedIndex, options, maybeStyle);
             }
 
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<Combo> makeWidget(const int id, const std::string& label, const int defaultValue, const json& options, std::optional<BaseStyle>& style) {
-            Combo instance(id, label, defaultValue, options, style);
-            return std::make_unique<Combo>(std::move(instance));
-        }
-
-        static std::unique_ptr<Combo> makeWidget(const int id, const std::string& label, const int defaultValue, std::string optionsList, std::optional<BaseStyle>& style) {
-            Combo instance(id, label, defaultValue, optionsList, style);
+        static std::unique_ptr<Combo> makeWidget(const int id, const std::string& placeholder, const int initialSelectedIndex, const std::vector<std::string>& options, std::optional<BaseStyle>& style) {
+            Combo instance(id, placeholder, initialSelectedIndex, options, style);
             return std::make_unique<Combo>(std::move(instance));
         }
 
@@ -559,6 +494,30 @@ class Combo final : public StyledWidget {
             size.height = ImGui::GetFrameHeight();
 
             return size;
+        }
+
+        void SetOptions(const json& options) {
+            m_options.clear();
+
+            if (options.is_array()) {
+                for (const auto &[key, item] : options.items()) {
+                    if (item.is_string()) {
+                        m_options.emplace_back(item.template get<std::string>());
+                    }
+                }
+            }
+        }
+
+        void SetOptions(const std::vector<std::string>& options) {
+            m_options = options;
+        }
+
+        void SetSelectedIndex(int selectedIndex) {
+            m_selectedIndex = selectedIndex;
+        }
+
+        void ClearSelectedIndex() {
+            m_selectedIndex = -1;
         }
 
         void Render(ReactImgui* view) override;
@@ -996,11 +955,7 @@ class ClippedMultiLineTextRenderer final : public StyledWidget {
         }
 
         static YGSize Measure(const YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
-            const auto widget = static_cast<Button*>(YGNodeGetContext(node));
-
             YGSize size;
-
-            const ImGuiStyle& style = ImGui::GetStyle();
 
             size.width = width;
             size.height = ImGui::GetFrameHeight() * 10.0f;
