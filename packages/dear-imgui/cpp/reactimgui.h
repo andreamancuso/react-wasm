@@ -50,6 +50,8 @@ class ReactImgui : public ImPlotView {
 
         std::unordered_map<int, std::unique_ptr<Texture>> m_textures;
 
+        ImGuiStyle m_baseStyle;
+
         OnTextChangedCallback m_onInputTextChange;
         OnComboChangedCallback m_onComboChange;
         OnNumericValueChangedCallback m_onNumericValueChange;
@@ -133,6 +135,8 @@ class ReactImgui : public ImPlotView {
         float GetFrameHeight(const StyledWidget* widget);
 
         float GetFrameHeightWithSpacing(const StyledWidget* widget);
+
+        void TakeStyleSnapshot();
 };
 
 template <typename T, typename std::enable_if<std::is_base_of<Widget, T>::value, int>::type = 0>
