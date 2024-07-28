@@ -1,9 +1,4 @@
 #include <cstring>
-#include <tuple>
-#include <string>
-#include <sstream>
-#include <emscripten.h>
-#include <emscripten/bind.h>
 #include <nlohmann/json.hpp>
 
 #include "shared.h"
@@ -12,8 +7,9 @@
 
 using json = nlohmann::json;
 
-Element::Element(int id, bool isRoot) {
+Element::Element(ReactImgui* view, int id, bool isRoot) {
     m_id = id;
+    m_view = view;
     m_handlesChildrenWithinRenderMethod = true;
     m_isRoot = isRoot;
     m_layoutNode = std::make_unique<LayoutNode>();
@@ -24,7 +20,7 @@ void Element::Init() {};
 std::unique_ptr<Element> Element::makeElement(const json& nodeDef, ReactImgui* view) {
     auto id = nodeDef["id"].template get<int>();
     bool isRoot = (nodeDef.contains("root") && nodeDef["root"].is_boolean()) ? nodeDef["root"].template get<bool>() : false;
-    auto element = std::make_unique<Element>(id, isRoot);
+    auto element = std::make_unique<Element>(view, id, isRoot);
 
     if (nodeDef.is_object() && nodeDef.contains("style") && nodeDef["style"].is_object()) {
         element->m_layoutNode->ApplyStyle(nodeDef["style"]);

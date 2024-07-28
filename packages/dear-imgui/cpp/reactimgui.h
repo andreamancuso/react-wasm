@@ -15,6 +15,7 @@ using json = nlohmann::json;
 #pragma once
 
 class Widget;
+class StyledWidget;
 class LayoutNode;
 struct BaseStyle;
 
@@ -116,6 +117,22 @@ class ReactImgui : public ImPlotView {
         void ExtractImVec2FromStyleDef(const json& styleDef, std::string key, ImVec2& value);
 
         void PatchStyle(const json& styleDef);
+
+        StyleVarValueRef GetStyleVar(ImGuiStyleVar key);
+
+        ImVec2 CalcTextSize(const StyledWidget* widget, const char* text, const char* text_end = nullptr, bool hide_text_after_double_hash = false, float wrap_width = -1.0f);
+
+        ImFont* GetWidgetFont(const StyledWidget* widget);
+
+        float GetWidgetFontSize(const StyledWidget* widget);
+
+        float GetTextLineHeight(const StyledWidget* widget);
+
+        float GetTextLineHeightWithSpacing(const StyledWidget* widget);
+
+        float GetFrameHeight(const StyledWidget* widget);
+
+        float GetFrameHeightWithSpacing(const StyledWidget* widget);
 };
 
 template <typename T, typename std::enable_if<std::is_base_of<Widget, T>::value, int>::type = 0>
