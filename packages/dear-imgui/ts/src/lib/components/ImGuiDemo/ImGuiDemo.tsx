@@ -96,7 +96,7 @@ export const ImGuiDemo = () => {
                 },
             }}
         >
-            {/* <ReactImgui.Node
+            <ReactImgui.Node
                 style={{
                     width: "100%",
                     height: 400,
@@ -112,7 +112,7 @@ export const ImGuiDemo = () => {
                 >
                     <Maps />
                 </ReactImgui.Node>
-            </ReactImgui.Node> */}
+            </ReactImgui.Node>
 
             <ReactImgui.UnformattedText text="Before" />
             <ReactImgui.UnformattedText text="Before" />

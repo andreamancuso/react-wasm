@@ -678,19 +678,19 @@ class Button final : public StyledWidget {
 
         static YGSize Measure(const YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
             const auto widget = static_cast<Button*>(YGNodeGetContext(node));
-            
+
             YGSize size;
 
-            auto styleVar = widget->GetCustomStyleVar(ImGuiStyleVar_FramePadding);
-
-            if (std::holds_alternative<ImVec2>(styleVar)) {
-                size.width = (std::get<ImVec2>(styleVar).x * 2.0f) + widget->m_view->CalcTextSize(widget, widget->m_label.c_str()).x;
-            } else {
-                const ImGuiStyle& style = ImGui::GetStyle();
-                size.width = (style.FramePadding.x * 2.0f) + widget->m_view->CalcTextSize(widget, widget->m_label.c_str()).x;
-            }
-
+            size.width = (widget->m_view->m_baseStyle.FramePadding.x * 2.0f) + widget->m_view->CalcTextSize(widget, widget->m_label.c_str()).x;
             size.height = widget->m_view->GetFrameHeight(widget);
+
+            if (widget->HasCustomStyles() && widget->HasCustomStyleVar(ImGuiStyleVar_FramePadding)) {
+                auto styleVar = widget->GetCustomStyleVar(ImGuiStyleVar_FramePadding);
+
+                if (std::holds_alternative<ImVec2>(styleVar)) {
+                    size.width = (std::get<ImVec2>(styleVar).x * 2.0f) + widget->m_view->CalcTextSize(widget, widget->m_label.c_str()).x;
+                }
+            }
 
             return size;
         }
