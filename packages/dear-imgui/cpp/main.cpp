@@ -195,66 +195,64 @@ class WasmRunner {
         }
 
         std::string getStyle() {
-            auto imguiStyle = m_view->GetStyle();
-
             json style;
 
-            style["alpha"] = imguiStyle.Alpha;
-            style["disabledAlpha"] = imguiStyle.DisabledAlpha;
-            style["windowPadding"] = { imguiStyle.WindowPadding.x, imguiStyle.WindowPadding.y };
-            style["windowRounding"] = imguiStyle.WindowRounding;
-            style["windowBorderSize"] = imguiStyle.WindowBorderSize;
-            style["windowMinSize"] = { imguiStyle.WindowMinSize.x, imguiStyle.WindowMinSize.y };
-            style["windowTitleAlign"] = { imguiStyle.WindowTitleAlign.x, imguiStyle.WindowTitleAlign.y };
-            style["windowMenuButtonPosition"] = imguiStyle.WindowMenuButtonPosition;
-            style["childRounding"] = imguiStyle.ChildRounding;
-            style["childBorderSize"] = imguiStyle.ChildBorderSize;
-            style["popupRounding"] = imguiStyle.PopupRounding;
-            style["popupBorderSize"] = imguiStyle.PopupBorderSize;
-            style["framePadding"] = { imguiStyle.FramePadding.x, imguiStyle.FramePadding.y };
-            style["frameRounding"] = imguiStyle.FrameRounding;
-            style["frameBorderSize"] = imguiStyle.FrameBorderSize;
-            style["itemSpacing"] = { imguiStyle.ItemSpacing.x, imguiStyle.ItemSpacing.y };
-            style["itemInnerSpacing"] = { imguiStyle.ItemInnerSpacing.x, imguiStyle.ItemInnerSpacing.y };
-            style["cellPadding"] = { imguiStyle.CellPadding.x, imguiStyle.CellPadding.y };
-            style["touchExtraPadding"] = { imguiStyle.TouchExtraPadding.x, imguiStyle.TouchExtraPadding.y };
-            style["indentSpacing"] = imguiStyle.IndentSpacing;
-            style["columnsMinSpacing"] = imguiStyle.ColumnsMinSpacing;
-            style["scrollbarSize"] = imguiStyle.ScrollbarSize;
-            style["scrollbarRounding"] = imguiStyle.ScrollbarRounding;
-            style["grabMinSize"] = imguiStyle.GrabMinSize;
-            style["grabRounding"] = imguiStyle.GrabRounding;
-            style["logSliderDeadzone"] = imguiStyle.LogSliderDeadzone;
-            style["tabRounding"] = imguiStyle.TabRounding;
-            style["tabBorderSize"] = imguiStyle.TabBorderSize;
-            style["tabMinWidthForCloseButton"] = imguiStyle.TabMinWidthForCloseButton;
-            style["tabBarBorderSize"] = imguiStyle.TabBarBorderSize;
-            style["tableAngledHeadersAngle"] = imguiStyle.TableAngledHeadersAngle;
-            style["tableAngledHeadersTextAlign"] = { imguiStyle.TableAngledHeadersTextAlign.x, imguiStyle.TableAngledHeadersTextAlign.y };
-            style["colorButtonPosition"] = imguiStyle.ColorButtonPosition;
-            style["buttonTextAlign"] = { imguiStyle.ButtonTextAlign.x, imguiStyle.ButtonTextAlign.y };
-            style["selectableTextAlign"] = { imguiStyle.SelectableTextAlign.x, imguiStyle.SelectableTextAlign.y };
-            style["separatorTextPadding"] = { imguiStyle.SeparatorTextPadding.x, imguiStyle.SeparatorTextPadding.y };
-            style["displayWindowPadding"] = { imguiStyle.DisplayWindowPadding.x, imguiStyle.DisplayWindowPadding.y };
-            style["displaySafeAreaPadding"] = { imguiStyle.DisplaySafeAreaPadding.x, imguiStyle.DisplaySafeAreaPadding.y };
-            style["mouseCursorScale"] = imguiStyle.MouseCursorScale;
-            style["antiAliasedLines"] = imguiStyle.AntiAliasedLines;
-            style["antiAliasedLinesUseTex"] = imguiStyle.AntiAliasedLinesUseTex;
-            style["antiAliasedFill"] = imguiStyle.AntiAliasedFill;
-            style["curveTessellationTol"] = imguiStyle.CurveTessellationTol;
-            style["circleTessellationMaxError"] = imguiStyle.CircleTessellationMaxError;
+            style["alpha"] = m_view->m_baseStyle.Alpha;
+            style["disabledAlpha"] = m_view->m_baseStyle.DisabledAlpha;
+            style["windowPadding"] = { m_view->m_baseStyle.WindowPadding.x, m_view->m_baseStyle.WindowPadding.y };
+            style["windowRounding"] = m_view->m_baseStyle.WindowRounding;
+            style["windowBorderSize"] = m_view->m_baseStyle.WindowBorderSize;
+            style["windowMinSize"] = { m_view->m_baseStyle.WindowMinSize.x, m_view->m_baseStyle.WindowMinSize.y };
+            style["windowTitleAlign"] = { m_view->m_baseStyle.WindowTitleAlign.x, m_view->m_baseStyle.WindowTitleAlign.y };
+            style["windowMenuButtonPosition"] = m_view->m_baseStyle.WindowMenuButtonPosition;
+            style["childRounding"] = m_view->m_baseStyle.ChildRounding;
+            style["childBorderSize"] = m_view->m_baseStyle.ChildBorderSize;
+            style["popupRounding"] = m_view->m_baseStyle.PopupRounding;
+            style["popupBorderSize"] = m_view->m_baseStyle.PopupBorderSize;
+            style["framePadding"] = { m_view->m_baseStyle.FramePadding.x, m_view->m_baseStyle.FramePadding.y };
+            style["frameRounding"] = m_view->m_baseStyle.FrameRounding;
+            style["frameBorderSize"] = m_view->m_baseStyle.FrameBorderSize;
+            style["itemSpacing"] = { m_view->m_baseStyle.ItemSpacing.x, m_view->m_baseStyle.ItemSpacing.y };
+            style["itemInnerSpacing"] = { m_view->m_baseStyle.ItemInnerSpacing.x, m_view->m_baseStyle.ItemInnerSpacing.y };
+            style["cellPadding"] = { m_view->m_baseStyle.CellPadding.x, m_view->m_baseStyle.CellPadding.y };
+            style["touchExtraPadding"] = { m_view->m_baseStyle.TouchExtraPadding.x, m_view->m_baseStyle.TouchExtraPadding.y };
+            style["indentSpacing"] = m_view->m_baseStyle.IndentSpacing;
+            style["columnsMinSpacing"] = m_view->m_baseStyle.ColumnsMinSpacing;
+            style["scrollbarSize"] = m_view->m_baseStyle.ScrollbarSize;
+            style["scrollbarRounding"] = m_view->m_baseStyle.ScrollbarRounding;
+            style["grabMinSize"] = m_view->m_baseStyle.GrabMinSize;
+            style["grabRounding"] = m_view->m_baseStyle.GrabRounding;
+            style["logSliderDeadzone"] = m_view->m_baseStyle.LogSliderDeadzone;
+            style["tabRounding"] = m_view->m_baseStyle.TabRounding;
+            style["tabBorderSize"] = m_view->m_baseStyle.TabBorderSize;
+            style["tabMinWidthForCloseButton"] = m_view->m_baseStyle.TabMinWidthForCloseButton;
+            style["tabBarBorderSize"] = m_view->m_baseStyle.TabBarBorderSize;
+            style["tableAngledHeadersAngle"] = m_view->m_baseStyle.TableAngledHeadersAngle;
+            style["tableAngledHeadersTextAlign"] = { m_view->m_baseStyle.TableAngledHeadersTextAlign.x, m_view->m_baseStyle.TableAngledHeadersTextAlign.y };
+            style["colorButtonPosition"] = m_view->m_baseStyle.ColorButtonPosition;
+            style["buttonTextAlign"] = { m_view->m_baseStyle.ButtonTextAlign.x, m_view->m_baseStyle.ButtonTextAlign.y };
+            style["selectableTextAlign"] = { m_view->m_baseStyle.SelectableTextAlign.x, m_view->m_baseStyle.SelectableTextAlign.y };
+            style["separatorTextPadding"] = { m_view->m_baseStyle.SeparatorTextPadding.x, m_view->m_baseStyle.SeparatorTextPadding.y };
+            style["displayWindowPadding"] = { m_view->m_baseStyle.DisplayWindowPadding.x, m_view->m_baseStyle.DisplayWindowPadding.y };
+            style["displaySafeAreaPadding"] = { m_view->m_baseStyle.DisplaySafeAreaPadding.x, m_view->m_baseStyle.DisplaySafeAreaPadding.y };
+            style["mouseCursorScale"] = m_view->m_baseStyle.MouseCursorScale;
+            style["antiAliasedLines"] = m_view->m_baseStyle.AntiAliasedLines;
+            style["antiAliasedLinesUseTex"] = m_view->m_baseStyle.AntiAliasedLinesUseTex;
+            style["antiAliasedFill"] = m_view->m_baseStyle.AntiAliasedFill;
+            style["curveTessellationTol"] = m_view->m_baseStyle.CurveTessellationTol;
+            style["circleTessellationMaxError"] = m_view->m_baseStyle.CircleTessellationMaxError;
             
-            style["hoverStationaryDelay"] = imguiStyle.HoverStationaryDelay;
-            style["hoverDelayShort"] = imguiStyle.HoverDelayShort;
-            style["hoverDelayNormal"] = imguiStyle.HoverDelayNormal;
+            style["hoverStationaryDelay"] = m_view->m_baseStyle.HoverStationaryDelay;
+            style["hoverDelayShort"] = m_view->m_baseStyle.HoverDelayShort;
+            style["hoverDelayNormal"] = m_view->m_baseStyle.HoverDelayNormal;
 
-            style["hoverFlagsForTooltipMouse"] = imguiStyle.HoverFlagsForTooltipMouse;
-            style["hoverFlagsForTooltipNav"] = imguiStyle.HoverFlagsForTooltipNav;
+            style["hoverFlagsForTooltipMouse"] = m_view->m_baseStyle.HoverFlagsForTooltipMouse;
+            style["hoverFlagsForTooltipNav"] = m_view->m_baseStyle.HoverFlagsForTooltipNav;
 
             style["colors"] = json::array();
 
             for (int i = 0; i < ImGuiCol_COUNT; i++) {
-                style["colors"].push_back(IV4toJsonHEXATuple(imguiStyle.Colors[i]));
+                style["colors"].push_back(IV4toJsonHEXATuple(m_view->m_baseStyle.Colors[i]));
             }
 
             return style.dump();

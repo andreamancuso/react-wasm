@@ -11,7 +11,7 @@
 
 using json = nlohmann::json;
 
-Widget::Widget(const int id) : Element(id, false) {
+Widget::Widget(ReactImgui* view, const int id) : Element(view, id, false) {
     m_type = "Unknown";
     m_handlesChildrenWithinRenderMethod = false;
 }
@@ -116,9 +116,9 @@ std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, React
     return maybeStyle;
 };
 
-StyledWidget::StyledWidget(const int id) : Widget(id) {}
+StyledWidget::StyledWidget(ReactImgui* view, const int id) : Widget(view, id) {}
 
-StyledWidget::StyledWidget(const int id, std::optional<BaseStyle>& maybeStyle) : Widget(id) {
+StyledWidget::StyledWidget(ReactImgui* view, const int id, std::optional<BaseStyle>& maybeStyle) : Widget(view, id) {
     if (maybeStyle.has_value()) {
         m_style.emplace(std::make_unique<BaseStyle>(maybeStyle.value()));
     }
@@ -241,7 +241,16 @@ void StyledWidget::PostRender(ReactImgui* view) {
     }
 };
 
-Window::Window(const int id, const std::string& title, const float width, const float height, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+bool StyledWidget::HasCustomStyleVar(const ImGuiStyleVar key) const {
+    return m_style.has_value() && m_style.value()->maybeStyleVars.has_value() && m_style.value()->maybeStyleVars.value().contains(key);
+};
+
+// IMPORTANT: call HasCustomStyleVar() first
+StyleVarValue& StyledWidget::GetCustomStyleVar(const ImGuiStyleVar key) const {
+    return m_style.value()->maybeStyleVars.value().at(key);
+};
+
+Window::Window(ReactImgui* view, const int id, const std::string& title, const float width, const float height, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
     m_type = "Window";
     m_handlesChildrenWithinRenderMethod = true;
 
@@ -280,7 +289,7 @@ void Window::Patch(const json& widgetPatchDef, ReactImgui* view) {
     }
 };
 
-Group::Group(const int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+Group::Group(ReactImgui* view, const int id, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
     m_type = "Group";
     m_handlesChildrenWithinRenderMethod = true;
 }
@@ -291,7 +300,7 @@ void Group::Render(ReactImgui* view) {
     ImGui::EndGroup();
 };
 
-Child::Child(const int id, const float width, const float height, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+Child::Child(ReactImgui* view, const int id, const float width, const float height, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
     m_type = "Child";
     m_handlesChildrenWithinRenderMethod = true;
 
@@ -353,7 +362,7 @@ std::unique_ptr<BulletText> BulletText::makeWidget(const json& widgetDef, std::o
         auto id = widgetDef["id"].template get<int>();
         auto text = widgetDef["text"].template get<std::string>();
 
-        return std::make_unique<BulletText>(id, text, maybeStyle);
+        return std::make_unique<BulletText>(view, id, text, maybeStyle);
     }
 
     throw std::invalid_argument("Invalid JSON data");
@@ -368,7 +377,7 @@ std::unique_ptr<UnformattedText> UnformattedText::makeWidget(const json& widgetD
         auto id = widgetDef["id"].template get<int>();
         auto text = widgetDef["text"].template get<std::string>();
 
-        return std::make_unique<UnformattedText>(id, text, maybeStyle);
+        return std::make_unique<UnformattedText>(view, id, text, maybeStyle);
     }
 
     throw std::invalid_argument("Invalid JSON data");
@@ -383,7 +392,7 @@ std::unique_ptr<DisabledText> DisabledText::makeWidget(const json& widgetDef, st
         auto id = widgetDef["id"].template get<int>();
         auto text = widgetDef["text"].template get<std::string>();
 
-        return std::make_unique<DisabledText>(id, text, maybeStyle);
+        return std::make_unique<DisabledText>(view, id, text, maybeStyle);
     }
 
     throw std::invalid_argument("Invalid JSON data");
@@ -393,7 +402,7 @@ void DisabledText::Render(ReactImgui* view) {
     ImGui::TextDisabled("%s", m_text.c_str());
 };
 
-TabBar::TabBar(const int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+TabBar::TabBar(ReactImgui* view, const int id, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
     m_type = "TabBar";
     m_handlesChildrenWithinRenderMethod = true;
 }
@@ -429,7 +438,7 @@ void TabBar::Render(ReactImgui* view) {
     ImGui::PopID();
 };
 
-TabItem::TabItem(const int id, const std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+TabItem::TabItem(ReactImgui* view, const int id, const std::string& label, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
     m_type = "TabItem";
     m_handlesChildrenWithinRenderMethod = true;
     m_label = label;
@@ -475,14 +484,14 @@ void TabItem::Patch(const json& widgetPatchDef, ReactImgui* view) {
     }
 };
 
-CollapsingHeader::CollapsingHeader(const int id, const std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+CollapsingHeader::CollapsingHeader(ReactImgui* view, const int id, const std::string& label, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
     m_type = "CollapsingHeader";
     m_handlesChildrenWithinRenderMethod = true;
     m_label = label;
 }
 
 void CollapsingHeader::Render(ReactImgui* view) {
-    YGNodeStyleSetMargin(m_layoutNode->m_node, YGEdgeBottom, ImGui::GetFrameHeightWithSpacing());
+    YGNodeStyleSetMargin(m_layoutNode->m_node, YGEdgeBottom, m_view->GetFrameHeightWithSpacing(this));
 
     ImGui::PushID(m_id);
     if (ImGui::CollapsingHeader(m_label.c_str())) {
@@ -493,7 +502,7 @@ void CollapsingHeader::Render(ReactImgui* view) {
         const float width = YGNodeLayoutGetWidth(m_layoutNode->m_node);
         const float height = YGNodeLayoutGetHeight(m_layoutNode->m_node);
 
-        ImGui::SetCursorPos(ImVec2(left, top + ImGui::GetFrameHeightWithSpacing())); // account for header
+        ImGui::SetCursorPos(ImVec2(left, top + m_view->GetFrameHeightWithSpacing(this))); // account for header
 
         ImGui::BeginChild("##", ImVec2(width, height), ImGuiChildFlags_None);
 
@@ -526,7 +535,7 @@ bool CollapsingHeader::HasCustomHeight() {
     return false;
 }
 
-TextWrap::TextWrap(const int id, const float& width, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+TextWrap::TextWrap(ReactImgui* view, const int id, const float& width, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
     m_type = "TextWrap";
     m_handlesChildrenWithinRenderMethod = true;
     m_width = width;
@@ -550,7 +559,7 @@ void TextWrap::Patch(const json& widgetPatchDef, ReactImgui* view) {
     }
 };
 
-ItemTooltip::ItemTooltip(const int id, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+ItemTooltip::ItemTooltip(ReactImgui* view, const int id, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
     m_type = "ItemTooltip";
     m_handlesChildrenWithinRenderMethod = true;
 }
@@ -563,14 +572,14 @@ void ItemTooltip::Render(ReactImgui* view) {
     }
 };
 
-TreeNode::TreeNode(const int id, const std::string& label, std::optional<BaseStyle>& style) : StyledWidget(id, style) {
+TreeNode::TreeNode(ReactImgui* view, const int id, const std::string& label, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
     m_type = "TreeNode";
     m_handlesChildrenWithinRenderMethod = true;
     m_label = label;
 }
 
 void TreeNode::Render(ReactImgui* view) {
-    YGNodeStyleSetMargin(m_layoutNode->m_node, YGEdgeBottom, ImGui::GetFontSize());
+    YGNodeStyleSetMargin(m_layoutNode->m_node, YGEdgeBottom, m_view->GetWidgetFontSize(this));
 
     ImGui::PushID(m_id);
     if (ImGui::TreeNode(m_label.c_str())) {
@@ -581,7 +590,7 @@ void TreeNode::Render(ReactImgui* view) {
         const float width = YGNodeLayoutGetWidth(m_layoutNode->m_node);
         const float height = YGNodeLayoutGetHeight(m_layoutNode->m_node);
 
-        ImGui::SetCursorPos(ImVec2(left, top + ImGui::GetFontSize())); // account for header
+        ImGui::SetCursorPos(ImVec2(left, top + m_view->GetWidgetFontSize(this))); // account for header
 
         ImGui::BeginChild("##", ImVec2(width, height), ImGuiChildFlags_None);
 
@@ -618,9 +627,28 @@ bool TreeNode::HasCustomHeight() {
 
 void Combo::Render(ReactImgui* view) {
     ImGui::PushID(m_id);
-    if (ImGui::Combo("", &m_selectedIndex, m_itemsSeparatedByZeros.get())) {
-        view->m_onComboChange(m_id, m_selectedIndex);
+
+    if (ImGui::BeginCombo("",
+        m_selectedIndex >= 0 && m_selectedIndex < m_options.size()
+            ? m_options[m_selectedIndex].c_str()
+            : m_placeholder.c_str()
+        , ImGuiComboFlags_None)) {
+        const auto optionsLength = m_options.size();
+        for (int n = 0; n < optionsLength; n++)
+        {
+            const bool is_selected = (m_selectedIndex == n);
+            if (ImGui::Selectable(m_options[n].c_str(), is_selected)) {
+                m_selectedIndex = n;
+                view->m_onComboChange(m_id, m_selectedIndex);
+            }
+
+            // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+            if (is_selected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
     }
+
     ImGui::PopID();
 };
 
@@ -628,8 +656,12 @@ void Combo::Patch(const json& widgetPatchDef, ReactImgui* view) {
     if (widgetPatchDef.is_object()) {
         StyledWidget::Patch(widgetPatchDef, view);
 
-        if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-            m_label = widgetPatchDef["label"].template get<std::string>();
+        if (widgetPatchDef.contains("placeholder") && widgetPatchDef["placeholder"].is_string()) {
+            m_placeholder = widgetPatchDef["placeholder"].template get<std::string>();
+        }
+
+        if (widgetPatchDef.contains("options") && widgetPatchDef["options"].is_array()) {
+            SetOptions(widgetPatchDef["options"]);
         }
     }
 };
@@ -684,7 +716,7 @@ std::unique_ptr<Button> Button::makeWidget(const json& widgetDef, std::optional<
         auto id = widgetDef["id"].template get<int>();
         auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
 
-        return makeWidget(id, label, maybeStyle);
+        return makeWidget(view, id, label, maybeStyle);
     }
 
     throw std::invalid_argument("Invalid JSON data");
@@ -871,6 +903,21 @@ void Table::Patch(const json& widgetPatchDef, ReactImgui* view) {
         StyledWidget::Patch(widgetPatchDef, view);
         // not sure what can be patched - presumably the columns? though that'd likely force us to clear the data
     }
+};
+
+YGSize Table::Measure(const YGNodeConstRef node, const float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
+    const auto widget = static_cast<Table*>(YGNodeGetContext(node));
+    float fontSize = widget->m_view->GetWidgetFontSize(widget);
+    YGSize size;
+
+    size.width = width / 2;
+    if (widget->m_clipRows > 0) {
+        size.height = fontSize * static_cast<float>(widget->m_clipRows); // TODO: call ReactImgui::GetWidgetFontSize(widget)
+    } else {
+        size.height = fontSize * 5; // TODO: call ReactImgui::GetWidgetFontSize(widget)
+    }
+
+    return size;
 };
 
 void ClippedMultiLineTextRenderer::Render(ReactImgui* view) {

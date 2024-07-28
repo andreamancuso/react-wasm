@@ -1,7 +1,6 @@
 import React, { useCallback, useRef, useState } from "react";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { MapImperativeHandle } from "../../ReactImgui/Map";
-import { ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 
 export const Maps = () => {
     const mapRef = useRef<MapImperativeHandle>(null);
@@ -48,12 +47,7 @@ export const Maps = () => {
                 <ReactImgui.Button onClick={locate} label="Locate" />
                 <ReactImgui.Button onClick={renderMap} label="Render" />
             </ReactImgui.Node>
-            {/* <ReactImgui.Separator />
-            <ReactImgui.SeparatorText
-                label="label"
-                style={{ vars: { [ImGuiStyleVar.SeparatorTextBorderSize]: 1 } }}
-            />
-            <ReactImgui.BulletText text="Sections below are demonstrating many aspects of the library." /> */}
+
             <ReactImgui.Map ref={mapRef} style={{ flex: 1 }} />
         </ReactImgui.Node>
     );

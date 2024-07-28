@@ -81,10 +81,10 @@ export type WidgetPropsMap = {
         label?: string;
     };
     Combo: StyleProps & {
-        label?: string;
-        options?: { value: number; label: string }[];
+        placeholder?: string;
+        options?: string[];
         optionsList?: string;
-        defaultValue?: number;
+        initialSelectedIndex?: number;
         onChange?: (event: ComboChangeEvent) => void;
     };
     Slider: StyleProps & {

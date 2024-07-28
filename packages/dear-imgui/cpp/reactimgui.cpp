@@ -45,6 +45,8 @@ ReactImgui::ReactImgui(
         m_shouldLoadDefaultStyle = false;
         PatchStyle(json::parse(rawStyleOverridesDefs.value()));
     }
+
+    TakeStyleSnapshot();
 }
 
 void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) {
@@ -445,6 +447,13 @@ void ReactImgui::PatchStyle(const json& styleDef) {
     }
 };
 
+void ReactImgui::TakeStyleSnapshot() {
+    const auto style = GetStyle();
+
+    // This is necessary as the style is repeatedly modified during render via push and pop calls
+    memcpy(&m_baseStyle, &style, sizeof(style));
+};
+
 void ReactImgui::SetElement(std::string& elementJsonAsString) {
     InitElement(json::parse(elementJsonAsString));
 };
@@ -588,3 +597,151 @@ void ReactImgui::AppendTextToClippedMultiLineTextRenderer(const int id, const st
         }
     }
 };
+
+StyleVarValueRef ReactImgui::GetStyleVar(const ImGuiStyleVar key) {
+    StyleVarValueRef value;
+
+    switch(key) {
+        case ImGuiStyleVar_Alpha: value.emplace<const float*>(&m_baseStyle.Alpha); break;
+        case ImGuiStyleVar_DisabledAlpha: value.emplace<const float*>(&m_baseStyle.DisabledAlpha); break;
+        case ImGuiStyleVar_WindowPadding: value.emplace<const ImVec2*>(&m_baseStyle.WindowPadding); break;
+        case ImGuiStyleVar_WindowRounding: value.emplace<const float*>(&m_baseStyle.WindowRounding); break;
+        case ImGuiStyleVar_WindowBorderSize: value.emplace<const float*>(&m_baseStyle.WindowBorderSize); break;
+        case ImGuiStyleVar_WindowMinSize: value.emplace<const ImVec2*>(&m_baseStyle.WindowMinSize); break;
+        case ImGuiStyleVar_WindowTitleAlign: value.emplace<const ImVec2*>(&m_baseStyle.WindowTitleAlign); break;
+        case ImGuiStyleVar_ChildRounding: value.emplace<const float*>(&m_baseStyle.ChildRounding); break;
+        case ImGuiStyleVar_ChildBorderSize: value.emplace<const float*>(&m_baseStyle.ChildBorderSize); break;
+        case ImGuiStyleVar_PopupRounding: value.emplace<const float*>(&m_baseStyle.PopupRounding); break;
+        case ImGuiStyleVar_PopupBorderSize: value.emplace<const float*>(&m_baseStyle.PopupBorderSize); break;
+        case ImGuiStyleVar_FramePadding: value.emplace<const ImVec2*>(&m_baseStyle.FramePadding); break;
+        case ImGuiStyleVar_FrameRounding: value.emplace<const float*>(&m_baseStyle.FrameRounding); break;
+        case ImGuiStyleVar_FrameBorderSize: value.emplace<const float*>(&m_baseStyle.FrameBorderSize); break;
+        case ImGuiStyleVar_ItemSpacing: value.emplace<const ImVec2*>(&m_baseStyle.ItemSpacing); break;
+        case ImGuiStyleVar_ItemInnerSpacing: value.emplace<const ImVec2*>(&m_baseStyle.ItemInnerSpacing); break;
+        case ImGuiStyleVar_IndentSpacing: value.emplace<const float*>(&m_baseStyle.IndentSpacing); break;
+        case ImGuiStyleVar_CellPadding: value.emplace<const ImVec2*>(&m_baseStyle.CellPadding); break;
+        case ImGuiStyleVar_ScrollbarSize: value.emplace<const float*>(&m_baseStyle.ScrollbarSize); break;
+        case ImGuiStyleVar_ScrollbarRounding: value.emplace<const float*>(&m_baseStyle.ScrollbarRounding); break;
+        case ImGuiStyleVar_GrabMinSize: value.emplace<const float*>(&m_baseStyle.GrabMinSize); break;
+        case ImGuiStyleVar_GrabRounding: value.emplace<const float*>(&m_baseStyle.GrabRounding); break;
+        case ImGuiStyleVar_TabRounding: value.emplace<const float*>(&m_baseStyle.TabRounding); break;
+        case ImGuiStyleVar_TabBorderSize: value.emplace<const float*>(&m_baseStyle.TabBorderSize); break;
+        case ImGuiStyleVar_TabBarBorderSize: value.emplace<const float*>(&m_baseStyle.TabBarBorderSize); break;
+        case ImGuiStyleVar_TableAngledHeadersAngle: value.emplace<const float*>(&m_baseStyle.TableAngledHeadersAngle); break;
+        case ImGuiStyleVar_TableAngledHeadersTextAlign: value.emplace<const ImVec2*>(&m_baseStyle.TableAngledHeadersTextAlign); break;
+        case ImGuiStyleVar_ButtonTextAlign: value.emplace<const ImVec2*>(&m_baseStyle.ButtonTextAlign); break;
+        case ImGuiStyleVar_SelectableTextAlign: value.emplace<const ImVec2*>(&m_baseStyle.SelectableTextAlign); break;
+        case ImGuiStyleVar_SeparatorTextBorderSize: value.emplace<const float*>(&m_baseStyle.SeparatorTextBorderSize); break;
+        case ImGuiStyleVar_SeparatorTextAlign: value.emplace<const ImVec2*>(&m_baseStyle.SeparatorTextAlign); break;
+        case ImGuiStyleVar_SeparatorTextPadding: value.emplace<const ImVec2*>(&m_baseStyle.SeparatorTextPadding); break;
+        default: break;
+    }
+
+    return value;
+};
+
+ImFont* ReactImgui::GetWidgetFont(const StyledWidget* widget) {
+    if (widget->HasCustomStyles() && widget->HasCustomFont(this)) {
+        return m_loadedFonts[widget->m_style.value()->maybeFontIndex.value()];
+    }
+
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+    // Return default font size as we might be in the middle of rendering a widget with a custom font
+    return io.FontDefault;
+}
+
+float ReactImgui::GetWidgetFontSize(const StyledWidget* widget) {
+    if (widget->HasCustomStyles() && widget->HasCustomFont(this)) {
+        return m_loadedFonts[widget->m_style.value()->maybeFontIndex.value()]->FontSize;
+    }
+
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+    // Return default font size as we might be in the middle of rendering a widget with a custom font
+    return io.FontDefault->FontSize;
+}
+
+float ReactImgui::GetTextLineHeight(const StyledWidget* widget) {
+    return GetWidgetFontSize(widget);
+};
+
+float ReactImgui::GetTextLineHeightWithSpacing(const StyledWidget* widget) {
+    auto fontSize = GetWidgetFontSize(widget);
+
+    float itemSpacingY = m_baseStyle.ItemSpacing.y;
+
+    if (widget->HasCustomStyles() && widget->HasCustomStyleVar(ImGuiStyleVar_ItemSpacing)) {
+        auto maybeCustomItemSpacing = widget->GetCustomStyleVar(ImGuiStyleVar_ItemSpacing);
+        if (std::holds_alternative<ImVec2>(maybeCustomItemSpacing)) {
+            itemSpacingY = std::get<ImVec2>(maybeCustomItemSpacing).y;
+        }
+    }
+
+    return fontSize + itemSpacingY;
+};
+
+float ReactImgui::GetFrameHeight(const StyledWidget* widget) {
+    auto fontSize = GetWidgetFontSize(widget);
+
+    float framePaddingY = m_baseStyle.FramePadding.y;
+
+    if (widget->HasCustomStyles() && widget->HasCustomStyleVar(ImGuiStyleVar_FramePadding)) {
+        auto maybeCustomFramePadding = widget->GetCustomStyleVar(ImGuiStyleVar_FramePadding);
+        if (std::holds_alternative<ImVec2>(maybeCustomFramePadding)) {
+            framePaddingY = std::get<ImVec2>(maybeCustomFramePadding).y;
+        }
+    }
+
+    return fontSize + framePaddingY * 2.0f;
+};
+
+float ReactImgui::GetFrameHeightWithSpacing(const StyledWidget* widget) {
+    auto fontSize = GetWidgetFontSize(widget);
+
+    float framePaddingY = m_baseStyle.FramePadding.y;
+    float itemSpacingY = m_baseStyle.ItemSpacing.y;
+
+    if (widget->HasCustomStyles()) {
+        if (widget->HasCustomStyleVar(ImGuiStyleVar_FramePadding)) {
+            auto maybeCustomFramePadding = widget->GetCustomStyleVar(ImGuiStyleVar_FramePadding);
+            if (std::holds_alternative<ImVec2>(maybeCustomFramePadding)) {
+                framePaddingY = std::get<ImVec2>(maybeCustomFramePadding).y;
+            }
+        }
+
+        if (widget->HasCustomStyleVar(ImGuiStyleVar_ItemSpacing)) {
+            auto maybeCustomItemSpacing = widget->GetCustomStyleVar(ImGuiStyleVar_ItemSpacing);
+            if (std::holds_alternative<ImVec2>(maybeCustomItemSpacing)) {
+                itemSpacingY = std::get<ImVec2>(maybeCustomItemSpacing).y;
+            }
+        }
+    }
+
+    return fontSize + framePaddingY * 2.0f + itemSpacingY;
+};
+
+ImVec2 ReactImgui::CalcTextSize(const StyledWidget* widget, const char* text, const char* text_end, bool hide_text_after_double_hash, float wrap_width)
+{
+    auto font = GetWidgetFont(widget);
+
+    const char* text_display_end;
+    if (hide_text_after_double_hash)
+        text_display_end = ImGui::FindRenderedTextEnd(text, text_end);      // Hide anything after a '##' string
+    else
+        text_display_end = text_end;
+
+    const float font_size = font->FontSize;
+    if (text == text_display_end)
+        return ImVec2(0.0f, font_size);
+    ImVec2 text_size = font->CalcTextSizeA(font->FontSize, FLT_MAX, wrap_width, text, text_display_end, NULL);
+
+    // Round
+    // FIXME: This has been here since Dec 2015 (7b0bf230) but down the line we want this out.
+    // FIXME: Investigate using ceilf or e.g.
+    // - https://git.musl-libc.org/cgit/musl/tree/src/math/ceilf.c
+    // - https://embarkstudios.github.io/rust-gpu/api/src/libm/math/ceilf.rs.html
+    text_size.x = IM_TRUNC(text_size.x + 0.99999f);
+
+    return text_size;
+}

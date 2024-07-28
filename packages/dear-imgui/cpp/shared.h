@@ -23,6 +23,7 @@ typedef std::unordered_map<std::string, std::string> TableRow;
 typedef std::vector<TableRow> TableData;
 
 typedef std::variant<std::monostate, ImVec2, float> StyleVarValue;
+typedef std::variant<std::monostate, const ImVec2*, const float*> StyleVarValueRef;
 typedef std::unordered_map<ImGuiCol, ImVec4> StyleColors;
 typedef std::unordered_map<ImGuiStyleVar, StyleVarValue> StyleVars;
 

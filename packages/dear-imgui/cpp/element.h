@@ -13,11 +13,12 @@ class ReactImgui;
 class Element {
     public:
         int m_id;
+        ReactImgui* m_view;
         bool m_handlesChildrenWithinRenderMethod;
         bool m_isRoot;
         std::unique_ptr<LayoutNode> m_layoutNode;
 
-        Element(int id, bool isRoot);
+        Element(ReactImgui* view, int id, bool isRoot);
 
         static std::unique_ptr<Element> makeElement(const json& val, ReactImgui* view);
 
