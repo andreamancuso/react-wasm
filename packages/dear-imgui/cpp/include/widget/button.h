@@ -40,8 +40,6 @@ class Button final : public StyledWidget {
             return size;
         }
 
-        ImGuiCol GetImGuiCol();
-
         void Render(ReactImgui* view) override;
 
         bool HasCustomWidth() override;
