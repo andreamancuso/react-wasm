@@ -5,8 +5,8 @@
 #include <nlohmann/json.hpp>
 
 #include "shared.h"
-#include "element.h"
-#include "widget.h"
+#include "element/element.h"
+#include "widget/widget.h"
 #include "reactimgui.h"
 
 using json = nlohmann::json;

@@ -3,13 +3,12 @@
 #include <string>
 #include <sstream>
 #include <emscripten.h>
-#include <reactimgui.h>
 #include <emscripten/bind.h>
 #include "imgui.h"
 #include <nlohmann/json.hpp>
 
-#include "shared.h"
-#include "element.h"
+#include <reactimgui.h>
+#include <element/element.h>
 
 using json = nlohmann::json;
 

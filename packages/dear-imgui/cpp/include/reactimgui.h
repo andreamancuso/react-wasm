@@ -4,17 +4,16 @@
 #include "imgui.h"
 #include <nlohmann/json.hpp>
 
-#include "mapgenerator.h"
-
 using json = nlohmann::json;
 
-#include "shared.h"
-#include "element.h"
+#include "yoga/YGEnums.h"
 #include "implotview.h"
 
 #pragma once
 
 class Widget;
+class MapGenerator;
+class Element;
 class StyledWidget;
 class LayoutNode;
 struct BaseStyle;

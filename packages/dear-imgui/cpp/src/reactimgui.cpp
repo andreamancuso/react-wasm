@@ -11,14 +11,14 @@
 #include "implot_internal.h"
 #include <nlohmann/json.hpp>
 
-#include "layout_node.h"
+#include "element/layout_node.h"
 
 #include "mapgenerator.h"
 
 #include "shared.h"
 #include "reactimgui.h"
 #include "implotview.h"
-#include "widget.h"
+#include "widget/widget.h"
 
 
 using json = nlohmann::json;

@@ -92,16 +92,18 @@ if (DEFINED EMSCRIPTEN)
         ${DEPS}/yoga/yoga/*.cpp
         ${DEPS}/yoga/yoga/**/*.cpp)
 
-	add_executable(reactDearImgui main.cpp
-        shared.cpp
-        element.cpp
-        widget.cpp
-        layout_node.cpp
-        reactimgui.cpp
+	add_executable(reactDearImgui
+        src/main.cpp
+        src/shared.cpp
+        src/element/layout_node.cpp
+        src/element/element.cpp
+        src/widget/widget.cpp
+        src/reactimgui.cpp
+        src/imguiview.cpp
+        src/implotview.cpp
+
         ${DEPS}/wasm-glfw3-boilerplate/view.cpp
         ${DEPS}/wasm-glfw3-boilerplate/glwasm.cpp
-        imguiview.cpp
-        implotview.cpp
         ${OSM_STATIC_MAP_GENERATOR_SRC}
         ${LEPTONICA_SRC}
         ${LIBTIFF_SRC}
@@ -110,7 +112,7 @@ if (DEFINED EMSCRIPTEN)
 
     target_include_directories(
         reactDearImgui PRIVATE 
-        ${CMAKE_CURRENT_SOURCE_DIR} 
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${DEPS}/wasm-glfw3-boilerplate 
         ${DEPS}/IconFontCppHeaders 
         ${DEPS}/ReactivePlusPlus/src/rpp
