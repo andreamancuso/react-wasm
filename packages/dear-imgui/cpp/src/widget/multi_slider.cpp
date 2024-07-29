@@ -1,0 +1,46 @@
+#include <nlohmann/json.hpp>
+
+#include "widget/multi_slider.h"
+
+#include <imgui.h>
+
+#include "reactimgui.h"
+
+void MultiSlider::Render(ReactImgui* view) {
+    ImGui::PushID(m_id);
+
+    if (m_numValues == 2) {
+        if (ImGui::SliderFloat2(m_label.c_str(), m_values.get(), m_min, m_max, view->m_floatFormatChars[m_decimalDigits].get())) {
+            view->m_onMultiValueChange(m_id, m_values.get(), m_numValues);
+        }
+    } else if (m_numValues == 3) {
+        if (ImGui::SliderFloat3(m_label.c_str(), m_values.get(), m_min, m_max, view->m_floatFormatChars[m_decimalDigits].get())) {
+            view->m_onMultiValueChange(m_id, m_values.get(), m_numValues);
+        }
+    } else if (m_numValues == 4) {
+        if (ImGui::SliderFloat4(m_label.c_str(), m_values.get(), m_min, m_max, view->m_floatFormatChars[m_decimalDigits].get())) {
+            view->m_onMultiValueChange(m_id, m_values.get(), m_numValues);
+        }
+    }
+
+    ImGui::PopID();
+};
+
+void MultiSlider::Patch(const json& widgetPatchDef, ReactImgui* view) {
+    if (widgetPatchDef.is_object()) {
+        StyledWidget::Patch(widgetPatchDef, view);
+
+        if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
+            m_label = widgetPatchDef["label"].template get<std::string>();
+        }
+        if (widgetPatchDef.contains("min") && widgetPatchDef["min"].is_number()) {
+            m_min = widgetPatchDef["min"].template get<float>();
+        }
+        if (widgetPatchDef.contains("max") && widgetPatchDef["max"].is_number()) {
+            m_max = widgetPatchDef["max"].template get<float>();
+        }
+        if (widgetPatchDef.contains("decimalDigits") && widgetPatchDef["decimalDigits"].is_number()) {
+            m_decimalDigits = widgetPatchDef["decimalDigits"].template get<int>();
+        }
+    }
+};

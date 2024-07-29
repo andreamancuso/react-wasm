@@ -1,0 +1,47 @@
+
+#include "widget/window.h"
+
+#include <imgui.h>
+
+#include "widget/styled_widget.h"
+
+class ReactImgui;
+
+Window::Window(ReactImgui* view, const int id, const std::string& title, const float width, const float height, std::optional<BaseStyle>& style) : ::StyledWidget(view, id, style) {
+    m_type = "Window";
+    m_handlesChildrenWithinRenderMethod = true;
+
+    m_title = title;
+    m_width = width;
+    m_height = height;
+    m_open = true;
+}
+
+void Window::Render(ReactImgui* view) {
+    // ImGui::PushID(m_id);
+    ImGui::SetNextWindowSize(ImVec2(m_width, m_height), ImGuiCond_FirstUseEver);
+
+    if (!ImGui::Begin(m_title.c_str(), &m_open, m_flags)) {
+        ImGui::End();
+        return;
+    }
+    Widget::HandleChildren(view);
+    ImGui::End();
+    // ImGui::PopID();
+};
+
+void Window::Patch(const json& widgetPatchDef, ReactImgui* view) {
+    if (widgetPatchDef.is_object()) {
+        StyledWidget::Patch(widgetPatchDef, view);
+
+        if (widgetPatchDef["title"].is_string()) {
+            m_title = widgetPatchDef["title"].template get<std::string>();
+        }
+        if (widgetPatchDef["width"].is_string()) {
+            m_width = widgetPatchDef["width"].template get<float>();
+        }
+        if (widgetPatchDef["height"].is_string()) {
+            m_height = widgetPatchDef["height"].template get<float>();
+        }
+    }
+};

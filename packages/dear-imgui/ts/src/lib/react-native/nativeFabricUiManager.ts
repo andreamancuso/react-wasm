@@ -15,7 +15,7 @@ export default class {
     eventSubject: ReplaySubject<Event>;
     eventSubjectSubscription: Subscription;
 
-    linkedWidgetTypes = ["Table", "ClippedMultiLineTextRenderer", "Map"];
+    linkedWidgetTypes = ["Table", "ClippedMultiLineTextRenderer", "MapView"];
 
     constructor() {
         this.fiberNodesMap = new Map();

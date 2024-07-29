@@ -98,6 +98,27 @@ if (DEFINED EMSCRIPTEN)
         src/element/layout_node.cpp
         src/element/element.cpp
         src/widget/widget.cpp
+        src/widget/styled_widget.cpp
+        src/widget/button.cpp
+        src/widget/checkbox.cpp
+        src/widget/child.cpp
+        src/widget/clipped_multi_line_text_renderer.cpp
+        src/widget/collapsing_header.cpp
+        src/widget/combo.cpp
+        src/widget/group.cpp
+        src/widget/input_text.cpp
+        src/widget/item_tooltip.cpp
+        src/widget/map_view.cpp
+        src/widget/multi_slider.cpp
+        src/widget/separator.cpp
+        src/widget/separator_text.cpp
+        src/widget/slider.cpp
+        src/widget/table.cpp
+        src/widget/tabs.cpp
+        src/widget/text.cpp
+        src/widget/text_wrap.cpp
+        src/widget/tree_node.cpp
+        src/widget/window.cpp
         src/reactimgui.cpp
         src/imguiview.cpp
         src/implotview.cpp

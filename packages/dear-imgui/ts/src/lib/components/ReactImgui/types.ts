@@ -120,7 +120,7 @@ export type WidgetPropsMap = {
         clipRows?: number;
     };
     ClippedMultiLineTextRenderer: StyleProps & {};
-    Map: StyleProps & {};
+    MapView: StyleProps & {};
 };
 
 type WidgetKeys = keyof WidgetPropsMap;
@@ -140,7 +140,7 @@ type WidgetsRequiringId =
     | "Button"
     | "Table"
     | "ClippedMultiLineTextRenderer"
-    | "Map";
+    | "MapView";
 
 export type WidgetReactNode =
     | WidgetReactElementsFlat
