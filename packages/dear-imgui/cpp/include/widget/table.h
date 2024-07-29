@@ -15,7 +15,7 @@ class Table final : public StyledWidget {
             m_columns = columns;
             m_clipRows = 0;
 
-            if (clipRows.has_value()) {
+            if (clipRows.has_value() && clipRows.value() > 0) {
                 m_clipRows = clipRows.value();
             }
         }
@@ -25,26 +25,33 @@ class Table final : public StyledWidget {
         std::vector<TableColumn> m_columns;
         int m_clipRows; // todo: potentially redundant?
 
+        static std::vector<TableColumn> extractColumns(const json& columnsDef) {
+            std::vector<TableColumn> columns;
+
+            if (columnsDef.is_array()) {
+                for (auto& [key, item] : columnsDef.items()) {
+                    columns.push_back({
+                        std::make_optional(item["fieldId"].template get<std::string>()),
+                        item["heading"].template get<std::string>()
+                    });
+                }
+            }
+
+            return columns;
+        }
+
         static std::unique_ptr<Table> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 const auto id = widgetDef["id"].template get<int>();
 
                 if (widgetDef.contains("columns") && widgetDef["columns"].is_array()) {
                     std::optional<int> clipRows;
-                    std::vector<TableColumn> columns;
 
                     if (widgetDef.contains("clipRows") && widgetDef["clipRows"].is_number_integer()) {
                         clipRows.emplace(widgetDef["clipRows"].template get<int>());
                     }
 
-                    for (auto& [key, item] : widgetDef["columns"].items()) {
-                        columns.push_back({
-                            std::make_optional(item["fieldId"].template get<std::string>()),
-                            item["heading"].template get<std::string>()
-                        });
-                    }
-
-                    return makeWidget(view, id, columns, clipRows, maybeStyle);
+                    return makeWidget(view, id, extractColumns(widgetDef["columns"]), clipRows, maybeStyle);
                 }
             }
 
@@ -62,6 +69,20 @@ class Table final : public StyledWidget {
         void Render(ReactImgui* view) override;
 
         void Patch(const json& widgetPatchDef, ReactImgui* view) override;
+
+        void SetColumns(const json& columnsDef) {
+            m_data.clear();
+            m_columns.clear();
+
+            auto newColumns = extractColumns(columnsDef);
+            m_columns.insert(m_columns.end(), newColumns.begin(), newColumns.end());
+        }
+
+        void SetClipRows(int clipRows) {
+            if (clipRows > 0) {
+                m_clipRows = clipRows;
+            }
+        }
 
         void SetData(TableData& data) {
             m_data.clear();

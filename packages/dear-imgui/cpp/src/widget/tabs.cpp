@@ -25,7 +25,6 @@ void TabBar::Render(ReactImgui* view) {
 
     ImGui::SetCursorPos(ImVec2(left, top));
 
-    // TODO: +4.0f seems somewhat arbitrary
     ImGui::BeginChild("##", ImVec2(width, height), ImGuiChildFlags_None);
 
     if (ImGui::BeginTabBar("", ImGuiTabBarFlags_None)) {

@@ -32,14 +32,15 @@ class Checkbox final : public StyledWidget {
         }
 
         static YGSize Measure(const YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
-            auto widget = static_cast<Checkbox*>(YGNodeGetContext(node));
+            YGSize size{};
+            const auto context = YGNodeGetContext(node);
+            if (context) {
+                auto widget = static_cast<Checkbox*>(context);
+                const auto frameHeight = widget->m_view->GetFrameHeight(widget);
 
-            YGSize size;
-
-            const auto frameHeight = widget->m_view->GetFrameHeight(widget);
-
-            size.width = frameHeight;
-            size.height = frameHeight;
+                size.width = frameHeight;
+                size.height = frameHeight;
+            }
 
             return size;
         }

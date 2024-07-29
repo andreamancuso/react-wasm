@@ -81,20 +81,26 @@ void Table::Render(ReactImgui* view) {
 void Table::Patch(const json& widgetPatchDef, ReactImgui* view) {
     if (widgetPatchDef.is_object()) {
         StyledWidget::Patch(widgetPatchDef, view);
-        // not sure what can be patched - presumably the columns? though that'd likely force us to clear the data
+
+        if (widgetPatchDef.contains("columns") && widgetPatchDef["columns"].is_array()) {
+            SetColumns(widgetPatchDef["columns"]);
+        }
     }
 };
 
 YGSize Table::Measure(const YGNodeConstRef node, const float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
-    const auto widget = static_cast<Table*>(YGNodeGetContext(node));
-    float fontSize = widget->m_view->GetWidgetFontSize(widget);
-    YGSize size;
+    YGSize size{};
+    const auto context = YGNodeGetContext(node);
+    if (context) {
+        const auto widget = static_cast<Table*>(context);
+        const float fontSize = widget->m_view->GetWidgetFontSize(widget);
 
-    size.width = width / 2;
-    if (widget->m_clipRows > 0) {
-        size.height = fontSize * static_cast<float>(widget->m_clipRows); // TODO: call ReactImgui::GetWidgetFontSize(widget)
-    } else {
-        size.height = fontSize * 5; // TODO: call ReactImgui::GetWidgetFontSize(widget)
+        size.width = width / 2;
+        if (widget->m_clipRows > 0) {
+            size.height = fontSize * static_cast<float>(widget->m_clipRows);
+        } else {
+            size.height = fontSize * 5;
+        }
     }
 
     return size;

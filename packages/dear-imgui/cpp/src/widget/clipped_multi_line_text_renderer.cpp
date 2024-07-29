@@ -29,6 +29,9 @@ void ClippedMultiLineTextRenderer::Render(ReactImgui* view) {
 void ClippedMultiLineTextRenderer::Patch(const json& widgetPatchDef, ReactImgui* view) {
     if (widgetPatchDef.is_object()) {
         StyledWidget::Patch(widgetPatchDef, view);
-        // not sure what can be patched
+
+        if (widgetPatchDef.contains("numberOfLines") && widgetPatchDef["numberOfLines"].is_number_unsigned()) {
+            SetNumberOfLines(widgetPatchDef["numberOfLines"].template get<int>());
+        }
     }
 };

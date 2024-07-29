@@ -9,6 +9,10 @@ class Slider final : public StyledWidget {
             m_value = defaultValue;
             m_min = min;
             m_max = max;
+
+            if (m_min > m_max) {
+                m_min = m_max;
+            }
         }
 
     public:
@@ -39,11 +43,14 @@ class Slider final : public StyledWidget {
         }
 
         static YGSize Measure(const YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
-            auto widget = static_cast<Slider*>(YGNodeGetContext(node));
-            YGSize size;
+            YGSize size{};
+            const auto context = YGNodeGetContext(node);
+            if (context) {
+                auto widget = static_cast<Slider*>(context);
 
-            size.width = 60.0f; // TODO: This is rather arbitrary
-            size.height = widget->m_view->GetFrameHeight(widget);
+                size.width = 60.0f; // TODO: This is rather arbitrary
+                size.height = widget->m_view->GetFrameHeight(widget);
+            }
 
             return size;
         }

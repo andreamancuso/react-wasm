@@ -57,12 +57,14 @@ class MultiSlider final : public StyledWidget {
         }
 
         static YGSize Measure(const YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
-            const auto widget = static_cast<MultiSlider*>(YGNodeGetContext(node));
+            YGSize size{};
+            const auto context = YGNodeGetContext(node);
+            if (context) {
+                const auto widget = static_cast<MultiSlider*>(context);
 
-            YGSize size;
-
-            size.width = static_cast<float>(widget->m_numValues) * 60.0f;
-            size.height = widget->m_view->GetFrameHeight(widget);
+                size.width = static_cast<float>(widget->m_numValues) * 60.0f;
+                size.height = widget->m_view->GetFrameHeight(widget);
+            }
 
             return size;
         }

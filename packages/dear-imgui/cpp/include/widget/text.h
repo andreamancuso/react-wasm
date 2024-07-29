@@ -9,12 +9,14 @@ class Text : public StyledWidget {
         }
 
         static YGSize Measure(const YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
-            const auto widget = static_cast<Text*>(YGNodeGetContext(node));
+            YGSize size{};
+            const auto context = YGNodeGetContext(node);
+            if (context) {
+                const auto widget = static_cast<Text*>(context);
 
-            YGSize size;
-
-            size.width = widget->m_view->CalcTextSize(widget, widget->m_text.c_str()).x;
-            size.height = widget->m_view->GetWidgetFontSize(widget);
+                size.width = widget->m_view->CalcTextSize(widget, widget->m_text.c_str()).x;
+                size.height = widget->m_view->GetWidgetFontSize(widget);
+            }
 
             return size;
         }

@@ -16,12 +16,14 @@ public:
     }
 
     static YGSize Measure(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
-        const auto widget = static_cast<SeparatorText*>(YGNodeGetContext(node));
+        YGSize size{};
+        const auto context = YGNodeGetContext(node);
+        if (context) {
+            const auto widget = static_cast<SeparatorText*>(context);
 
-        YGSize size;
-
-        size.width = width; // TODO: sure about that?
-        size.height = widget->m_view->GetWidgetFontSize(widget);
+            size.width = width; // TODO: sure about that?
+            size.height = widget->m_view->GetWidgetFontSize(widget);
+        }
 
         return size;
     }

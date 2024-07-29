@@ -30,5 +30,9 @@ void Slider::Patch(const json& widgetPatchDef, ReactImgui* view) {
         if (widgetPatchDef.contains("max") && widgetPatchDef["max"].is_number()) {
             m_max = widgetPatchDef["max"].template get<float>();
         }
+
+        if (m_min > m_max) {
+            m_min = m_max;
+        }
     }
 };

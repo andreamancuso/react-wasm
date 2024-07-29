@@ -40,14 +40,16 @@ class InputText final : public StyledWidget {
         }
 
         static YGSize Measure(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
-            const auto widget = static_cast<InputText*>(YGNodeGetContext(node));
+            YGSize size{};
+            const auto context = YGNodeGetContext(node);
+            if (context) {
+                const auto widget = static_cast<InputText*>(context);
 
-            YGSize size;
-            
-            // TODO: we may want to define default widths similarly to how browsers do
-            size.width = widget->m_view->GetWidgetFontSize(widget) * 10;
-            // TODO: we likely need to compute this based on the associated font, based on the widget's style
-            size.height = widget->m_view->GetFrameHeight(widget);
+                // TODO: we may want to define default widths similarly to how browsers do
+                size.width = widget->m_view->GetWidgetFontSize(widget) * 10;
+                // TODO: we likely need to compute this based on the associated font, based on the widget's style
+                size.height = widget->m_view->GetFrameHeight(widget);
+            }
 
             return size;
         }

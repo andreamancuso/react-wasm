@@ -4,9 +4,12 @@ class Combo final : public StyledWidget {
     protected:
         Combo(ReactImgui* view, const int id, const std::string& placeholder, const int initialSelectedIndex, const std::vector<std::string>& options, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
             m_type = "Combo";
-            m_selectedIndex = initialSelectedIndex;
             m_placeholder = placeholder;
             m_options = options;
+
+            if (initialSelectedIndex > -1) {
+                m_selectedIndex = initialSelectedIndex;
+            }
         }
 
     public:
@@ -44,14 +47,16 @@ class Combo final : public StyledWidget {
         }
 
         static YGSize Measure(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
-            const auto widget = static_cast<Combo*>(YGNodeGetContext(node));
+            YGSize size{};
+            const auto context = YGNodeGetContext(node);
 
-            YGSize size;
-
-            // TODO: we may want to define default widths similarly to how browsers do
-            size.width = widget->m_view->GetWidgetFontSize(widget) * 10;
-            // TODO: we likely need to compute this based on the associated font, based on the widget's style
-            size.height = widget->m_view->GetFrameHeight(widget);
+            if (context) {
+                const auto widget = static_cast<Combo*>(context);
+                // TODO: we may want to define default widths similarly to how browsers do
+                size.width = widget->m_view->GetWidgetFontSize(widget) * 10;
+                // TODO: we likely need to compute this based on the associated font, based on the widget's style
+                size.height = widget->m_view->GetFrameHeight(widget);
+            }
 
             return size;
         }
