@@ -1,7 +1,6 @@
 #include <nlohmann/json.hpp>
 
 #include "widget/text.h"
-
 #include "widget/styled_widget.h"
 
 void Text::Patch(const json& widgetPatchDef, ReactImgui* view) {

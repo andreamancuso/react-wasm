@@ -1,8 +1,6 @@
-
-#include "widget/window.h"
-
 #include <imgui.h>
 
+#include "widget/window.h"
 #include "widget/styled_widget.h"
 
 class ReactImgui;

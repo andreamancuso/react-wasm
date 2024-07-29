@@ -1,9 +1,6 @@
-
-
-#include "widget/tree_node.h"
-
 #include <string>
 
+#include "widget/tree_node.h"
 #include "widget/styled_widget.h"
 
 TreeNode::TreeNode(ReactImgui* view, const int id, const std::string& label, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {

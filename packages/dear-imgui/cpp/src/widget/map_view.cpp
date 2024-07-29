@@ -1,8 +1,7 @@
-#include "widget/map_view.h"
-
 #include <imgui.h>
 #include <yoga/YGNodeLayout.h>
 
+#include "widget/map_view.h"
 #include "reactimgui.h"
 
 bool MapView::HasCustomWidth() {

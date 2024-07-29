@@ -1,5 +1,3 @@
-
-
 #include "styled_widget.h"
 
 // todo: should we preallocate buffer size?

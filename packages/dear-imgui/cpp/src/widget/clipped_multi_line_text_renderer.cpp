@@ -1,6 +1,5 @@
-#include "widget/clipped_multi_line_text_renderer.h"
-
 #include "widget/styled_widget.h"
+#include "widget/clipped_multi_line_text_renderer.h"
 
 void ClippedMultiLineTextRenderer::Render(ReactImgui* view) {
     ImGui::PushID(m_id);

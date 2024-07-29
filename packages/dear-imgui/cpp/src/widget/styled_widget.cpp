@@ -1,6 +1,6 @@
-#include "widget/styled_widget.h"
-
 #include <optional>
+
+#include "widget/styled_widget.h"
 
 std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
     std::optional<BaseStyle> maybeStyle;

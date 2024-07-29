@@ -1,6 +1,4 @@
-
 #include "widget/table.h"
-
 #include "reactimgui.h"
 
 void Table::Render(ReactImgui* view) {

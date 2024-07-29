@@ -1,7 +1,5 @@
 #include <cstring>
 #include <string>
-#include <emscripten/bind.h>
-#include "imgui.h"
 #include <nlohmann/json.hpp>
 
 #include "shared.h"

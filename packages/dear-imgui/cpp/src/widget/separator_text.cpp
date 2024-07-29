@@ -1,7 +1,6 @@
-#include "widget/separator_text.h"
-
 #include <imgui.h>
 
+#include "widget/separator_text.h"
 #include "reactimgui.h"
 
 void SeparatorText::Patch(const json& widgetPatchDef, ReactImgui* view) {

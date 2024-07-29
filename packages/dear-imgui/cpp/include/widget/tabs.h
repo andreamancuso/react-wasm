@@ -1,4 +1,3 @@
-
 #include "styled_widget.h"
 
 class TabBar final : public StyledWidget {

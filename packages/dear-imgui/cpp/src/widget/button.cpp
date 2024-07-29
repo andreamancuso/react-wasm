@@ -1,7 +1,6 @@
-#include "widget/button.h"
-
 #include <string>
 
+#include "widget/button.h"
 #include "widget/styled_widget.h"
 
 std::unique_ptr<Button> Button::makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {

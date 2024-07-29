@@ -1,5 +1,4 @@
 #include "widget/tabs.h"
-
 #include "reactimgui.h"
 
 TabBar::TabBar(ReactImgui* view, const int id, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {

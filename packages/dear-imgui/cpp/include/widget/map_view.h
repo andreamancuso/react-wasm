@@ -1,5 +1,3 @@
-
-
 #include "styled_widget.h"
 
 class MapView final : public StyledWidget {

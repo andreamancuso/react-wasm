@@ -1,5 +1,6 @@
-#include "styled_widget.h"
 #include <nlohmann/json.hpp>
+
+#include "styled_widget.h"
 
 class Checkbox final : public StyledWidget {
     protected:

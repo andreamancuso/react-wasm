@@ -1,8 +1,6 @@
-
-#include "widget/slider.h"
-
 #include <string>
 
+#include "widget/slider.h"
 #include "widget/styled_widget.h"
 
 void Slider::Render(ReactImgui* view) {

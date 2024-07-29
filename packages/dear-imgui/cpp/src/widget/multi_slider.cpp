@@ -1,9 +1,7 @@
+#include <imgui.h>
 #include <nlohmann/json.hpp>
 
 #include "widget/multi_slider.h"
-
-#include <imgui.h>
-
 #include "reactimgui.h"
 
 void MultiSlider::Render(ReactImgui* view) {

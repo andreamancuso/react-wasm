@@ -1,6 +1,5 @@
-#include "widget/child.h"
-
 #include "widget/styled_widget.h"
+#include "widget/child.h"
 
 Child::Child(ReactImgui* view, const int id, const float width, const float height, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
     m_type = "Child";

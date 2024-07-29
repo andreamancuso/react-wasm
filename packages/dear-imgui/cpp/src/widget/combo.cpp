@@ -1,7 +1,6 @@
-#include "widget/combo.h"
-
 #include <imgui.h>
 
+#include "widget/combo.h"
 #include "reactimgui.h"
 
 void Combo::Render(ReactImgui* view) {

@@ -1,9 +1,8 @@
-#include "widget/input_text.h"
-
 #include <imgui.h>
 #include <string>
 #include <nlohmann/json.hpp>
 
+#include "widget/input_text.h"
 #include "reactimgui.h"
 
 void InputText::Render(ReactImgui* view) {

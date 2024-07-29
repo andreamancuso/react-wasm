@@ -1,9 +1,7 @@
-#include "widget/checkbox.h"
-
 #include <imgui.h>
-
 #include <nlohmann/json.hpp>
 
+#include "widget/checkbox.h"
 #include "reactimgui.h"
 
 void Checkbox::Render(ReactImgui* view) {
