@@ -18,7 +18,28 @@
 #include "shared.h"
 #include "reactimgui.h"
 #include "implotview.h"
+#include "widget/button.h"
+#include "widget/checkbox.h"
+#include "widget/child.h"
+#include "widget/clipped_multi_line_text_renderer.h"
+#include "widget/collapsing_header.h"
+#include "widget/combo.h"
+#include "widget/group.h"
+#include "widget/input_text.h"
+#include "widget/item_tooltip.h"
+#include "widget/map_view.h"
+#include "widget/multi_slider.h"
+#include "widget/separator.h"
+#include "widget/separator_text.h"
+#include "widget/slider.h"
 #include "widget/widget.h"
+#include "widget/styled_widget.h"
+#include "widget/table.h"
+#include "widget/tabs.h"
+#include "widget/text.h"
+#include "widget/text_wrap.h"
+#include "widget/tree_node.h"
+#include "widget/window.h"
 
 
 using json = nlohmann::json;
@@ -66,7 +87,7 @@ void ReactImgui::SetUpElementCreatorFunctions() {
 
     m_element_init_fn["Table"] = &makeWidget<Table>;
     m_element_init_fn["ClippedMultiLineTextRenderer"] = &makeWidget<ClippedMultiLineTextRenderer>;
-    m_element_init_fn["Map"] = &makeWidget<Map>;
+    m_element_init_fn["MapView"] = &makeWidget<MapView>;
 
     m_element_init_fn["ItemTooltip"] = &makeWidget<ItemTooltip>;
 
@@ -491,22 +512,25 @@ void ReactImgui::SetChildren(const int parentId, const std::vector<int>& childre
 };
 
 void ReactImgui::AppendChild(int parentId, int childId) {
+    const std::lock_guard<std::mutex> lock(m_hierarchy_mutex);
+
     if (m_hierarchy.contains(parentId)) {
         if ( std::find(m_hierarchy[parentId].begin(), m_hierarchy[parentId].end(), childId) == m_hierarchy[parentId].end() ) {
-            const std::lock_guard<std::mutex> lock(m_hierarchy_mutex);
-            const std::lock_guard<std::mutex> elementsLock(m_hierarchy_mutex);
+            const std::lock_guard<std::mutex> elementsLock(m_elements_mutex);
 
-            if (!m_elements[childId]->m_isRoot) {
-                auto parentNode = YGNodeGetParent(m_elements[childId]->m_layoutNode->m_node);
+            if (m_elements.contains(childId)) {
+                if (!m_elements[childId]->m_isRoot) {
+                    auto parentNode = YGNodeGetParent(m_elements[childId]->m_layoutNode->m_node);
 
-                if (!parentNode) {
-                    const auto childCount = m_elements[parentId]->m_layoutNode->GetChildCount();
+                    if (!parentNode) {
+                        const auto childCount = m_elements[parentId]->m_layoutNode->GetChildCount();
 
-                    m_elements[parentId]->m_layoutNode->InsertChild(m_elements[childId]->m_layoutNode.get(), childCount);
+                        m_elements[parentId]->m_layoutNode->InsertChild(m_elements[childId]->m_layoutNode.get(), childCount);
+                    }
                 }
-            }
 
-            m_hierarchy[parentId].push_back(childId);
+                m_hierarchy[parentId].push_back(childId);
+            }
         }
     }
 };

@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from "react";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
-import { MapImperativeHandle } from "../../ReactImgui/Map";
+import { MapImperativeHandle } from "../../ReactImgui/MapView";
 
 export const Maps = () => {
     const mapRef = useRef<MapImperativeHandle>(null);
@@ -48,7 +48,7 @@ export const Maps = () => {
                 <ReactImgui.Button onClick={renderMap} label="Render" />
             </ReactImgui.Node>
 
-            <ReactImgui.Map ref={mapRef} style={{ flex: 1 }} />
+            <ReactImgui.MapView ref={mapRef} style={{ flex: 1 }} />
         </ReactImgui.Node>
     );
 };

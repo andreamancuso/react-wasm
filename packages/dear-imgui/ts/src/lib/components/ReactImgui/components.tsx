@@ -18,7 +18,7 @@ import { DisabledText } from "./DisabledText";
 import { TextWrap } from "./TextWrap";
 import { TreeNode } from "./TreeNode";
 import { UnformattedText } from "./UnformattedText";
-import { MapComponent } from "./Map";
+import { MapView } from "./MapView";
 import { Unknown } from "./Unknown";
 import { Table } from "./Table";
 import { Child } from "./Child";
@@ -50,7 +50,7 @@ export const components = {
     TabItem,
     Table,
     ClippedMultiLineTextRenderer,
-    Map: MapComponent,
+    MapView,
     Node,
 } as const;
 

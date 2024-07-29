@@ -3,7 +3,6 @@
 #include <nlohmann/json.hpp>
 
 #include "shared.h"
-#include "reactimgui.h"
 #include "element/layout_node.h"
 
 using json = nlohmann::json;
