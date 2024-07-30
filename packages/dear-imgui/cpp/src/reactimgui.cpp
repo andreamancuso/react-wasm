@@ -99,8 +99,8 @@ void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glf
         }
     };
 
-    m_widgetOpSubject = rpp::subjects::replay_subject<ElementOpDef>{100};
-    m_widgetOpSubject.get_observable() | rpp::ops::subscribe(handler);
+    m_elementOpSubject = rpp::subjects::serialized_replay_subject<ElementOpDef>{100};
+    m_elementOpSubject.get_observable() | rpp::ops::subscribe(handler);
 
     m_onInit();
 };
@@ -496,9 +496,8 @@ void ReactImgui::TakeStyleSnapshot() {
 
 void ReactImgui::QueueCreateElement(std::string& elementJsonAsString) {
     try {
-        const std::lock_guard<std::mutex> opSubjectsLock(m_widgetOpSubjectsMutex);
         ElementOpDef elementOp{OpCreateElement,json::parse(elementJsonAsString)};
-        m_widgetOpSubject.get_observer().on_next(elementOp);
+        m_elementOpSubject.get_observer().on_next(elementOp);
     } catch (nlohmann::detail::parse_error& parseError) {
         printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
     }
@@ -506,11 +505,10 @@ void ReactImgui::QueueCreateElement(std::string& elementJsonAsString) {
 
 void ReactImgui::QueuePatchElement(const int id, std::string& elementJsonAsString) {
     try {
-        const std::lock_guard<std::mutex> opSubjectsLock(m_widgetOpSubjectsMutex);
         json opDef = json::parse(elementJsonAsString);
         opDef["id"] = id;
         ElementOpDef elementOp{OpPatchElement,opDef};
-        m_widgetOpSubject.get_observer().on_next(elementOp);
+        m_elementOpSubject.get_observer().on_next(elementOp);
     } catch (nlohmann::detail::parse_error& parseError) {
         printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
     }
@@ -521,9 +519,8 @@ void ReactImgui::QueueAppendChild(int parentId, int childId) {
         json opDef;
         opDef["parentId"] = parentId;
         opDef["childId"] = childId;
-        const std::lock_guard<std::mutex> opSubjectsLock(m_widgetOpSubjectsMutex);
         ElementOpDef elementOp{OpAppendChild,opDef};
-        m_widgetOpSubject.get_observer().on_next(elementOp);
+        m_elementOpSubject.get_observer().on_next(elementOp);
     } catch (nlohmann::detail::parse_error& parseError) {
         printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
     }
@@ -534,9 +531,8 @@ void ReactImgui::QueueSetChildren(const int parentId, const std::vector<int>& ch
         json opDef;
         opDef["parentId"] = parentId;
         opDef["childrenIds"] = childrenIds;
-        const std::lock_guard<std::mutex> opSubjectsLock(m_widgetOpSubjectsMutex);
         ElementOpDef elementOp{OpSetChildren,opDef};
-        m_widgetOpSubject.get_observer().on_next(elementOp);
+        m_elementOpSubject.get_observer().on_next(elementOp);
     } catch (nlohmann::detail::parse_error& parseError) {
         printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
     }
@@ -544,11 +540,10 @@ void ReactImgui::QueueSetChildren(const int parentId, const std::vector<int>& ch
 
 void ReactImgui::QueueElementInternalOp(const int id, std::string& widgetOpDef) {
     try {
-        const std::lock_guard<std::mutex> opSubjectsLock(m_widgetOpSubjectsMutex);
         json opDef = json::parse(widgetOpDef);
         opDef["id"] = id;
         ElementOpDef elementOp{OpInternal,opDef};
-        m_widgetOpSubject.get_observer().on_next(elementOp);
+        m_elementOpSubject.get_observer().on_next(elementOp);
     } catch (nlohmann::detail::parse_error& parseError) {
         printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
     }

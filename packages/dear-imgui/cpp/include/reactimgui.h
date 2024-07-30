@@ -36,8 +36,7 @@ class ReactImgui : public ImPlotView {
         int m_mapGeneratorJobCounter = 0;
         std::unordered_map<int, std::unique_ptr<MapGenerator>> m_mapGeneratorJobs;
 
-        rpp::subjects::replay_subject<ElementOpDef> m_widgetOpSubject;
-        std::mutex m_widgetOpSubjectsMutex;
+        rpp::subjects::serialized_replay_subject<ElementOpDef> m_elementOpSubject;
 
         std::unordered_map<int, rpp::subjects::replay_subject<TableData>> m_tableSubjects;
         std::mutex m_tableSubjectsMutex;
