@@ -12,6 +12,7 @@
 
 using json = nlohmann::json;
 
+EMSCRIPTEN_DECLARE_VAL_TYPE(OnInitType);
 EMSCRIPTEN_DECLARE_VAL_TYPE(OnInputTextChangeType);
 EMSCRIPTEN_DECLARE_VAL_TYPE(OnComboChangeType);
 EMSCRIPTEN_DECLARE_VAL_TYPE(OnNumericValueChangeType);
@@ -61,7 +62,13 @@ class WasmRunner {
         ReactImgui* m_view{};
 
     public:
-        WasmRunner() = default;
+    WasmRunner() = default;
+
+        static void OnInit() {
+            EM_ASM(
+                { Module.eventHandlers.onInit(); }
+            );
+        }
 
         static void OnTextChanged(const int id, const std::string& value) {
             EM_ASM_ARGS(
@@ -139,6 +146,7 @@ class WasmRunner {
                 rawStyleOverridesDefs
             );
             m_view->SetEventHandlers(
+                OnInit,
                 OnTextChanged,
                 OnComboChanged,
                 OnNumericValueChanged,
@@ -159,19 +167,19 @@ class WasmRunner {
         }
 
         void setElement(std::string& elementJsonAsString) {
-            m_view->SetElement(elementJsonAsString);
+            m_view->QueueCreateElement(elementJsonAsString);
         }
 
         void patchElement(int id, std::string& elementJsonAsString) {
-            m_view->PatchElement(id, elementJsonAsString);
+            m_view->QueuePatchElement(id, elementJsonAsString);
         }
 
         void setChildren(int id, const std::vector<int>& childrenIds) {
-            m_view->SetChildren(id, childrenIds);
+            m_view->QueueSetChildren(id, childrenIds);
         }
 
         void appendChild(int parentId, int childId) {
-            m_view->AppendChild(parentId, childId);
+            m_view->QueueAppendChild(parentId, childId);
         }
 
         std::vector<int> getChildren(int id) {
@@ -360,6 +368,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
 
     // emscripten::register_vector<int>("IntVector");
 
+    emscripten::register_type<OnInitType>("() => void");
     emscripten::register_type<OnInputTextChangeType>("(id: string, value: string) => void");
     emscripten::register_type<OnComboChangeType>("(id: string, value: number) => void");
     emscripten::register_type<OnNumericValueChangeType>("(id: string, value: number) => void");

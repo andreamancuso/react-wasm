@@ -5,6 +5,20 @@ import { StyleRules } from "src/lib/stylesheet/stylesheet";
 import { ImVec2 } from "src/lib/wasm/wasm-app-types";
 import { YogaStyle } from "src/lib/stylesheet/yoga-style";
 
+export type ModuleEventHandlers = {
+    onTextChange: (id: number, value: string) => void;
+    onComboChange: (id: number, value: number) => void;
+    onNumericValueChange: (id: number, value: number) => void;
+    onMultiValueChange: (id: number, values: Primitive[]) => void;
+    onBooleanValueChange: (id: number, value: boolean) => void;
+    onClick: (id: number) => void;
+    onInit?: () => void;
+};
+
+export type WasmDeps = {
+    eventHandlers: ModuleEventHandlers;
+};
+
 export type Primitive = string | number | boolean;
 
 export type SliderTypes = "default" | "angle";

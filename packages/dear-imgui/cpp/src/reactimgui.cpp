@@ -68,10 +68,41 @@ ReactImgui::ReactImgui(
     }
 
     TakeStyleSnapshot();
+
+
+
 }
 
 void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) {
     ImGuiView::SetUp(pCanvasSelector, device, glfwWindow, wgpu_preferred_fmt);
+
+    auto handler = [this](const ElementOpDef& elementOpDef) {
+        switch(elementOpDef.op) {
+            case OpCreateElement: {
+                InitElement(elementOpDef.data);
+                break;
+            }
+            case OpPatchElement: {
+                PatchElement(elementOpDef.data);
+                break;
+            }
+            case OpSetChildren: {
+                SetChildren(elementOpDef.data);
+                break;
+            }
+            case OpAppendChild: {
+                AppendChild(elementOpDef.data);
+                break;
+            }
+
+            default: break;
+        }
+    };
+
+    m_widgetOpSubject = rpp::subjects::replay_subject<ElementOpDef>{100};
+    m_widgetOpSubject.get_observable() | rpp::ops::subscribe(handler);
+
+    m_onInit();
 };
 
 void ReactImgui::SetUpElementCreatorFunctions() {
@@ -195,8 +226,9 @@ void ReactImgui::InitElement(const json& elementDef) {
 
 void ReactImgui::HandleTableData(const int id, TableData val) {
     // printf("%d\n", (int)val.size());
-
-    static_cast<Table*>(m_elements[id].get())->AppendData(val);
+    if (m_elements.contains(id)) {
+        dynamic_cast<Table*>(m_elements[id].get())->AppendData(val);
+    }
 };
 
 void ReactImgui::HandleBufferedTableData(const int id, const std::vector<TableData>& val) {
@@ -222,6 +254,7 @@ void ReactImgui::HandleBufferedTableData(const int id, const std::vector<TableDa
 };
 
 void ReactImgui::SetEventHandlers(
+    const OnInitCallback onInitFn,
     const OnTextChangedCallback onInputTextChangeFn,
     const OnComboChangedCallback onComboChangeFn,
     const OnNumericValueChangedCallback onNumericValueChangeFn,
@@ -229,6 +262,7 @@ void ReactImgui::SetEventHandlers(
     const OnBooleanValueChangedCallback onBooleanValueChangeFn,
     const OnClickCallback onClickFn
 ) {
+    m_onInit = onInitFn;
     m_onInputTextChange = onInputTextChangeFn;
     m_onComboChange = onComboChangeFn;
     m_onNumericValueChange = onNumericValueChangeFn;
@@ -270,25 +304,12 @@ void ReactImgui::PrepareForRender() {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
-#ifdef __EMSCRIPTEN__
     // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
     // You may manually call LoadIniSettingsFromMemory() to load settings from your own storage.
     io.IniFilename = nullptr;
-#endif
-
-#ifndef IMGUI_DISABLE_FILE_FUNCTIONS
-    //io.Fonts->AddFontFromFileTTF("fonts/segoeui.ttf", 18.0f);
-    // io.Fonts->AddFontFromFileTTF("fonts/DroidSans.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("fonts/Roboto-Medium.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("fonts/Cousine-Regular.ttf", 15.0f);
-    //io.Fonts->AddFontFromFileTTF("fonts/ProggyTiny.ttf", 10.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("fonts/ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != nullptr);
-#endif
 
     if (m_shouldLoadDefaultStyle) {
         ImGui::StyleColorsLight();
-        // ImGui::StyleColorsDark();
     }
 };
 
@@ -329,8 +350,6 @@ void ReactImgui::RenderElementTree(const int id) {
 
 void ReactImgui::Render(const int window_width, const int window_height) {
     SetCurrentContext();
-
-    // ImGuiIO& io = ImGui::GetIO();
 
     ImGui_ImplWGPU_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -475,24 +494,72 @@ void ReactImgui::TakeStyleSnapshot() {
     memcpy(&m_baseStyle, &style, sizeof(style));
 };
 
-void ReactImgui::SetElement(std::string& elementJsonAsString) {
-    InitElement(json::parse(elementJsonAsString));
-};
-
-void ReactImgui::PatchElement(const int id, std::string& elementJsonAsString) {
-    const std::lock_guard<std::mutex> lock(m_elements_mutex);
-
-    if (m_elements.contains(id)) {
-        auto elementDef = json::parse(elementJsonAsString);
-        auto pElement = m_elements[id].get();
-
-        pElement->Patch(elementDef, this);
+void ReactImgui::QueueCreateElement(std::string& elementJsonAsString) {
+    try {
+        const std::lock_guard<std::mutex> opSubjectsLock(m_widgetOpSubjectsMutex);
+        ElementOpDef elementOp{OpCreateElement,json::parse(elementJsonAsString)};
+        m_widgetOpSubject.get_observer().on_next(elementOp);
+    } catch (nlohmann::detail::parse_error& parseError) {
+        printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
     }
 };
 
-void ReactImgui::SetChildren(const int parentId, const std::vector<int>& childrenIds) {
+void ReactImgui::QueuePatchElement(const int id, std::string& elementJsonAsString) {
+    try {
+        const std::lock_guard<std::mutex> opSubjectsLock(m_widgetOpSubjectsMutex);
+        json opDef = json::parse(elementJsonAsString);
+        opDef["id"] = id;
+        ElementOpDef elementOp{OpPatchElement,opDef};
+        m_widgetOpSubject.get_observer().on_next(elementOp);
+    } catch (nlohmann::detail::parse_error& parseError) {
+        printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
+    }
+};
+
+void ReactImgui::QueueAppendChild(int parentId, int childId) {
+    try {
+        json opDef;
+        opDef["parentId"] = parentId;
+        opDef["childId"] = childId;
+        const std::lock_guard<std::mutex> opSubjectsLock(m_widgetOpSubjectsMutex);
+        ElementOpDef elementOp{OpAppendChild,opDef};
+        m_widgetOpSubject.get_observer().on_next(elementOp);
+    } catch (nlohmann::detail::parse_error& parseError) {
+        printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
+    }
+};
+
+void ReactImgui::QueueSetChildren(const int parentId, const std::vector<int>& childrenIds) {
+    try {
+        json opDef;
+        opDef["parentId"] = parentId;
+        opDef["childrenIds"] = childrenIds;
+        const std::lock_guard<std::mutex> opSubjectsLock(m_widgetOpSubjectsMutex);
+        ElementOpDef elementOp{OpSetChildren,opDef};
+        m_widgetOpSubject.get_observer().on_next(elementOp);
+    } catch (nlohmann::detail::parse_error& parseError) {
+        printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
+    }
+};
+
+void ReactImgui::PatchElement(const json& opDef) {
+    auto id = opDef["id"].template get<int>();
+
+    const std::lock_guard<std::mutex> lock(m_elements_mutex);
+
+    if (m_elements.contains(id)) {
+        auto pElement = m_elements[id].get();
+
+        pElement->Patch(opDef, this);
+    }
+}
+
+void ReactImgui::SetChildren(const json& opDef) {
     const std::lock_guard<std::mutex> elementsLock(m_hierarchy_mutex);
     const std::lock_guard<std::mutex> hierarchyLock(m_elements_mutex);
+
+    auto parentId = opDef["parentId"].template get<int>();
+    auto childrenIds = opDef["childrenIds"].template get<std::vector<int>>();
 
     if (m_elements.contains(parentId)) {
         YGNodeRemoveAllChildren(m_elements[parentId]->m_layoutNode->m_node);
@@ -509,31 +576,34 @@ void ReactImgui::SetChildren(const int parentId, const std::vector<int>& childre
     }
 
     m_hierarchy[parentId] = childrenIds;
-};
+}
 
-void ReactImgui::AppendChild(int parentId, int childId) {
+void ReactImgui::AppendChild(const json& opDef) {
+    auto parentId = opDef["parentId"].template get<int>();
+    auto childId = opDef["childId"].template get<int>();
+
     const std::lock_guard<std::mutex> lock(m_hierarchy_mutex);
-
+    
     if (m_hierarchy.contains(parentId)) {
         if ( std::find(m_hierarchy[parentId].begin(), m_hierarchy[parentId].end(), childId) == m_hierarchy[parentId].end() ) {
             const std::lock_guard<std::mutex> elementsLock(m_elements_mutex);
-
+    
             if (m_elements.contains(childId)) {
                 if (!m_elements[childId]->m_isRoot) {
                     auto parentNode = YGNodeGetParent(m_elements[childId]->m_layoutNode->m_node);
-
+    
                     if (!parentNode) {
                         const auto childCount = m_elements[parentId]->m_layoutNode->GetChildCount();
-
+    
                         m_elements[parentId]->m_layoutNode->InsertChild(m_elements[childId]->m_layoutNode.get(), childCount);
                     }
                 }
-
+    
                 m_hierarchy[parentId].push_back(childId);
             }
         }
     }
-};
+}
 
 std::vector<int> ReactImgui::GetChildren(int id) {
     return m_hierarchy[id];

@@ -55,6 +55,13 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
                         args.push(JSON.stringify(styleOverrides));
                     }
 
+                    console.time("init");
+                    eventHandlers.onInit = () => {
+                        console.timeEnd("init");
+                        console.log("ready");
+                        setWasmModule(localModule);
+                    };
+
                     const moduleArg: any = {
                         canvas: canvasRef.current,
                         arguments: args,
@@ -66,8 +73,6 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
 
                     try {
                         localModule = await getWasmModule(moduleArg);
-
-                        setWasmModule(localModule);
                     } catch (exception) {
                         console.log("Unable to initialize the WASM correctly", exception);
                     }
