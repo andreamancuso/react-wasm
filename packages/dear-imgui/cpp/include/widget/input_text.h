@@ -58,6 +58,12 @@ class InputText final : public StyledWidget {
 
         void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
+        void HandleInternalOp(const json& opDef);
+
+        void SetValue(std::string& value) {
+            strncpy(m_bufferPointer.get(), value.c_str(), 99);
+        }
+
         void Init() override {
             Element::Init();
 

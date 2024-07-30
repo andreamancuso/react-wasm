@@ -1,4 +1,3 @@
-#include <cstring>
 #include <sstream>
 #include <nlohmann/json.hpp>
 
@@ -37,6 +36,8 @@ class Element {
         virtual void PostRender(ReactImgui* view);
 
         virtual void Patch(const json& elementPatchDef, ReactImgui* view);
+
+        virtual void HandleInternalOp(const json& opDef);
 
         virtual float GetLayoutLeftFromParentNode(YGNodeRef node, float left);
 

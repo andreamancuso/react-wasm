@@ -92,4 +92,24 @@ export class WidgetRegistrationService {
             }
         }
     }
+
+    setInputTextValue(id: string, value: string) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            this.wasmModule.elementInternalOp(
+                fabricWidgetId,
+                JSON.stringify({ op: "setValue", value }),
+            );
+        }
+    }
+
+    setComboSelectedIndex(id: string, index: number) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            this.wasmModule.elementInternalOp(
+                fabricWidgetId,
+                JSON.stringify({ op: "setSelectedIndex", index }),
+            );
+        }
+    }
 }

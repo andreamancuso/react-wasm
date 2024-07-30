@@ -22,7 +22,8 @@ enum ElementOp {
     OpCreateElement,
     OpPatchElement,
     OpSetChildren,
-    OpAppendChild
+    OpAppendChild,
+    OpInternal,
 };
 
 struct ElementOpDef {
@@ -46,7 +47,15 @@ class ReactImgui : public ImPlotView {
         std::unordered_map<int, std::unique_ptr<Element>> m_elements;
         std::mutex m_elements_mutex;
 
-        void InitElement(const json& elementDef);
+        void CreateElement(const json& elementDef);
+
+        void PatchElement(const json& opDef);
+
+        void HandleElementInternalOp(const json& opDef);
+
+        void SetChildren(const json& opDef);
+
+        void AppendChild(const json& opDef);
         
         void SetUpFloatFormatChars();
 
@@ -113,15 +122,11 @@ class ReactImgui : public ImPlotView {
 
         void QueuePatchElement(int id, std::string& elementJsonAsString);
 
-        void PatchElement(const json& opDef);
-
         void QueueSetChildren(int id, const std::vector<int>& childIds);
-
-        void SetChildren(const json& opDef);
 
         void QueueAppendChild(int parentId, int childId);
 
-        void AppendChild(const json& opDef);
+        void QueueElementInternalOp(int id, std::string& widgetOpDef);
 
         void AppendDataToTable(int id, std::string& data);
 

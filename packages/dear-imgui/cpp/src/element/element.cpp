@@ -109,3 +109,4 @@ void Element::Patch(const json& nodeDef, ReactImgui* view) {
     }
 };
 
+void Element::HandleInternalOp(const json& opDef) {};

@@ -1,30 +1,37 @@
-import { useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import { useWidgetRegistrationService } from "../../hooks";
-import { WidgetFunctionComponent, WidgetPropsMap } from "./types";
+import { WidgetPropsMap } from "./types";
 
-export type InputTextProps = {
-    defaultValue?: string;
-    label?: string;
-    onChange?: (value: string) => void;
+export type InputTextImperativeHandle = {
+    setValue: (value: string) => void;
 };
 
-export const InputText: WidgetFunctionComponent<WidgetPropsMap["InputText"]> = ({
-    onChange,
-    defaultValue,
-    label,
-    style,
-}) => {
-    const widgetRegistratonService = useWidgetRegistrationService();
-    const idRef = useRef(widgetRegistratonService.generateId());
+export const InputText = forwardRef<InputTextImperativeHandle, WidgetPropsMap["InputText"]>(
+    ({ onChange, defaultValue, label, style }, ref) => {
+        const widgetRegistratonService = useWidgetRegistrationService();
+        const idRef = useRef(widgetRegistratonService.generateId());
 
-    return (
-        <widget
-            type="InputText"
-            id={idRef.current}
-            defaultValue={defaultValue}
-            label={label}
-            onChange={onChange}
-            style={style}
-        />
-    );
-};
+        useImperativeHandle(
+            ref,
+            () => {
+                return {
+                    setValue(value: string) {
+                        widgetRegistratonService.setInputTextValue(idRef.current, value);
+                    },
+                };
+            },
+            [],
+        );
+
+        return (
+            <widget
+                type="InputText"
+                id={idRef.current}
+                defaultValue={defaultValue}
+                label={label}
+                onChange={onChange}
+                style={style}
+            />
+        );
+    },
+);

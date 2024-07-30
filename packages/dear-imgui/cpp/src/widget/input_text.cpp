@@ -21,6 +21,17 @@ void InputText::Patch(const json& widgetPatchDef, ReactImgui* view) {
     }
 };
 
+void InputText::HandleInternalOp(const json& opDef) {
+    if (opDef.contains("op") && opDef["op"].is_string()) {
+        auto op = opDef["op"].template get<std::string>();
+
+        if (op == "setValue") {
+            auto value = opDef["value"].template get<std::string>();
+            SetValue(value);
+        }
+    }
+};
+
 int InputText::InputTextCb(ImGuiInputTextCallbackData* data) {
     if (data->EventFlag == ImGuiInputTextFlags_CallbackEdit) {
         auto pInputText = reinterpret_cast<InputText*>(data->UserData);

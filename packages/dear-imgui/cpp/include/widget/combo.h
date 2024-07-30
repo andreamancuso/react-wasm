@@ -89,6 +89,8 @@ class Combo final : public StyledWidget {
 
         void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
+        void HandleInternalOp(const json& opDef);
+
         void Init() override {
             Element::Init();
 

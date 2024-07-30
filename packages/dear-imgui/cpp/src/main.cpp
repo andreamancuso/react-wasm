@@ -174,6 +174,10 @@ class WasmRunner {
             m_view->QueuePatchElement(id, elementJsonAsString);
         }
 
+        void elementInternalOp(int id, std::string& elementJsonAsString) {
+            m_view->QueueElementInternalOp(id, elementJsonAsString);
+        }
+
         void setChildren(int id, const std::vector<int>& childrenIds) {
             m_view->QueueSetChildren(id, childrenIds);
         }
@@ -305,6 +309,10 @@ void patchElement(int id, std::string elementJson) {
     pRunner->patchElement(id, elementJson);
 }
 
+void elementInternalOp(int id, std::string elementJson) {
+    pRunner->elementInternalOp(id, elementJson);
+}
+
 void setChildren(int id, std::string childrenIds) {
     pRunner->setChildren(id, JsonToVector<int>(childrenIds));
 }
@@ -342,6 +350,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("resizeWindow", &resizeWindow);
     emscripten::function("setElement", &setElement);
     emscripten::function("patchElement", &patchElement);
+    emscripten::function("elementInternalOp", &patchElement);
     emscripten::function("setChildren", &setChildren);
     emscripten::function("appendChild", &appendChild);
     emscripten::function("getChildren", &getChildren);

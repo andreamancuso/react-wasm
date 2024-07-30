@@ -68,9 +68,6 @@ ReactImgui::ReactImgui(
     }
 
     TakeStyleSnapshot();
-
-
-
 }
 
 void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) {
@@ -79,7 +76,7 @@ void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glf
     auto handler = [this](const ElementOpDef& elementOpDef) {
         switch(elementOpDef.op) {
             case OpCreateElement: {
-                InitElement(elementOpDef.data);
+                CreateElement(elementOpDef.data);
                 break;
             }
             case OpPatchElement: {
@@ -93,6 +90,9 @@ void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glf
             case OpAppendChild: {
                 AppendChild(elementOpDef.data);
                 break;
+            }
+            case OpInternal: {
+                HandleElementInternalOp(elementOpDef.data);
             }
 
             default: break;
@@ -180,7 +180,7 @@ void ReactImgui::SetChildrenDisplay(const int id, const YGDisplay display) {
     }
 };
 
-void ReactImgui::InitElement(const json& elementDef) {
+void ReactImgui::CreateElement(const json& elementDef) {
     if (elementDef.is_object() && elementDef.contains("type")) {
         std::string type = elementDef["type"].template get<std::string>();
 
@@ -542,6 +542,18 @@ void ReactImgui::QueueSetChildren(const int parentId, const std::vector<int>& ch
     }
 };
 
+void ReactImgui::QueueElementInternalOp(const int id, std::string& widgetOpDef) {
+    try {
+        const std::lock_guard<std::mutex> opSubjectsLock(m_widgetOpSubjectsMutex);
+        json opDef = json::parse(widgetOpDef);
+        opDef["id"] = id;
+        ElementOpDef elementOp{OpInternal,opDef};
+        m_widgetOpSubject.get_observer().on_next(elementOp);
+    } catch (nlohmann::detail::parse_error& parseError) {
+        printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
+    }
+};
+
 void ReactImgui::PatchElement(const json& opDef) {
     auto id = opDef["id"].template get<int>();
 
@@ -551,6 +563,18 @@ void ReactImgui::PatchElement(const json& opDef) {
         auto pElement = m_elements[id].get();
 
         pElement->Patch(opDef, this);
+    }
+}
+
+void ReactImgui::HandleElementInternalOp(const json& opDef) {
+    auto id = opDef["id"].template get<int>();
+
+    const std::lock_guard<std::mutex> lock(m_elements_mutex);
+
+    if (m_elements.contains(id)) {
+        auto pElement = m_elements[id].get();
+
+        pElement->HandleInternalOp(opDef);
     }
 }
 
