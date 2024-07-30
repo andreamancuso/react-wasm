@@ -27,6 +27,7 @@ typedef std::variant<std::monostate, const ImVec2*, const float*> StyleVarValueR
 typedef std::unordered_map<ImGuiCol, ImVec4> StyleColors;
 typedef std::unordered_map<ImGuiStyleVar, StyleVarValue> StyleVars;
 
+typedef void (*OnInitCallback)();
 typedef void (*OnTextChangedCallback)(int id, const std::string& value);
 typedef void (*OnComboChangedCallback)(int id, int value);
 typedef void (*OnNumericValueChangedCallback)(int id, float value);

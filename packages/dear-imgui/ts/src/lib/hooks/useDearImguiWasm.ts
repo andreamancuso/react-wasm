@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import { Primitive } from "../components/ReactImgui/types";
+import { Primitive, WasmDeps } from "../components/ReactImgui/types";
 
-export const useDearImguiWasm = (ReactNativePrivateInterface: any) => {
+export const useDearImguiWasm = (ReactNativePrivateInterface: any): WasmDeps => {
     const onTextChange = useCallback((id: number, value: string) => {
         const rootNodeID = id;
         const topLevelType = "onChange";

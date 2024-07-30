@@ -18,10 +18,25 @@ class StyledWidget;
 class LayoutNode;
 struct BaseStyle;
 
+enum ElementOp {
+    OpCreateElement,
+    OpPatchElement,
+    OpSetChildren,
+    OpAppendChild
+};
+
+struct ElementOpDef {
+    ElementOp op;
+    json data;
+};
+
 class ReactImgui : public ImPlotView {
     private:
         int m_mapGeneratorJobCounter = 0;
         std::unordered_map<int, std::unique_ptr<MapGenerator>> m_mapGeneratorJobs;
+
+        rpp::subjects::replay_subject<ElementOpDef> m_widgetOpSubject;
+        std::mutex m_widgetOpSubjectsMutex;
 
         std::unordered_map<int, rpp::subjects::replay_subject<TableData>> m_tableSubjects;
         std::mutex m_tableSubjectsMutex;
@@ -51,6 +66,7 @@ class ReactImgui : public ImPlotView {
 
         ImGuiStyle m_baseStyle;
 
+        OnInitCallback m_onInit;
         OnTextChangedCallback m_onInputTextChange;
         OnComboChangedCallback m_onComboChange;
         OnNumericValueChangedCallback m_onNumericValueChange;
@@ -70,6 +86,7 @@ class ReactImgui : public ImPlotView {
         void SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) override;
 
         void SetEventHandlers(
+            OnInitCallback onInitFn,
             OnTextChangedCallback onInputTextChangeFn,
             OnComboChangedCallback onComboChangeFn,
             OnNumericValueChangedCallback onNumericValueChangeFn,
@@ -92,13 +109,19 @@ class ReactImgui : public ImPlotView {
 
         void RenderElements(int id = 0);
 
-        void SetElement(std::string& elementJsonAsString);
+        void QueueCreateElement(std::string& elementJsonAsString);
 
-        void PatchElement(int id, std::string& elementJsonAsString);
+        void QueuePatchElement(int id, std::string& elementJsonAsString);
 
-        void SetChildren(int id, const std::vector<int>& childIds);
+        void PatchElement(const json& opDef);
 
-        void AppendChild(int parentId, int childId);
+        void QueueSetChildren(int id, const std::vector<int>& childIds);
+
+        void SetChildren(const json& opDef);
+
+        void QueueAppendChild(int parentId, int childId);
+
+        void AppendChild(const json& opDef);
 
         void AppendDataToTable(int id, std::string& data);
 
