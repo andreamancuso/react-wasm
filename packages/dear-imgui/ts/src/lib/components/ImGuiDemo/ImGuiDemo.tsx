@@ -181,14 +181,14 @@ export const ImGuiDemo = () => {
 
             <ReactImgui.UnformattedText text="After Style Selector 1" />
 
-            {/* <ReactImgui.Node
+            <ReactImgui.Node
                 style={{
                     width: "45%",
                     height: "100%",
                 }}
             >
                 <Tables />
-            </ReactImgui.Node> */}
+            </ReactImgui.Node>
 
             {/* <ReactImgui.UnformattedText
                 text={`dear imgui says hello! ${faIconMap["address-book"]} ${faIconMap["wine-bottle"]}`}

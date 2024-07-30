@@ -1,3 +1,4 @@
 .cmake
 .cproject
 .project
+.ninja_lock

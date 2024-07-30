@@ -174,6 +174,10 @@ class WasmRunner {
             m_view->QueuePatchElement(id, elementJsonAsString);
         }
 
+        void elementInternalOp(int id, std::string& elementJsonAsString) {
+            m_view->QueueElementInternalOp(id, elementJsonAsString);
+        }
+
         void setChildren(int id, const std::vector<int>& childrenIds) {
             m_view->QueueSetChildren(id, childrenIds);
         }
@@ -188,10 +192,6 @@ class WasmRunner {
 
         std::string getAvailableFonts() {
             return m_view->GetAvailableFonts().dump();
-        }
-
-        void appendDataToTable(int id, std::string& data) {
-            m_view->AppendDataToTable(id, data);
         }
 
         void renderMap(int id, double centerX, double centerY, int zoom) {
@@ -305,6 +305,10 @@ void patchElement(int id, std::string elementJson) {
     pRunner->patchElement(id, elementJson);
 }
 
+void elementInternalOp(int id, std::string elementJson) {
+    pRunner->elementInternalOp(id, elementJson);
+}
+
 void setChildren(int id, std::string childrenIds) {
     pRunner->setChildren(id, JsonToVector<int>(childrenIds));
 }
@@ -315,10 +319,6 @@ void appendChild(int parentId, int childId) {
 
 std::string getChildren(int id) {
     return IntVectorToJson(pRunner->getChildren(id)).dump();
-}
-
-void appendDataToTable(int id, std::string data) {
-    pRunner->appendDataToTable(id, data);
 }
 
 void renderMap(int id, double centerX, double centerY, int zoom) {
@@ -342,10 +342,10 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("resizeWindow", &resizeWindow);
     emscripten::function("setElement", &setElement);
     emscripten::function("patchElement", &patchElement);
+    emscripten::function("elementInternalOp", &elementInternalOp);
     emscripten::function("setChildren", &setChildren);
     emscripten::function("appendChild", &appendChild);
     emscripten::function("getChildren", &getChildren);
-    emscripten::function("appendDataToTable", &appendDataToTable);
     emscripten::function("renderMap", &renderMap);
     emscripten::function("appendTextToClippedMultiLineTextRenderer", &appendTextToClippedMultiLineTextRenderer);
     emscripten::function("getStyle", &getStyle);

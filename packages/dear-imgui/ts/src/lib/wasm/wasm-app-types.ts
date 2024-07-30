@@ -97,7 +97,6 @@ export enum ImGuiStyleVar {
 }
 
 // TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
-// TypeScript bindings for emscripten-generated code.  Automatically generated at compile time.
 declare namespace RuntimeExports {
     let HEAPF32: any;
     let HEAPF64: any;
@@ -835,6 +834,7 @@ interface EmbindModule {
     resizeWindow(_0: number, _1: number): void;
     setElement(_0: EmbindString): void;
     patchElement(_0: number, _1: EmbindString): void;
+    elementInternalOp(_0: number, _1: EmbindString): void;
     setChildren(_0: number, _1: EmbindString): void;
     appendChild(_0: number, _1: number): void;
     getChildren(_0: number): string;

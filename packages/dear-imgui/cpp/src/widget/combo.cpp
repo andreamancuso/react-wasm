@@ -43,3 +43,14 @@ void Combo::Patch(const json& widgetPatchDef, ReactImgui* view) {
         }
     }
 };
+
+void Combo::HandleInternalOp(const json& opDef) {
+    if (opDef.contains("op") && opDef["op"].is_string()) {
+        auto op = opDef["op"].template get<std::string>();
+
+        if (op == "setSelectedIndex" && opDef.contains("index") && opDef["index"].is_number_integer()) {
+            auto index = opDef["index"].template get<int>();
+            SetSelectedIndex(index);
+        }
+    }
+};

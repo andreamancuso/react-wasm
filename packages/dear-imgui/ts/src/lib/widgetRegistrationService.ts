@@ -57,11 +57,14 @@ export class WidgetRegistrationService {
         this.maps.delete(id);
     }
 
-    appendDataToTable(id: string, data: any) {
+    appendDataToTable(id: string, data: any[]) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
             try {
-                this.wasmModule.appendDataToTable(fabricWidgetId, JSON.stringify(data));
+                this.wasmModule.elementInternalOp(
+                    fabricWidgetId,
+                    JSON.stringify({ op: "appendData", data }),
+                );
             } catch (error) {
                 // todo: propagate this?
                 console.error(error);
@@ -90,6 +93,26 @@ export class WidgetRegistrationService {
                 // todo: propagate this?
                 console.error(error);
             }
+        }
+    }
+
+    setInputTextValue(id: string, value: string) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            this.wasmModule.elementInternalOp(
+                fabricWidgetId,
+                JSON.stringify({ op: "setValue", value }),
+            );
+        }
+    }
+
+    setComboSelectedIndex(id: string, index: number) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            this.wasmModule.elementInternalOp(
+                fabricWidgetId,
+                JSON.stringify({ op: "setSelectedIndex", index }),
+            );
         }
     }
 }

@@ -137,11 +137,11 @@ export type WidgetPropsMap = {
     MapView: StyleProps & {};
 };
 
-type WidgetKeys = keyof WidgetPropsMap;
+export type WidgetKeys = keyof WidgetPropsMap;
 
 type ReactImguiType = typeof ReactImgui;
 
-type WidgetsRequiringId =
+export type WidgetsRequiringId =
     | "InputText"
     | "CollapsingHeader"
     | "TreeNode"

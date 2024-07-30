@@ -68,9 +68,6 @@ ReactImgui::ReactImgui(
     }
 
     TakeStyleSnapshot();
-
-
-
 }
 
 void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) {
@@ -79,7 +76,7 @@ void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glf
     auto handler = [this](const ElementOpDef& elementOpDef) {
         switch(elementOpDef.op) {
             case OpCreateElement: {
-                InitElement(elementOpDef.data);
+                CreateElement(elementOpDef.data);
                 break;
             }
             case OpPatchElement: {
@@ -94,13 +91,16 @@ void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glf
                 AppendChild(elementOpDef.data);
                 break;
             }
+            case OpInternal: {
+                HandleElementInternalOp(elementOpDef.data);
+            }
 
             default: break;
         }
     };
 
-    m_widgetOpSubject = rpp::subjects::replay_subject<ElementOpDef>{100};
-    m_widgetOpSubject.get_observable() | rpp::ops::subscribe(handler);
+    m_elementOpSubject = rpp::subjects::serialized_replay_subject<ElementOpDef>{100};
+    m_elementOpSubject.get_observable() | rpp::ops::subscribe(handler);
 
     m_onInit();
 };
@@ -180,7 +180,7 @@ void ReactImgui::SetChildrenDisplay(const int id, const YGDisplay display) {
     }
 };
 
-void ReactImgui::InitElement(const json& elementDef) {
+void ReactImgui::CreateElement(const json& elementDef) {
     if (elementDef.is_object() && elementDef.contains("type")) {
         std::string type = elementDef["type"].template get<std::string>();
 
@@ -203,54 +203,12 @@ void ReactImgui::InitElement(const json& elementDef) {
             if (elementDef.is_object() && elementDef.contains("style") && elementDef["style"].is_object()) {
                 m_elements[id]->m_layoutNode->ApplyStyle(elementDef["style"]);
             }
-
-            if (type == "Table") {
-                const std::lock_guard<std::mutex> lock(m_tableSubjectsMutex);
-
-                m_tableSubjects[id] = rpp::subjects::replay_subject<TableData>{100};
-
-                // auto handler = std::bind(&ReactImgui::HandleBufferedTableData, this, id, std::placeholders::_1);
-                auto handler = std::bind(&ReactImgui::HandleTableData, this, id, std::placeholders::_1);
-
-                // todo: restore buffer() usage
-                // m_tableSubjects[id].get_observable() | rpp::ops::buffer(50) | rpp::ops::subscribe(handler);
-                m_tableSubjects[id].get_observable() | rpp::ops::subscribe(handler);
-            }
         } else {
             printf("unrecognised element type: '%s'\n", type.c_str());
         }
     } else {
         printf("received JSON either not an object or does not contain type property\n");
     }
-};
-
-void ReactImgui::HandleTableData(const int id, TableData val) {
-    // printf("%d\n", (int)val.size());
-    if (m_elements.contains(id)) {
-        dynamic_cast<Table*>(m_elements[id].get())->AppendData(val);
-    }
-};
-
-void ReactImgui::HandleBufferedTableData(const int id, const std::vector<TableData>& val) {
-    // printf("%d\n", (int)val.size()); // I'm seeing 50 the first time this gets called, then 1 subsequent times...
-
-    const std::lock_guard<std::mutex> elementLock(m_elements_mutex);
-
-    size_t totalSize = 0;
-
-    for (const auto& chunk : val) {
-        totalSize += chunk.size();
-    }
-
-    TableData data;
-
-    data.reserve(totalSize);
-
-    for (const auto& chunk : val) {
-        data.insert(data.end(), chunk.begin(), chunk.end());
-    }
-
-    dynamic_cast<Table*>(m_elements[id].get())->AppendData(data);
 };
 
 void ReactImgui::SetEventHandlers(
@@ -496,9 +454,8 @@ void ReactImgui::TakeStyleSnapshot() {
 
 void ReactImgui::QueueCreateElement(std::string& elementJsonAsString) {
     try {
-        const std::lock_guard<std::mutex> opSubjectsLock(m_widgetOpSubjectsMutex);
         ElementOpDef elementOp{OpCreateElement,json::parse(elementJsonAsString)};
-        m_widgetOpSubject.get_observer().on_next(elementOp);
+        m_elementOpSubject.get_observer().on_next(elementOp);
     } catch (nlohmann::detail::parse_error& parseError) {
         printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
     }
@@ -506,11 +463,10 @@ void ReactImgui::QueueCreateElement(std::string& elementJsonAsString) {
 
 void ReactImgui::QueuePatchElement(const int id, std::string& elementJsonAsString) {
     try {
-        const std::lock_guard<std::mutex> opSubjectsLock(m_widgetOpSubjectsMutex);
         json opDef = json::parse(elementJsonAsString);
         opDef["id"] = id;
         ElementOpDef elementOp{OpPatchElement,opDef};
-        m_widgetOpSubject.get_observer().on_next(elementOp);
+        m_elementOpSubject.get_observer().on_next(elementOp);
     } catch (nlohmann::detail::parse_error& parseError) {
         printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
     }
@@ -521,9 +477,8 @@ void ReactImgui::QueueAppendChild(int parentId, int childId) {
         json opDef;
         opDef["parentId"] = parentId;
         opDef["childId"] = childId;
-        const std::lock_guard<std::mutex> opSubjectsLock(m_widgetOpSubjectsMutex);
         ElementOpDef elementOp{OpAppendChild,opDef};
-        m_widgetOpSubject.get_observer().on_next(elementOp);
+        m_elementOpSubject.get_observer().on_next(elementOp);
     } catch (nlohmann::detail::parse_error& parseError) {
         printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
     }
@@ -534,9 +489,19 @@ void ReactImgui::QueueSetChildren(const int parentId, const std::vector<int>& ch
         json opDef;
         opDef["parentId"] = parentId;
         opDef["childrenIds"] = childrenIds;
-        const std::lock_guard<std::mutex> opSubjectsLock(m_widgetOpSubjectsMutex);
         ElementOpDef elementOp{OpSetChildren,opDef};
-        m_widgetOpSubject.get_observer().on_next(elementOp);
+        m_elementOpSubject.get_observer().on_next(elementOp);
+    } catch (nlohmann::detail::parse_error& parseError) {
+        printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
+    }
+};
+
+void ReactImgui::QueueElementInternalOp(const int id, std::string& widgetOpDef) {
+    try {
+        json opDef = json::parse(widgetOpDef);
+        opDef["id"] = id;
+        ElementOpDef elementOp{OpInternal,opDef};
+        m_elementOpSubject.get_observer().on_next(elementOp);
     } catch (nlohmann::detail::parse_error& parseError) {
         printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
     }
@@ -551,6 +516,18 @@ void ReactImgui::PatchElement(const json& opDef) {
         auto pElement = m_elements[id].get();
 
         pElement->Patch(opDef, this);
+    }
+}
+
+void ReactImgui::HandleElementInternalOp(const json& opDef) {
+    auto id = opDef["id"].template get<int>();
+
+    const std::lock_guard<std::mutex> lock(m_elements_mutex);
+
+    if (m_elements.contains(id)) {
+        auto pElement = m_elements[id].get();
+
+        pElement->HandleInternalOp(opDef);
     }
 }
 
@@ -623,37 +600,7 @@ json ReactImgui::GetAvailableFonts() {
     return fonts;
 };
 
-void ReactImgui::AppendDataToTable(const int id, std::string& data) {
-    if (m_tableSubjects.contains(id)) {
-        const std::lock_guard<std::mutex> lock(m_tableSubjectsMutex);
-        auto parsedData = json::parse(data);
 
-        if (parsedData.is_array()) {
-            auto tableData = TableData();
-
-            for (auto& [parsedItemKey, parsedRow] : parsedData.items()) {
-                if (parsedRow.is_object()) {
-                    auto row = TableRow();
-
-                    for (auto& [parsedRowFieldKey, parsedRowFieldValue] : parsedRow.items()) {
-                        if (parsedRowFieldValue.is_string()) {
-                            row[parsedRowFieldKey] = parsedRowFieldValue.template get<std::string>();
-                        }
-                    }
-
-                    tableData.push_back(row);
-                }
-            }
-
-            // printf("About to add data to subject\n");
-            m_tableSubjects[id].get_observer().on_next(tableData);
-            // printf("Added data to subject\n");
-        }
-    } else {
-        // todo: should we lock beforehand?
-        // todo: should we throw here, or return a boolean to indicate whether the append operation was successfully 'queued' success or failure
-    }
-};
 
 void ReactImgui::RenderMap(int id, double centerX, double centerY, int zoom) {
     MapGeneratorOptions options;

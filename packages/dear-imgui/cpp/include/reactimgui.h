@@ -22,7 +22,8 @@ enum ElementOp {
     OpCreateElement,
     OpPatchElement,
     OpSetChildren,
-    OpAppendChild
+    OpAppendChild,
+    OpInternal,
 };
 
 struct ElementOpDef {
@@ -35,27 +36,27 @@ class ReactImgui : public ImPlotView {
         int m_mapGeneratorJobCounter = 0;
         std::unordered_map<int, std::unique_ptr<MapGenerator>> m_mapGeneratorJobs;
 
-        rpp::subjects::replay_subject<ElementOpDef> m_widgetOpSubject;
-        std::mutex m_widgetOpSubjectsMutex;
-
-        std::unordered_map<int, rpp::subjects::replay_subject<TableData>> m_tableSubjects;
-        std::mutex m_tableSubjectsMutex;
+        rpp::subjects::serialized_replay_subject<ElementOpDef> m_elementOpSubject;
 
         std::unordered_map<std::string, std::function<std::unique_ptr<Element>(const json&, std::optional<BaseStyle>, ReactImgui*)>> m_element_init_fn;
 
         std::unordered_map<int, std::unique_ptr<Element>> m_elements;
         std::mutex m_elements_mutex;
 
-        void InitElement(const json& elementDef);
+        void CreateElement(const json& elementDef);
+
+        void PatchElement(const json& opDef);
+
+        void HandleElementInternalOp(const json& opDef);
+
+        void SetChildren(const json& opDef);
+
+        void AppendChild(const json& opDef);
         
         void SetUpFloatFormatChars();
 
         void SetUpElementCreatorFunctions();
         
-        void HandleTableData(int id, TableData val);
-        
-        void HandleBufferedTableData(int id, const std::vector<TableData>& val);
-
     public:
         std::unordered_map<int, std::vector<int>> m_hierarchy;
         std::mutex m_hierarchy_mutex;
@@ -113,17 +114,11 @@ class ReactImgui : public ImPlotView {
 
         void QueuePatchElement(int id, std::string& elementJsonAsString);
 
-        void PatchElement(const json& opDef);
-
         void QueueSetChildren(int id, const std::vector<int>& childIds);
-
-        void SetChildren(const json& opDef);
 
         void QueueAppendChild(int parentId, int childId);
 
-        void AppendChild(const json& opDef);
-
-        void AppendDataToTable(int id, std::string& data);
+        void QueueElementInternalOp(int id, std::string& widgetOpDef);
 
         void RenderMap(int id, double centerX, double centerY, int zoom);
 
