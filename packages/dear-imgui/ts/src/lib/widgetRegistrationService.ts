@@ -57,11 +57,14 @@ export class WidgetRegistrationService {
         this.maps.delete(id);
     }
 
-    appendDataToTable(id: string, data: any) {
+    appendDataToTable(id: string, data: any[]) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
             try {
-                this.wasmModule.appendDataToTable(fabricWidgetId, JSON.stringify(data));
+                this.wasmModule.elementInternalOp(
+                    fabricWidgetId,
+                    JSON.stringify({ op: "appendData", data }),
+                );
             } catch (error) {
                 // todo: propagate this?
                 console.error(error);

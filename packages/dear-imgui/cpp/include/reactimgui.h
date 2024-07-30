@@ -38,9 +38,6 @@ class ReactImgui : public ImPlotView {
 
         rpp::subjects::serialized_replay_subject<ElementOpDef> m_elementOpSubject;
 
-        std::unordered_map<int, rpp::subjects::replay_subject<TableData>> m_tableSubjects;
-        std::mutex m_tableSubjectsMutex;
-
         std::unordered_map<std::string, std::function<std::unique_ptr<Element>(const json&, std::optional<BaseStyle>, ReactImgui*)>> m_element_init_fn;
 
         std::unordered_map<int, std::unique_ptr<Element>> m_elements;
@@ -60,10 +57,6 @@ class ReactImgui : public ImPlotView {
 
         void SetUpElementCreatorFunctions();
         
-        void HandleTableData(int id, TableData val);
-        
-        void HandleBufferedTableData(int id, const std::vector<TableData>& val);
-
     public:
         std::unordered_map<int, std::vector<int>> m_hierarchy;
         std::mutex m_hierarchy_mutex;
@@ -126,8 +119,6 @@ class ReactImgui : public ImPlotView {
         void QueueAppendChild(int parentId, int childId);
 
         void QueueElementInternalOp(int id, std::string& widgetOpDef);
-
-        void AppendDataToTable(int id, std::string& data);
 
         void RenderMap(int id, double centerX, double centerY, int zoom);
 

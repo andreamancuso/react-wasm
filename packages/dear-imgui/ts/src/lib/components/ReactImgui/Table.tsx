@@ -3,7 +3,7 @@ import { useWidgetRegistrationService } from "../../hooks";
 import { WidgetPropsMap } from "./types";
 
 export type TableImperativeHandle = {
-    appendDataToTable: (data: any) => void;
+    appendDataToTable: (data: any[]) => void;
 };
 
 export const Table = forwardRef<TableImperativeHandle, WidgetPropsMap["Table"]>(
@@ -19,7 +19,7 @@ export const Table = forwardRef<TableImperativeHandle, WidgetPropsMap["Table"]>(
             ref,
             () => {
                 return {
-                    appendDataToTable(data: any) {
+                    appendDataToTable(data: any[]) {
                         widgetRegistratonService.appendDataToTable(idRef.current, data);
                     },
                 };

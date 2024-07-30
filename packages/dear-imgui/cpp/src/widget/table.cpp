@@ -88,6 +88,32 @@ void Table::Patch(const json& widgetPatchDef, ReactImgui* view) {
     }
 };
 
+void Table::HandleInternalOp(const json& opDef) {
+    if (opDef.contains("op") && opDef["op"].is_string()) {
+        auto op = opDef["op"].template get<std::string>();
+
+        if (op == "appendData" && opDef.contains("data") && opDef["data"].is_array()) {
+            auto tableData = TableData();
+
+            for (auto& [parsedItemKey, parsedRow] : opDef["data"].items()) {
+                if (parsedRow.is_object()) {
+                    auto row = TableRow();
+
+                    for (auto& [parsedRowFieldKey, parsedRowFieldValue] : parsedRow.items()) {
+                        if (parsedRowFieldValue.is_string()) {
+                            row[parsedRowFieldKey] = parsedRowFieldValue.template get<std::string>();
+                        }
+                    }
+
+                    tableData.push_back(row);
+                }
+            }
+
+            AppendData(tableData);
+        }
+    }
+};
+
 YGSize Table::Measure(const YGNodeConstRef node, const float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
     YGSize size{};
     const auto context = YGNodeGetContext(node);

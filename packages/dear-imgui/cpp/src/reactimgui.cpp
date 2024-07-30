@@ -203,54 +203,12 @@ void ReactImgui::CreateElement(const json& elementDef) {
             if (elementDef.is_object() && elementDef.contains("style") && elementDef["style"].is_object()) {
                 m_elements[id]->m_layoutNode->ApplyStyle(elementDef["style"]);
             }
-
-            if (type == "Table") {
-                const std::lock_guard<std::mutex> lock(m_tableSubjectsMutex);
-
-                m_tableSubjects[id] = rpp::subjects::replay_subject<TableData>{100};
-
-                // auto handler = std::bind(&ReactImgui::HandleBufferedTableData, this, id, std::placeholders::_1);
-                auto handler = std::bind(&ReactImgui::HandleTableData, this, id, std::placeholders::_1);
-
-                // todo: restore buffer() usage
-                // m_tableSubjects[id].get_observable() | rpp::ops::buffer(50) | rpp::ops::subscribe(handler);
-                m_tableSubjects[id].get_observable() | rpp::ops::subscribe(handler);
-            }
         } else {
             printf("unrecognised element type: '%s'\n", type.c_str());
         }
     } else {
         printf("received JSON either not an object or does not contain type property\n");
     }
-};
-
-void ReactImgui::HandleTableData(const int id, TableData val) {
-    // printf("%d\n", (int)val.size());
-    if (m_elements.contains(id)) {
-        dynamic_cast<Table*>(m_elements[id].get())->AppendData(val);
-    }
-};
-
-void ReactImgui::HandleBufferedTableData(const int id, const std::vector<TableData>& val) {
-    // printf("%d\n", (int)val.size()); // I'm seeing 50 the first time this gets called, then 1 subsequent times...
-
-    const std::lock_guard<std::mutex> elementLock(m_elements_mutex);
-
-    size_t totalSize = 0;
-
-    for (const auto& chunk : val) {
-        totalSize += chunk.size();
-    }
-
-    TableData data;
-
-    data.reserve(totalSize);
-
-    for (const auto& chunk : val) {
-        data.insert(data.end(), chunk.begin(), chunk.end());
-    }
-
-    dynamic_cast<Table*>(m_elements[id].get())->AppendData(data);
 };
 
 void ReactImgui::SetEventHandlers(
@@ -642,37 +600,7 @@ json ReactImgui::GetAvailableFonts() {
     return fonts;
 };
 
-void ReactImgui::AppendDataToTable(const int id, std::string& data) {
-    if (m_tableSubjects.contains(id)) {
-        const std::lock_guard<std::mutex> lock(m_tableSubjectsMutex);
-        auto parsedData = json::parse(data);
 
-        if (parsedData.is_array()) {
-            auto tableData = TableData();
-
-            for (auto& [parsedItemKey, parsedRow] : parsedData.items()) {
-                if (parsedRow.is_object()) {
-                    auto row = TableRow();
-
-                    for (auto& [parsedRowFieldKey, parsedRowFieldValue] : parsedRow.items()) {
-                        if (parsedRowFieldValue.is_string()) {
-                            row[parsedRowFieldKey] = parsedRowFieldValue.template get<std::string>();
-                        }
-                    }
-
-                    tableData.push_back(row);
-                }
-            }
-
-            // printf("About to add data to subject\n");
-            m_tableSubjects[id].get_observer().on_next(tableData);
-            // printf("Added data to subject\n");
-        }
-    } else {
-        // todo: should we lock beforehand?
-        // todo: should we throw here, or return a boolean to indicate whether the append operation was successfully 'queued' success or failure
-    }
-};
 
 void ReactImgui::RenderMap(int id, double centerX, double centerY, int zoom) {
     MapGeneratorOptions options;

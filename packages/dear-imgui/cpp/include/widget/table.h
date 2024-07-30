@@ -70,6 +70,8 @@ class Table final : public StyledWidget {
 
         void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
+        void HandleInternalOp(const json& opDef);
+
         void SetColumns(const json& columnsDef) {
             m_data.clear();
             m_columns.clear();
