@@ -27,6 +27,7 @@
 #include "widget/item_tooltip.h"
 #include "widget/map_view.h"
 #include "widget/multi_slider.h"
+#include "widget/plot_view.h"
 #include "widget/separator.h"
 #include "widget/separator_text.h"
 #include "widget/slider.h"
@@ -114,6 +115,7 @@ void ReactImgui::SetUpElementCreatorFunctions() {
     m_element_init_fn["Table"] = &makeWidget<Table>;
     m_element_init_fn["ClippedMultiLineTextRenderer"] = &makeWidget<ClippedMultiLineTextRenderer>;
     m_element_init_fn["MapView"] = &makeWidget<MapView>;
+    m_element_init_fn["PlotView"] = &makeWidget<PlotView>;
 
     m_element_init_fn["ItemTooltip"] = &makeWidget<ItemTooltip>;
 

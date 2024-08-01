@@ -67,7 +67,7 @@ export const Tables = () => {
                     tableRef3.current.appendDataToTable(data);
                     tableRef4.current.appendDataToTable(data);
                 }
-            }, 1);
+            }, 10);
         }
     }, [tableRef1, tableRef2, tableRef3]);
 

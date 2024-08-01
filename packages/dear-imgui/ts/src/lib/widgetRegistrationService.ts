@@ -72,6 +72,66 @@ export class WidgetRegistrationService {
         }
     }
 
+    appendDataToPlotView(id: string, x: number, y: number) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            try {
+                this.wasmModule.elementInternalOp(
+                    fabricWidgetId,
+                    JSON.stringify({ op: "appendData", x, y }),
+                );
+            } catch (error) {
+                // todo: propagate this?
+                console.error(error);
+            }
+        }
+    }
+
+    setPlotViewAxesDecimalDigits(id: string, x: number, y: number) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            try {
+                this.wasmModule.elementInternalOp(
+                    fabricWidgetId,
+                    JSON.stringify({ op: "setAxesDecimalDigits", x, y }),
+                );
+            } catch (error) {
+                // todo: propagate this?
+                console.error(error);
+            }
+        }
+    }
+
+    setPlotViewAutoAxisFitEnabled(id: string, enabled: boolean) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            try {
+                this.wasmModule.elementInternalOp(
+                    fabricWidgetId,
+                    JSON.stringify({ op: "setAxesAutoFit", enabled }),
+                );
+            } catch (error) {
+                // todo: propagate this?
+                console.error(error);
+            }
+        }
+    }
+
+    resetPlotViewData(id: string) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            try {
+                this.wasmModule.elementInternalOp(
+                    fabricWidgetId,
+                    JSON.stringify({ op: "resetData" }),
+                );
+            } catch (error) {
+                // todo: propagate this?
+                console.error(error);
+            }
+        }
+    }
+
     renderMap(id: string, centerX: number, centerY: number, zoom: number) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {

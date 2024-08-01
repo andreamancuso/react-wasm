@@ -11,6 +11,7 @@ import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 import { WidgetReactElement } from "../ReactImgui/types";
 import { Maps } from "./Maps/Maps";
 import { StyleSelector } from "./StyleEditor/StyleSelector/StyleSelector";
+import { Plots } from "./Plots/Plots";
 
 export const ImGuiDemo = () => {
     const [color, setColor] = useState("ff6e59");
@@ -111,6 +112,24 @@ export const ImGuiDemo = () => {
                     }}
                 >
                     <Maps />
+                </ReactImgui.Node>
+            </ReactImgui.Node>
+
+            <ReactImgui.Node
+                style={{
+                    width: "100%",
+                    height: 400,
+                    flexDirection: "row",
+                    gap: { column: 5 },
+                }}
+            >
+                <ReactImgui.Node
+                    style={{
+                        width: "45%",
+                        height: "100%",
+                    }}
+                >
+                    <Plots />
                 </ReactImgui.Node>
             </ReactImgui.Node>
 
