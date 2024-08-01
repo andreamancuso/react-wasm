@@ -44,6 +44,10 @@ void Combo::Patch(const json& widgetPatchDef, ReactImgui* view) {
     }
 };
 
+bool Combo::HasInternalOps() {
+    return true;
+}
+
 void Combo::HandleInternalOp(const json& opDef) {
     if (opDef.contains("op") && opDef["op"].is_string()) {
         auto op = opDef["op"].template get<std::string>();

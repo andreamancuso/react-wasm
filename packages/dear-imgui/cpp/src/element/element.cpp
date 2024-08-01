@@ -109,4 +109,8 @@ void Element::Patch(const json& nodeDef, ReactImgui* view) {
     }
 };
 
+bool Element::HasInternalOps() {
+    return false;
+};
+
 void Element::HandleInternalOp(const json& opDef) {};

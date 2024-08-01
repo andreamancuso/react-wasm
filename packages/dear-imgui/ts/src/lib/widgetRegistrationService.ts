@@ -76,7 +76,10 @@ export class WidgetRegistrationService {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
             try {
-                this.wasmModule.renderMap(fabricWidgetId, centerX, centerY, zoom);
+                this.wasmModule.elementInternalOp(
+                    fabricWidgetId,
+                    JSON.stringify({ op: "render", centerX, centerY, zoom }),
+                );
             } catch (error) {
                 // todo: propagate this?
                 console.error(error);

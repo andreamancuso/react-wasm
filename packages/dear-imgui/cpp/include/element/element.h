@@ -37,6 +37,8 @@ class Element {
 
         virtual void Patch(const json& elementPatchDef, ReactImgui* view);
 
+        virtual bool HasInternalOps();
+
         virtual void HandleInternalOp(const json& opDef);
 
         virtual float GetLayoutLeftFromParentNode(YGNodeRef node, float left);
