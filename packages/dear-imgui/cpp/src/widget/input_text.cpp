@@ -21,6 +21,10 @@ void InputText::Patch(const json& widgetPatchDef, ReactImgui* view) {
     }
 };
 
+bool InputText::HasInternalOps() {
+    return true;
+}
+
 void InputText::HandleInternalOp(const json& opDef) {
     if (opDef.contains("op") && opDef["op"].is_string()) {
         auto op = opDef["op"].template get<std::string>();

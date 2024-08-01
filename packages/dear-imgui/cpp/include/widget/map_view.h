@@ -1,8 +1,14 @@
+#include "mapgenerator.h"
 #include "styled_widget.h"
 
 class MapView final : public StyledWidget {
 private:
     ImVec2 m_offset;
+
+    int m_mapGeneratorJobCounter = 0;
+    std::unordered_map<int, std::unique_ptr<MapGenerator>> m_mapGeneratorJobs;
+
+    std::unordered_map<int, std::unique_ptr<Texture>> m_textures;
 
 public:
     static std::unique_ptr<MapView> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
@@ -26,4 +32,8 @@ public:
     }
 
     void Render(ReactImgui* view) override;
+
+    bool HasInternalOps();
+
+    void HandleInternalOp(const json& opDef);
 };

@@ -13,8 +13,6 @@
 
 #include "element/layout_node.h"
 
-#include "mapgenerator.h"
-
 #include "shared.h"
 #include "reactimgui.h"
 #include "implotview.h"
@@ -90,9 +88,6 @@ void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glf
             case OpAppendChild: {
                 AppendChild(elementOpDef.data);
                 break;
-            }
-            case OpInternal: {
-                HandleElementInternalOp(elementOpDef.data);
             }
 
             default: break;
@@ -194,6 +189,14 @@ void ReactImgui::CreateElement(const json& elementDef) {
                 m_elements[id] = makeElement(elementDef, this);
             } else if (m_element_init_fn.contains(type)) {
                 m_elements[id] = m_element_init_fn[type](elementDef, StyledWidget::ExtractStyle(elementDef, this), this);
+            }
+
+            if (m_elements[id]->HasInternalOps()) {
+                m_elementInternalOpsSubject[id] = rpp::subjects::serialized_replay_subject<json>{10};
+                auto handler = [this, id](const json& opDef) {
+                    m_elements[id]->HandleInternalOp(opDef);
+                };
+                m_elementInternalOpsSubject[id].get_observable() | rpp::ops::subscribe(handler);
             }
 
             m_elements[id]->Init();
@@ -498,10 +501,11 @@ void ReactImgui::QueueSetChildren(const int parentId, const std::vector<int>& ch
 
 void ReactImgui::QueueElementInternalOp(const int id, std::string& widgetOpDef) {
     try {
-        json opDef = json::parse(widgetOpDef);
-        opDef["id"] = id;
-        ElementOpDef elementOp{OpInternal,opDef};
-        m_elementOpSubject.get_observer().on_next(elementOp);
+        const json opDef = json::parse(widgetOpDef);
+
+        if (m_elementInternalOpsSubject.contains(id)) {
+            m_elementInternalOpsSubject[id].get_observer().on_next(opDef);
+        }
     } catch (nlohmann::detail::parse_error& parseError) {
         printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
     }
@@ -598,32 +602,6 @@ json ReactImgui::GetAvailableFonts() {
     }
 
     return fonts;
-};
-
-
-
-void ReactImgui::RenderMap(int id, double centerX, double centerY, int zoom) {
-    MapGeneratorOptions options;
-    options.m_width = 600;
-    options.m_height = 600;
-
-    m_mapGeneratorJobCounter++;
-
-    m_mapGeneratorJobs[m_mapGeneratorJobCounter] = std::make_unique<MapGenerator>(options, [this] (const void* data, const size_t numBytes) {
-        Texture texture{};
-
-        const bool ret = LoadTexture(m_device, data, static_cast<int>(numBytes), &texture);
-        IM_ASSERT(ret);
-
-        // TODO: add proper texture management
-        m_textures[0] = std::make_unique<Texture>(texture);
-
-        printf("Loaded texture, width: %d, height: %d\n", m_textures[0]->width, m_textures[0]->height);
-
-        // TODO: remove job from map
-    });
-
-    m_mapGeneratorJobs[m_mapGeneratorJobCounter]->Render(std::make_tuple(centerX, centerY), zoom);
 };
 
 // todo: switch to ReactivePlusPlus's BehaviorSubject

@@ -194,10 +194,6 @@ class WasmRunner {
             return m_view->GetAvailableFonts().dump();
         }
 
-        void renderMap(int id, double centerX, double centerY, int zoom) {
-            m_view->RenderMap(id, centerX, centerY, zoom);
-        }
-
         void appendTextToClippedMultiLineTextRenderer(int id, std::string& data) {
             m_view->AppendTextToClippedMultiLineTextRenderer(id, data);
         }
@@ -321,10 +317,6 @@ std::string getChildren(int id) {
     return IntVectorToJson(pRunner->getChildren(id)).dump();
 }
 
-void renderMap(int id, double centerX, double centerY, int zoom) {
-    pRunner->renderMap(id, centerX, centerY, zoom);
-}
-
 void appendTextToClippedMultiLineTextRenderer(int id, std::string data) {
     pRunner->appendTextToClippedMultiLineTextRenderer(id, data);
 }
@@ -346,7 +338,6 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("setChildren", &setChildren);
     emscripten::function("appendChild", &appendChild);
     emscripten::function("getChildren", &getChildren);
-    emscripten::function("renderMap", &renderMap);
     emscripten::function("appendTextToClippedMultiLineTextRenderer", &appendTextToClippedMultiLineTextRenderer);
     emscripten::function("getStyle", &getStyle);
     emscripten::function("patchStyle", &patchStyle);

@@ -88,6 +88,10 @@ void Table::Patch(const json& widgetPatchDef, ReactImgui* view) {
     }
 };
 
+bool Table::HasInternalOps() {
+    return true;
+}
+
 void Table::HandleInternalOp(const json& opDef) {
     if (opDef.contains("op") && opDef["op"].is_string()) {
         auto op = opDef["op"].template get<std::string>();

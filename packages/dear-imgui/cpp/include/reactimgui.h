@@ -23,7 +23,6 @@ enum ElementOp {
     OpPatchElement,
     OpSetChildren,
     OpAppendChild,
-    OpInternal,
 };
 
 struct ElementOpDef {
@@ -33,8 +32,7 @@ struct ElementOpDef {
 
 class ReactImgui : public ImPlotView {
     private:
-        int m_mapGeneratorJobCounter = 0;
-        std::unordered_map<int, std::unique_ptr<MapGenerator>> m_mapGeneratorJobs;
+        std::unordered_map<int, rpp::subjects::serialized_replay_subject<json>> m_elementInternalOpsSubject;
 
         rpp::subjects::serialized_replay_subject<ElementOpDef> m_elementOpSubject;
 
@@ -62,8 +60,6 @@ class ReactImgui : public ImPlotView {
         std::mutex m_hierarchy_mutex;
 
         std::unordered_map<int, std::unique_ptr<char[]>> m_floatFormatChars;
-
-        std::unordered_map<int, std::unique_ptr<Texture>> m_textures;
 
         ImGuiStyle m_baseStyle;
 
@@ -119,8 +115,6 @@ class ReactImgui : public ImPlotView {
         void QueueAppendChild(int parentId, int childId);
 
         void QueueElementInternalOp(int id, std::string& widgetOpDef);
-
-        void RenderMap(int id, double centerX, double centerY, int zoom);
 
         void AppendTextToClippedMultiLineTextRenderer(int id, const std::string& data);
 
