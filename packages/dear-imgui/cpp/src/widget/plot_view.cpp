@@ -12,10 +12,6 @@ bool PlotView::HasCustomHeight() {
 }
 
 void PlotView::Render(ReactImgui* view) {
-    // ImGui::Text("Received %lu data points", m_xValues.size());
-    // ImGui::Checkbox("Auto-fit Axes", &enable_axis_auto_fit_flag);
-    // ImGui::SameLine();
-
     // static int e = 0;
     // ImGui::RadioButton("line plot", &e, 0);
     // ImGui::SameLine();

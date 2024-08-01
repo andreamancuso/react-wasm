@@ -7,12 +7,12 @@ private:
     std::vector<double> m_xValues;
     std::vector<double> m_yValues;
 
-    int m_xAxisDecimalDigits = 0;
-    int m_yAxisDecimalDigits = 0;
+    int m_xAxisDecimalDigits;
+    int m_yAxisDecimalDigits;
 
     int m_dataPointsLimit = 6000;
 
-    bool m_axisAutoFit = false;
+    bool m_axisAutoFit;
 
 public:
     static std::unique_ptr<PlotView> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
