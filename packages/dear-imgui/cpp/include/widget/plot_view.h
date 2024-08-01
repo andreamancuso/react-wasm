@@ -18,8 +18,20 @@ public:
     static std::unique_ptr<PlotView> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
         if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
             auto id = widgetDef["id"].template get<int>();
+            int xAxisDecimalDigits = 0;
+            int yAxisDecimalDigits = 0;
+            bool axisAutoFit = false;
 
-            return std::make_unique<PlotView>(view, id, maybeStyle);
+            if (widgetDef.contains("xAxisDecimalDigits") && widgetDef.contains("yAxisDecimalDigits")) {
+                xAxisDecimalDigits = widgetDef["xAxisDecimalDigits"].template get<int>();
+                yAxisDecimalDigits = widgetDef["yAxisDecimalDigits"].template get<int>();
+            }
+
+            if (widgetDef.contains("axisAutoFit")) {
+                axisAutoFit = widgetDef["axisAutoFit"].template get<bool>();
+            }
+
+            return std::make_unique<PlotView>(view, id, xAxisDecimalDigits, yAxisDecimalDigits, axisAutoFit, maybeStyle);
         }
 
         throw std::invalid_argument("Invalid JSON data");
@@ -37,14 +49,19 @@ public:
 
     bool HasCustomHeight() override;
 
-    PlotView(ReactImgui* view, const int id, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
+    PlotView(ReactImgui* view, const int id, const int xAxisDecimalDigits, const int yAxisDecimalDigits, const bool axisAutoFit, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
         m_type = "PlotView";
+        m_xAxisDecimalDigits = xAxisDecimalDigits;
+        m_yAxisDecimalDigits = yAxisDecimalDigits;
+        m_axisAutoFit = axisAutoFit;
 
         m_xValues.reserve(m_dataPointsLimit);
         m_yValues.reserve(m_dataPointsLimit);
     }
 
     void Render(ReactImgui* view) override;
+
+    void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
     bool HasInternalOps();
 

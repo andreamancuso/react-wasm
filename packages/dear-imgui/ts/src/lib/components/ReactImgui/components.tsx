@@ -25,6 +25,7 @@ import { Child } from "./Child";
 import { Group } from "./Group";
 import { DIWindow } from "./DIWindow";
 import { ClippedMultiLineTextRenderer } from "./ClippedMultiLineTextRenderer";
+import { PlotView } from "./PlotView";
 
 export const components = {
     UnformattedText,
@@ -51,6 +52,7 @@ export const components = {
     Table,
     ClippedMultiLineTextRenderer,
     MapView,
+    PlotView,
     Node,
 } as const;
 

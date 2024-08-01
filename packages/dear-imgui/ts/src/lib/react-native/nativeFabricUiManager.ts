@@ -30,6 +30,7 @@ export default class {
         "Table",
         "ClippedMultiLineTextRenderer",
         "MapView",
+        "PlotView",
     ];
 
     constructor() {

@@ -21,7 +21,9 @@ void PlotView::Render(ReactImgui* view) {
     // ImGui::SameLine();
     // ImGui::RadioButton("scatter plot", &e, 1);
 
-    if (ImPlot::BeginPlot("Line Plots", ImVec2(-1, -1), ImPlotFlags_NoMenus | ImPlotFlags_NoMouseText | ImPlotFlags_NoLegend | ImPlotFlags_NoTitle)) {
+    auto size = ImVec2(YGNodeLayoutGetWidth(m_layoutNode->m_node), YGNodeLayoutGetHeight(m_layoutNode->m_node));
+
+    if (ImPlot::BeginPlot("Line Plots", size, ImPlotFlags_NoMenus | ImPlotFlags_NoMouseText | ImPlotFlags_NoLegend | ImPlotFlags_NoTitle)) {
         if (m_axisAutoFit) {
             ImPlot::SetupAxes("x","y", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
         } else {
@@ -48,6 +50,24 @@ void PlotView::Render(ReactImgui* view) {
             // ImPlot::PlotScatter("scatter-plot", x_valuesPtr, y_valuesPtr, m_xValues.size());
         // }
         ImPlot::EndPlot();
+    }
+};
+
+void PlotView::Patch(const json& widgetPatchDef, ReactImgui* view) {
+    if (widgetPatchDef.is_object()) {
+        StyledWidget::Patch(widgetPatchDef, view);
+
+        if (widgetPatchDef.contains("xAxisDecimalDigits") && widgetPatchDef.contains("yAxisDecimalDigits")) {
+            const auto xAxisDecimalDigits = widgetPatchDef["xAxisDecimalDigits"].template get<int>();
+            const auto yAxisDecimalDigits = widgetPatchDef["yAxisDecimalDigits"].template get<int>();
+
+            SetAxesDecimalDigits(xAxisDecimalDigits, yAxisDecimalDigits);
+        }
+
+        if (widgetPatchDef.contains("axisAutoFit")) {
+            const auto axisAutoFit = widgetPatchDef["axisAutoFit"].template get<bool>();
+            SetAxesAutoFit(axisAutoFit);
+        }
     }
 };
 
