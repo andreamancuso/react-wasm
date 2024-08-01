@@ -460,7 +460,7 @@ void ReactImgui::QueueCreateElement(std::string& elementJsonAsString) {
         ElementOpDef elementOp{OpCreateElement,json::parse(elementJsonAsString)};
         m_elementOpSubject.get_observer().on_next(elementOp);
     } catch (nlohmann::detail::parse_error& parseError) {
-        printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
+        printf("ReactImgui::QueueCreateElement, parse error: %s\n", parseError.what());
     }
 };
 
@@ -471,7 +471,7 @@ void ReactImgui::QueuePatchElement(const int id, std::string& elementJsonAsStrin
         ElementOpDef elementOp{OpPatchElement,opDef};
         m_elementOpSubject.get_observer().on_next(elementOp);
     } catch (nlohmann::detail::parse_error& parseError) {
-        printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
+        printf("ReactImgui::QueuePatchElement, parse error: %s\n", parseError.what());
     }
 };
 
@@ -483,7 +483,7 @@ void ReactImgui::QueueAppendChild(int parentId, int childId) {
         ElementOpDef elementOp{OpAppendChild,opDef};
         m_elementOpSubject.get_observer().on_next(elementOp);
     } catch (nlohmann::detail::parse_error& parseError) {
-        printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
+        printf("ReactImgui::QueueAppendChild, parse error: %s\n", parseError.what());
     }
 };
 
@@ -495,7 +495,7 @@ void ReactImgui::QueueSetChildren(const int parentId, const std::vector<int>& ch
         ElementOpDef elementOp{OpSetChildren,opDef};
         m_elementOpSubject.get_observer().on_next(elementOp);
     } catch (nlohmann::detail::parse_error& parseError) {
-        printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
+        printf("ReactImgui::QueueSetChildren, parse error: %s\n", parseError.what());
     }
 };
 
@@ -507,7 +507,7 @@ void ReactImgui::QueueElementInternalOp(const int id, std::string& widgetOpDef) 
             m_elementInternalOpsSubject[id].get_observer().on_next(opDef);
         }
     } catch (nlohmann::detail::parse_error& parseError) {
-        printf("ReactImgui::SetElement, parse error: %s\n", parseError.what());
+        printf("ReactImgui::QueueElementInternalOp, parse error: %s\n", parseError.what());
     }
 };
 
