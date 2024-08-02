@@ -31,6 +31,7 @@ export default class {
         "ClippedMultiLineTextRenderer",
         "MapView",
         "PlotView",
+        "Image",
     ];
 
     constructor() {

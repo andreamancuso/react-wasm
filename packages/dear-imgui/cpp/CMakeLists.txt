@@ -106,6 +106,7 @@ if (DEFINED EMSCRIPTEN)
         src/widget/collapsing_header.cpp
         src/widget/combo.cpp
         src/widget/group.cpp
+        src/widget/image.cpp
         src/widget/input_text.cpp
         src/widget/item_tooltip.cpp
         src/widget/map_view.cpp

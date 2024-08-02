@@ -23,6 +23,7 @@
 #include "widget/collapsing_header.h"
 #include "widget/combo.h"
 #include "widget/group.h"
+#include "widget/image.h"
 #include "widget/input_text.h"
 #include "widget/item_tooltip.h"
 #include "widget/map_view.h"
@@ -114,6 +115,7 @@ void ReactImgui::SetUpElementCreatorFunctions() {
 
     m_element_init_fn["Table"] = &makeWidget<Table>;
     m_element_init_fn["ClippedMultiLineTextRenderer"] = &makeWidget<ClippedMultiLineTextRenderer>;
+    m_element_init_fn["Image"] = &makeWidget<Image>;
     m_element_init_fn["MapView"] = &makeWidget<MapView>;
     m_element_init_fn["PlotView"] = &makeWidget<PlotView>;
 
