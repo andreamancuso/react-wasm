@@ -135,6 +135,7 @@ export type WidgetPropsMap = {
     };
     ClippedMultiLineTextRenderer: StyleProps & {};
     MapView: StyleProps & {};
+    Image: StyleProps & { url: string; width?: number; height?: number };
     PlotView: StyleProps & {
         xAxisDecimalDigits?: number;
         yAxisDecimalDigits?: number;
@@ -159,6 +160,7 @@ export type WidgetsRequiringId =
     | "Button"
     | "Table"
     | "ClippedMultiLineTextRenderer"
+    | "Image"
     | "MapView"
     | "PlotView";
 

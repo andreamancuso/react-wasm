@@ -1,0 +1,67 @@
+#include <optional>
+#include "mapgenerator.h"
+#include "styled_widget.h"
+
+typedef std::function<void(void*, size_t)> fetchImageCallback;
+
+class Image final : public StyledWidget {
+private:
+    std::string m_url;
+    std::optional<ImVec2> m_size;
+    Texture m_texture;
+
+public:
+    static std::unique_ptr<Image> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+        if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer() && widgetDef.contains("url")) {
+            auto id = widgetDef["id"].template get<int>();
+            auto url = widgetDef["url"].template get<std::string>();
+
+            std::optional<ImVec2> size;
+
+            if (widgetDef.contains("width") && widgetDef.contains("height")) {
+                const auto w = widgetDef["width"].template get<float>();
+                const auto h = widgetDef["height"].template get<float>();
+
+                size.emplace(ImVec2(w,h));
+            }
+
+            return std::make_unique<Image>(view, id, url, size, maybeStyle);
+        }
+
+        throw std::invalid_argument("Invalid JSON data");
+    }
+
+    bool HasCustomWidth() override;
+
+    bool HasCustomHeight() override;
+
+    Image(ReactImgui* view, const int id, const std::string& url, const std::optional<ImVec2>& size, std::optional<BaseStyle>& style) : StyledWidget(view, id, style), m_texture() {
+        m_type = "Image";
+        m_url = url;
+
+        m_size = size;
+    }
+
+    void Render(ReactImgui* view) override;
+
+    static YGSize Measure(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode);
+
+    bool HasInternalOps();
+
+    void HandleInternalOp(const json& opDef);
+
+    void FetchImage();
+
+    void HandleFetchImageSuccess(emscripten_fetch_t *fetch);
+
+    void HandleFetchImageFailure(emscripten_fetch_t *fetch);
+
+    void Init() override {
+        Element::Init();
+
+        YGNodeSetContext(m_layoutNode->m_node, this);
+        YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);
+
+        FetchImage();
+    }
+};

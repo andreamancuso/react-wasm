@@ -132,6 +132,21 @@ export class WidgetRegistrationService {
         }
     }
 
+    reloadImage(id: string) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            try {
+                this.wasmModule.elementInternalOp(
+                    fabricWidgetId,
+                    JSON.stringify({ op: "reloadImage" }),
+                );
+            } catch (error) {
+                // todo: propagate this?
+                console.error(error);
+            }
+        }
+    }
+
     renderMap(id: string, centerX: number, centerY: number, zoom: number) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {

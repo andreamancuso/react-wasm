@@ -56,6 +56,7 @@ export default {
                                 xAxisDecimalDigits: true,
                                 yAxisDecimalDigits: true,
                                 axisAutoFit: true,
+                                url: true,
                                 style: true,
                                 root: true,
                             },

@@ -51,13 +51,15 @@ void MapView::Render(ReactImgui* view) {
                 }
             }
 
-            const ImVec2 p0 = ImGui::GetItemRectMin();
-            const ImVec2 p1 = ImGui::GetItemRectMax();
-
             if (!ImGui::IsItemVisible()) {
                 // Skip rendering as ImDrawList elements are not clipped.
+                ImGui::EndGroup();
+                ImGui::PopID();
                 return;
             }
+
+            const ImVec2 p0 = ImGui::GetItemRectMin();
+            const ImVec2 p1 = ImGui::GetItemRectMax();
 
             ImGui::PushClipRect(p0, p1, true);
 
