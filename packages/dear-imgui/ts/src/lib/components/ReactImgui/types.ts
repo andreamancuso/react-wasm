@@ -141,7 +141,7 @@ export type WidgetPropsMap = {
         initialData?: string;
         clipRows?: number;
     };
-    ClippedMultiLineTextRenderer: WidgetStyleProps & {};
+    ClippedMultiLineTextRenderer: WidgetStyleProps;
     MapView: WidgetStyleProps;
     Image: WidgetStyleProps & { url: string; width?: number; height?: number };
     PlotView: WidgetStyleProps & {
