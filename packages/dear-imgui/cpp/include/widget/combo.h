@@ -2,7 +2,7 @@
 
 class Combo final : public StyledWidget {
     protected:
-        Combo(ReactImgui* view, const int id, const std::string& placeholder, const int initialSelectedIndex, const std::vector<std::string>& options, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
+        Combo(ReactImgui* view, const int id, const std::string& placeholder, const int initialSelectedIndex, const std::vector<std::string>& options, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
             m_type = "Combo";
             m_placeholder = placeholder;
             m_options = options;
@@ -17,7 +17,7 @@ class Combo final : public StyledWidget {
         std::string m_placeholder;
         std::vector<std::string> m_options;
 
-        static std::unique_ptr<Combo> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+        static std::unique_ptr<Combo> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 const auto id = widgetDef["id"].template get<int>();
                 const auto initialSelectedIndex = widgetDef.contains("initialSelectedIndex") && widgetDef["initialSelectedIndex"].is_number()
@@ -41,7 +41,7 @@ class Combo final : public StyledWidget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<Combo> makeWidget(ReactImgui* view, const int id, const std::string& placeholder, const int initialSelectedIndex, const std::vector<std::string>& options, std::optional<BaseStyle>& style) {
+        static std::unique_ptr<Combo> makeWidget(ReactImgui* view, const int id, const std::string& placeholder, const int initialSelectedIndex, const std::vector<std::string>& options, std::optional<WidgetStyle>& style) {
             Combo instance(view, id, placeholder, initialSelectedIndex, options, style);
             return std::make_unique<Combo>(std::move(instance));
         }
@@ -89,9 +89,9 @@ class Combo final : public StyledWidget {
 
         void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
-        bool HasInternalOps();
+        bool HasInternalOps() override;
 
-        void HandleInternalOp(const json& opDef);
+        void HandleInternalOp(const json& opDef) override;
 
         void Init() override {
             Element::Init();

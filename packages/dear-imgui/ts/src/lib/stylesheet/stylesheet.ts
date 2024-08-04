@@ -1,11 +1,10 @@
 import { ImGuiCol, ImGuiStyleVar, ImVec2 } from "../wasm/wasm-app-types";
-import { StyleColValue } from "./imgui-style";
+import { BaseDrawStyle } from "./base-draw-style";
+import { StyleColValue } from "./types";
 import { YogaStyle } from "./yoga-style";
 
 export type StyleRules = {
     align?: "left" | "right";
-    // width?: number; // Currently % based; supported on a subset of widgets
-    // height?: number; // Currently % based; supported on a subset of widgets
     font?: {
         name: string;
         size: number;
@@ -48,7 +47,7 @@ export type StyleRules = {
 };
 
 export type RWStyleSheet = {
-    [k: string]: StyleRules & YogaStyle;
+    [k: string]: StyleRules & YogaStyle & BaseDrawStyle;
 };
 
 const RWStyleSheet = {

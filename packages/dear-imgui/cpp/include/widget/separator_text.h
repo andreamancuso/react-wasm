@@ -4,7 +4,7 @@ class SeparatorText final : public StyledWidget {
 public:
     std::string m_label;
 
-    static std::unique_ptr<SeparatorText> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+    static std::unique_ptr<SeparatorText> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
         if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
             auto id = widgetDef["id"].template get<int>();
             auto label = widgetDef["label"].template get<std::string>();
@@ -28,7 +28,7 @@ public:
         return size;
     }
 
-    SeparatorText(ReactImgui* view, const int id, const std::string& label, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
+    SeparatorText(ReactImgui* view, const int id, const std::string& label, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
         m_type = "SeparatorText";
         m_label = label;
     }

@@ -1,10 +1,7 @@
 import { ImGuiCol, ImGuiDir, ImGuiHoveredFlags, ImVec2 } from "../wasm/wasm-app-types";
-
-export type HEXA = [string, number];
+import { HEXA } from "./types";
 
 export type StyleVarValue = number | ImVec2;
-
-export type StyleColValue = string | HEXA;
 
 // This is a more or less accurate representation of ImGuiStyle
 export type ImGuiStyle = {

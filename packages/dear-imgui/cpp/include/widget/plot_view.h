@@ -15,7 +15,7 @@ private:
     bool m_axisAutoFit;
 
 public:
-    static std::unique_ptr<PlotView> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+    static std::unique_ptr<PlotView> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
         if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
             auto id = widgetDef["id"].template get<int>();
             int xAxisDecimalDigits = 0;
@@ -49,7 +49,7 @@ public:
 
     bool HasCustomHeight() override;
 
-    PlotView(ReactImgui* view, const int id, const int xAxisDecimalDigits, const int yAxisDecimalDigits, const bool axisAutoFit, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
+    PlotView(ReactImgui* view, const int id, const int xAxisDecimalDigits, const int yAxisDecimalDigits, const bool axisAutoFit, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
         m_type = "PlotView";
         m_xAxisDecimalDigits = xAxisDecimalDigits;
         m_yAxisDecimalDigits = yAxisDecimalDigits;

@@ -1,5 +1,5 @@
 #include <imgui.h>
-#include <emscripten/fetch.h>>
+#include <emscripten/fetch.h>
 
 #include "widget/image.h"
 #include "reactimgui.h"
@@ -15,6 +15,7 @@ bool Image::HasCustomHeight() {
 void Image::Render(ReactImgui* view) {
     if (m_texture.textureView != nullptr) {
         auto imageSize = m_size.has_value() ? m_size.value() : ImVec2(YGNodeLayoutGetWidth(m_layoutNode->m_node), YGNodeLayoutGetHeight(m_layoutNode->m_node));
+        // auto imageSize = ImVec2(YGNodeLayoutGetWidth(m_layoutNode->m_node), YGNodeLayoutGetHeight(m_layoutNode->m_node));
 
         ImGui::PushID(m_id);
         ImGui::BeginGroup();
@@ -32,11 +33,13 @@ void Image::Render(ReactImgui* view) {
         const ImVec2 p0 = ImGui::GetItemRectMin();
         const ImVec2 p1 = ImGui::GetItemRectMax();
 
-        ImGui::PushClipRect(p0, p1, true);
-
         drawList->AddImage((void*)m_texture.textureView, p0, p1, ImVec2(0, 0), ImVec2(1, 1));
 
-        ImGui::PopClipRect();
+        // ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
+        // ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
+        // ImVec4 tint_col = use_text_color_for_tint ? ImGui::GetStyleColorVec4(ImGuiCol_Text) : ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // No tint
+        // ImVec4 border_col = ImGui::GetStyleColorVec4(ImGuiCol_Border);
+        // ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h), uv_min, uv_max, tint_col, border_col);
 
         ImGui::EndGroup();
         ImGui::PopID();
@@ -109,12 +112,20 @@ YGSize Image::Measure(const YGNodeConstRef node, const float width, YGMeasureMod
     if (context) {
         const auto widget = static_cast<Image*>(context);
 
+        // if (widget->m_size.has_value()) {
+        //     size.width = widget->m_size.value().x;
+        //     size.height = widget->m_size.value().y;
+        // } else {
+        //     size.width = static_cast<float>(widget->m_texture.width);
+        //     size.height = static_cast<float>(widget->m_texture.height);
+        // }
+
         if (widget->m_size.has_value()) {
             size.width = widget->m_size.value().x;
             size.height = widget->m_size.value().y;
         } else {
-            size.width = static_cast<float>(widget->m_texture.width);
-            size.height = static_cast<float>(widget->m_texture.height);
+            size.width = width;
+            size.height = height;
         }
     }
 

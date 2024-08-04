@@ -133,6 +133,28 @@ export const ImGuiDemo = () => {
                 </ReactImgui.Node>
             </ReactImgui.Node>
 
+            <ReactImgui.Node
+                style={{
+                    width: 100,
+                    height: 100,
+                    backgroundColor: ["000000", 1],
+                    borderColor: ["66ff00", 1],
+                    borderThickness: 5,
+                    rounding: 5,
+                    roundCorners: ["topLeft"],
+                    border: { all: 5 },
+                }}
+            >
+                <ReactImgui.UnformattedText
+                    text="Inside"
+                    style={{ colors: { [ImGuiCol.Text]: "FFFFFF" } }}
+                />
+                <ReactImgui.Image
+                    url="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
+                    style={{ flex: 1, width: "100%" }}
+                />
+            </ReactImgui.Node>
+
             <ReactImgui.Image
                 url="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
                 width={400}

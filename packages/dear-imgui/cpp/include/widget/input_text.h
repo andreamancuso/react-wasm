@@ -6,7 +6,7 @@ class InputText final : public StyledWidget {
 
         static int InputTextCb(ImGuiInputTextCallbackData* data);
 
-        InputText(ReactImgui* view, const int id, const std::string& defaultValue, const std::string& label, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
+        InputText(ReactImgui* view, const int id, const std::string& defaultValue, const std::string& label, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
             m_type = "InputText";
             m_bufferPointer = std::make_unique<char[]>(100);
             m_defaultValue = defaultValue;
@@ -22,7 +22,7 @@ class InputText final : public StyledWidget {
         std::string m_defaultValue;
         std::string m_label;
 
-        static std::unique_ptr<InputText> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+        static std::unique_ptr<InputText> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 const auto id = widgetDef["id"].template get<int>();
                 const auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_string() ? widgetDef["defaultValue"].template get<std::string>() : "";
@@ -34,7 +34,7 @@ class InputText final : public StyledWidget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<InputText> makeWidget(ReactImgui* view, const int id, const std::string& defaultValue, const std::string& label, std::optional<BaseStyle>& style) {
+        static std::unique_ptr<InputText> makeWidget(ReactImgui* view, const int id, const std::string& defaultValue, const std::string& label, std::optional<WidgetStyle>& style) {
             InputText instance(view, id, defaultValue, label, style);
             return std::make_unique<InputText>(std::move(instance));
         }
@@ -58,9 +58,9 @@ class InputText final : public StyledWidget {
 
         void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
-        bool HasInternalOps();
+        bool HasInternalOps() override;
 
-        void HandleInternalOp(const json& opDef);
+        void HandleInternalOp(const json& opDef) override;
 
         void SetValue(std::string& value) {
             strncpy(m_bufferPointer.get(), value.c_str(), 99);

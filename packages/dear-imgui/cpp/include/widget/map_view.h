@@ -11,7 +11,7 @@ private:
     std::unordered_map<int, std::unique_ptr<Texture>> m_textures;
 
 public:
-    static std::unique_ptr<MapView> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+    static std::unique_ptr<MapView> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
         if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
             auto id = widgetDef["id"].template get<int>();
 
@@ -25,7 +25,7 @@ public:
 
     bool HasCustomHeight() override;
 
-    MapView(ReactImgui* view, const int id, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
+    MapView(ReactImgui* view, const int id, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
         m_type = "MapView";
 
         m_offset = ImVec2(0.0f, 0.0f);
@@ -33,7 +33,7 @@ public:
 
     void Render(ReactImgui* view) override;
 
-    bool HasInternalOps();
+    bool HasInternalOps() override;
 
-    void HandleInternalOp(const json& opDef);
+    void HandleInternalOp(const json& opDef) override;
 };

@@ -24,6 +24,42 @@ std::unique_ptr<Element> Element::makeElement(const json& nodeDef, ReactImgui* v
 
     if (nodeDef.is_object() && nodeDef.contains("style") && nodeDef["style"].is_object()) {
         element->m_layoutNode->ApplyStyle(nodeDef["style"]);
+
+        if (nodeDef["style"].contains("backgroundColor") || nodeDef["style"].contains("borderColor")) {
+            BaseDrawStyle baseDrawStyle;
+
+            if (nodeDef["style"].contains("backgroundColor")) {
+                baseDrawStyle.backgroundColor = jsonHEXATupleToIV4(nodeDef["style"]["backgroundColor"]);
+            }
+
+            if (nodeDef["style"].contains("borderColor")) {
+                baseDrawStyle.borderColor = jsonHEXATupleToIV4(nodeDef["style"]["borderColor"]);
+            }
+
+            if (baseDrawStyle.backgroundColor.has_value() || baseDrawStyle.borderColor.has_value()) {
+
+                if (nodeDef["style"].contains("rounding")) {
+                    baseDrawStyle.rounding = nodeDef["style"]["rounding"].template get<float>();
+                }
+
+                if (nodeDef["style"].contains("borderThickness")) {
+                    baseDrawStyle.borderThickness = nodeDef["style"]["borderThickness"].template get<float>();
+                }
+
+                if (nodeDef["style"].contains("roundCorners") && nodeDef["style"]["roundCorners"].is_array()) {
+                    const auto roundCorners = nodeDef["style"]["roundCorners"].template get<std::vector<std::string>>();
+
+                    baseDrawStyle.drawFlags = std::accumulate(
+                        roundCorners.begin(),
+                        roundCorners.end(),
+                        static_cast<ImDrawFlags>(ImDrawFlags_None),
+                        cornersToDrawFlags
+                    );
+                }
+
+                element->m_baseDrawStyle.emplace(baseDrawStyle);
+            }
+        }
     }
 
     return element;
@@ -89,10 +125,53 @@ void Element::Render(ReactImgui* view) {
 
     ImGui::BeginChild("##", ImVec2(width, height), ImGuiChildFlags_None);
 
+    if (m_baseDrawStyle.has_value()) {
+        DrawBaseEffects();
+    }
+
     HandleChildren(view);
 
     ImGui::EndChild();
     ImGui::PopID();
+};
+
+void Element::DrawBaseEffects() const {
+    const float width = YGNodeLayoutGetWidth(m_layoutNode->m_node);
+    const float height = YGNodeLayoutGetHeight(m_layoutNode->m_node);
+
+    const auto size = ImVec2(width, height);
+
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+    ImGui::InvisibleButton("##block", size);
+
+    const ImVec2 p0 = ImGui::GetItemRectMin();
+    const ImVec2 p1 = ImGui::GetItemRectMax();
+
+    if (m_baseDrawStyle.value().backgroundColor.has_value()) {
+        const ImU32 col = ImColor(m_baseDrawStyle.value().backgroundColor.value());
+
+        drawList->AddRectFilled(
+            p0,
+            p1,
+            col,
+            m_baseDrawStyle.value().rounding.value_or(0),
+            m_baseDrawStyle.value().drawFlags
+        );
+    }
+
+    if (m_baseDrawStyle.value().borderColor.has_value()) {
+        const ImU32 col = ImColor(m_baseDrawStyle.value().borderColor.value());
+
+        drawList->AddRect(
+            p0,
+            p1,
+            col,
+            m_baseDrawStyle.value().rounding.value_or(0),
+            ImDrawFlags_RoundCornersTopLeft | ImDrawFlags_RoundCornersBottomRight,
+            m_baseDrawStyle.value().borderThickness.value_or(1.0f)
+        );
+    }
 };
 
 bool Element::ShouldRender(ReactImgui* view) const {

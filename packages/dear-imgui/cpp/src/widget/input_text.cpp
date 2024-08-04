@@ -7,6 +7,8 @@
 
 void InputText::Render(ReactImgui* view) {
     ImGui::PushID(m_id);
+    // imgui_stdlib.cpp
+    // bool ImGui::InputText(const char* label, std::string* str, ImGuiInputTextFlags flags, ImGuiInputTextCallback callback, void* user_data)
     ImGui::InputText(m_label.c_str(), m_bufferPointer.get(), 100, inputTextFlags, InputTextCb, (void*)this);
     ImGui::PopID();
 };

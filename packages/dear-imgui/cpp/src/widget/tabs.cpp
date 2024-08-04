@@ -1,7 +1,7 @@
 #include "widget/tabs.h"
 #include "reactimgui.h"
 
-TabBar::TabBar(ReactImgui* view, const int id, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
+TabBar::TabBar(ReactImgui* view, const int id, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
     m_type = "TabBar";
     m_handlesChildrenWithinRenderMethod = true;
 }
@@ -36,7 +36,7 @@ void TabBar::Render(ReactImgui* view) {
     ImGui::PopID();
 };
 
-TabItem::TabItem(ReactImgui* view, const int id, const std::string& label, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
+TabItem::TabItem(ReactImgui* view, const int id, const std::string& label, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
     m_type = "TabItem";
     m_handlesChildrenWithinRenderMethod = true;
     m_label = label;

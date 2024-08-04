@@ -4,6 +4,7 @@ import { MainComponentProps } from "../ReactImgui";
 import { StyleRules } from "src/lib/stylesheet/stylesheet";
 import { ImVec2 } from "src/lib/wasm/wasm-app-types";
 import { YogaStyle } from "src/lib/stylesheet/yoga-style";
+import { BaseDrawStyle } from "src/lib/stylesheet/base-draw-style";
 
 export type ModuleEventHandlers = {
     onTextChange: (id: number, value: string) => void;
@@ -28,8 +29,15 @@ export type FontDef = {
     sizes: number[];
 };
 
-export type StyleProps = {
-    style?: StyleRules & YogaStyle;
+export type NodeStyle = YogaStyle & BaseDrawStyle;
+export type WidgetStyle = StyleRules & YogaStyle & BaseDrawStyle;
+
+export type NodeStyleProps = {
+    style?: NodeStyle;
+};
+
+export type WidgetStyleProps = {
+    style?: WidgetStyle;
 };
 
 export type TabItemChangeEvent = SyntheticEvent<WidgetReactElement<"TabItem">, { value: boolean }>;
@@ -55,53 +63,53 @@ export type CheckboxChangeEvent = SyntheticEvent<
 
 export type WidgetPropsMap = {
     Unknown: {};
-    Child: StyleProps & { width?: number; height?: number };
-    DIWindow: StyleProps & { title: string; width: number; height: number };
-    Group: StyleProps & {};
-    TabBar: StyleProps & {};
-    TabItem: StyleProps & {
+    Child: WidgetStyleProps;
+    DIWindow: WidgetStyleProps & { title: string };
+    Group: WidgetStyleProps;
+    TabBar: WidgetStyleProps;
+    TabItem: WidgetStyleProps & {
         label: string;
         onOpenChange?: (event: TabItemChangeEvent) => void;
     };
-    ItemTooltip: StyleProps & {};
-    TextWrap: StyleProps & { width: number };
-    Indent: StyleProps & {};
-    UnformattedText: StyleProps & {
+    ItemTooltip: WidgetStyleProps;
+    TextWrap: WidgetStyleProps & { width: number };
+    Indent: WidgetStyleProps;
+    UnformattedText: WidgetStyleProps & {
         text: string;
     };
-    DisabledText: StyleProps & {
+    DisabledText: WidgetStyleProps & {
         text: string;
     };
-    HelpMarker: StyleProps & {
+    HelpMarker: WidgetStyleProps & {
         text: string;
     };
-    BulletText: StyleProps & {
+    BulletText: WidgetStyleProps & {
         // todo: What about `fmt` ?
         text: string;
     };
-    Separator: StyleProps & {};
-    SeparatorText: StyleProps & {
+    Separator: WidgetStyleProps;
+    SeparatorText: WidgetStyleProps & {
         label: string;
     };
-    InputText: StyleProps & {
+    InputText: WidgetStyleProps & {
         defaultValue?: string;
         label?: string;
         onChange?: (event: InputTextChangeEvent) => void;
     };
-    CollapsingHeader: StyleProps & {
+    CollapsingHeader: WidgetStyleProps & {
         label?: string;
     };
-    TreeNode: StyleProps & {
+    TreeNode: WidgetStyleProps & {
         label?: string;
     };
-    Combo: StyleProps & {
+    Combo: WidgetStyleProps & {
         placeholder?: string;
         options?: string[];
         optionsList?: string;
         initialSelectedIndex?: number;
         onChange?: (event: ComboChangeEvent) => void;
     };
-    Slider: StyleProps & {
+    Slider: WidgetStyleProps & {
         sliderType?: SliderTypes;
         label: string;
         defaultValue?: number;
@@ -109,7 +117,7 @@ export type WidgetPropsMap = {
         max?: number;
         onChange?: (event: SliderChangeEvent) => void;
     };
-    MultiSlider: StyleProps & {
+    MultiSlider: WidgetStyleProps & {
         numValues: 2 | 3 | 4;
         label?: string;
         defaultValues?: number[];
@@ -118,25 +126,25 @@ export type WidgetPropsMap = {
         decimalDigits?: number;
         onChange?: (event: MultiSliderChangeEvent) => void;
     };
-    Checkbox: StyleProps & {
+    Checkbox: WidgetStyleProps & {
         defaultChecked?: boolean;
         label?: string;
         onChange?: (event: CheckboxChangeEvent) => void;
     };
-    Button: StyleProps & {
+    Button: WidgetStyleProps & {
         onClick?: () => void;
         label?: string;
         size?: ImVec2;
     };
-    Table: StyleProps & {
+    Table: WidgetStyleProps & {
         columns: { heading: string; fieldId?: string }[];
         initialData?: string;
         clipRows?: number;
     };
-    ClippedMultiLineTextRenderer: StyleProps & {};
-    MapView: StyleProps & {};
-    Image: StyleProps & { url: string; width?: number; height?: number };
-    PlotView: StyleProps & {
+    ClippedMultiLineTextRenderer: WidgetStyleProps;
+    MapView: WidgetStyleProps;
+    Image: WidgetStyleProps & { url: string; width?: number; height?: number };
+    PlotView: WidgetStyleProps & {
         xAxisDecimalDigits?: number;
         yAxisDecimalDigits?: number;
         axisAutoFit?: boolean;
@@ -206,11 +214,10 @@ type ReactElementWidgets = {
 
 export type ReactElementWidgetsFlat = ReactElementWidgets[keyof ReactElementWidgets];
 
-export type YogaNode = {
+export type NodeProps = {
     root?: boolean;
-    style?: YogaStyle;
     children?: WidgetReactNode;
-};
+} & NodeStyleProps;
 
 export type ImguiWidget<
     K extends WidgetKeys,

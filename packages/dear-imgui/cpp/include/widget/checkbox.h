@@ -4,7 +4,7 @@
 
 class Checkbox final : public StyledWidget {
     protected:
-        Checkbox(ReactImgui* view, const int id, const std::string& label, const bool defaultChecked, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
+        Checkbox(ReactImgui* view, const int id, const std::string& label, const bool defaultChecked, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
             m_type = "Checkbox";
             m_checked = defaultChecked;
             m_label = label;
@@ -14,7 +14,7 @@ class Checkbox final : public StyledWidget {
         bool m_checked;
         std::string m_label;
 
-        static std::unique_ptr<Checkbox> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+        static std::unique_ptr<Checkbox> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 const auto id = widgetDef["id"].template get<int>();
                 const auto defaultChecked = widgetDef.contains("defaultChecked") && widgetDef["defaultChecked"].is_boolean() ? widgetDef["defaultChecked"].template get<bool>() : false;
@@ -26,7 +26,7 @@ class Checkbox final : public StyledWidget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<Checkbox> makeWidget(ReactImgui* view, const int id,  const std::string& label, const bool defaultChecked, std::optional<BaseStyle>& style) {
+        static std::unique_ptr<Checkbox> makeWidget(ReactImgui* view, const int id,  const std::string& label, const bool defaultChecked, std::optional<WidgetStyle>& style) {
             Checkbox instance(view, id, label, defaultChecked, style);
             return std::make_unique<Checkbox>(std::move(instance));
         }

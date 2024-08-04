@@ -16,7 +16,7 @@ class MapGenerator;
 class Element;
 class StyledWidget;
 class LayoutNode;
-struct BaseStyle;
+struct WidgetStyle;
 
 enum ElementOp {
     OpCreateElement,
@@ -36,7 +36,7 @@ class ReactImgui : public ImPlotView {
 
         rpp::subjects::serialized_replay_subject<ElementOpDef> m_elementOpSubject;
 
-        std::unordered_map<std::string, std::function<std::unique_ptr<Element>(const json&, std::optional<BaseStyle>, ReactImgui*)>> m_element_init_fn;
+        std::unordered_map<std::string, std::function<std::unique_ptr<Element>(const json&, std::optional<WidgetStyle>, ReactImgui*)>> m_element_init_fn;
 
         std::unordered_map<int, std::unique_ptr<Element>> m_elements;
         std::mutex m_elements_mutex;
@@ -61,7 +61,7 @@ class ReactImgui : public ImPlotView {
 
         std::unordered_map<int, std::unique_ptr<char[]>> m_floatFormatChars;
 
-        ImGuiStyle m_baseStyle;
+        ImGuiStyle m_widgetStyle;
 
         OnInitCallback m_onInit;
         OnTextChangedCallback m_onInputTextChange;
@@ -151,6 +151,6 @@ class ReactImgui : public ImPlotView {
 };
 
 template <typename T, typename std::enable_if<std::is_base_of<Widget, T>::value, int>::type = 0>
-std::unique_ptr<T> makeWidget(const json& val, std::optional<BaseStyle> maybeStyle, ReactImgui* view);
+std::unique_ptr<T> makeWidget(const json& val, std::optional<WidgetStyle> maybeStyle, ReactImgui* view);
 
 std::unique_ptr<Element> makeElement(const json& val, ReactImgui* view);

@@ -2,12 +2,12 @@
 
 #include "widget/styled_widget.h"
 
-std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
-    std::optional<BaseStyle> maybeStyle;
+std::optional<WidgetStyle> StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
+    std::optional<WidgetStyle> maybeStyle;
         
     if (widgetDef.is_object() && widgetDef.contains("style") && widgetDef["style"].is_object()) {
         // Perhaps a bit optimistic, but also rather convenient
-        maybeStyle.emplace(BaseStyle{});
+        maybeStyle.emplace(WidgetStyle{});
 
         if (widgetDef["style"].contains("font") 
             && widgetDef["style"]["font"].is_object() 
@@ -32,13 +32,10 @@ std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, React
                     if (color.size() == 6) {
                         colors[stoi(key)] = HEXAtoIV4(color.c_str());
                     }
-                } else if (item.is_array() && item.size() == 2
-                    && item[0].is_string() && item[1].is_number_unsigned()) { // hex + alpha
-                    auto color = item[0].template get<std::string>();
-                    auto alpha = item[1].template get<float>();
-
-                    if (color.size() == 6) {
-                        colors[stoi(key)] = HEXAtoIV4(color.c_str(), alpha);
+                } else {
+                    auto col = jsonHEXATupleToIV4(item);
+                    if (col.has_value()) {
+                        colors[stoi(key)] = col.value();
                     }
                 }
             }
@@ -81,15 +78,15 @@ std::optional<BaseStyle> StyledWidget::ExtractStyle(const json& widgetDef, React
 
 StyledWidget::StyledWidget(ReactImgui* view, const int id) : Widget(view, id) {}
 
-StyledWidget::StyledWidget(ReactImgui* view, const int id, std::optional<BaseStyle>& maybeStyle) : Widget(view, id) {
+StyledWidget::StyledWidget(ReactImgui* view, const int id, std::optional<WidgetStyle>& maybeStyle) : Widget(view, id) {
     if (maybeStyle.has_value()) {
-        m_style.emplace(std::make_unique<BaseStyle>(maybeStyle.value()));
+        m_style.emplace(std::make_unique<WidgetStyle>(maybeStyle.value()));
     }
 }
 
-void StyledWidget::ReplaceStyle(BaseStyle& newStyle) {
+void StyledWidget::ReplaceStyle(WidgetStyle& newStyle) {
     m_style.reset();
-    m_style.emplace(std::make_unique<BaseStyle>(newStyle));
+    m_style.emplace(std::make_unique<WidgetStyle>(newStyle));
 };
 
 void StyledWidget::Patch(const json& widgetPatchDef, ReactImgui* view) {

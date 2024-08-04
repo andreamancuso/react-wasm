@@ -1,6 +1,6 @@
 #include "widget/group.h"
 
-Group::Group(ReactImgui* view, const int id, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
+Group::Group(ReactImgui* view, const int id, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
     m_type = "Group";
     m_handlesChildrenWithinRenderMethod = true;
 }

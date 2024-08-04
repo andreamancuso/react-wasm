@@ -11,7 +11,7 @@ private:
     Texture m_texture;
 
 public:
-    static std::unique_ptr<Image> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+    static std::unique_ptr<Image> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
         if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer() && widgetDef.contains("url")) {
             auto id = widgetDef["id"].template get<int>();
             auto url = widgetDef["url"].template get<std::string>();
@@ -35,7 +35,7 @@ public:
 
     bool HasCustomHeight() override;
 
-    Image(ReactImgui* view, const int id, const std::string& url, const std::optional<ImVec2>& size, std::optional<BaseStyle>& style) : StyledWidget(view, id, style), m_texture() {
+    Image(ReactImgui* view, const int id, const std::string& url, const std::optional<ImVec2>& size, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style), m_texture() {
         m_type = "Image";
         m_url = url;
 
@@ -46,9 +46,9 @@ public:
 
     static YGSize Measure(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode);
 
-    bool HasInternalOps();
+    bool HasInternalOps() override;
 
-    void HandleInternalOp(const json& opDef);
+    void HandleInternalOp(const json& opDef) override;
 
     void FetchImage();
 

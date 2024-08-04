@@ -48,6 +48,10 @@ json IV4toJsonTuple(ImVec4 imVec4);
 json IV4toJsonRGBATuple(ImVec4 imVec4);
 json IV4toJsonHEXATuple(ImVec4 imVec4);
 
+std::optional<ImVec4> jsonHEXATupleToIV4(const json& tupleDef);
+
+ImDrawFlags cornersToDrawFlags(ImDrawFlags accumulator, std::string_view side);
+
 struct Texture {
     WGPUTextureView textureView;
     int width;
