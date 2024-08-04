@@ -65,15 +65,15 @@ export type WidgetPropsMap = {
     Unknown: {};
     Child: WidgetStyleProps;
     DIWindow: WidgetStyleProps & { title: string };
-    Group: WidgetStyleProps & {};
-    TabBar: WidgetStyleProps & {};
+    Group: WidgetStyleProps;
+    TabBar: WidgetStyleProps;
     TabItem: WidgetStyleProps & {
         label: string;
         onOpenChange?: (event: TabItemChangeEvent) => void;
     };
-    ItemTooltip: WidgetStyleProps & {};
+    ItemTooltip: WidgetStyleProps;
     TextWrap: WidgetStyleProps & { width: number };
-    Indent: WidgetStyleProps & {};
+    Indent: WidgetStyleProps;
     UnformattedText: WidgetStyleProps & {
         text: string;
     };
@@ -87,7 +87,7 @@ export type WidgetPropsMap = {
         // todo: What about `fmt` ?
         text: string;
     };
-    Separator: WidgetStyleProps & {};
+    Separator: WidgetStyleProps;
     SeparatorText: WidgetStyleProps & {
         label: string;
     };
@@ -142,7 +142,7 @@ export type WidgetPropsMap = {
         clipRows?: number;
     };
     ClippedMultiLineTextRenderer: WidgetStyleProps & {};
-    MapView: WidgetStyleProps & {};
+    MapView: WidgetStyleProps;
     Image: WidgetStyleProps & { url: string; width?: number; height?: number };
     PlotView: WidgetStyleProps & {
         xAxisDecimalDigits?: number;

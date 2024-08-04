@@ -99,23 +99,22 @@ json IV4toJsonHEXATuple(ImVec4 imVec4) {
 };
 
 std::optional<ImVec4> jsonHEXATupleToIV4(const json& tupleDef) {
-    std::optional<ImVec4> col;
-
-    if (tupleDef.is_array() && tupleDef.size() == 2
-        && tupleDef[0].is_string() && tupleDef[1].is_number_unsigned()) {
-        // hex + alpha
-        const auto color = tupleDef[0].template get<std::string>();
-        const auto alpha = tupleDef[1].template get<float>();
-
-        if (color.size() == 6) {
-            col.emplace(HEXAtoIV4(color.c_str(), alpha));
+    if (!tupleDef.is_array() || tupleDef.size() != 2
+        || !tupleDef[0].is_string() || !tupleDef[1].is_number_unsigned()) {
+        return std::nullopt;
         }
+
+    const auto color = tupleDef[0].template get<std::string>();
+    const auto alpha = tupleDef[1].template get<float>();
+
+    if (color.size() != 6) {
+        return std::nullopt;
     }
 
-    return col;
+    return HEXAtoIV4(color.c_str(), alpha);
 };
 
-ImDrawFlags cornersToDrawFlags(ImDrawFlags accumulator, const std::string& side) {
+ImDrawFlags cornersToDrawFlags(ImDrawFlags accumulator, const std::string_view side) {
     if (side == "all") {
         accumulator |= ImDrawFlags_RoundCornersAll;
     } else if (side == "topLeft") {
