@@ -10,7 +10,7 @@ class Table final : public StyledWidget {
     protected:
         ImGuiTableFlags m_flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
 
-        Table(ReactImgui* view, const int id, const std::vector<TableColumn>& columns, const std::optional<int> clipRows, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
+        Table(ReactImgui* view, const int id, const std::vector<TableColumn>& columns, const std::optional<int> clipRows, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
             m_type = "Table";
             m_columns = columns;
             m_clipRows = 0;
@@ -40,7 +40,7 @@ class Table final : public StyledWidget {
             return columns;
         }
 
-        static std::unique_ptr<Table> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+        static std::unique_ptr<Table> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 const auto id = widgetDef["id"].template get<int>();
 
@@ -58,7 +58,7 @@ class Table final : public StyledWidget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<Table> makeWidget(ReactImgui* view, const int id, const std::vector<TableColumn>& columns, std::optional<int> clipRows, std::optional<BaseStyle>& style) {
+        static std::unique_ptr<Table> makeWidget(ReactImgui* view, const int id, const std::vector<TableColumn>& columns, std::optional<int> clipRows, std::optional<WidgetStyle>& style) {
             Table instance(view, id, columns, clipRows, style);
 
             return std::make_unique<Table>(std::move(instance));

@@ -13,7 +13,7 @@ void Text::Patch(const json& widgetPatchDef, ReactImgui* view) {
     }
 };
 
-std::unique_ptr<BulletText> BulletText::makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+std::unique_ptr<BulletText> BulletText::makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
     if (widgetDef.is_object()) {
         auto id = widgetDef["id"].template get<int>();
         auto text = widgetDef["text"].template get<std::string>();
@@ -28,7 +28,7 @@ void BulletText::Render(ReactImgui* view) {
     ImGui::BulletText("%s", m_text.c_str());
 };
 
-std::unique_ptr<UnformattedText> UnformattedText::makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+std::unique_ptr<UnformattedText> UnformattedText::makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
     if (widgetDef.is_object()) {
         auto id = widgetDef["id"].template get<int>();
         auto text = widgetDef["text"].template get<std::string>();
@@ -43,7 +43,7 @@ void UnformattedText::Render(ReactImgui* view) {
     ImGui::TextUnformatted(m_text.c_str());
 };
 
-std::unique_ptr<DisabledText> DisabledText::makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+std::unique_ptr<DisabledText> DisabledText::makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
     if (widgetDef.is_object()) {
         auto id = widgetDef["id"].template get<int>();
         auto text = widgetDef["text"].template get<std::string>();

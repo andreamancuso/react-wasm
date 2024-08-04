@@ -4,7 +4,7 @@ class Text : public StyledWidget {
     public:
         std::string m_text;
 
-        Text(ReactImgui* view, int id, const std::string& text, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
+        Text(ReactImgui* view, int id, const std::string& text, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
             m_text = text;
         }
 
@@ -33,9 +33,9 @@ class Text : public StyledWidget {
 
 class BulletText final : public Text {
     public:
-        static std::unique_ptr<BulletText> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view);
+        static std::unique_ptr<BulletText> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view);
 
-        BulletText(ReactImgui* view, const int id, const std::string& text, std::optional<BaseStyle>& style) : Text(view, id, text, style) {
+        BulletText(ReactImgui* view, const int id, const std::string& text, std::optional<WidgetStyle>& style) : Text(view, id, text, style) {
             m_type = "BulletText";
         }
 
@@ -44,9 +44,9 @@ class BulletText final : public Text {
 
 class UnformattedText final : public Text {
     public:
-        static std::unique_ptr<UnformattedText> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view);
+        static std::unique_ptr<UnformattedText> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view);
 
-        UnformattedText(ReactImgui* view, const int id, const std::string& text, std::optional<BaseStyle>& style) : Text(view, id, text, style) {
+        UnformattedText(ReactImgui* view, const int id, const std::string& text, std::optional<WidgetStyle>& style) : Text(view, id, text, style) {
             m_type = "UnformattedText";
         }
 
@@ -55,9 +55,9 @@ class UnformattedText final : public Text {
 
 class DisabledText final : public Text {
     public:
-        static std::unique_ptr<DisabledText> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view);
+        static std::unique_ptr<DisabledText> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view);
 
-        DisabledText(ReactImgui* view, const int id, const std::string& text, std::optional<BaseStyle>& style) : Text(view, id, text, style) {
+        DisabledText(ReactImgui* view, const int id, const std::string& text, std::optional<WidgetStyle>& style) : Text(view, id, text, style) {
             m_type = "DisabledText";
         }
 

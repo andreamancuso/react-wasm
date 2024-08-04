@@ -6,7 +6,7 @@ class TextWrap final : public StyledWidget {
 public:
     float m_width;
 
-    static std::unique_ptr<TextWrap> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+    static std::unique_ptr<TextWrap> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
         if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
             auto id = widgetDef["id"].template get<int>();
             double width = widgetDef["width"].template get<double>();
@@ -17,7 +17,7 @@ public:
         throw std::invalid_argument("Invalid JSON data");
     }
 
-    TextWrap(ReactImgui* view, int id, const float& width, std::optional<BaseStyle>& style);
+    TextWrap(ReactImgui* view, int id, const float& width, std::optional<WidgetStyle>& style);
 
     void Render(ReactImgui* view) override;
 

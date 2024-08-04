@@ -5,7 +5,7 @@
 
 class ReactImgui;
 
-struct BaseStyle {
+struct WidgetStyle {
     std::optional<StyleColors> maybeColors;
     std::optional<StyleVars> maybeStyleVars;
     std::optional<int> maybeFontIndex;
@@ -14,13 +14,13 @@ struct BaseStyle {
 
 class StyledWidget : public Widget {
 public:
-    std::optional<std::unique_ptr<BaseStyle>> m_style;
+    std::optional<std::unique_ptr<WidgetStyle>> m_style;
 
-    static std::optional<BaseStyle> ExtractStyle(const json& widgetDef, ReactImgui* view);
+    static std::optional<WidgetStyle> ExtractStyle(const json& widgetDef, ReactImgui* view);
 
     explicit StyledWidget(ReactImgui* view, int id);
 
-    StyledWidget(ReactImgui* view, int id, std::optional<BaseStyle>& maybeStyle);
+    StyledWidget(ReactImgui* view, int id, std::optional<WidgetStyle>& maybeStyle);
 
     void PreRender(ReactImgui* view) override;
 
@@ -42,7 +42,7 @@ public:
 
     [[nodiscard]] bool HasRightHorizontalAlignment() const;
 
-    void ReplaceStyle(BaseStyle& newStyle);
+    void ReplaceStyle(WidgetStyle& newStyle);
 
     void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 

@@ -9,6 +9,14 @@ using json = nlohmann::json;
 
 class ReactImgui;
 
+struct BaseDrawStyle {
+    std::optional<ImVec4> backgroundColor;
+    std::optional<ImVec4> borderColor;
+    std::optional<float> rounding;
+    std::optional<float> borderThickness;
+    ImDrawFlags drawFlags = ImDrawFlags_RoundCornersNone;
+};
+
 class Element {
     public:
         int m_id;
@@ -16,6 +24,7 @@ class Element {
         bool m_handlesChildrenWithinRenderMethod;
         bool m_isRoot;
         std::unique_ptr<LayoutNode> m_layoutNode;
+        std::optional<BaseDrawStyle> m_baseDrawStyle;
 
         Element(ReactImgui* view, int id, bool isRoot);
 
@@ -34,6 +43,8 @@ class Element {
         virtual void Render(ReactImgui* view);
 
         virtual void PostRender(ReactImgui* view);
+
+        void DrawBaseEffects() const;
 
         virtual void Patch(const json& elementPatchDef, ReactImgui* view);
 

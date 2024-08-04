@@ -2,7 +2,7 @@
 
 class Slider final : public StyledWidget {
     protected:
-        Slider(ReactImgui* view, const int id, const std::string& label, const float defaultValue, const float min, const float max, const std::string& sliderType, std::optional<BaseStyle>& style) : StyledWidget(view, id, style) {
+        Slider(ReactImgui* view, const int id, const std::string& label, const float defaultValue, const float min, const float max, const std::string& sliderType, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
             m_type = "Slider";
             m_sliderType = sliderType;
             m_label = label;
@@ -22,7 +22,7 @@ class Slider final : public StyledWidget {
         float m_max;
         std::string m_label;
 
-        static std::unique_ptr<Slider> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+        static std::unique_ptr<Slider> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
             if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
                 const auto id = widgetDef["id"].template get<int>();
                 const auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_number() ? widgetDef["defaultValue"].template get<float>() : 0.0f;
@@ -37,7 +37,7 @@ class Slider final : public StyledWidget {
             throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<Slider> makeWidget(ReactImgui* view, const int id, const std::string& label, const float defaultValue, const float min, const float max, const std::string& sliderType, std::optional<BaseStyle>& style) {
+        static std::unique_ptr<Slider> makeWidget(ReactImgui* view, const int id, const std::string& label, const float defaultValue, const float min, const float max, const std::string& sliderType, std::optional<WidgetStyle>& style) {
             Slider instance(view, id, label, defaultValue, min, max, sliderType, style);
             return std::make_unique<Slider>(std::move(instance));
         }

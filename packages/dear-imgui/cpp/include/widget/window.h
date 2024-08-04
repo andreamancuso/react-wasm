@@ -8,7 +8,7 @@ public:
     float m_width;
     float m_height;
 
-    static std::unique_ptr<Window> makeWidget(const json& widgetDef, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+    static std::unique_ptr<Window> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
         if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
             auto id = widgetDef["id"].template get<int>();
             auto title = widgetDef.contains("title") ? widgetDef["title"].template get<std::string>() : "";
@@ -21,7 +21,7 @@ public:
         throw std::invalid_argument("Invalid JSON data");
     }
 
-    Window(ReactImgui* view, int id, const std::string& title, float width, float height, std::optional<BaseStyle>& style);
+    Window(ReactImgui* view, int id, const std::string& title, float width, float height, std::optional<WidgetStyle>& style);
 
     void Render(ReactImgui* view) override;
 

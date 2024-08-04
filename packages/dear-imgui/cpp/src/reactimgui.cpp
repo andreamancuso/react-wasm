@@ -45,7 +45,7 @@
 using json = nlohmann::json;
 
 template <typename T, typename std::enable_if<std::is_base_of<Widget, T>::value, int>::type>
-std::unique_ptr<T> makeWidget(const json& val, std::optional<BaseStyle> maybeStyle, ReactImgui* view) {
+std::unique_ptr<T> makeWidget(const json& val, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
     return T::makeWidget(val, maybeStyle, view);
 }
 
@@ -456,7 +456,7 @@ void ReactImgui::TakeStyleSnapshot() {
     const auto style = GetStyle();
 
     // This is necessary as the style is repeatedly modified during render via push and pop calls
-    memcpy(&m_baseStyle, &style, sizeof(style));
+    memcpy(&m_widgetStyle, &style, sizeof(style));
 };
 
 void ReactImgui::QueueCreateElement(std::string& elementJsonAsString) {
@@ -625,38 +625,38 @@ StyleVarValueRef ReactImgui::GetStyleVar(const ImGuiStyleVar key) {
     StyleVarValueRef value;
 
     switch(key) {
-        case ImGuiStyleVar_Alpha: value.emplace<const float*>(&m_baseStyle.Alpha); break;
-        case ImGuiStyleVar_DisabledAlpha: value.emplace<const float*>(&m_baseStyle.DisabledAlpha); break;
-        case ImGuiStyleVar_WindowPadding: value.emplace<const ImVec2*>(&m_baseStyle.WindowPadding); break;
-        case ImGuiStyleVar_WindowRounding: value.emplace<const float*>(&m_baseStyle.WindowRounding); break;
-        case ImGuiStyleVar_WindowBorderSize: value.emplace<const float*>(&m_baseStyle.WindowBorderSize); break;
-        case ImGuiStyleVar_WindowMinSize: value.emplace<const ImVec2*>(&m_baseStyle.WindowMinSize); break;
-        case ImGuiStyleVar_WindowTitleAlign: value.emplace<const ImVec2*>(&m_baseStyle.WindowTitleAlign); break;
-        case ImGuiStyleVar_ChildRounding: value.emplace<const float*>(&m_baseStyle.ChildRounding); break;
-        case ImGuiStyleVar_ChildBorderSize: value.emplace<const float*>(&m_baseStyle.ChildBorderSize); break;
-        case ImGuiStyleVar_PopupRounding: value.emplace<const float*>(&m_baseStyle.PopupRounding); break;
-        case ImGuiStyleVar_PopupBorderSize: value.emplace<const float*>(&m_baseStyle.PopupBorderSize); break;
-        case ImGuiStyleVar_FramePadding: value.emplace<const ImVec2*>(&m_baseStyle.FramePadding); break;
-        case ImGuiStyleVar_FrameRounding: value.emplace<const float*>(&m_baseStyle.FrameRounding); break;
-        case ImGuiStyleVar_FrameBorderSize: value.emplace<const float*>(&m_baseStyle.FrameBorderSize); break;
-        case ImGuiStyleVar_ItemSpacing: value.emplace<const ImVec2*>(&m_baseStyle.ItemSpacing); break;
-        case ImGuiStyleVar_ItemInnerSpacing: value.emplace<const ImVec2*>(&m_baseStyle.ItemInnerSpacing); break;
-        case ImGuiStyleVar_IndentSpacing: value.emplace<const float*>(&m_baseStyle.IndentSpacing); break;
-        case ImGuiStyleVar_CellPadding: value.emplace<const ImVec2*>(&m_baseStyle.CellPadding); break;
-        case ImGuiStyleVar_ScrollbarSize: value.emplace<const float*>(&m_baseStyle.ScrollbarSize); break;
-        case ImGuiStyleVar_ScrollbarRounding: value.emplace<const float*>(&m_baseStyle.ScrollbarRounding); break;
-        case ImGuiStyleVar_GrabMinSize: value.emplace<const float*>(&m_baseStyle.GrabMinSize); break;
-        case ImGuiStyleVar_GrabRounding: value.emplace<const float*>(&m_baseStyle.GrabRounding); break;
-        case ImGuiStyleVar_TabRounding: value.emplace<const float*>(&m_baseStyle.TabRounding); break;
-        case ImGuiStyleVar_TabBorderSize: value.emplace<const float*>(&m_baseStyle.TabBorderSize); break;
-        case ImGuiStyleVar_TabBarBorderSize: value.emplace<const float*>(&m_baseStyle.TabBarBorderSize); break;
-        case ImGuiStyleVar_TableAngledHeadersAngle: value.emplace<const float*>(&m_baseStyle.TableAngledHeadersAngle); break;
-        case ImGuiStyleVar_TableAngledHeadersTextAlign: value.emplace<const ImVec2*>(&m_baseStyle.TableAngledHeadersTextAlign); break;
-        case ImGuiStyleVar_ButtonTextAlign: value.emplace<const ImVec2*>(&m_baseStyle.ButtonTextAlign); break;
-        case ImGuiStyleVar_SelectableTextAlign: value.emplace<const ImVec2*>(&m_baseStyle.SelectableTextAlign); break;
-        case ImGuiStyleVar_SeparatorTextBorderSize: value.emplace<const float*>(&m_baseStyle.SeparatorTextBorderSize); break;
-        case ImGuiStyleVar_SeparatorTextAlign: value.emplace<const ImVec2*>(&m_baseStyle.SeparatorTextAlign); break;
-        case ImGuiStyleVar_SeparatorTextPadding: value.emplace<const ImVec2*>(&m_baseStyle.SeparatorTextPadding); break;
+        case ImGuiStyleVar_Alpha: value.emplace<const float*>(&m_widgetStyle.Alpha); break;
+        case ImGuiStyleVar_DisabledAlpha: value.emplace<const float*>(&m_widgetStyle.DisabledAlpha); break;
+        case ImGuiStyleVar_WindowPadding: value.emplace<const ImVec2*>(&m_widgetStyle.WindowPadding); break;
+        case ImGuiStyleVar_WindowRounding: value.emplace<const float*>(&m_widgetStyle.WindowRounding); break;
+        case ImGuiStyleVar_WindowBorderSize: value.emplace<const float*>(&m_widgetStyle.WindowBorderSize); break;
+        case ImGuiStyleVar_WindowMinSize: value.emplace<const ImVec2*>(&m_widgetStyle.WindowMinSize); break;
+        case ImGuiStyleVar_WindowTitleAlign: value.emplace<const ImVec2*>(&m_widgetStyle.WindowTitleAlign); break;
+        case ImGuiStyleVar_ChildRounding: value.emplace<const float*>(&m_widgetStyle.ChildRounding); break;
+        case ImGuiStyleVar_ChildBorderSize: value.emplace<const float*>(&m_widgetStyle.ChildBorderSize); break;
+        case ImGuiStyleVar_PopupRounding: value.emplace<const float*>(&m_widgetStyle.PopupRounding); break;
+        case ImGuiStyleVar_PopupBorderSize: value.emplace<const float*>(&m_widgetStyle.PopupBorderSize); break;
+        case ImGuiStyleVar_FramePadding: value.emplace<const ImVec2*>(&m_widgetStyle.FramePadding); break;
+        case ImGuiStyleVar_FrameRounding: value.emplace<const float*>(&m_widgetStyle.FrameRounding); break;
+        case ImGuiStyleVar_FrameBorderSize: value.emplace<const float*>(&m_widgetStyle.FrameBorderSize); break;
+        case ImGuiStyleVar_ItemSpacing: value.emplace<const ImVec2*>(&m_widgetStyle.ItemSpacing); break;
+        case ImGuiStyleVar_ItemInnerSpacing: value.emplace<const ImVec2*>(&m_widgetStyle.ItemInnerSpacing); break;
+        case ImGuiStyleVar_IndentSpacing: value.emplace<const float*>(&m_widgetStyle.IndentSpacing); break;
+        case ImGuiStyleVar_CellPadding: value.emplace<const ImVec2*>(&m_widgetStyle.CellPadding); break;
+        case ImGuiStyleVar_ScrollbarSize: value.emplace<const float*>(&m_widgetStyle.ScrollbarSize); break;
+        case ImGuiStyleVar_ScrollbarRounding: value.emplace<const float*>(&m_widgetStyle.ScrollbarRounding); break;
+        case ImGuiStyleVar_GrabMinSize: value.emplace<const float*>(&m_widgetStyle.GrabMinSize); break;
+        case ImGuiStyleVar_GrabRounding: value.emplace<const float*>(&m_widgetStyle.GrabRounding); break;
+        case ImGuiStyleVar_TabRounding: value.emplace<const float*>(&m_widgetStyle.TabRounding); break;
+        case ImGuiStyleVar_TabBorderSize: value.emplace<const float*>(&m_widgetStyle.TabBorderSize); break;
+        case ImGuiStyleVar_TabBarBorderSize: value.emplace<const float*>(&m_widgetStyle.TabBarBorderSize); break;
+        case ImGuiStyleVar_TableAngledHeadersAngle: value.emplace<const float*>(&m_widgetStyle.TableAngledHeadersAngle); break;
+        case ImGuiStyleVar_TableAngledHeadersTextAlign: value.emplace<const ImVec2*>(&m_widgetStyle.TableAngledHeadersTextAlign); break;
+        case ImGuiStyleVar_ButtonTextAlign: value.emplace<const ImVec2*>(&m_widgetStyle.ButtonTextAlign); break;
+        case ImGuiStyleVar_SelectableTextAlign: value.emplace<const ImVec2*>(&m_widgetStyle.SelectableTextAlign); break;
+        case ImGuiStyleVar_SeparatorTextBorderSize: value.emplace<const float*>(&m_widgetStyle.SeparatorTextBorderSize); break;
+        case ImGuiStyleVar_SeparatorTextAlign: value.emplace<const ImVec2*>(&m_widgetStyle.SeparatorTextAlign); break;
+        case ImGuiStyleVar_SeparatorTextPadding: value.emplace<const ImVec2*>(&m_widgetStyle.SeparatorTextPadding); break;
         default: break;
     }
 
@@ -692,7 +692,7 @@ float ReactImgui::GetTextLineHeight(const StyledWidget* widget) {
 float ReactImgui::GetTextLineHeightWithSpacing(const StyledWidget* widget) {
     auto fontSize = GetWidgetFontSize(widget);
 
-    float itemSpacingY = m_baseStyle.ItemSpacing.y;
+    float itemSpacingY = m_widgetStyle.ItemSpacing.y;
 
     if (widget->HasCustomStyles() && widget->HasCustomStyleVar(ImGuiStyleVar_ItemSpacing)) {
         auto maybeCustomItemSpacing = widget->GetCustomStyleVar(ImGuiStyleVar_ItemSpacing);
@@ -707,7 +707,7 @@ float ReactImgui::GetTextLineHeightWithSpacing(const StyledWidget* widget) {
 float ReactImgui::GetFrameHeight(const StyledWidget* widget) {
     auto fontSize = GetWidgetFontSize(widget);
 
-    float framePaddingY = m_baseStyle.FramePadding.y;
+    float framePaddingY = m_widgetStyle.FramePadding.y;
 
     if (widget->HasCustomStyles() && widget->HasCustomStyleVar(ImGuiStyleVar_FramePadding)) {
         auto maybeCustomFramePadding = widget->GetCustomStyleVar(ImGuiStyleVar_FramePadding);
@@ -722,8 +722,8 @@ float ReactImgui::GetFrameHeight(const StyledWidget* widget) {
 float ReactImgui::GetFrameHeightWithSpacing(const StyledWidget* widget) {
     auto fontSize = GetWidgetFontSize(widget);
 
-    float framePaddingY = m_baseStyle.FramePadding.y;
-    float itemSpacingY = m_baseStyle.ItemSpacing.y;
+    float framePaddingY = m_widgetStyle.FramePadding.y;
+    float itemSpacingY = m_widgetStyle.ItemSpacing.y;
 
     if (widget->HasCustomStyles()) {
         if (widget->HasCustomStyleVar(ImGuiStyleVar_FramePadding)) {

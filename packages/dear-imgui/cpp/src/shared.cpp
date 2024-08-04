@@ -98,6 +98,39 @@ json IV4toJsonHEXATuple(ImVec4 imVec4) {
     return j;
 };
 
+std::optional<ImVec4> jsonHEXATupleToIV4(const json& tupleDef) {
+    std::optional<ImVec4> col;
+
+    if (tupleDef.is_array() && tupleDef.size() == 2
+        && tupleDef[0].is_string() && tupleDef[1].is_number_unsigned()) {
+        // hex + alpha
+        const auto color = tupleDef[0].template get<std::string>();
+        const auto alpha = tupleDef[1].template get<float>();
+
+        if (color.size() == 6) {
+            col.emplace(HEXAtoIV4(color.c_str(), alpha));
+        }
+    }
+
+    return col;
+};
+
+ImDrawFlags cornersToDrawFlags(ImDrawFlags accumulator, const std::string& side) {
+    if (side == "all") {
+        accumulator |= ImDrawFlags_RoundCornersAll;
+    } else if (side == "topLeft") {
+        accumulator |= ImDrawFlags_RoundCornersTopLeft;
+    } else if (side == "topRight") {
+        accumulator |= ImDrawFlags_RoundCornersTopRight;
+    } else if (side == "bottomLeft") {
+        accumulator |= ImDrawFlags_RoundCornersBottomLeft;
+    } else if (side == "bottomRight") {
+        accumulator |= ImDrawFlags_RoundCornersBottomRight;
+    }
+
+    return accumulator;
+};
+
 // borrowed from https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
 bool LoadTexture(WGPUDevice device, const void* data, const int numBytes, Texture* texture)
 {
