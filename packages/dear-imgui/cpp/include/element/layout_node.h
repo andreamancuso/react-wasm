@@ -11,16 +11,36 @@ using json = nlohmann::json;
 class ReactImgui;
 
 class LayoutNode {
+    std::unordered_map<std::string, std::unique_ptr<IVariadicFn>, StringHash, std::equal_to<>> m_setters;
+
+    // Add a setter for any number of parameters
+    template <typename... Args>
+    void AddSetter(const std::string& key, std::function<void(Args...)> setter) {
+        m_setters[key] = std::make_unique<VariadicFnImpl<Args...>>(std::move(setter));
+    }
+
+    // Call a setter with variadic arguments
+    template <typename... Args>
+    void CallSetter(const std::string& key, Args... args) const {
+        auto it = m_setters.find(key);
+        if (it != m_setters.end()) {
+            void* arguments[] = { &args... };
+            it->second->call(arguments);
+        } else {
+            throw std::invalid_argument("Setter not found for key: " + key);
+        }
+    }
+
     public:
         YGNodeRef m_node;
 
         LayoutNode();
 
-        size_t GetChildCount();
+        [[nodiscard]] size_t GetChildCount() const;
 
-        void InsertChild(LayoutNode* child, size_t index);
+        void InsertChild(LayoutNode* child, size_t index) const;
 
-        void ApplyStyle(const json& styleDef);
+        void ApplyStyle(const json& styleDef) const;
 
         [[nodiscard]] YGNodeRef GetParentNode() const {
             return YGNodeGetParent(m_node);
@@ -100,16 +120,8 @@ class LayoutNode {
             YGNodeStyleSetPosition(m_node, edge, points);
         }
 
-        void SetPositionPercent(const YGEdge edge, const float percent) const {
-            YGNodeStyleSetPositionPercent(m_node, edge, percent);
-        }
-
         void SetMargin(const YGEdge edge, const float points) const {
             YGNodeStyleSetMargin(m_node, edge, points);
-        }
-
-        void SetMarginPercent(const YGEdge edge, const float percent) const {
-            YGNodeStyleSetMarginPercent(m_node, edge, percent);
         }
 
         void SetMarginAuto(const YGEdge edge) const {
@@ -118,10 +130,6 @@ class LayoutNode {
 
         void SetPadding(const YGEdge edge, const float points) const {
             YGNodeStyleSetPadding(m_node, edge, points);
-        }
-
-        void SetPaddingPercent(const YGEdge edge, const float percent) const {
-            YGNodeStyleSetPaddingPercent(m_node, edge, percent);
         }
 
         void SetBorder(const YGEdge edge, const float border) const {
@@ -196,10 +204,29 @@ class LayoutNode {
             YGNodeStyleSetMaxHeightPercent(m_node, percent);
         }
 
-        std::optional<YGAlign> ResolveAlignItems(std::string def);
+        template <typename T, typename PropertyValueResolver>
+        void ApplyOptionalStyleProperty(const json& styleDef, const std::string& propertyKey, PropertyValueResolver resolver) const {
+            if (styleDef.contains(propertyKey) && styleDef[propertyKey].is_string()) {
+                auto rawValue = styleDef[propertyKey].template get<std::string>();
+                std::optional<T> value = resolver(rawValue);
+                if (value.has_value()) {
+                    CallSetter<T>(propertyKey, value.value());
+                }
+            }
+        }
 
-        std::optional<YGEdge> ResolveEdge(const std::string& edgeKey);
-
-        std::optional<YGGutter> ResolveGutter(const std::string& gutterKey);
+        template <typename T1, typename T2, typename EdgeResolver>
+        void ApplyOptionalMultiEdgeStyleProperty(const json& styleDef, const std::string& propertyKey, EdgeResolver edgeResolver) const {
+            if (styleDef.contains(propertyKey) && styleDef[propertyKey].is_object()) {
+                for (auto& [key, item] : styleDef[propertyKey].items()) {
+                    if (item.is_number()) {
+                        std::optional<T1> edge = edgeResolver(key);
+                        if (edge.has_value()) {
+                            CallSetter<T1, T2>(propertyKey, edge.value(), item.template get<float>());
+                        }
+                    }
+                }
+            }
+        }
 };
 

@@ -2,6 +2,8 @@
 #include <variant>
 #include <nlohmann/json.hpp>
 #include <webgpu/webgpu.h>
+#include <yoga/YGEnums.h>
+
 #include "imgui.h"
 
 #pragma once
@@ -10,6 +12,20 @@
 #define SHARED_STUFF
 
 using json = nlohmann::json;
+
+// https://www.cppstories.com/2021/heterogeneous-access-cpp20/
+struct StringHash {
+    using is_transparent = void;
+    [[nodiscard]] size_t operator()(const char *txt) const {
+        return std::hash<std::string_view>{}(txt);
+    }
+    [[nodiscard]] size_t operator()(std::string_view txt) const {
+        return std::hash<std::string_view>{}(txt);
+    }
+    [[nodiscard]] size_t operator()(const std::string &txt) const {
+        return std::hash<std::string>{}(txt);
+    }
+};
 
 enum HorizontalAlignment
 {
@@ -41,7 +57,7 @@ ImVec4 RGBAtoIV4(int r, int g, int b);
 ImVec4 HEXAtoIV4(const char* hex, float a);
 ImVec4 HEXAtoIV4(const char* hex);
 
-float charPercentageToFloat(const char* input);
+std::optional<float> charPercentageToFloat(const char* input);
 
 json IV4toJson(ImVec4 imVec4);
 json IV4toJsonTuple(ImVec4 imVec4);
@@ -56,6 +72,44 @@ struct Texture {
     WGPUTextureView textureView;
     int width;
     int height;
+};
+
+std::optional<YGAlign> ResolveAlignItems(std::string_view value);
+std::optional<YGAlign> ResolveAlignContent(std::string_view value);
+std::optional<YGJustify> ResolveJustifyContent(std::string_view value);
+std::optional<YGFlexDirection> ResolveFlexDirection(std::string_view value);
+std::optional<YGDirection> ResolveDirection(std::string_view value);
+std::optional<YGPositionType> ResolvePositionType(std::string_view value);
+std::optional<YGWrap> ResolveFlexWrap(std::string_view value);
+std::optional<YGOverflow> ResolveOverflow(std::string_view value);
+std::optional<YGDisplay> ResolveDisplay(std::string_view value);
+std::optional<YGEdge> ResolveEdge(std::string_view edgeKey);
+std::optional<YGGutter> ResolveGutter(std::string_view gutterKey);
+
+// Base class for type-erased setters
+struct IVariadicFn {
+    virtual ~IVariadicFn() = default;
+    virtual void call(void* args[]) = 0;
+};
+
+// Templated derived class for variadic setters
+template <typename... Args>
+class VariadicFnImpl : public IVariadicFn {
+    std::function<void(Args...)> setter;
+
+public:
+    explicit VariadicFnImpl(std::function<void(Args...)> s) : setter(std::move(s)) {}
+
+    void call(void* args[]) override {
+        // Use std::apply to call the setter with unpacked arguments
+        callImpl(std::index_sequence_for<Args...>{}, args);
+    }
+
+private:
+    template <std::size_t... I>
+    void callImpl(std::index_sequence<I...>, void* args[]) {
+        setter(*static_cast<Args*>(args[I])...);
+    }
 };
 
 bool LoadTexture(WGPUDevice device, const void* data, int numBytes, Texture* texture);
