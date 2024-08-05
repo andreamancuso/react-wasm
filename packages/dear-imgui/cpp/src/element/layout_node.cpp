@@ -8,7 +8,24 @@
 using json = nlohmann::json;
 
 LayoutNode::LayoutNode() {
+    using namespace std::placeholders;
+
     m_node = YGNodeNew();
+
+    AddSetter<YGDirection>("direction", std::bind(&LayoutNode::SetDirection, this, _1));
+    AddSetter<YGFlexDirection>("flexDirection", std::bind(&LayoutNode::SetFlexDirection, this, _1));
+    AddSetter<YGJustify>("justifyContent", std::bind(&LayoutNode::SetJustifyContent, this, _1));
+    AddSetter<YGAlign>("alignContent", std::bind(&LayoutNode::SetAlignContent, this, _1));
+    AddSetter<YGAlign>("alignItems", std::bind(&LayoutNode::SetAlignItems, this, _1));
+    AddSetter<YGAlign>("alignSelf", std::bind(&LayoutNode::SetAlignSelf, this, _1));
+    AddSetter<YGPositionType>("positionType", std::bind(&LayoutNode::SetPositionType, this, _1));
+    AddSetter<YGWrap>("flexWrap", std::bind(&LayoutNode::SetFlexWrap, this, _1));
+    AddSetter<YGOverflow>("overflow", std::bind(&LayoutNode::SetOverflow, this, _1));
+    AddSetter<YGDisplay>("display", std::bind(&LayoutNode::SetDisplay, this, _1));
+
+    AddSetter<YGEdge, float>("padding", std::bind(&LayoutNode::SetPadding, this, _1, _2));
+    AddSetter<YGEdge, float>("margin", std::bind(&LayoutNode::SetMargin, this, _1, _2));
+    AddSetter<YGEdge, float>("position", std::bind(&LayoutNode::SetPosition, this, _1, _2));
 }
 
 void LayoutNode::InsertChild(LayoutNode* child, size_t index) const {
@@ -19,97 +36,18 @@ size_t LayoutNode::GetChildCount() const {
     return YGNodeGetChildCount(m_node);
 };
 
-void LayoutNode::ApplyStyle(const json& styleDef) {
-    if (styleDef.contains("direction") && styleDef["direction"].is_string()) {
-        auto rawDirection = styleDef["direction"].template get<std::string>();
-        std::optional<YGDirection> direction = ResolveDirection(rawDirection);
+void LayoutNode::ApplyStyle(const json& styleDef) const {
+    ApplyOptionalStyleProperty<YGDirection>(styleDef, "direction", ResolveDirection);
+    ApplyOptionalStyleProperty<YGFlexDirection>(styleDef, "flexDirection", ResolveFlexDirection);
+    ApplyOptionalStyleProperty<YGJustify>(styleDef, "justifyContent", ResolveJustifyContent);
+    ApplyOptionalStyleProperty<YGAlign>(styleDef, "alignContent", ResolveAlignContent);
+    ApplyOptionalStyleProperty<YGAlign>(styleDef, "alignItems", ResolveAlignItems);
+    ApplyOptionalStyleProperty<YGAlign>(styleDef, "alignSelf", ResolveAlignItems);
+    ApplyOptionalStyleProperty<YGPositionType>(styleDef, "positionType", ResolvePositionType);
+    ApplyOptionalStyleProperty<YGWrap>(styleDef, "flexWrap", ResolveFlexWrap);
+    ApplyOptionalStyleProperty<YGOverflow>(styleDef, "overflow", ResolveOverflow);
+    ApplyOptionalStyleProperty<YGDisplay>(styleDef, "display", ResolveDisplay);
 
-        if (direction.has_value()) {
-            SetDirection(direction.value());
-        }
-    }
-    
-    if (styleDef.contains("flexDirection") && styleDef["flexDirection"].is_string()) {
-        auto rawFlexDirection = styleDef["flexDirection"].template get<std::string>();
-        std::optional<YGFlexDirection> flexDirection = ResolveFlexDirection(rawFlexDirection);
-
-        if (flexDirection.has_value()) {
-            SetFlexDirection(flexDirection.value());
-        }
-    }
-    
-    if (styleDef.contains("justifyContent") && styleDef["justifyContent"].is_string()) {
-        auto rawJustifyContent = styleDef["justifyContent"].template get<std::string>();
-        std::optional<YGJustify> justifyContent = ResolveJustifyContent(rawJustifyContent);
-
-        if (justifyContent.has_value()) {
-            SetJustifyContent(justifyContent.value());
-        }
-    }
-    
-    if (styleDef.contains("alignContent") && styleDef["alignContent"].is_string()) {
-        auto rawAlignContent = styleDef["alignContent"].template get<std::string>();
-        std::optional<YGAlign> alignContent = ResolveAlignItems(rawAlignContent);
-
-        if (alignContent.has_value()) {
-            SetAlignContent(alignContent.value());
-        }
-    }
-    
-    if (styleDef.contains("alignItems") && styleDef["alignItems"].is_string()) {
-        auto rawAlignItems = styleDef["alignItems"].template get<std::string>();
-        std::optional<YGAlign> alignItems = ResolveAlignItems(rawAlignItems);
-
-        if (alignItems.has_value()) {
-            SetAlignItems(alignItems.value());
-        }
-    }
-    
-    if (styleDef.contains("alignSelf") && styleDef["alignSelf"].is_string()) {
-        auto def = styleDef["alignSelf"].template get<std::string>();
-        std::optional<YGAlign> alignSelf = ResolveAlignItems(def);
-
-        if (alignSelf.has_value()) {
-            SetAlignSelf(alignSelf.value());
-        }
-    }
-    
-    if (styleDef.contains("positionType") && styleDef["positionType"].is_string()) {
-        auto rawPositionType = styleDef["positionType"].template get<std::string>();
-        std::optional<YGPositionType> positionType = ResolvePositionType(rawPositionType);
-
-        if (positionType.has_value()) {
-            SetPositionType(positionType.value());
-        }
-    }
-    
-    if (styleDef.contains("flexWrap") && styleDef["flexWrap"].is_string()) {
-        auto rawFlexWrap = styleDef["flexWrap"].template get<std::string>();
-        std::optional<YGWrap> flexWrap = ResolveFlexWrap(rawFlexWrap);
-
-        if (flexWrap.has_value()) {
-            SetFlexWrap(flexWrap.value());
-        }
-    }
-    
-    if (styleDef.contains("overflow") && styleDef["overflow"].is_string()) {
-        auto rawOverflow = styleDef["overflow"].template get<std::string>();
-        std::optional<YGOverflow> overflow = ResolveOverflow(rawOverflow);
-
-        if (overflow.has_value()) {
-            SetOverflow(overflow.value());
-        }
-    }
-    
-    if (styleDef.contains("display") && styleDef["display"].is_string()) {
-        auto rawDisplay = styleDef["display"].template get<std::string>();
-        std::optional<YGDisplay> display = ResolveDisplay(rawDisplay);
-
-        if (display.has_value()) {
-            SetDisplay(display.value());
-        }
-    }
-    
     if (styleDef.contains("flex") && styleDef["flex"].is_number()) {
         SetFlex(styleDef["flex"].template get<float>());
     }
@@ -135,40 +73,12 @@ void LayoutNode::ApplyStyle(const json& styleDef) {
             }
         }
     }
-    
-    if (styleDef.contains("position") && styleDef["position"].is_object()) {
-        for (auto& [key, item] : styleDef["position"].items()) {
-            if (item.is_number()) {
-                std::optional<YGEdge> edge = ResolveEdge(key);
-                if (edge.has_value()) {
-                    SetPosition(edge.value(), item.template get<float>());
-                }
-            }
-        }
-    }
-    
-    if (styleDef.contains("margin") && styleDef["margin"].is_object()) {
-        for (auto& [key, item] : styleDef["margin"].items()) {
-            if (item.is_number()) {
-                std::optional<YGEdge> edge = ResolveEdge(key);
-                if (edge.has_value()) {
-                    SetMargin(edge.value(), item.template get<float>());
-                }
-            }
-        }
-    }
-    
-    if (styleDef.contains("padding") && styleDef["padding"].is_object()) {
-        for (auto& [key, item] : styleDef["padding"].items()) {
-            if (item.is_number()) {
-                std::optional<YGEdge> edge = ResolveEdge(key);
-                if (edge.has_value()) {
-                    SetPadding(edge.value(), item.template get<float>());
-                }
-            }
-        }
-    }
-    
+
+    ApplyOptionalMultiEdgeStyleProperty<YGEdge>(styleDef, "position", ResolveEdge);
+    ApplyOptionalMultiEdgeStyleProperty<YGEdge>(styleDef, "margin", ResolveEdge);
+    ApplyOptionalMultiEdgeStyleProperty<YGEdge>(styleDef, "padding", ResolveEdge);
+
+    // TODO: Border must be applied equally on all 4 sides
     if (styleDef.contains("border") && styleDef["border"].is_object()) {
         for (auto& [key, item] : styleDef["border"].items()) {
             if (item.is_number()) {
@@ -184,7 +94,6 @@ void LayoutNode::ApplyStyle(const json& styleDef) {
         for (auto& [key, item] : styleDef["gap"].items()) {
             if (item.is_number()) {
                 std::optional<YGGutter> gutter = ResolveGutter(key);
-                // todo: what about percentage?
                 if (gutter.has_value()) {
                     SetGap(gutter.value(), item.template get<float>());
                 }
