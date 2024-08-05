@@ -12,20 +12,20 @@ LayoutNode::LayoutNode() {
 
     m_node = YGNodeNew();
 
-    AddSetter<YGDirection>("direction", std::bind(&LayoutNode::SetDirection, this, _1));
-    AddSetter<YGFlexDirection>("flexDirection", std::bind(&LayoutNode::SetFlexDirection, this, _1));
-    AddSetter<YGJustify>("justifyContent", std::bind(&LayoutNode::SetJustifyContent, this, _1));
-    AddSetter<YGAlign>("alignContent", std::bind(&LayoutNode::SetAlignContent, this, _1));
-    AddSetter<YGAlign>("alignItems", std::bind(&LayoutNode::SetAlignItems, this, _1));
-    AddSetter<YGAlign>("alignSelf", std::bind(&LayoutNode::SetAlignSelf, this, _1));
-    AddSetter<YGPositionType>("positionType", std::bind(&LayoutNode::SetPositionType, this, _1));
-    AddSetter<YGWrap>("flexWrap", std::bind(&LayoutNode::SetFlexWrap, this, _1));
-    AddSetter<YGOverflow>("overflow", std::bind(&LayoutNode::SetOverflow, this, _1));
-    AddSetter<YGDisplay>("display", std::bind(&LayoutNode::SetDisplay, this, _1));
+    AddSetter<YGDirection>("direction", std::function<void(YGDirection)>(std::bind(&LayoutNode::SetDirection, this, _1)));
+    AddSetter<YGFlexDirection>("flexDirection", std::function<void(YGFlexDirection)>(std::bind(&LayoutNode::SetFlexDirection, this, _1)));
+    AddSetter<YGJustify>("justifyContent", std::function<void(YGJustify)>(std::bind(&LayoutNode::SetJustifyContent, this, _1)));
+    AddSetter<YGAlign>("alignContent", std::function<void(YGAlign)>(std::bind(&LayoutNode::SetAlignContent, this, _1)));
+    AddSetter<YGAlign>("alignItems", std::function<void(YGAlign)>(std::bind(&LayoutNode::SetAlignItems, this, _1)));
+    AddSetter<YGAlign>("alignSelf", std::function<void(YGAlign)>(std::bind(&LayoutNode::SetAlignSelf, this, _1)));
+    AddSetter<YGPositionType>("positionType", std::function<void(YGPositionType)>(std::bind(&LayoutNode::SetPositionType, this, _1)));
+    AddSetter<YGWrap>("flexWrap", std::function<void(YGWrap)>(std::bind(&LayoutNode::SetFlexWrap, this, _1)));
+    AddSetter<YGOverflow>("overflow", std::function<void(YGOverflow)>(std::bind(&LayoutNode::SetOverflow, this, _1)));
+    AddSetter<YGDisplay>("display", std::function<void(YGDisplay)>(std::bind(&LayoutNode::SetDisplay, this, _1)));
 
-    AddSetter<YGEdge, float>("padding", std::bind(&LayoutNode::SetPadding, this, _1, _2));
-    AddSetter<YGEdge, float>("margin", std::bind(&LayoutNode::SetMargin, this, _1, _2));
-    AddSetter<YGEdge, float>("position", std::bind(&LayoutNode::SetPosition, this, _1, _2));
+    AddSetter<YGEdge, float>("padding", std::function<void(YGEdge, float)>(std::bind(&LayoutNode::SetPadding, this, _1, _2)));
+    AddSetter<YGEdge, float>("margin", std::function<void(YGEdge, float)>(std::bind(&LayoutNode::SetMargin, this, _1, _2)));
+    AddSetter<YGEdge, float>("position", std::function<void(YGEdge, float)>(std::bind(&LayoutNode::SetPosition, this, _1, _2)));
 }
 
 void LayoutNode::InsertChild(LayoutNode* child, size_t index) const {
@@ -74,9 +74,9 @@ void LayoutNode::ApplyStyle(const json& styleDef) const {
         }
     }
 
-    ApplyOptionalMultiEdgeStyleProperty<YGEdge>(styleDef, "position", ResolveEdge);
-    ApplyOptionalMultiEdgeStyleProperty<YGEdge>(styleDef, "margin", ResolveEdge);
-    ApplyOptionalMultiEdgeStyleProperty<YGEdge>(styleDef, "padding", ResolveEdge);
+    ApplyOptionalMultiEdgeStyleProperty<YGEdge, float>(styleDef, "position", ResolveEdge);
+    ApplyOptionalMultiEdgeStyleProperty<YGEdge, float>(styleDef, "margin", ResolveEdge);
+    ApplyOptionalMultiEdgeStyleProperty<YGEdge, float>(styleDef, "padding", ResolveEdge);
 
     // TODO: Border must be applied equally on all 4 sides
     if (styleDef.contains("border") && styleDef["border"].is_object()) {

@@ -11,69 +11,52 @@ using json = nlohmann::json;
 class ReactImgui;
 
 class LayoutNode {
-    // Courtesy of Chat GPT - I am only beginning to understand templates!!
     // Base class for type-erased setters
     struct ISetter {
         virtual ~ISetter() = default;
-        virtual void call(void* value1, void* value2 = nullptr) = 0;
+        virtual void call(void* args[]) = 0;
     };
 
-    // Templated derived class for single-parameter setters
-    template <typename T>
+    // Templated derived class for variadic setters
+    template <typename... Args>
     class SetterImpl : public ISetter {
-        std::function<void(T)> setter;
+        std::function<void(Args...)> setter;
 
     public:
-        SetterImpl(std::function<void(T)> s) : setter(std::move(s)) {}
-        void call(void* value1, void* value2 = nullptr) override {
-            setter(*static_cast<T*>(value1));
+        SetterImpl(std::function<void(Args...)> s) : setter(std::move(s)) {}
+
+        void call(void* args[]) override {
+            // Use std::apply to call the setter with unpacked arguments
+            callImpl(std::index_sequence_for<Args...>{}, args);
         }
-    };
 
-    // Templated derived class for two-parameter setters
-    template <typename T1, typename T2>
-    class SetterImpl2 : public ISetter {
-        std::function<void(T1, T2)> setter;
-
-    public:
-        SetterImpl2(std::function<void(T1, T2)> s) : setter(std::move(s)) {}
-        void call(void* value1, void* value2) override {
-            setter(*static_cast<T1*>(value1), *static_cast<T2*>(value2));
+    private:
+        template <std::size_t... I>
+        void callImpl(std::index_sequence<I...>, void* args[]) {
+            setter(*static_cast<Args*>(args[I])...);
         }
     };
 
     private:
         std::unordered_map<std::string, std::unique_ptr<ISetter>> m_setters;
 
-        template <typename T>
-        void AddSetter(const std::string& key, std::function<void(T)> setter) {
-            m_setters[key] = std::make_unique<SetterImpl<T>>(std::move(setter));
-        }
+    // Add a setter for any number of parameters
+    template <typename... Args>
+    void AddSetter(const std::string& key, std::function<void(Args...)> setter) {
+        m_setters[key] = std::make_unique<SetterImpl<Args...>>(std::move(setter));
+    }
 
-        template <typename T1, typename T2>
-        void AddSetter(const std::string& key, std::function<void(T1, T2)> setter) {
-            m_setters[key] = std::make_unique<SetterImpl2<T1, T2>>(std::move(setter));
+    // Call a setter with variadic arguments
+    template <typename... Args>
+    void CallSetter(const std::string& key, Args... args) const {
+        auto it = m_setters.find(key);
+        if (it != m_setters.end()) {
+            void* arguments[] = { &args... };
+            it->second->call(arguments);
+        } else {
+            throw std::runtime_error("Setter not found for key: " + key);
         }
-
-        template <typename T>
-        void CallSetter(const std::string& key, T value) const {
-            auto it = m_setters.find(key);
-            if (it != m_setters.end()) {
-                it->second->call(&value);
-            } else {
-                throw std::runtime_error("Setter not found for key: " + key);
-            }
-        }
-
-        template <typename T1, typename T2>
-        void CallSetter(const std::string& key, T1 value1, T2 value2) const {
-            auto it = m_setters.find(key);
-            if (it != m_setters.end()) {
-                it->second->call(&value1, &value2);
-            } else {
-                throw std::runtime_error("Setter not found for key: " + key);
-            }
-        }
+    }
 
     public:
         YGNodeRef m_node;
@@ -259,14 +242,14 @@ class LayoutNode {
             }
         }
 
-        template <typename T, typename EdgeResolver>
+        template <typename T1, typename T2, typename EdgeResolver>
         void ApplyOptionalMultiEdgeStyleProperty(const json& styleDef, const std::string& propertyKey, EdgeResolver edgeResolver) const {
             if (styleDef.contains(propertyKey) && styleDef[propertyKey].is_object()) {
                 for (auto& [key, item] : styleDef[propertyKey].items()) {
                     if (item.is_number()) {
-                        std::optional<T> edge = edgeResolver(key);
+                        std::optional<T1> edge = edgeResolver(key);
                         if (edge.has_value()) {
-                            CallSetter<T, float>(propertyKey, edge.value(), item.template get<float>());
+                            CallSetter<T1, T2>(propertyKey, edge.value(), item.template get<float>());
                         }
                     }
                 }
