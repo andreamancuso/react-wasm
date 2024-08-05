@@ -100,16 +100,8 @@ class LayoutNode {
             YGNodeStyleSetPosition(m_node, edge, points);
         }
 
-        void SetPositionPercent(const YGEdge edge, const float percent) const {
-            YGNodeStyleSetPositionPercent(m_node, edge, percent);
-        }
-
         void SetMargin(const YGEdge edge, const float points) const {
             YGNodeStyleSetMargin(m_node, edge, points);
-        }
-
-        void SetMarginPercent(const YGEdge edge, const float percent) const {
-            YGNodeStyleSetMarginPercent(m_node, edge, percent);
         }
 
         void SetMarginAuto(const YGEdge edge) const {
@@ -118,10 +110,6 @@ class LayoutNode {
 
         void SetPadding(const YGEdge edge, const float points) const {
             YGNodeStyleSetPadding(m_node, edge, points);
-        }
-
-        void SetPaddingPercent(const YGEdge edge, const float percent) const {
-            YGNodeStyleSetPaddingPercent(m_node, edge, percent);
         }
 
         void SetBorder(const YGEdge edge, const float border) const {
