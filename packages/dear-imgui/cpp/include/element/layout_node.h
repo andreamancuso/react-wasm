@@ -11,39 +11,12 @@ using json = nlohmann::json;
 class ReactImgui;
 
 class LayoutNode {
-    // Base class for type-erased setters
-    struct ISetter {
-        virtual ~ISetter() = default;
-        virtual void call(void* args[]) = 0;
-    };
-
-    // Templated derived class for variadic setters
-    template <typename... Args>
-    class SetterImpl : public ISetter {
-        std::function<void(Args...)> setter;
-
-    public:
-        SetterImpl(std::function<void(Args...)> s) : setter(std::move(s)) {}
-
-        void call(void* args[]) override {
-            // Use std::apply to call the setter with unpacked arguments
-            callImpl(std::index_sequence_for<Args...>{}, args);
-        }
-
-    private:
-        template <std::size_t... I>
-        void callImpl(std::index_sequence<I...>, void* args[]) {
-            setter(*static_cast<Args*>(args[I])...);
-        }
-    };
-
-    private:
-        std::unordered_map<std::string, std::unique_ptr<ISetter>> m_setters;
+    std::unordered_map<std::string, std::unique_ptr<IVariadicFn>, StringHash, std::equal_to<>> m_setters;
 
     // Add a setter for any number of parameters
     template <typename... Args>
     void AddSetter(const std::string& key, std::function<void(Args...)> setter) {
-        m_setters[key] = std::make_unique<SetterImpl<Args...>>(std::move(setter));
+        m_setters[key] = std::make_unique<VariadicFnImpl<Args...>>(std::move(setter));
     }
 
     // Call a setter with variadic arguments
@@ -54,7 +27,7 @@ class LayoutNode {
             void* arguments[] = { &args... };
             it->second->call(arguments);
         } else {
-            throw std::runtime_error("Setter not found for key: " + key);
+            throw std::invalid_argument("Setter not found for key: " + key);
         }
     }
 

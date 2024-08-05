@@ -37,9 +37,8 @@ ImVec4 HEXAtoIV4(const char* hex) {
 std::optional<float> charPercentageToFloat(const char* input) {
     std::optional<float> value;
     float parsedValue;
-    auto outcome = std::sscanf(input, "%f%%", &parsedValue);
 
-    if (outcome != EOF && outcome > 0) {
+    if (auto outcome = std::sscanf(input, "%f%%", &parsedValue); outcome != EOF && outcome > 0) {
         value.emplace(parsedValue);
     }
 
@@ -285,7 +284,7 @@ std::optional<YGDisplay> ResolveDisplay(std::string_view value) {
     return display;
 };
 
-std::optional<YGEdge> ResolveEdge(const std::string& edgeKey) {
+std::optional<YGEdge> ResolveEdge(std::string_view edgeKey) {
     std::optional<YGEdge> edge;
 
     if (edgeKey == "left") {
@@ -311,7 +310,7 @@ std::optional<YGEdge> ResolveEdge(const std::string& edgeKey) {
     return edge;
 }
 
-std::optional<YGGutter> ResolveGutter(const std::string& gutterKey) {
+std::optional<YGGutter> ResolveGutter(std::string_view gutterKey) {
     std::optional<YGGutter> gutter;
 
     if (gutterKey == "column") {

@@ -13,6 +13,20 @@
 
 using json = nlohmann::json;
 
+// https://www.cppstories.com/2021/heterogeneous-access-cpp20/
+struct StringHash {
+    using is_transparent = void;
+    [[nodiscard]] size_t operator()(const char *txt) const {
+        return std::hash<std::string_view>{}(txt);
+    }
+    [[nodiscard]] size_t operator()(std::string_view txt) const {
+        return std::hash<std::string_view>{}(txt);
+    }
+    [[nodiscard]] size_t operator()(const std::string &txt) const {
+        return std::hash<std::string>{}(txt);
+    }
+};
+
 enum HorizontalAlignment
 {
     // HorizontalAlignment_None    = -1,
@@ -69,8 +83,34 @@ std::optional<YGPositionType> ResolvePositionType(std::string_view value);
 std::optional<YGWrap> ResolveFlexWrap(std::string_view value);
 std::optional<YGOverflow> ResolveOverflow(std::string_view value);
 std::optional<YGDisplay> ResolveDisplay(std::string_view value);
-std::optional<YGEdge> ResolveEdge(const std::string& edgeKey);
-std::optional<YGGutter> ResolveGutter(const std::string& gutterKey);
+std::optional<YGEdge> ResolveEdge(std::string_view edgeKey);
+std::optional<YGGutter> ResolveGutter(std::string_view gutterKey);
+
+// Base class for type-erased setters
+struct IVariadicFn {
+    virtual ~IVariadicFn() = default;
+    virtual void call(void* args[]) = 0;
+};
+
+// Templated derived class for variadic setters
+template <typename... Args>
+class VariadicFnImpl : public IVariadicFn {
+    std::function<void(Args...)> setter;
+
+public:
+    explicit VariadicFnImpl(std::function<void(Args...)> s) : setter(std::move(s)) {}
+
+    void call(void* args[]) override {
+        // Use std::apply to call the setter with unpacked arguments
+        callImpl(std::index_sequence_for<Args...>{}, args);
+    }
+
+private:
+    template <std::size_t... I>
+    void callImpl(std::index_sequence<I...>, void* args[]) {
+        setter(*static_cast<Args*>(args[I])...);
+    }
+};
 
 bool LoadTexture(WGPUDevice device, const void* data, int numBytes, Texture* texture);
 
