@@ -2,6 +2,8 @@
 #include <variant>
 #include <nlohmann/json.hpp>
 #include <webgpu/webgpu.h>
+#include <yoga/YGEnums.h>
+
 #include "imgui.h"
 
 #pragma once
@@ -41,7 +43,7 @@ ImVec4 RGBAtoIV4(int r, int g, int b);
 ImVec4 HEXAtoIV4(const char* hex, float a);
 ImVec4 HEXAtoIV4(const char* hex);
 
-float charPercentageToFloat(const char* input);
+std::optional<float> charPercentageToFloat(const char* input);
 
 json IV4toJson(ImVec4 imVec4);
 json IV4toJsonTuple(ImVec4 imVec4);
@@ -57,6 +59,18 @@ struct Texture {
     int width;
     int height;
 };
+
+std::optional<YGAlign> ResolveAlignItems(std::string_view value);
+std::optional<YGAlign> ResolveAlignContent(std::string_view value);
+std::optional<YGJustify> ResolveJustifyContent(std::string_view value);
+std::optional<YGFlexDirection> ResolveFlexDirection(std::string_view value);
+std::optional<YGDirection> ResolveDirection(std::string_view value);
+std::optional<YGPositionType> ResolvePositionType(std::string_view value);
+std::optional<YGWrap> ResolveFlexWrap(std::string_view value);
+std::optional<YGOverflow> ResolveOverflow(std::string_view value);
+std::optional<YGDisplay> ResolveDisplay(std::string_view value);
+std::optional<YGEdge> ResolveEdge(const std::string& edgeKey);
+std::optional<YGGutter> ResolveGutter(const std::string& gutterKey);
 
 bool LoadTexture(WGPUDevice device, const void* data, int numBytes, Texture* texture);
 

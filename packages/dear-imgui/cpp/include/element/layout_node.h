@@ -16,9 +16,9 @@ class LayoutNode {
 
         LayoutNode();
 
-        size_t GetChildCount();
+        [[nodiscard]] size_t GetChildCount() const;
 
-        void InsertChild(LayoutNode* child, size_t index);
+        void InsertChild(LayoutNode* child, size_t index) const;
 
         void ApplyStyle(const json& styleDef);
 
@@ -183,11 +183,5 @@ class LayoutNode {
         void SetMaxHeightPercent(const float percent) const {
             YGNodeStyleSetMaxHeightPercent(m_node, percent);
         }
-
-        std::optional<YGAlign> ResolveAlignItems(std::string def);
-
-        std::optional<YGEdge> ResolveEdge(const std::string& edgeKey);
-
-        std::optional<YGGutter> ResolveGutter(const std::string& gutterKey);
 };
 
