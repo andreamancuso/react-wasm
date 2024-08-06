@@ -50,9 +50,6 @@ export type YogaStyle = {
     padding?: {
         [edge in Edge]?: number;
     };
-    border?: {
-        [edge in Edge]?: number;
-    };
     gap?: {
         [gutter in Gutter]?: number;
     };

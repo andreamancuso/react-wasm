@@ -36,147 +36,159 @@ size_t LayoutNode::GetChildCount() const {
     return YGNodeGetChildCount(m_node);
 };
 
+void LayoutNode::ResetStyle() const {
+    SetDirection(YGDirectionInherit);
+    SetFlexDirection(YGFlexDirectionColumn);
+    SetJustifyContent(YGJustifyFlexStart);
+    SetAlignContent(YGAlignAuto);
+    SetAlignItems(YGAlignAuto);
+    SetAlignSelf(YGAlignAuto);
+    SetPositionType(YGPositionTypeStatic);
+    SetFlexWrap(YGWrapNoWrap);
+    SetOverflow(YGOverflowVisible);
+    SetDisplay(YGDisplayFlex);
+
+    SetPadding(YGEdgeAll, 0);
+    SetMargin(YGEdgeAll, 0);
+    SetPosition(YGEdgeAll, 0);
+};
+
 void LayoutNode::ApplyStyle(const json& styleDef) const {
-    ApplyOptionalStyleProperty<YGDirection>(styleDef, "direction", ResolveDirection);
-    ApplyOptionalStyleProperty<YGFlexDirection>(styleDef, "flexDirection", ResolveFlexDirection);
-    ApplyOptionalStyleProperty<YGJustify>(styleDef, "justifyContent", ResolveJustifyContent);
-    ApplyOptionalStyleProperty<YGAlign>(styleDef, "alignContent", ResolveAlignContent);
-    ApplyOptionalStyleProperty<YGAlign>(styleDef, "alignItems", ResolveAlignItems);
-    ApplyOptionalStyleProperty<YGAlign>(styleDef, "alignSelf", ResolveAlignItems);
-    ApplyOptionalStyleProperty<YGPositionType>(styleDef, "positionType", ResolvePositionType);
-    ApplyOptionalStyleProperty<YGWrap>(styleDef, "flexWrap", ResolveFlexWrap);
-    ApplyOptionalStyleProperty<YGOverflow>(styleDef, "overflow", ResolveOverflow);
-    ApplyOptionalStyleProperty<YGDisplay>(styleDef, "display", ResolveDisplay);
+    if (styleDef.is_object()) {
+        ApplyOptionalStyleProperty<YGDirection>(styleDef, "direction", ResolveDirection);
+        ApplyOptionalStyleProperty<YGFlexDirection>(styleDef, "flexDirection", ResolveFlexDirection);
+        ApplyOptionalStyleProperty<YGJustify>(styleDef, "justifyContent", ResolveJustifyContent);
+        ApplyOptionalStyleProperty<YGAlign>(styleDef, "alignContent", ResolveAlignContent);
+        ApplyOptionalStyleProperty<YGAlign>(styleDef, "alignItems", ResolveAlignItems);
+        ApplyOptionalStyleProperty<YGAlign>(styleDef, "alignSelf", ResolveAlignItems);
+        ApplyOptionalStyleProperty<YGPositionType>(styleDef, "positionType", ResolvePositionType);
+        ApplyOptionalStyleProperty<YGWrap>(styleDef, "flexWrap", ResolveFlexWrap);
+        ApplyOptionalStyleProperty<YGOverflow>(styleDef, "overflow", ResolveOverflow);
+        ApplyOptionalStyleProperty<YGDisplay>(styleDef, "display", ResolveDisplay);
 
-    if (styleDef.contains("flex") && styleDef["flex"].is_number()) {
-        SetFlex(styleDef["flex"].template get<float>());
-    }
-    
-    if (styleDef.contains("flexGrow") && styleDef["flexGrow"].is_number()) {
-        SetFlexGrow(styleDef["flexGrow"].template get<float>());
-    }
-    
-    if (styleDef.contains("flexShrink") && styleDef["flexShrink"].is_number()) {
-        SetFlexShrink(styleDef["flexShrink"].template get<float>());
-    }
-    
-    if (styleDef.contains("flexBasis")) {
-        if (styleDef["flexBasis"].is_number()) {
-            SetFlexBasis(styleDef["flexBasis"].template get<float>());
-        } else if (styleDef["flexBasis"].is_string()) {
-            auto flexBasis = styleDef["flexBasis"].template get<std::string>();
-
-            if (flexBasis == "auto") {
-                SetFlexBasisAuto();
-            } else if (auto maybePct = charPercentageToFloat(flexBasis.c_str()); maybePct.has_value()) {
-                SetFlexBasisPercent(maybePct.value());
-            }
+        if (styleDef.contains("flex") && styleDef["flex"].is_number()) {
+            SetFlex(styleDef["flex"].template get<float>());
         }
-    }
 
-    ApplyOptionalMultiEdgeStyleProperty<YGEdge, float>(styleDef, "position", ResolveEdge);
-    ApplyOptionalMultiEdgeStyleProperty<YGEdge, float>(styleDef, "margin", ResolveEdge);
-    ApplyOptionalMultiEdgeStyleProperty<YGEdge, float>(styleDef, "padding", ResolveEdge);
+        if (styleDef.contains("flexGrow") && styleDef["flexGrow"].is_number()) {
+            SetFlexGrow(styleDef["flexGrow"].template get<float>());
+        }
 
-    // TODO: Border must be applied equally on all 4 sides
-    if (styleDef.contains("border") && styleDef["border"].is_object()) {
-        for (auto& [key, item] : styleDef["border"].items()) {
-            if (item.is_number()) {
-                std::optional<YGEdge> edge = ResolveEdge(key);
-                if (edge.has_value()) {
-                    SetBorder(edge.value(), item.template get<float>());
+        if (styleDef.contains("flexShrink") && styleDef["flexShrink"].is_number()) {
+            SetFlexShrink(styleDef["flexShrink"].template get<float>());
+        }
+
+        if (styleDef.contains("flexBasis")) {
+            if (styleDef["flexBasis"].is_number()) {
+                SetFlexBasis(styleDef["flexBasis"].template get<float>());
+            } else if (styleDef["flexBasis"].is_string()) {
+                auto flexBasis = styleDef["flexBasis"].template get<std::string>();
+
+                if (flexBasis == "auto") {
+                    SetFlexBasisAuto();
+                } else if (auto maybePct = charPercentageToFloat(flexBasis.c_str()); maybePct.has_value()) {
+                    SetFlexBasisPercent(maybePct.value());
                 }
             }
         }
-    }
-    
-    if (styleDef.contains("gap") && styleDef["gap"].is_object()) {
-        for (auto& [key, item] : styleDef["gap"].items()) {
-            if (item.is_number()) {
-                std::optional<YGGutter> gutter = ResolveGutter(key);
-                if (gutter.has_value()) {
-                    SetGap(gutter.value(), item.template get<float>());
+
+        ApplyOptionalMultiEdgeStyleProperty<YGEdge, float>(styleDef, "position", ResolveEdge);
+        ApplyOptionalMultiEdgeStyleProperty<YGEdge, float>(styleDef, "margin", ResolveEdge);
+        ApplyOptionalMultiEdgeStyleProperty<YGEdge, float>(styleDef, "padding", ResolveEdge);
+
+        // Currently we support only same thickness borders
+        if (styleDef.contains("borderThickness") && styleDef["borderThickness"].is_number()) {
+            SetBorder(YGEdgeAll, styleDef["borderThickness"].template get<float>());
+        }
+
+        if (styleDef.contains("gap") && styleDef["gap"].is_object()) {
+            for (auto& [key, item] : styleDef["gap"].items()) {
+                if (item.is_number()) {
+                    std::optional<YGGutter> gutter = ResolveGutter(key);
+                    if (gutter.has_value()) {
+                        SetGap(gutter.value(), item.template get<float>());
+                    }
                 }
             }
         }
-    }
 
-    if (styleDef.contains("aspectRatio") && styleDef["aspectRatio"].is_number()) {
-        SetAspectRatio(styleDef["aspectRatio"].template get<float>());
-    }
+        if (styleDef.contains("aspectRatio") && styleDef["aspectRatio"].is_number()) {
+            SetAspectRatio(styleDef["aspectRatio"].template get<float>());
+        }
 
-    if (styleDef.contains("width")) {
-        if (styleDef["width"].is_number()) {
-            SetWidth(styleDef["width"].template get<float>());
-        } else if (styleDef["width"].is_string()) {
-            auto width = styleDef["width"].template get<std::string>();
+        if (styleDef.contains("width")) {
+            if (styleDef["width"].is_number()) {
+                SetWidth(styleDef["width"].template get<float>());
+            } else if (styleDef["width"].is_string()) {
+                auto width = styleDef["width"].template get<std::string>();
 
-            if (width == "auto") {
-                SetWidthAuto();
-            } else if (auto maybePct = charPercentageToFloat(width.c_str()); maybePct.has_value()) {
-                SetWidthPercent(maybePct.value());
+                if (width == "auto") {
+                    SetWidthAuto();
+                } else if (auto maybePct = charPercentageToFloat(width.c_str()); maybePct.has_value()) {
+                    SetWidthPercent(maybePct.value());
+                }
             }
         }
-    }
 
-    if (styleDef.contains("minWidth")) {
-        if (styleDef["minWidth"].is_number()) {
-            SetMinWidth(styleDef["minWidth"].template get<float>());
-        } else if (styleDef["minWidth"].is_string()) {
-            auto minWidth = styleDef["minWidth"].template get<std::string>();
+        if (styleDef.contains("minWidth")) {
+            if (styleDef["minWidth"].is_number()) {
+                SetMinWidth(styleDef["minWidth"].template get<float>());
+            } else if (styleDef["minWidth"].is_string()) {
+                auto minWidth = styleDef["minWidth"].template get<std::string>();
 
-            if (auto maybePct = charPercentageToFloat(minWidth.c_str()); maybePct.has_value()) {
-                SetMinWidthPercent(maybePct.value());
+                if (auto maybePct = charPercentageToFloat(minWidth.c_str()); maybePct.has_value()) {
+                    SetMinWidthPercent(maybePct.value());
+                }
             }
         }
-    }
 
-    if (styleDef.contains("maxWidth")) {
-        if (styleDef["maxWidth"].is_number()) {
-            SetMaxWidth(styleDef["maxWidth"].template get<float>());
-        } else if (styleDef["maxWidth"].is_string()) {
-            auto maxWidth = styleDef["maxWidth"].template get<std::string>();
+        if (styleDef.contains("maxWidth")) {
+            if (styleDef["maxWidth"].is_number()) {
+                SetMaxWidth(styleDef["maxWidth"].template get<float>());
+            } else if (styleDef["maxWidth"].is_string()) {
+                auto maxWidth = styleDef["maxWidth"].template get<std::string>();
 
-            if (auto maybePct = charPercentageToFloat(maxWidth.c_str()); maybePct.has_value()) {
-                SetMaxWidthPercent(maybePct.value());
+                if (auto maybePct = charPercentageToFloat(maxWidth.c_str()); maybePct.has_value()) {
+                    SetMaxWidthPercent(maybePct.value());
+                }
             }
         }
-    }
 
-    if (styleDef.contains("height")) {
-        if (styleDef["height"].is_number()) {
-            SetHeight(styleDef["height"].template get<float>());
-        } else if (styleDef["height"].is_string()) {
-            auto height = styleDef["height"].template get<std::string>();
+        if (styleDef.contains("height")) {
+            if (styleDef["height"].is_number()) {
+                SetHeight(styleDef["height"].template get<float>());
+            } else if (styleDef["height"].is_string()) {
+                auto height = styleDef["height"].template get<std::string>();
 
-            if (height == "auto") {
-                SetHeightAuto();
-            } else if (auto maybePct = charPercentageToFloat(height.c_str()); maybePct.has_value()) {
-                SetHeightPercent(maybePct.value());
+                if (height == "auto") {
+                    SetHeightAuto();
+                } else if (auto maybePct = charPercentageToFloat(height.c_str()); maybePct.has_value()) {
+                    SetHeightPercent(maybePct.value());
+                }
             }
         }
-    }
 
-    if (styleDef.contains("minHeight")) {
-        if (styleDef["minHeight"].is_number()) {
-            SetMinHeight(styleDef["minHeight"].template get<float>());
-        } else if (styleDef["minHeight"].is_string()) {
-            auto minHeight = styleDef["minHeight"].template get<std::string>();
+        if (styleDef.contains("minHeight")) {
+            if (styleDef["minHeight"].is_number()) {
+                SetMinHeight(styleDef["minHeight"].template get<float>());
+            } else if (styleDef["minHeight"].is_string()) {
+                auto minHeight = styleDef["minHeight"].template get<std::string>();
 
-            if (auto maybePct = charPercentageToFloat(minHeight.c_str()); maybePct.has_value()) {
-                SetMinHeightPercent(maybePct.value());
+                if (auto maybePct = charPercentageToFloat(minHeight.c_str()); maybePct.has_value()) {
+                    SetMinHeightPercent(maybePct.value());
+                }
             }
         }
-    }
 
-    if (styleDef.contains("maxHeight")) {
-        if (styleDef["maxHeight"].is_number()) {
-            SetMaxHeight(styleDef["maxHeight"].template get<float>());
-        } else if (styleDef["maxHeight"].is_string()) {
-            auto maxHeight = styleDef["maxHeight"].template get<std::string>();
+        if (styleDef.contains("maxHeight")) {
+            if (styleDef["maxHeight"].is_number()) {
+                SetMaxHeight(styleDef["maxHeight"].template get<float>());
+            } else if (styleDef["maxHeight"].is_string()) {
+                auto maxHeight = styleDef["maxHeight"].template get<std::string>();
 
-            if (auto maybePct = charPercentageToFloat(maxHeight.c_str()); maybePct.has_value()) {
-                SetMaxHeightPercent(maybePct.value());
+                if (auto maybePct = charPercentageToFloat(maxHeight.c_str()); maybePct.has_value()) {
+                    SetMaxHeightPercent(maybePct.value());
+                }
             }
         }
     }

@@ -142,7 +142,6 @@ export const ImGuiDemo = () => {
                     borderThickness: 5,
                     rounding: 5,
                     roundCorners: ["topLeft"],
-                    border: { all: 5 },
                 }}
             >
                 <ReactImgui.UnformattedText

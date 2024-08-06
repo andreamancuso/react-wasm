@@ -52,6 +52,8 @@ class LayoutNode {
             return !parentNode || YGNodeStyleGetDisplay(parentNode) != YGDisplayNone;
         }
 
+        void ResetStyle() const;
+
         void SetDirection(const YGDirection direction) const {
             YGNodeStyleSetDirection(m_node, direction);
         }
@@ -206,7 +208,7 @@ class LayoutNode {
 
         template <typename T, typename PropertyValueResolver>
         void ApplyOptionalStyleProperty(const json& styleDef, const std::string& propertyKey, PropertyValueResolver resolver) const {
-            if (styleDef.contains(propertyKey) && styleDef[propertyKey].is_string()) {
+            if (styleDef.is_object() && styleDef.contains(propertyKey) && styleDef[propertyKey].is_string()) {
                 auto rawValue = styleDef[propertyKey].template get<std::string>();
                 std::optional<T> value = resolver(rawValue);
                 if (value.has_value()) {
@@ -217,7 +219,7 @@ class LayoutNode {
 
         template <typename T1, typename T2, typename EdgeResolver>
         void ApplyOptionalMultiEdgeStyleProperty(const json& styleDef, const std::string& propertyKey, EdgeResolver edgeResolver) const {
-            if (styleDef.contains(propertyKey) && styleDef[propertyKey].is_object()) {
+            if (styleDef.is_object() && styleDef.contains(propertyKey) && styleDef[propertyKey].is_object()) {
                 for (auto& [key, item] : styleDef[propertyKey].items()) {
                     if (item.is_number()) {
                         std::optional<T1> edge = edgeResolver(key);
