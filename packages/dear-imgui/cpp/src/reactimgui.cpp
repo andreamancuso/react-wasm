@@ -208,7 +208,7 @@ void ReactImgui::CreateElement(const json& elementDef) {
             m_hierarchy[id] = std::vector<int>();
 
             if (elementDef.is_object() && elementDef.contains("style") && elementDef["style"].is_object()) {
-                m_elements[id]->m_layoutNode->ApplyStyle(elementDef["style"]);
+                m_elements[id]->SetStyle(elementDef["style"]);
             }
         } else {
             printf("unrecognised element type: '%s'\n", type.c_str());

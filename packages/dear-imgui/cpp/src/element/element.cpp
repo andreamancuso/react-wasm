@@ -22,32 +22,41 @@ std::unique_ptr<Element> Element::makeElement(const json& nodeDef, ReactImgui* v
     bool isRoot = (nodeDef.contains("root") && nodeDef["root"].is_boolean()) ? nodeDef["root"].template get<bool>() : false;
     auto element = std::make_unique<Element>(view, id, isRoot);
 
-    if (nodeDef.is_object() && nodeDef.contains("style") && nodeDef["style"].is_object()) {
-        element->m_layoutNode->ApplyStyle(nodeDef["style"]);
+    return element;
+};
 
-        if (nodeDef["style"].contains("backgroundColor") || nodeDef["style"].contains("borderColor")) {
+void Element::ResetStyle() {
+    m_layoutNode->ResetStyle();
+    m_baseDrawStyle.reset();
+};
+
+void Element::SetStyle(const json& styleDef) {
+    if (styleDef.is_object()) {
+        m_layoutNode->ApplyStyle(styleDef);
+
+        if (styleDef.contains("backgroundColor") || styleDef.contains("borderColor")) {
             BaseDrawStyle baseDrawStyle;
 
-            if (nodeDef["style"].contains("backgroundColor")) {
-                baseDrawStyle.backgroundColor = jsonHEXATupleToIV4(nodeDef["style"]["backgroundColor"]);
+            if (styleDef.contains("backgroundColor")) {
+                baseDrawStyle.backgroundColor = jsonHEXATupleToIV4(styleDef["backgroundColor"]);
             }
 
-            if (nodeDef["style"].contains("borderColor")) {
-                baseDrawStyle.borderColor = jsonHEXATupleToIV4(nodeDef["style"]["borderColor"]);
+            if (styleDef.contains("borderColor")) {
+                baseDrawStyle.borderColor = jsonHEXATupleToIV4(styleDef["borderColor"]);
             }
 
             if (baseDrawStyle.backgroundColor.has_value() || baseDrawStyle.borderColor.has_value()) {
 
-                if (nodeDef["style"].contains("rounding")) {
-                    baseDrawStyle.rounding = nodeDef["style"]["rounding"].template get<float>();
+                if (styleDef.contains("rounding")) {
+                    baseDrawStyle.rounding = styleDef["rounding"].template get<float>();
                 }
 
-                if (nodeDef["style"].contains("borderThickness")) {
-                    baseDrawStyle.borderThickness = nodeDef["style"]["borderThickness"].template get<float>();
+                if (styleDef.contains("borderThickness")) {
+                    baseDrawStyle.borderThickness = styleDef["borderThickness"].template get<float>();
                 }
 
-                if (nodeDef["style"].contains("roundCorners") && nodeDef["style"]["roundCorners"].is_array()) {
-                    const auto roundCorners = nodeDef["style"]["roundCorners"].template get<std::vector<std::string>>();
+                if (styleDef.contains("roundCorners") && styleDef["roundCorners"].is_array()) {
+                    const auto roundCorners = styleDef["roundCorners"].template get<std::vector<std::string>>();
 
                     baseDrawStyle.drawFlags = std::accumulate(
                         roundCorners.begin(),
@@ -57,13 +66,11 @@ std::unique_ptr<Element> Element::makeElement(const json& nodeDef, ReactImgui* v
                     );
                 }
 
-                element->m_baseDrawStyle.emplace(baseDrawStyle);
+                m_baseDrawStyle.emplace(baseDrawStyle);
             }
         }
     }
-
-    return element;
-};
+}
 
 const char* Element::GetElementType() {
     return "node";
@@ -184,7 +191,8 @@ void Element::PostRender(ReactImgui* view) {};
 
 void Element::Patch(const json& nodeDef, ReactImgui* view) {
     if (nodeDef.is_object() && nodeDef.contains("style") && nodeDef["style"].is_object()) {
-        m_layoutNode->ApplyStyle(nodeDef["style"]);
+        ResetStyle();
+        SetStyle(nodeDef["style"]);
     }
 };
 

@@ -46,6 +46,10 @@ class Element {
 
         void DrawBaseEffects() const;
 
+        void ResetStyle();
+
+        void SetStyle(const json& styleDef);
+
         virtual void Patch(const json& elementPatchDef, ReactImgui* view);
 
         virtual bool HasInternalOps();
