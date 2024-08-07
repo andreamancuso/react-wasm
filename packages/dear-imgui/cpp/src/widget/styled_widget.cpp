@@ -26,17 +26,8 @@ std::optional<WidgetStyle> StyledWidget::ExtractStyle(const json& widgetDef, Rea
             StyleColors colors;
 
             for (auto& [key, item] : widgetDef["style"]["colors"].items()) {
-                if (item.is_string()) {
-                    auto color = item.template get<std::string>();
-
-                    if (color.size() == 6) {
-                        colors[stoi(key)] = HEXAtoIV4(color.c_str());
-                    }
-                } else {
-                    auto col = jsonHEXATupleToIV4(item);
-                    if (col.has_value()) {
-                        colors[stoi(key)] = col.value();
-                    }
+                if (auto maybeColor = extractColor(item); maybeColor.has_value()) {
+                    colors[stoi(key)] = maybeColor.value();
                 }
             }
 

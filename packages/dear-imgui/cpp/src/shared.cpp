@@ -113,11 +113,25 @@ std::optional<ImVec4> jsonHEXATupleToIV4(const json& tupleDef) {
     const auto color = tupleDef[0].template get<std::string>();
     const auto alpha = tupleDef[1].template get<float>();
 
+    // TODO: perhaps use a proper HEX color parser?
     if (color.size() != 6) {
         return std::nullopt;
     }
 
     return HEXAtoIV4(color.c_str(), alpha);
+};
+
+std::optional<ImVec4> extractColor(const json& item) {
+    if (item.is_string()) {
+        auto color = item.template get<std::string>();
+
+        // TODO: perhaps use a proper HEX color parser?
+        if (color.size() == 6) {
+            return HEXAtoIV4(color.c_str());
+        }
+    }
+
+    return jsonHEXATupleToIV4(item);
 };
 
 ImDrawFlags cornersToDrawFlags(ImDrawFlags accumulator, const std::string_view side) {

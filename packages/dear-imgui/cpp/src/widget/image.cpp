@@ -15,34 +15,35 @@ bool Image::HasCustomHeight() {
 void Image::Render(ReactImgui* view) {
     if (m_texture.textureView != nullptr) {
         auto imageSize = m_size.has_value() ? m_size.value() : ImVec2(YGNodeLayoutGetWidth(m_layoutNode->m_node), YGNodeLayoutGetHeight(m_layoutNode->m_node));
-        // auto imageSize = ImVec2(YGNodeLayoutGetWidth(m_layoutNode->m_node), YGNodeLayoutGetHeight(m_layoutNode->m_node));
 
-        ImGui::PushID(m_id);
-        ImGui::BeginGroup();
+        if (imageSize.x != 0 && imageSize.y != 0) {
+            ImGui::PushID(m_id);
+            ImGui::BeginGroup();
 
-        ImGui::InvisibleButton("##image", imageSize);
-        ImDrawList* drawList = ImGui::GetWindowDrawList();
+            ImGui::InvisibleButton("##image", imageSize);
+            ImDrawList* drawList = ImGui::GetWindowDrawList();
 
-        if (!ImGui::IsItemVisible()) {
-            // Skip rendering as ImDrawList elements are not clipped.
+            if (!ImGui::IsItemVisible()) {
+                // Skip rendering as ImDrawList elements are not clipped.
+                ImGui::EndGroup();
+                ImGui::PopID();
+                return;
+            }
+
+            const ImVec2 p0 = ImGui::GetItemRectMin();
+            const ImVec2 p1 = ImGui::GetItemRectMax();
+
+            drawList->AddImage((void*)m_texture.textureView, p0, p1, ImVec2(0, 0), ImVec2(1, 1));
+
+            // ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
+            // ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
+            // ImVec4 tint_col = use_text_color_for_tint ? ImGui::GetStyleColorVec4(ImGuiCol_Text) : ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // No tint
+            // ImVec4 border_col = ImGui::GetStyleColorVec4(ImGuiCol_Border);
+            // ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h), uv_min, uv_max, tint_col, border_col);
+
             ImGui::EndGroup();
             ImGui::PopID();
-            return;
         }
-
-        const ImVec2 p0 = ImGui::GetItemRectMin();
-        const ImVec2 p1 = ImGui::GetItemRectMax();
-
-        drawList->AddImage((void*)m_texture.textureView, p0, p1, ImVec2(0, 0), ImVec2(1, 1));
-
-        // ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
-        // ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
-        // ImVec4 tint_col = use_text_color_for_tint ? ImGui::GetStyleColorVec4(ImGuiCol_Text) : ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // No tint
-        // ImVec4 border_col = ImGui::GetStyleColorVec4(ImGuiCol_Border);
-        // ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h), uv_min, uv_max, tint_col, border_col);
-
-        ImGui::EndGroup();
-        ImGui::PopID();
     }
 };
 

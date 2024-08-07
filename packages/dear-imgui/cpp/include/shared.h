@@ -66,6 +66,8 @@ json IV4toJsonHEXATuple(ImVec4 imVec4);
 
 std::optional<ImVec4> jsonHEXATupleToIV4(const json& tupleDef);
 
+std::optional<ImVec4> extractColor(const json& colorDef);
+
 ImDrawFlags cornersToDrawFlags(ImDrawFlags accumulator, std::string_view side);
 
 struct Texture {
