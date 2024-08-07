@@ -38,11 +38,15 @@ void Element::SetStyle(const json& styleDef) {
             BaseDrawStyle baseDrawStyle;
 
             if (styleDef.contains("backgroundColor")) {
-                baseDrawStyle.backgroundColor = jsonHEXATupleToIV4(styleDef["backgroundColor"]);
+                if (auto maybeColor = extractColor(styleDef["backgroundColor"]); maybeColor.has_value()) {
+                    baseDrawStyle.backgroundColor = maybeColor.value();
+                }
             }
 
             if (styleDef.contains("borderColor")) {
-                baseDrawStyle.borderColor = jsonHEXATupleToIV4(styleDef["borderColor"]);
+                if (auto maybeColor = extractColor(styleDef["borderColor"]); maybeColor.has_value()) {
+                    baseDrawStyle.borderColor = maybeColor.value();
+                }
             }
 
             if (baseDrawStyle.backgroundColor.has_value() || baseDrawStyle.borderColor.has_value()) {
@@ -148,36 +152,38 @@ void Element::DrawBaseEffects() const {
 
     const auto size = ImVec2(width, height);
 
-    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    if (size.x != 0 && size.y != 0) {
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
 
-    ImGui::InvisibleButton("##block", size);
+        ImGui::InvisibleButton("##block", size);
 
-    const ImVec2 p0 = ImGui::GetItemRectMin();
-    const ImVec2 p1 = ImGui::GetItemRectMax();
+        const ImVec2 p0 = ImGui::GetItemRectMin();
+        const ImVec2 p1 = ImGui::GetItemRectMax();
 
-    if (m_baseDrawStyle.value().backgroundColor.has_value()) {
-        const ImU32 col = ImColor(m_baseDrawStyle.value().backgroundColor.value());
+        if (m_baseDrawStyle.value().backgroundColor.has_value()) {
+            const ImU32 col = ImColor(m_baseDrawStyle.value().backgroundColor.value());
 
-        drawList->AddRectFilled(
-            p0,
-            p1,
-            col,
-            m_baseDrawStyle.value().rounding.value_or(0),
-            m_baseDrawStyle.value().drawFlags
-        );
-    }
+            drawList->AddRectFilled(
+                p0,
+                p1,
+                col,
+                m_baseDrawStyle.value().rounding.value_or(0),
+                m_baseDrawStyle.value().drawFlags
+            );
+        }
 
-    if (m_baseDrawStyle.value().borderColor.has_value()) {
-        const ImU32 col = ImColor(m_baseDrawStyle.value().borderColor.value());
+        if (m_baseDrawStyle.value().borderColor.has_value()) {
+            const ImU32 col = ImColor(m_baseDrawStyle.value().borderColor.value());
 
-        drawList->AddRect(
-            p0,
-            p1,
-            col,
-            m_baseDrawStyle.value().rounding.value_or(0),
-            ImDrawFlags_RoundCornersTopLeft | ImDrawFlags_RoundCornersBottomRight,
-            m_baseDrawStyle.value().borderThickness.value_or(1.0f)
-        );
+            drawList->AddRect(
+                p0,
+                p1,
+                col,
+                m_baseDrawStyle.value().rounding.value_or(0),
+                ImDrawFlags_RoundCornersTopLeft | ImDrawFlags_RoundCornersBottomRight,
+                m_baseDrawStyle.value().borderThickness.value_or(1.0f)
+            );
+        }
     }
 };
 

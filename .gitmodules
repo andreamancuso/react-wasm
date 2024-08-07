@@ -16,3 +16,6 @@
 [submodule "packages/dear-imgui/cpp/deps/yoga"]
 	path = packages/dear-imgui/cpp/deps/yoga
 	url = https://github.com/facebook/yoga.git
+[submodule "packages/dear-imgui/cpp/deps/css-color-parser-cpp"]
+	path = packages/dear-imgui/cpp/deps/css-color-parser-cpp
+	url = https://github.com/andreamancuso/css-color-parser-cpp

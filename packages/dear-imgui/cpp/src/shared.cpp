@@ -1,16 +1,14 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-
+#include <yoga/YGEnums.h>
 #include <webgpu/webgpu.h>
-
+#include "csscolorparser.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 #include "imgui.h"
 #include "shared.h"
-
-#include <yoga/YGEnums.h>
 
 #pragma once
 
@@ -25,12 +23,18 @@ ImVec4 RGBAtoIV4(int r, int g, int b) {
 	return RGBAtoIV4(r, g, b, 1.0f);
 }
 
-ImVec4 HEXAtoIV4(const char* hex, float a) {
-	int r, g, b;
-	std::sscanf(hex, "%02x%02x%02x", &r, &g, &b);
-	return RGBAtoIV4(r, g, b, a);
+std::optional<ImVec4> HEXAtoIV4(const std::string& hex, float a) {
+    auto maybeColor = CSSColorParser::parse(hex);
+
+    if (maybeColor.has_value()) {
+        CSSColorParser::Color& color = maybeColor.value();
+
+        return RGBAtoIV4(color.r, color.g, color.b, a);
+    }
+
+	return std::nullopt;
 }
-ImVec4 HEXAtoIV4(const char* hex) {
+std::optional<ImVec4> HEXAtoIV4(const std::string& hex) {
 	return HEXAtoIV4(hex, 1.0f);
 }
 
@@ -113,11 +117,15 @@ std::optional<ImVec4> jsonHEXATupleToIV4(const json& tupleDef) {
     const auto color = tupleDef[0].template get<std::string>();
     const auto alpha = tupleDef[1].template get<float>();
 
-    if (color.size() != 6) {
-        return std::nullopt;
+    return HEXAtoIV4(color, alpha);
+};
+
+std::optional<ImVec4> extractColor(const json& item) {
+    if (item.is_string()) {
+        return HEXAtoIV4(item.template get<std::string>());
     }
 
-    return HEXAtoIV4(color.c_str(), alpha);
+    return jsonHEXATupleToIV4(item);
 };
 
 ImDrawFlags cornersToDrawFlags(ImDrawFlags accumulator, const std::string_view side) {
