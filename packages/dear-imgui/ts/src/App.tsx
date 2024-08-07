@@ -11,15 +11,15 @@ import { ImGuiStyleForPatching } from "./lib/stylesheet/imgui-style";
 import "./App.css";
 
 export const themeColors = {
-    black: "1a1a1a",
-    darkGrey: "5a5a5a",
-    grey: "9a9a9a",
-    lightGrey: "bebebe",
-    veryLightGrey: "e5e5e5",
-    superLightGrey: "f7f7f7",
-    white: "ffffff",
-    hero: "ff6e59",
-    hoverHero: "ff4a30",
+    black: "#1a1a1a",
+    darkGrey: "#5a5a5a",
+    grey: "#9a9a9a",
+    lightGrey: "#bebebe",
+    veryLightGrey: "#e5e5e5",
+    superLightGrey: "#f7f7f7",
+    white: "#fff",
+    hero: "#ff6e59",
+    hoverHero: "#ff4a30",
 };
 
 function App() {

@@ -440,12 +440,12 @@ void ReactImgui::PatchStyle(const json& styleDef) {
             for (auto& [colorItemKey, colorItemValue] : styleDef["colors"].items()) {
                 auto colorItemKeyAsNumber = stoi(colorItemKey);
 
-                if (colorItemKeyAsNumber >= 0 && colorItemKeyAsNumber < ImGuiCol_COUNT 
-                    && colorItemValue.is_array() && colorItemValue.size() == 2) {
-                    colors[colorItemKeyAsNumber] = HEXAtoIV4(
-                        colorItemValue[0].template get<std::string>().c_str(),
-                        colorItemValue[1].template get<float>()
-                    );
+                if (colorItemKeyAsNumber >= 0 && colorItemKeyAsNumber < ImGuiCol_COUNT) {
+                    auto maybeColor = extractColor(colorItemValue);
+
+                    if (maybeColor.has_value()) {
+                        colors[colorItemKeyAsNumber] = maybeColor.value();
+                    }
                 }
             }
         }

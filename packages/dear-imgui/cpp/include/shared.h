@@ -54,8 +54,8 @@ typedef void (*OnClickCallback)(int id);
 ImVec4 RGBAtoIV4(int r, int g, int b, float a);
 ImVec4 RGBAtoIV4(int r, int g, int b);
 
-ImVec4 HEXAtoIV4(const char* hex, float a);
-ImVec4 HEXAtoIV4(const char* hex);
+std::optional<ImVec4> HEXAtoIV4(const std::string& hex, float a);
+std::optional<ImVec4> HEXAtoIV4(const std::string& hex);
 
 std::optional<float> charPercentageToFloat(const char* input);
 

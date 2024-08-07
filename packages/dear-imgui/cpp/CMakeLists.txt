@@ -131,6 +131,8 @@ if (DEFINED EMSCRIPTEN)
         ${LEPTONICA_SRC}
         ${LIBTIFF_SRC}
         ${YOGA_SRC}
+        ${DEPS}/css-color-parser-cpp/csscolorparser.hpp
+        ${DEPS}/css-color-parser-cpp/csscolorparser.cpp
     )
 
     target_include_directories(
@@ -142,6 +144,7 @@ if (DEFINED EMSCRIPTEN)
 
         ${Stb_INCLUDE_DIR}
         ${DEPS}/yoga
+        ${DEPS}/css-color-parser-cpp
 
         ${DEPS}/osm-static-map-generator/cpp
         ${DEPS}/osm-static-map-generator/cpp/deps/leptonica/src
