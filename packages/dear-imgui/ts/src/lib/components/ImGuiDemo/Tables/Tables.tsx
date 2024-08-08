@@ -14,7 +14,7 @@ const sampleData = [
 
 const styleSheet = RWStyleSheet.create({
     primaryButton: {
-        colors: { [ImGuiCol.Button]: "ff6e59" },
+        colors: { [ImGuiCol.Button]: "#ff6e59" },
         // vars: { [ImGuiStyleVar.FramePadding]: [40, 3] },
         // width: 150,
     },

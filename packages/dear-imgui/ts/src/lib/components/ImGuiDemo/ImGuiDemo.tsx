@@ -95,12 +95,21 @@ export const ImGuiDemo = () => {
                 padding: {
                     all: 20,
                 },
+                borderColor: "#000",
+                borderThickness: 1,
             }}
         >
             <ReactImgui.TreeNode label="Tree View">
                 <ReactImgui.TreeNode label="Images">
                     <ReactImgui.Node
-                        style={{ flexDirection: "row", gap: { column: 5 }, alignItems: "center" }}
+                        style={{
+                            flexDirection: "row",
+                            gap: { column: 5 },
+                            alignItems: "center",
+                            borderColor: "#ff0000",
+                            borderThickness: 2,
+                            width: 400,
+                        }}
                     >
                         <ReactImgui.Image
                             url="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
@@ -125,27 +134,47 @@ export const ImGuiDemo = () => {
                             />
                             <ReactImgui.Image
                                 url="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
-                                style={{ flex: 1, width: "100%" }}
+                                style={{
+                                    flex: 1,
+                                    width: "100%",
+                                }}
                             />
                         </ReactImgui.Node>
                     </ReactImgui.Node>
                 </ReactImgui.TreeNode>
                 <ReactImgui.TreeNode
                     label="Icons"
-                    style={{ flexDirection: "row", gap: { column: 5 }, alignItems: "center" }}
+                    style={{
+                        flexDirection: "row",
+                        gap: { column: 5 },
+                        alignItems: "center",
+                    }}
                 >
-                    <ReactImgui.UnformattedText text={faIconMap["circle-arrow-right"]} />
-                    <ReactImgui.Node style={{ width: 4, height: 20, backgroundColor: "#f0cb69" }} />
-                    <ReactImgui.Node style={{ backgroundColor: "#000000" }}>
-                        <ReactImgui.UnformattedText
-                            text="Inside"
-                            style={{
-                                colors: { [ImGuiCol.Text]: "#FFFFFF" },
-                            }}
+                    <ReactImgui.Node
+                        style={{
+                            flexDirection: "row",
+                            gap: { column: 5 },
+                            borderColor: "#ff0000",
+                            borderThickness: 2,
+                            width: 400,
+                        }}
+                    >
+                        <ReactImgui.UnformattedText text={faIconMap["circle-arrow-right"]} />
+                        <ReactImgui.Node
+                            style={{ width: 4, height: 20, backgroundColor: "#f0cb69" }}
                         />
+                        <ReactImgui.Node style={{ backgroundColor: "#000000" }}>
+                            <ReactImgui.UnformattedText
+                                text="Inside"
+                                style={{
+                                    colors: { [ImGuiCol.Text]: "#FFFFFF" },
+                                }}
+                            />
+                        </ReactImgui.Node>
                     </ReactImgui.Node>
                 </ReactImgui.TreeNode>
             </ReactImgui.TreeNode>
+
             <ReactImgui.Node
                 style={{
                     width: "100%",

@@ -155,10 +155,8 @@ void Element::DrawBaseEffects() const {
     if (size.x != 0 && size.y != 0) {
         ImDrawList* drawList = ImGui::GetWindowDrawList();
 
-        ImGui::InvisibleButton("##block", size);
-
-        const ImVec2 p0 = ImGui::GetItemRectMin();
-        const ImVec2 p1 = ImGui::GetItemRectMax();
+        const ImVec2 p0 = ImGui::GetCursorScreenPos();
+        const ImVec2 p1 = ImVec2(p0.x + width, p0.y + height);
 
         if (m_baseDrawStyle.value().backgroundColor.has_value()) {
             const ImU32 col = ImColor(m_baseDrawStyle.value().backgroundColor.value());
