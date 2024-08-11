@@ -41,19 +41,24 @@ class Table final : public StyledWidget {
         }
 
         static std::unique_ptr<Table> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-            const auto id = widgetDef["id"].template get<int>();
-
-            if (widgetDef.contains("columns") && widgetDef["columns"].is_array()) {
-                std::optional<int> clipRows;
-
-                if (widgetDef.contains("clipRows") && widgetDef["clipRows"].is_number_integer()) {
-                    clipRows.emplace(widgetDef["clipRows"].template get<int>());
-                }
-
-                return makeWidget(view, id, extractColumns(widgetDef["columns"]), clipRows, maybeStyle);
+            if (!widgetDef.contains("columns") || !widgetDef["columns"].is_array()) {
+                throw std::invalid_argument("columns not set or not an array");
             }
 
-            // throw std::invalid_argument("Invalid JSON data");
+            auto extractedColumns = extractColumns(widgetDef["columns"]);
+
+            if (extractedColumns.empty()) {
+                throw std::invalid_argument("no columns were extracted");
+            }
+
+            const auto id = widgetDef["id"].template get<int>();
+            std::optional<int> clipRows;
+
+            if (widgetDef.contains("clipRows") && widgetDef["clipRows"].is_number_integer()) {
+                clipRows.emplace(widgetDef["clipRows"].template get<int>());
+            }
+
+            return makeWidget(view, id, extractedColumns, clipRows, maybeStyle);
         }
 
         static std::unique_ptr<Table> makeWidget(ReactImgui* view, const int id, const std::vector<TableColumn>& columns, std::optional<int> clipRows, std::optional<WidgetStyle>& style) {

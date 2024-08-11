@@ -36,7 +36,7 @@ enum HorizontalAlignment
     HorizontalAlignment_Center  = 2 // Wondering this will ever be supported the way I'd like
 };
 
-using TableRow = std::unordered_map<std::string, std::string>;
+using TableRow = std::unordered_map<std::string, std::string, StringHash, std::equal_to<>>;
 using TableData = std::vector<TableRow>;
 
 using StyleVarValue = std::variant<std::monostate, ImVec2, float>;

@@ -12,23 +12,23 @@ private:
 
 public:
     static std::unique_ptr<Image> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-        if (widgetDef.contains("url")) {
-            auto id = widgetDef["id"].template get<int>();
-            auto url = widgetDef["url"].template get<std::string>();
-
-            std::optional<ImVec2> size;
-
-            if (widgetDef.contains("width") && widgetDef.contains("height")) {
-                const auto w = widgetDef["width"].template get<float>();
-                const auto h = widgetDef["height"].template get<float>();
-
-                size.emplace(ImVec2(w,h));
-            }
-
-            return std::make_unique<Image>(view, id, url, size, maybeStyle);
+        if (!widgetDef.contains("url") || !widgetDef["url"].is_string()) {
+            throw std::invalid_argument("url not defined or not a string");
         }
 
-        throw std::invalid_argument("Invalid JSON data");
+        auto id = widgetDef["id"].template get<int>();
+        auto url = widgetDef["url"].template get<std::string>();
+
+        std::optional<ImVec2> size;
+
+        if (widgetDef.contains("width") && widgetDef.contains("height")) {
+            const auto w = widgetDef["width"].template get<float>();
+            const auto h = widgetDef["height"].template get<float>();
+
+            size.emplace(ImVec2(w,h));
+        }
+
+        return std::make_unique<Image>(view, id, url, size, maybeStyle);
     }
 
     bool HasCustomWidth() override;
