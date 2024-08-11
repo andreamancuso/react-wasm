@@ -5,7 +5,7 @@
 std::optional<WidgetStyle> StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
     std::optional<WidgetStyle> maybeStyle;
         
-    if (widgetDef.is_object() && widgetDef.contains("style") && widgetDef["style"].is_object()) {
+    if (widgetDef.contains("style") && widgetDef["style"].is_object()) {
         // Perhaps a bit optimistic, but also rather convenient
         maybeStyle.emplace(WidgetStyle{});
 

@@ -4,14 +4,12 @@
 #include "widget/styled_widget.h"
 
 std::unique_ptr<Button> Button::makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-    if (widgetDef.is_object()) {
-        auto id = widgetDef["id"].template get<int>();
-        auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+    auto id = widgetDef["id"].template get<int>();
+    auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
 
-        return makeWidget(view, id, label, maybeStyle);
-    }
+    return makeWidget(view, id, label, maybeStyle);
 
-    throw std::invalid_argument("Invalid JSON data");
+    // throw std::invalid_argument("Invalid JSON data");
 };
 
 // size is passed as part of rendering the widget
@@ -35,11 +33,9 @@ void Button::Render(ReactImgui* view) {
 };
 
 void Button::Patch(const json& widgetPatchDef, ReactImgui* view) {
-    if (widgetPatchDef.is_object()) {
-        StyledWidget::Patch(widgetPatchDef, view);
+    StyledWidget::Patch(widgetPatchDef, view);
 
-        if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-            m_label = widgetPatchDef["label"].template get<std::string>();
-        }
+    if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
+        m_label = widgetPatchDef["label"].template get<std::string>();
     }
 };

@@ -31,16 +31,14 @@ void Combo::Render(ReactImgui* view) {
 };
 
 void Combo::Patch(const json& widgetPatchDef, ReactImgui* view) {
-    if (widgetPatchDef.is_object()) {
-        StyledWidget::Patch(widgetPatchDef, view);
+    StyledWidget::Patch(widgetPatchDef, view);
 
-        if (widgetPatchDef.contains("placeholder") && widgetPatchDef["placeholder"].is_string()) {
-            m_placeholder = widgetPatchDef["placeholder"].template get<std::string>();
-        }
+    if (widgetPatchDef.contains("placeholder") && widgetPatchDef["placeholder"].is_string()) {
+        m_placeholder = widgetPatchDef["placeholder"].template get<std::string>();
+    }
 
-        if (widgetPatchDef.contains("options") && widgetPatchDef["options"].is_array()) {
-            SetOptions(widgetPatchDef["options"]);
-        }
+    if (widgetPatchDef.contains("options") && widgetPatchDef["options"].is_array()) {
+        SetOptions(widgetPatchDef["options"]);
     }
 };
 

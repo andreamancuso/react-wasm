@@ -15,11 +15,9 @@ void TextWrap::Render(ReactImgui* view) {
 };
 
 void TextWrap::Patch(const json& widgetPatchDef, ReactImgui* view) {
-    if (widgetPatchDef.is_object()) {
-        StyledWidget::Patch(widgetPatchDef, view);
+    StyledWidget::Patch(widgetPatchDef, view);
 
-        if (widgetPatchDef.contains("width") && widgetPatchDef["width"].is_string()) {
-            m_width = widgetPatchDef["width"].template get<float>();
-        }
+    if (widgetPatchDef.contains("width") && widgetPatchDef["width"].is_string()) {
+        m_width = widgetPatchDef["width"].template get<float>();
     }
 };

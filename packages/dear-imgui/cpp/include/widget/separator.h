@@ -3,13 +3,11 @@
 class Separator final : public StyledWidget {
 public:
     static std::unique_ptr<Separator> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-        if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-            auto id = widgetDef["id"].template get<int>();
+        auto id = widgetDef["id"].template get<int>();
 
-            return std::make_unique<Separator>(view, id, maybeStyle);
-        }
+        return std::make_unique<Separator>(view, id, maybeStyle);
 
-        throw std::invalid_argument("Invalid JSON data");
+        // throw std::invalid_argument("Invalid JSON data");
     }
 
     static YGSize Measure(YGNodeConstRef node, const float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
@@ -26,8 +24,8 @@ public:
 
     void Render(ReactImgui* view) override;
 
-    void Init() override {
-        Element::Init();
+    void Init(const json& elementDef) override {
+        Element::Init(elementDef);
 
         YGNodeSetContext(m_layoutNode->m_node, this);
         YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);

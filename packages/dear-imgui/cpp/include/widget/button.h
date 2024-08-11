@@ -48,8 +48,8 @@ class Button final : public StyledWidget {
 
         void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
-        void Init() override {
-            Element::Init();
+        void Init(const json& elementDef) override {
+            Element::Init(elementDef);
 
             YGNodeSetContext(m_layoutNode->m_node, this);
             YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);

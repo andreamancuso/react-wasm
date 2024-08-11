@@ -12,7 +12,7 @@ class ReactImgui;
 
 class Widget : public Element {
     public:
-        std::string m_type;
+
 
         // todo: does this belong here?
         inline static OnTextChangedCallback onInputTextChange_;
@@ -24,8 +24,6 @@ class Widget : public Element {
         void HandleChildren(ReactImgui* view) override;
 
         void SetChildrenDisplay(ReactImgui* view, YGDisplay display) const;
-
-        void SetChildrenAsDisplayFlex(ReactImgui* view) const;
 
         void PreRender(ReactImgui* view) override;
 

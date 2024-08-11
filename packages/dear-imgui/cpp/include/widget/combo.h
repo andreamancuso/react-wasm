@@ -18,27 +18,25 @@ class Combo final : public StyledWidget {
         std::vector<std::string> m_options;
 
         static std::unique_ptr<Combo> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                const auto id = widgetDef["id"].template get<int>();
-                const auto initialSelectedIndex = widgetDef.contains("initialSelectedIndex") && widgetDef["initialSelectedIndex"].is_number()
-                    ? widgetDef["initialSelectedIndex"].template get<int>()
-                    : -1;
-                const auto placeholder = widgetDef.contains("placeholder") ? widgetDef["placeholder"].template get<std::string>() : "";
+            const auto id = widgetDef["id"].template get<int>();
+            const auto initialSelectedIndex = widgetDef.contains("initialSelectedIndex") && widgetDef["initialSelectedIndex"].is_number()
+                ? widgetDef["initialSelectedIndex"].template get<int>()
+                : -1;
+            const auto placeholder = widgetDef.contains("placeholder") ? widgetDef["placeholder"].template get<std::string>() : "";
 
-                std::vector<std::string> options;
+            std::vector<std::string> options;
 
-                if (widgetDef.contains("options") && widgetDef["options"].is_array()) {
-                    for (const auto &[key, item] : widgetDef["options"].items()) {
-                        if (item.is_string()) {
-                            options.emplace_back(item.template get<std::string>());
-                        }
+            if (widgetDef.contains("options") && widgetDef["options"].is_array()) {
+                for (const auto &[key, item] : widgetDef["options"].items()) {
+                    if (item.is_string()) {
+                        options.emplace_back(item.template get<std::string>());
                     }
                 }
-
-                return makeWidget(view, id, placeholder, initialSelectedIndex, options, maybeStyle);
             }
 
-            throw std::invalid_argument("Invalid JSON data");
+            return makeWidget(view, id, placeholder, initialSelectedIndex, options, maybeStyle);
+
+            // throw std::invalid_argument("Invalid JSON data");
         }
 
         static std::unique_ptr<Combo> makeWidget(ReactImgui* view, const int id, const std::string& placeholder, const int initialSelectedIndex, const std::vector<std::string>& options, std::optional<WidgetStyle>& style) {
@@ -93,8 +91,8 @@ class Combo final : public StyledWidget {
 
         void HandleInternalOp(const json& opDef) override;
 
-        void Init() override {
-            Element::Init();
+        void Init(const json& elementDef) override {
+            Element::Init(elementDef);
 
             YGNodeSetContext(m_layoutNode->m_node, this);
             YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);

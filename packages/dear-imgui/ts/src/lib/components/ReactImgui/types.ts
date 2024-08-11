@@ -100,6 +100,14 @@ export type WidgetPropsMap = {
         label?: string;
     };
     TreeNode: WidgetStyleProps & {
+        itemId: string;
+        onClick?: () => void;
+        leaf?: boolean;
+        open?: boolean;
+        defaultOpen?: boolean;
+        selected?: boolean;
+        defaultSelected?: boolean;
+        selectable?: boolean;
         label?: string;
     };
     Combo: WidgetStyleProps & {

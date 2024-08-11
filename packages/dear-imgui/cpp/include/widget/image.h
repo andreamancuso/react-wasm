@@ -1,8 +1,9 @@
 #include <optional>
+#include "ada.h"
 #include "mapgenerator.h"
 #include "styled_widget.h"
 
-typedef std::function<void(void*, size_t)> fetchImageCallback;
+using fetchImageCallback = std::function<void(void*, size_t)>;
 
 class Image final : public StyledWidget {
 private:
@@ -12,23 +13,28 @@ private:
 
 public:
     static std::unique_ptr<Image> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-        if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer() && widgetDef.contains("url")) {
-            auto id = widgetDef["id"].template get<int>();
-            auto url = widgetDef["url"].template get<std::string>();
-
-            std::optional<ImVec2> size;
-
-            if (widgetDef.contains("width") && widgetDef.contains("height")) {
-                const auto w = widgetDef["width"].template get<float>();
-                const auto h = widgetDef["height"].template get<float>();
-
-                size.emplace(ImVec2(w,h));
-            }
-
-            return std::make_unique<Image>(view, id, url, size, maybeStyle);
+        if (!widgetDef.contains("url") || !widgetDef["url"].is_string()) {
+            throw std::invalid_argument("url not defined or not a string");
         }
 
-        throw std::invalid_argument("Invalid JSON data");
+        auto id = widgetDef["id"].template get<int>();
+        auto url = widgetDef["url"].template get<std::string>();
+        auto parsedUrl = ada::parse<ada::url>(url);
+
+        if (!parsedUrl) {
+            throw std::invalid_argument("Invalid url supplied");
+        }
+
+        std::optional<ImVec2> size;
+
+        if (widgetDef.contains("width") && widgetDef.contains("height")) {
+            const auto w = widgetDef["width"].template get<float>();
+            const auto h = widgetDef["height"].template get<float>();
+
+            size.emplace(ImVec2(w,h));
+        }
+
+        return std::make_unique<Image>(view, id, url, size, maybeStyle);
     }
 
     bool HasCustomWidth() override;
@@ -56,8 +62,8 @@ public:
 
     void HandleFetchImageFailure(emscripten_fetch_t *fetch);
 
-    void Init() override {
-        Element::Init();
+    void Init(const json& elementDef) override {
+        Element::Init(elementDef);
 
         YGNodeSetContext(m_layoutNode->m_node, this);
         YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);

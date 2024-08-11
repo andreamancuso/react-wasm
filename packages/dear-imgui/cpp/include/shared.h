@@ -4,6 +4,7 @@
 #include <webgpu/webgpu.h>
 #include <yoga/YGEnums.h>
 
+#include "csscolorparser.hpp"
 #include "imgui.h"
 
 #pragma once
@@ -35,21 +36,23 @@ enum HorizontalAlignment
     HorizontalAlignment_Center  = 2 // Wondering this will ever be supported the way I'd like
 };
 
-typedef std::unordered_map<std::string, std::string> TableRow;
-typedef std::vector<TableRow> TableData;
+using TableRow = std::unordered_map<std::string, std::string, StringHash, std::equal_to<>>;
+using TableData = std::vector<TableRow>;
 
-typedef std::variant<std::monostate, ImVec2, float> StyleVarValue;
-typedef std::variant<std::monostate, const ImVec2*, const float*> StyleVarValueRef;
-typedef std::unordered_map<ImGuiCol, ImVec4> StyleColors;
-typedef std::unordered_map<ImGuiStyleVar, StyleVarValue> StyleVars;
+using StyleVarValue = std::variant<std::monostate, ImVec2, float>;
+using StyleVarValueRef = std::variant<std::monostate, const ImVec2*, const float*>;
+using StyleColors = std::unordered_map<ImGuiCol, ImVec4>;
+using StyleVars = std::unordered_map<ImGuiStyleVar, StyleVarValue>;
 
-typedef void (*OnInitCallback)();
-typedef void (*OnTextChangedCallback)(int id, const std::string& value);
-typedef void (*OnComboChangedCallback)(int id, int value);
-typedef void (*OnNumericValueChangedCallback)(int id, float value);
-typedef void (*OnBooleanValueChangedCallback)(int id, bool value);
-typedef void (*OnMultipleNumericValuesChangedCallback)(int id, const float* values, int size);
-typedef void (*OnClickCallback)(int id);
+using HEXA = std::tuple<std::string, float>;
+
+using OnInitCallback = void (*)();
+using OnTextChangedCallback = void (*)(int id, const std::string& value);
+using OnComboChangedCallback = void (*)(int id, int value);
+using OnNumericValueChangedCallback = void (*)(int id, float value);
+using OnBooleanValueChangedCallback = void (*)(int id, bool value);
+using OnMultipleNumericValuesChangedCallback = void (*)(int id, const float* values, int size);
+using OnClickCallback = void (*)(int id);
 
 ImVec4 RGBAtoIV4(int r, int g, int b, float a);
 ImVec4 RGBAtoIV4(int r, int g, int b);
@@ -59,10 +62,13 @@ std::optional<ImVec4> HEXAtoIV4(const std::string& hex);
 
 std::optional<float> charPercentageToFloat(const char* input);
 
-json IV4toJson(ImVec4 imVec4);
-json IV4toJsonTuple(ImVec4 imVec4);
-json IV4toJsonRGBATuple(ImVec4 imVec4);
-json IV4toJsonHEXATuple(ImVec4 imVec4);
+json IV4toJson(const ImVec4& imVec4);
+json IV4toJsonTuple(const ImVec4& imVec4);
+json IV4toJsonRGBATuple(const ImVec4& imVec4);
+json IV4toJsonHEXATuple(const ImVec4& imVec4);
+
+CSSColorParser::Color IV4toCSSColor(const ImVec4& imVec4);
+HEXA IV4toHEXATuple(const ImVec4& imVec4);
 
 std::optional<ImVec4> jsonHEXATupleToIV4(const json& tupleDef);
 

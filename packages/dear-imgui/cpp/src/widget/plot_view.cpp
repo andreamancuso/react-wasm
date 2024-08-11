@@ -50,20 +50,18 @@ void PlotView::Render(ReactImgui* view) {
 };
 
 void PlotView::Patch(const json& widgetPatchDef, ReactImgui* view) {
-    if (widgetPatchDef.is_object()) {
-        StyledWidget::Patch(widgetPatchDef, view);
+    StyledWidget::Patch(widgetPatchDef, view);
 
-        if (widgetPatchDef.contains("xAxisDecimalDigits") && widgetPatchDef.contains("yAxisDecimalDigits")) {
-            const auto xAxisDecimalDigits = widgetPatchDef["xAxisDecimalDigits"].template get<int>();
-            const auto yAxisDecimalDigits = widgetPatchDef["yAxisDecimalDigits"].template get<int>();
+    if (widgetPatchDef.contains("xAxisDecimalDigits") && widgetPatchDef.contains("yAxisDecimalDigits")) {
+        const auto xAxisDecimalDigits = widgetPatchDef["xAxisDecimalDigits"].template get<int>();
+        const auto yAxisDecimalDigits = widgetPatchDef["yAxisDecimalDigits"].template get<int>();
 
-            SetAxesDecimalDigits(xAxisDecimalDigits, yAxisDecimalDigits);
-        }
+        SetAxesDecimalDigits(xAxisDecimalDigits, yAxisDecimalDigits);
+    }
 
-        if (widgetPatchDef.contains("axisAutoFit")) {
-            const auto axisAutoFit = widgetPatchDef["axisAutoFit"].template get<bool>();
-            SetAxesAutoFit(axisAutoFit);
-        }
+    if (widgetPatchDef.contains("axisAutoFit")) {
+        const auto axisAutoFit = widgetPatchDef["axisAutoFit"].template get<bool>();
+        SetAxesAutoFit(axisAutoFit);
     }
 };
 

@@ -26,7 +26,7 @@ class ImGuiView : public View {
 
         std::vector<ImFont*> m_loadedFonts;
 
-        std::unordered_map<std::string, std::unordered_map<int, int>> m_fontDefMap;
+        std::unordered_map<std::string, std::unordered_map<int, int>, StringHash, std::equal_to<>> m_fontDefMap;
 
         // static constexpr ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
     public:

@@ -59,6 +59,8 @@ ReactImgui::ReactImgui(
     std::string& rawFontDefs,
     std::optional<std::string>& rawStyleOverridesDefs
 ) : ImPlotView(newWindowId, newGlWindowTitle, rawFontDefs) {
+    m_debug = false;
+
     SetUpElementCreatorFunctions();
     SetUpFloatFormatChars();
 
@@ -69,6 +71,18 @@ ReactImgui::ReactImgui(
 
     TakeStyleSnapshot();
 }
+
+void ReactImgui::SetDebug(bool debug) {
+    m_debug = debug;
+
+    if (m_debug) {
+        ImGui::SetWindowFocus("debug");
+    }
+};
+
+void ReactImgui::ShowDebugWindow() {
+    ImGui::SetWindowFocus("debug");
+};
 
 void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) {
     ImGuiView::SetUp(pCanvasSelector, device, glfwWindow, wgpu_preferred_fmt);
@@ -180,41 +194,53 @@ void ReactImgui::SetChildrenDisplay(const int id, const YGDisplay display) {
 };
 
 void ReactImgui::CreateElement(const json& elementDef) {
-    if (elementDef.is_object() && elementDef.contains("type")) {
-        std::string type = elementDef["type"].template get<std::string>();
+    if (elementDef.is_object()) {
+        if (elementDef.contains("type") && elementDef["type"].is_string()) {
+            std::string type = elementDef["type"].template get<std::string>();
 
-        if (m_element_init_fn.contains(type) || type == "Node") {
-            int id = elementDef["id"].template get<int>();
+            if (elementDef.contains("id") && elementDef["id"].is_number_integer()) {
+                int id = elementDef["id"].template get<int>();
 
-            const std::lock_guard<std::mutex> elementLock(m_elements_mutex);
-            const std::lock_guard<std::mutex> hierarchyLock(m_hierarchy_mutex);
+                if (m_element_init_fn.contains(type) || type == "Node") {
+                    const std::lock_guard<std::mutex> elementLock(m_elements_mutex);
+                    const std::lock_guard<std::mutex> hierarchyLock(m_hierarchy_mutex);
 
-            if (type == "Node") {
-                m_elements[id] = makeElement(elementDef, this);
-            } else if (m_element_init_fn.contains(type)) {
-                m_elements[id] = m_element_init_fn[type](elementDef, StyledWidget::ExtractStyle(elementDef, this), this);
-            }
+                    try {
+                        if (type == "Node") {
+                            m_elements[id] = makeElement(elementDef, this);
+                        } else if (m_element_init_fn.contains(type)) {
+                            m_elements[id] = m_element_init_fn[type](elementDef, StyledWidget::ExtractStyle(elementDef, this), this);
+                        }
 
-            if (m_elements[id]->HasInternalOps()) {
-                m_elementInternalOpsSubject[id] = rpp::subjects::serialized_replay_subject<json>{10};
-                auto handler = [this, id](const json& opDef) {
-                    m_elements[id]->HandleInternalOp(opDef);
-                };
-                m_elementInternalOpsSubject[id].get_observable() | rpp::ops::subscribe(handler);
-            }
+                        if (m_elements[id]->HasInternalOps()) {
+                            m_elementInternalOpsSubject[id] = rpp::subjects::serialized_replay_subject<json>{10};
+                            auto handler = [this, id](const json& opDef) {
+                                m_elements[id]->HandleInternalOp(opDef);
+                            };
+                            m_elementInternalOpsSubject[id].get_observable() | rpp::ops::subscribe(handler);
+                        }
 
-            m_elements[id]->Init();
-            
-            m_hierarchy[id] = std::vector<int>();
+                        m_elements[id]->Init(elementDef);
 
-            if (elementDef.is_object() && elementDef.contains("style") && elementDef["style"].is_object()) {
-                m_elements[id]->SetStyle(elementDef["style"]);
+                        m_hierarchy[id] = std::vector<int>();
+                    } catch (const nlohmann::json::exception& ex) {
+                        // todo: signal that widget creation was not successful!
+                        printf("An error occurred while decoding JSON element creation definition %d (%s): %s\n", id, type.c_str(), ex.what());
+                    } catch (const std::exception& ex) {
+                        // todo: signal that widget creation was not successful!
+                        printf("An error occurred while creating widget %d (%s): %s\n", id, type.c_str(), ex.what());
+                    }
+                } else {
+                    printf("element has no ID: '%s'\n", elementDef.dump().c_str());
+                }
+            } else {
+                printf("unrecognised element type: '%s'\n", type.c_str());
             }
         } else {
-            printf("unrecognised element type: '%s'\n", type.c_str());
+            printf("received JSON does not contain type property\n");
         }
     } else {
-        printf("received JSON either not an object or does not contain type property\n");
+        printf("received JSON not an object\n");
     }
 };
 
@@ -293,16 +319,39 @@ void ReactImgui::RenderElementTree(const int id) {
 
             ImGui::TableNextColumn();
 
+            ImGui::Text("%s", m_elements[id]->GetType());
+
+            ImGui::TableNextColumn();
+
             ImGui::Text("%zu", m_elements[id]->m_layoutNode->GetChildCount());
 
             ImGui::TableNextColumn();
 
-            ImGui::Text("l: %f t: %f w: %f h: %f", 
-                YGNodeLayoutGetLeft(m_elements[id]->m_layoutNode->m_node), 
-                YGNodeLayoutGetTop(m_elements[id]->m_layoutNode->m_node), 
-                YGNodeLayoutGetWidth(m_elements[id]->m_layoutNode->m_node), 
-                YGNodeLayoutGetHeight(m_elements[id]->m_layoutNode->m_node)
+            ImGui::Text("%d, %d",
+                (int)YGNodeLayoutGetLeft(m_elements[id]->m_layoutNode->m_node),
+                (int)YGNodeLayoutGetTop(m_elements[id]->m_layoutNode->m_node)
             );
+
+            ImGui::TableNextColumn();
+
+            ImGui::Text("%d, %d",
+                (int)YGNodeLayoutGetWidth(m_elements[id]->m_layoutNode->m_node),
+                (int)YGNodeLayoutGetHeight(m_elements[id]->m_layoutNode->m_node)
+            );
+
+            ImGui::TableNextColumn();
+
+            if (m_elements[id]->m_baseDrawStyle.has_value()) {
+                std::string border;
+
+                if (m_elements[id]->m_baseDrawStyle.value().borderColor.has_value()) {
+                    auto [borderColorHex, _] = IV4toHEXATuple(m_elements[id]->m_baseDrawStyle.value().borderColor.value());
+
+                    border += borderColorHex;
+                }
+
+                ImGui::Text("%s", border.c_str());
+            }
         }
     }
 
@@ -332,7 +381,9 @@ void ReactImgui::Render(const int window_width, const int window_height) {
     RenderElements();
 
     // *** DEBUG ***
-    // RenderDebugWindow();
+    if (m_debug) {
+        RenderDebugWindow();
+    }
     // *** END DEBUG ***
 
     ImGui::End();
@@ -340,13 +391,16 @@ void ReactImgui::Render(const int window_width, const int window_height) {
 };
 
 void ReactImgui::RenderDebugWindow() {
-    ImGui::SetNextWindowSize(ImVec2(800, 700));
-    ImGui::Begin("element-tree", NULL);
+    ImGui::SetNextWindowSize(ImVec2(1000, 700));
+    ImGui::Begin("debug", nullptr);
 
-    if (ImGui::BeginTable("Elements", 3, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody)) {
-        ImGui::TableSetupColumn("Widget ID", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch);
-        ImGui::TableSetupColumn("Child Count", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch);
-        ImGui::TableSetupColumn("Properties", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch);
+    if (ImGui::BeginTable("Elements", 6, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingStretchProp)) {
+        ImGui::TableSetupColumn("Widget ID", ImGuiTableColumnFlags_NoHide, 100.0f);
+        ImGui::TableSetupColumn("Widget Type", ImGuiTableColumnFlags_NoHide, 100.0f);
+        ImGui::TableSetupColumn("Child N.", ImGuiTableColumnFlags_NoHide, 30.0f);
+        ImGui::TableSetupColumn("Left, Top", ImGuiTableColumnFlags_NoHide, 60.0f);
+        ImGui::TableSetupColumn("Width, Height", ImGuiTableColumnFlags_NoHide, 60.0f);
+        ImGui::TableSetupColumn("Border", ImGuiTableColumnFlags_NoHide, 60.0f);
 
         ImGui::TableHeadersRow();
 
@@ -515,27 +569,45 @@ void ReactImgui::QueueElementInternalOp(const int id, std::string& widgetOpDef) 
     }
 };
 
-void ReactImgui::PatchElement(const json& opDef) {
-    auto id = opDef["id"].template get<int>();
+void ReactImgui::PatchElement(const json& patchDef) {
+    if (patchDef.is_object()) {
+        const auto id = patchDef["id"].template get<int>();
 
-    const std::lock_guard<std::mutex> lock(m_elements_mutex);
+        const std::lock_guard<std::mutex> lock(m_elements_mutex);
 
-    if (m_elements.contains(id)) {
-        auto pElement = m_elements[id].get();
+        if (m_elements.contains(id)) {
+            const auto pElement = m_elements[id].get();
 
-        pElement->Patch(opDef, this);
+            try {
+                pElement->Patch(patchDef, this);
+            } catch (const nlohmann::json::exception& ex) {
+                // todo: signal that widget creation was not successful!
+                printf("An error occurred while decoding JSON element patching definition %d (%s): %s\n", id, pElement->m_type.c_str(), ex.what());
+            } catch (const std::exception& ex) {
+                // todo: signal that widget creation was not successful!
+                printf("An error occurred while patching widget %d (%s): %s\n", id, pElement->m_type.c_str(), ex.what());
+            }
+        }
     }
 }
 
 void ReactImgui::HandleElementInternalOp(const json& opDef) {
-    auto id = opDef["id"].template get<int>();
+    const auto id = opDef["id"].template get<int>();
 
     const std::lock_guard<std::mutex> lock(m_elements_mutex);
 
     if (m_elements.contains(id)) {
-        auto pElement = m_elements[id].get();
+        const auto pElement = m_elements[id].get();
 
-        pElement->HandleInternalOp(opDef);
+        try {
+            pElement->HandleInternalOp(opDef);
+        } catch (const nlohmann::json::exception& ex) {
+            // todo: signal that widget creation was not successful!
+            printf("An error occurred while decoding JSON element internal op definition %d (%s): %s\n", id, pElement->m_type.c_str(), ex.what());
+        } catch (const std::exception& ex) {
+            // todo: signal that widget creation was not successful!
+            printf("An error occurred while invoking widget %d (%s)'s interal op (%s): %s\n", id, pElement->m_type.c_str(), opDef.dump().c_str(), ex.what());
+        }
     }
 }
 

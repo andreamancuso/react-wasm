@@ -18,14 +18,12 @@ void Child::Render(ReactImgui* view) {
 };
 
 void Child::Patch(const json& widgetPatchDef, ReactImgui* view) {
-    if (widgetPatchDef.is_object()) {
-        StyledWidget::Patch(widgetPatchDef, view);
+    StyledWidget::Patch(widgetPatchDef, view);
 
-        if (widgetPatchDef["width"].is_string()) {
-            m_width = widgetPatchDef["width"].template get<float>();
-        }
-        if (widgetPatchDef["height"].is_string()) {
-            m_height = widgetPatchDef["height"].template get<float>();
-        }
+    if (widgetPatchDef["width"].is_string()) {
+        m_width = widgetPatchDef["width"].template get<float>();
+    }
+    if (widgetPatchDef["height"].is_string()) {
+        m_height = widgetPatchDef["height"].template get<float>();
     }
 };

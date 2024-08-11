@@ -41,6 +41,14 @@ export class WidgetRegistrationService {
         this.fabricWidgetsMapping.delete(id);
     }
 
+    setDebug(debug: boolean) {
+        this.wasmModule.setDebug(debug);
+    }
+
+    showDebugWindow() {
+        this.wasmModule.showDebugWindow();
+    }
+
     registerTable(id: string) {
         this.tables.add(id);
     }
