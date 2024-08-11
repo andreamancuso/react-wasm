@@ -7,7 +7,8 @@
 
 using json = nlohmann::json;
 
-Element::Element(ReactImgui* view, int id, bool isRoot) {
+Element::Element(ReactImgui* view, const int id, const bool isRoot) {
+    m_type = "Element";
     m_id = id;
     m_view = view;
     m_handlesChildrenWithinRenderMethod = true;
@@ -15,7 +16,17 @@ Element::Element(ReactImgui* view, int id, bool isRoot) {
     m_layoutNode = std::make_unique<LayoutNode>();
 }
 
-void Element::Init() {};
+void Element::Init(const json& elementDef) {
+    YGNodeSetContext(m_layoutNode->m_node, this);
+
+    if (elementDef.contains("style") && elementDef["style"].is_object()) {
+        SetStyle(elementDef["style"]);
+    }
+};
+
+const char* Element::GetType() const {
+    return m_type.c_str();
+};
 
 std::unique_ptr<Element> Element::makeElement(const json& nodeDef, ReactImgui* view) {
     auto id = nodeDef["id"].template get<int>();
@@ -143,6 +154,7 @@ void Element::Render(ReactImgui* view) {
     HandleChildren(view);
 
     ImGui::EndChild();
+
     ImGui::PopID();
 };
 
@@ -194,7 +206,7 @@ void Element::PreRender(ReactImgui* view) {};
 void Element::PostRender(ReactImgui* view) {};
 
 void Element::Patch(const json& nodeDef, ReactImgui* view) {
-    if (nodeDef.is_object() && nodeDef.contains("style") && nodeDef["style"].is_object()) {
+    if (nodeDef.contains("style") && nodeDef["style"].is_object()) {
         ResetStyle();
         SetStyle(nodeDef["style"]);
     }

@@ -157,48 +157,48 @@ class WasmRunner {
             m_glWasm->Init(canvasSelector);
         }
 
-        void exit() {
+        void exit() const {
             emscripten_cancel_main_loop();
             emscripten_force_exit(0);
         }
 
-        void resizeWindow(int width, int height) {
+        void resizeWindow(const int width, const int height) const {
             m_glWasm->SetWindowSize(width, height);
         }
 
-        void setElement(std::string& elementJsonAsString) {
+        void setElement(std::string& elementJsonAsString) const {
             m_view->QueueCreateElement(elementJsonAsString);
         }
 
-        void patchElement(int id, std::string& elementJsonAsString) {
+        void patchElement(const int id, std::string& elementJsonAsString) const {
             m_view->QueuePatchElement(id, elementJsonAsString);
         }
 
-        void elementInternalOp(int id, std::string& elementJsonAsString) {
+        void elementInternalOp(const int id, std::string& elementJsonAsString) const {
             m_view->QueueElementInternalOp(id, elementJsonAsString);
         }
 
-        void setChildren(int id, const std::vector<int>& childrenIds) {
+        void setChildren(const int id, const std::vector<int>& childrenIds) const {
             m_view->QueueSetChildren(id, childrenIds);
         }
 
-        void appendChild(int parentId, int childId) {
+        void appendChild(const int parentId, const int childId) const {
             m_view->QueueAppendChild(parentId, childId);
         }
 
-        std::vector<int> getChildren(int id) {
+        [[nodiscard]] std::vector<int> getChildren(const int id) const {
             return m_view->GetChildren(id);
         }
 
-        std::string getAvailableFonts() {
+        [[nodiscard]] std::string getAvailableFonts() const {
             return m_view->GetAvailableFonts().dump();
         }
 
-        void appendTextToClippedMultiLineTextRenderer(int id, std::string& data) {
+        void appendTextToClippedMultiLineTextRenderer(const int id, const std::string& data) const {
             m_view->AppendTextToClippedMultiLineTextRenderer(id, data);
         }
 
-        std::string getStyle() {
+        [[nodiscard]] std::string getStyle() const {
             json style;
 
             style["alpha"] = m_view->m_widgetStyle.Alpha;
@@ -262,8 +262,16 @@ class WasmRunner {
             return style.dump();
         }
 
-        void patchStyle(std::string& styleDef) {
+        void patchStyle(std::string& styleDef) const {
             m_view->PatchStyle(json::parse(styleDef));
+        }
+
+        void setDebug(const bool debug) const {
+            m_view->SetDebug(debug);
+        }
+
+        void showDebugWindow() const {
+            m_view->ShowDebugWindow();
         }
 };
 
@@ -329,6 +337,14 @@ void patchStyle(std::string styleDef) {
     return pRunner->patchStyle(styleDef);
 }
 
+void setDebug(const bool debug) {
+    return pRunner->setDebug(debug);
+}
+
+void showDebugWindow() {
+    pRunner->showDebugWindow();
+}
+
 EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("exit", &_exit);
     emscripten::function("resizeWindow", &resizeWindow);
@@ -341,6 +357,8 @@ EMSCRIPTEN_BINDINGS(my_module) {
     emscripten::function("appendTextToClippedMultiLineTextRenderer", &appendTextToClippedMultiLineTextRenderer);
     emscripten::function("getStyle", &getStyle);
     emscripten::function("patchStyle", &patchStyle);
+    emscripten::function("setDebug", &setDebug);
+    emscripten::function("showDebugWindow", &showDebugWindow);
 
     // emscripten::class_<WasmRunner>("WasmRunner")
     // .constructor<OnInputTextChangeType, OnComboChangeType, OnNumericValueChangeType, OnMultiValueChangeType, OnBooleanValueChangeType, OnClickType>()

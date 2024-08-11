@@ -16,25 +16,23 @@ private:
 
 public:
     static std::unique_ptr<PlotView> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-        if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-            auto id = widgetDef["id"].template get<int>();
-            int xAxisDecimalDigits = 0;
-            int yAxisDecimalDigits = 0;
-            bool axisAutoFit = false;
+        auto id = widgetDef["id"].template get<int>();
+        int xAxisDecimalDigits = 0;
+        int yAxisDecimalDigits = 0;
+        bool axisAutoFit = false;
 
-            if (widgetDef.contains("xAxisDecimalDigits") && widgetDef.contains("yAxisDecimalDigits")) {
-                xAxisDecimalDigits = widgetDef["xAxisDecimalDigits"].template get<int>();
-                yAxisDecimalDigits = widgetDef["yAxisDecimalDigits"].template get<int>();
-            }
-
-            if (widgetDef.contains("axisAutoFit")) {
-                axisAutoFit = widgetDef["axisAutoFit"].template get<bool>();
-            }
-
-            return std::make_unique<PlotView>(view, id, xAxisDecimalDigits, yAxisDecimalDigits, axisAutoFit, maybeStyle);
+        if (widgetDef.contains("xAxisDecimalDigits") && widgetDef.contains("yAxisDecimalDigits")) {
+            xAxisDecimalDigits = widgetDef["xAxisDecimalDigits"].template get<int>();
+            yAxisDecimalDigits = widgetDef["yAxisDecimalDigits"].template get<int>();
         }
 
-        throw std::invalid_argument("Invalid JSON data");
+        if (widgetDef.contains("axisAutoFit")) {
+            axisAutoFit = widgetDef["axisAutoFit"].template get<bool>();
+        }
+
+        return std::make_unique<PlotView>(view, id, xAxisDecimalDigits, yAxisDecimalDigits, axisAutoFit, maybeStyle);
+
+        // throw std::invalid_argument("Invalid JSON data");
     }
 
     static int axisValueFormatter(double value, char* buff, int size, void* decimalPlaces) {

@@ -5,14 +5,12 @@ public:
     std::string m_label;
 
     static std::unique_ptr<SeparatorText> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-        if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-            auto id = widgetDef["id"].template get<int>();
-            auto label = widgetDef["label"].template get<std::string>();
+        auto id = widgetDef["id"].template get<int>();
+        auto label = widgetDef["label"].template get<std::string>();
 
-            return std::make_unique<SeparatorText>(view, id, label, maybeStyle);
-        }
+        return std::make_unique<SeparatorText>(view, id, label, maybeStyle);
 
-        throw std::invalid_argument("Invalid JSON data");
+        // throw std::invalid_argument("Invalid JSON data");
     }
 
     static YGSize Measure(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
@@ -37,8 +35,8 @@ public:
 
     void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
-    void Init() override {
-        Element::Init();
+    void Init(const json& elementDef) override {
+        Element::Init(elementDef);
 
         YGNodeSetContext(m_layoutNode->m_node, this);
         YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);

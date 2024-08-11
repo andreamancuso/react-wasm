@@ -12,13 +12,11 @@ private:
 
 public:
     static std::unique_ptr<MapView> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-        if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-            auto id = widgetDef["id"].template get<int>();
+        auto id = widgetDef["id"].template get<int>();
 
-            return std::make_unique<MapView>(view, id, maybeStyle);
-        }
+        return std::make_unique<MapView>(view, id, maybeStyle);
 
-        throw std::invalid_argument("Invalid JSON data");
+        // throw std::invalid_argument("Invalid JSON data");
     }
 
     bool HasCustomWidth() override;

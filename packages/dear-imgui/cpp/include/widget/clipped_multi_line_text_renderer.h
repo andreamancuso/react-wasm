@@ -14,18 +14,16 @@ class ClippedMultiLineTextRenderer final : public StyledWidget {
         ImGuiTextBuffer m_textBuffer;
 
         static std::unique_ptr<ClippedMultiLineTextRenderer> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                const auto id = widgetDef["id"].template get<int>();
-                int numberOfLines = 10;
+            const auto id = widgetDef["id"].template get<int>();
+            int numberOfLines = 10;
 
-                if (widgetDef.contains("numberOfLines") && widgetDef["numberOfLines"].is_number_unsigned()) {
-                    numberOfLines = widgetDef["numberOfLines"].template get<int>();
-                }
-
-                return makeWidget(view, id, numberOfLines, maybeStyle);
+            if (widgetDef.contains("numberOfLines") && widgetDef["numberOfLines"].is_number_unsigned()) {
+                numberOfLines = widgetDef["numberOfLines"].template get<int>();
             }
 
-            throw std::invalid_argument("Invalid JSON data");
+            return makeWidget(view, id, numberOfLines, maybeStyle);
+
+            // throw std::invalid_argument("Invalid JSON data");
         }
 
         static std::unique_ptr<ClippedMultiLineTextRenderer> makeWidget(ReactImgui* view, int id, const int numberOfLines, std::optional<WidgetStyle>& style) {
@@ -76,8 +74,8 @@ class ClippedMultiLineTextRenderer final : public StyledWidget {
                     m_lineOffsets.push_back(old_size + 1);
         }
 
-        void Init() override {
-            Element::Init();
+        void Init(const json& elementDef) override {
+            Element::Init(elementDef);
 
             YGNodeSetContext(m_layoutNode->m_node, this);
             YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);

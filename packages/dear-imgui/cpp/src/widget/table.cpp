@@ -79,12 +79,10 @@ void Table::Render(ReactImgui* view) {
 };
 
 void Table::Patch(const json& widgetPatchDef, ReactImgui* view) {
-    if (widgetPatchDef.is_object()) {
-        StyledWidget::Patch(widgetPatchDef, view);
+    StyledWidget::Patch(widgetPatchDef, view);
 
-        if (widgetPatchDef.contains("columns") && widgetPatchDef["columns"].is_array()) {
-            SetColumns(widgetPatchDef["columns"]);
-        }
+    if (widgetPatchDef.contains("columns") && widgetPatchDef["columns"].is_array()) {
+        SetColumns(widgetPatchDef["columns"]);
     }
 };
 

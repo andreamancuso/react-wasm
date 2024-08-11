@@ -843,6 +843,8 @@ interface EmbindModule {
     appendTextToClippedMultiLineTextRenderer(_0: number, _1: EmbindString): void;
     getStyle(): string;
     patchStyle(_0: EmbindString): void;
+    setDebug(_0: boolean): void;
+    showDebugWindow(): void;
     ImGuiWindowFlags: {
         None: ImGuiWindowFlagsValue<0>;
         NoTitleBar: ImGuiWindowFlagsValue<1>;

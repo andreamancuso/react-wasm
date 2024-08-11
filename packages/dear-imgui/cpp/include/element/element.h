@@ -20,6 +20,7 @@ struct BaseDrawStyle {
 class Element {
     public:
         int m_id;
+    std::string m_type;
         ReactImgui* m_view;
         bool m_handlesChildrenWithinRenderMethod;
         bool m_isRoot;
@@ -30,7 +31,9 @@ class Element {
 
         static std::unique_ptr<Element> makeElement(const json& val, ReactImgui* view);
 
-        virtual void Init();
+        const char* GetType() const;
+
+        virtual void Init(const json& elementDef);
 
         virtual const char* GetElementType();
 

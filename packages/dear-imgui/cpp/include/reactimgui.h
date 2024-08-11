@@ -41,9 +41,11 @@ class ReactImgui : public ImPlotView {
         std::unordered_map<int, std::unique_ptr<Element>> m_elements;
         std::mutex m_elements_mutex;
 
+        bool m_debug;
+
         void CreateElement(const json& elementDef);
 
-        void PatchElement(const json& opDef);
+        void PatchElement(const json& patchDef);
 
         void HandleElementInternalOp(const json& opDef);
 
@@ -77,6 +79,10 @@ class ReactImgui : public ImPlotView {
             std::string& rawFontDefs,
             std::optional<std::string>& rawStyleOverridesDefs
         );
+
+        void SetDebug(bool debug);
+
+        void ShowDebugWindow();
 
         void RenderElementById(int id);
 

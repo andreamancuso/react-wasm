@@ -1,19 +1,23 @@
 import React, { SyntheticEvent, useCallback, useMemo, useRef, useState } from "react";
-import { HelpMarker } from "./HelpMarker/HelpMarker";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
+import { useWidgetRegistrationService } from "src/lib/hooks";
+import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
+import { HelpMarker } from "./HelpMarker/HelpMarker";
 import { UserGuide } from "./UserGuide/UserGuide";
 import { StyleEditor } from "./StyleEditor/StyleEditor";
 import { ClippedMultiLineTextRendererImperativeHandle } from "../ReactImgui/ClippedMultiLineTextRenderer";
 import faIconMap from "../../fa-icons";
 import RWStyleSheet from "../../stylesheet/stylesheet";
 import { Tables } from "./Tables/Tables";
-import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 import { WidgetReactElement } from "../ReactImgui/types";
 import { Maps } from "./Maps/Maps";
 import { StyleSelector } from "./StyleEditor/StyleSelector/StyleSelector";
 import { Plots } from "./Plots/Plots";
 
 export const ImGuiDemo = () => {
+    const widgetRegistratonService = useWidgetRegistrationService();
+
+    const [isTopLevelTreeNodeOpen, setTopLevelTreeNodeOpen] = useState(true);
     const [color, setColor] = useState("#ff6e59");
     const styleSheet = useMemo(
         () =>
@@ -85,97 +89,169 @@ export const ImGuiDemo = () => {
         }
     }, [clippedMultiLineTextRendererRef]);
 
+    const topLevelTreeNodeClicked = useCallback(() => {
+        setTopLevelTreeNodeOpen((isOpen) => !isOpen);
+    }, []);
+
+    const debugModeBtnClicked = useCallback(() => {
+        widgetRegistratonService.setDebug(true);
+    }, []);
+
     return (
         <ReactImgui.Node
             root
             style={{
-                flexDirection: "column",
                 height: "100%",
                 gap: { row: 10 },
                 padding: {
-                    all: 20,
+                    all: 10,
                 },
                 borderColor: "#000",
                 borderThickness: 1,
             }}
         >
-            <ReactImgui.TreeNode label="Tree View">
-                <ReactImgui.TreeNode label="Images">
-                    <ReactImgui.Node
-                        style={{
-                            flexDirection: "row",
-                            gap: { column: 5 },
-                            alignItems: "center",
-                            borderColor: "#ff0000",
-                            borderThickness: 2,
-                            width: 400,
-                        }}
-                    >
-                        <ReactImgui.Image
-                            url="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
-                            width={40}
-                            height={40}
-                        />
+            <ReactImgui.Node
+                style={{
+                    positionType: "absolute",
+                    position: { right: 10, bottom: 10 },
+                    flexDirection: "row",
+                    gap: { column: 10 },
+                }}
+            >
+                <ReactImgui.Button label={faIconMap.bug} onClick={debugModeBtnClicked} />
+                {/* <ReactImgui.Button label={faIconMap["window-maximize"]} /> */}
+            </ReactImgui.Node>
 
-                        <ReactImgui.Node
-                            style={{
-                                width: 100,
-                                height: 100,
-                                backgroundColor: "#000000",
-                                borderColor: "#66ff00",
-                                borderThickness: 5,
-                                rounding: 5,
-                                roundCorners: ["topLeft"],
-                            }}
-                        >
-                            <ReactImgui.UnformattedText
-                                text="Inside"
-                                style={{ colors: { [ImGuiCol.Text]: "#FFFFFF" } }}
-                            />
-                            <ReactImgui.Image
-                                url="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
-                                style={{
-                                    flex: 1,
-                                    width: "100%",
-                                }}
-                            />
-                        </ReactImgui.Node>
-                    </ReactImgui.Node>
-                </ReactImgui.TreeNode>
+            <ReactImgui.Node
+                style={{
+                    width: 400,
+                    height: "100%",
+                    borderColor: "#000",
+                    borderThickness: 1,
+                }}
+            >
                 <ReactImgui.TreeNode
-                    label="Icons"
+                    itemId="components"
+                    label="Components"
+                    onClick={topLevelTreeNodeClicked}
+                    open={isTopLevelTreeNodeOpen}
                     style={{
-                        flexDirection: "row",
-                        gap: { column: 5 },
-                        alignItems: "center",
+                        padding: {
+                            left: 20,
+                        },
                     }}
                 >
                     <ReactImgui.Node
                         style={{
-                            flexDirection: "row",
-                            gap: { column: 5 },
-                            borderColor: "#ff0000",
-                            borderThickness: 2,
-                            width: 400,
+                            width: "100%",
+                            height: "100%",
+                            borderColor: "#000",
+                            borderThickness: 1,
                         }}
                     >
-                        <ReactImgui.UnformattedText text={faIconMap["circle-arrow-right"]} />
-                        <ReactImgui.Node
-                            style={{ width: 4, height: 20, backgroundColor: "#f0cb69" }}
-                        />
-                        <ReactImgui.Node style={{ backgroundColor: "#000000" }}>
-                            <ReactImgui.UnformattedText
-                                text="Inside"
+                        <ReactImgui.TreeNode
+                            itemId="textField"
+                            label="Text Field"
+                            leaf
+                            selectable
+                            style={{
+                                padding: {
+                                    left: 20,
+                                },
+                            }}
+                        ></ReactImgui.TreeNode>
+                        <ReactImgui.TreeNode
+                            itemId="images"
+                            label="Images"
+                            leaf
+                            selectable
+                            style={{
+                                padding: {
+                                    left: 20,
+                                },
+                            }}
+                        >
+                            <ReactImgui.Node
                                 style={{
-                                    colors: { [ImGuiCol.Text]: "#FFFFFF" },
+                                    flexDirection: "row",
+                                    gap: { column: 5 },
+                                    alignItems: "center",
+                                    borderColor: "red",
+                                    borderThickness: 2,
+                                    width: "auto",
                                 }}
-                            />
-                        </ReactImgui.Node>
+                            >
+                                <ReactImgui.Image
+                                    url="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
+                                    width={40}
+                                    height={40}
+                                />
+
+                                <ReactImgui.Node
+                                    style={{
+                                        width: 100,
+                                        height: 100,
+                                        backgroundColor: "#000000",
+                                        borderColor: "lightgreen",
+                                        borderThickness: 5,
+                                        rounding: 5,
+                                        roundCorners: ["topLeft"],
+                                    }}
+                                >
+                                    <ReactImgui.UnformattedText
+                                        text="Inside"
+                                        style={{ colors: { [ImGuiCol.Text]: "#FFFFFF" } }}
+                                    />
+                                    <ReactImgui.Image
+                                        url="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
+                                        style={{
+                                            flex: 1,
+                                        }}
+                                    />
+                                </ReactImgui.Node>
+                            </ReactImgui.Node>
+                        </ReactImgui.TreeNode>
+                        <ReactImgui.TreeNode
+                            itemId="icons"
+                            label="Icons"
+                            leaf
+                            selectable
+                            style={{
+                                padding: {
+                                    left: 20,
+                                },
+                            }}
+                        >
+                            <ReactImgui.Node
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    gap: { column: 5 },
+                                    borderColor: "#000",
+                                    borderThickness: 1,
+                                }}
+                            >
+                                <ReactImgui.UnformattedText
+                                    text={faIconMap["circle-arrow-right"]}
+                                />
+                                <ReactImgui.Node
+                                    style={{ width: 4, height: 20, backgroundColor: "#f0cb69" }}
+                                />
+                                <ReactImgui.Node style={{ backgroundColor: "#000000" }}>
+                                    <ReactImgui.UnformattedText
+                                        text="Inside"
+                                        style={{
+                                            colors: { [ImGuiCol.Text]: "#FFFFFF" },
+                                        }}
+                                    />
+                                </ReactImgui.Node>
+                            </ReactImgui.Node>
+                        </ReactImgui.TreeNode>
                     </ReactImgui.Node>
                 </ReactImgui.TreeNode>
-            </ReactImgui.TreeNode>
+            </ReactImgui.Node>
 
-            <ReactImgui.Node
+            {/* <ReactImgui.Node
                 style={{
                     width: "100%",
                     height: 400,
@@ -291,7 +367,7 @@ export const ImGuiDemo = () => {
                 }}
             >
                 <Tables />
-            </ReactImgui.Node>
+            </ReactImgui.Node> */}
 
             {/* <ReactImgui.UnformattedText
                 text={`dear imgui says hello! ${faIconMap["address-book"]} ${faIconMap["wine-bottle"]}`}

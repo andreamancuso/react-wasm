@@ -4,6 +4,7 @@
 #include <webgpu/webgpu.h>
 #include <yoga/YGEnums.h>
 
+#include "csscolorparser.hpp"
 #include "imgui.h"
 
 #pragma once
@@ -43,6 +44,8 @@ typedef std::variant<std::monostate, const ImVec2*, const float*> StyleVarValueR
 typedef std::unordered_map<ImGuiCol, ImVec4> StyleColors;
 typedef std::unordered_map<ImGuiStyleVar, StyleVarValue> StyleVars;
 
+typedef std::tuple<std::string, float> HEXA;
+
 typedef void (*OnInitCallback)();
 typedef void (*OnTextChangedCallback)(int id, const std::string& value);
 typedef void (*OnComboChangedCallback)(int id, int value);
@@ -59,10 +62,13 @@ std::optional<ImVec4> HEXAtoIV4(const std::string& hex);
 
 std::optional<float> charPercentageToFloat(const char* input);
 
-json IV4toJson(ImVec4 imVec4);
-json IV4toJsonTuple(ImVec4 imVec4);
-json IV4toJsonRGBATuple(ImVec4 imVec4);
-json IV4toJsonHEXATuple(ImVec4 imVec4);
+json IV4toJson(const ImVec4& imVec4);
+json IV4toJsonTuple(const ImVec4& imVec4);
+json IV4toJsonRGBATuple(const ImVec4& imVec4);
+json IV4toJsonHEXATuple(const ImVec4& imVec4);
+
+CSSColorParser::Color IV4toCSSColor(const ImVec4& imVec4);
+HEXA IV4toHEXATuple(const ImVec4& imVec4);
 
 std::optional<ImVec4> jsonHEXATupleToIV4(const json& tupleDef);
 

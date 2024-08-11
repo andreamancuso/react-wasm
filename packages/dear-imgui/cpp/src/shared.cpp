@@ -49,7 +49,7 @@ std::optional<float> charPercentageToFloat(const char* input) {
     return value;
 }
 
-json IV4toJson(ImVec4 imVec4) {
+json IV4toJson(const ImVec4& imVec4) {
     json j = {
         {"x", imVec4.x},
         {"y", imVec4.y},
@@ -60,7 +60,7 @@ json IV4toJson(ImVec4 imVec4) {
     return j;
 };
 
-json IV4toJsonTuple(ImVec4 imVec4) {
+json IV4toJsonTuple(const ImVec4& imVec4) {
     json j = {
         imVec4.x,
         imVec4.y,
@@ -71,7 +71,18 @@ json IV4toJsonTuple(ImVec4 imVec4) {
     return j;
 };
 
-json IV4toJsonRGBATuple(ImVec4 imVec4) {
+CSSColorParser::Color IV4toCSSColor(const ImVec4& imVec4) {
+    CSSColorParser::Color color;
+
+    color.r = (int)(imVec4.x * 255);
+    color.g = (int)(imVec4.y * 255);
+    color.b = (int)(imVec4.z * 255);
+    color.a = imVec4.w;
+
+    return color;
+};
+
+json IV4toJsonRGBATuple(const ImVec4& imVec4) {
     json j = {
         (int)(imVec4.x * 255),
         (int)(imVec4.y * 255),
@@ -82,9 +93,7 @@ json IV4toJsonRGBATuple(ImVec4 imVec4) {
     return j;
 };
 
-// todo: refactor
-json IV4toJsonHEXATuple(ImVec4 imVec4) {
-
+HEXA IV4toHEXATuple(const ImVec4& imVec4) {
     auto rAsInt = (int)(imVec4.x * 255);
     auto gAsInt = (int)(imVec4.y * 255);
     auto bAsInt = (int)(imVec4.z * 255);
@@ -103,7 +112,13 @@ json IV4toJsonHEXATuple(ImVec4 imVec4) {
     bSs << std::setfill('0') << std::setw(2) << std::hex << bAsInt;
     h += bSs.str();
 
-    json j = { h, imVec4.w };
+    return std::make_tuple(h, imVec4.w);
+};
+
+json IV4toJsonHEXATuple(const ImVec4& imVec4) {
+    auto hexa = IV4toHEXATuple(imVec4);
+
+    json j = {std::get<0>(hexa), std::get<1>(hexa) };
 
     return j;
 };

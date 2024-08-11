@@ -3,19 +3,28 @@
 class TreeNode final : public StyledWidget {
 public:
     std::string m_label;
+    std::string m_itemId;
+    bool m_selectable;
+    bool m_leaf;
+
+    std::optional<bool> m_selected;
+    std::optional<bool> m_defaultSelected;
+    std::optional<bool> m_localSelected;
+    std::optional<bool> m_open;
+    std::optional<bool> m_defaultOpen;
+    std::optional<bool> m_localOpen;
 
     static std::unique_ptr<TreeNode> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-        if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-            auto id = widgetDef["id"].template get<int>();
-            std::string label = widgetDef.contains("label") ? widgetDef["label"].template get<std::string>() : "";
-
-            return std::make_unique<TreeNode>(view, id, label, maybeStyle);
+        if (!widgetDef.contains("itemId") || !widgetDef["itemId"].is_string()) {
+            throw std::invalid_argument("itemId missing or not a string");
         }
 
-        throw std::invalid_argument("Invalid JSON data");
+        return std::make_unique<TreeNode>(view, widgetDef["id"].template get<int>(), maybeStyle);
     }
 
-    TreeNode(ReactImgui* view, int id, const std::string& label, std::optional<WidgetStyle>& style);
+    TreeNode(ReactImgui* view, int id, std::optional<WidgetStyle>& style);
+
+    void Init(const json& elementDef) override;
 
     void Render(ReactImgui* view) override;
 
@@ -24,4 +33,16 @@ public:
     bool HasCustomWidth() override;
 
     bool HasCustomHeight() override;
+
+    void SetSelectable(bool selectable);
+
+    void SetSelected(bool selected);
+
+    void SetOpen(bool open);
+
+    void SetLeaf(bool left);
+
+    bool HasInternalOps() override;
+
+    void HandleInternalOp(const json& opDef) override;
 };

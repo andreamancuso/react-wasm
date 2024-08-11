@@ -41,21 +41,19 @@ class Table final : public StyledWidget {
         }
 
         static std::unique_ptr<Table> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                const auto id = widgetDef["id"].template get<int>();
+            const auto id = widgetDef["id"].template get<int>();
 
-                if (widgetDef.contains("columns") && widgetDef["columns"].is_array()) {
-                    std::optional<int> clipRows;
+            if (widgetDef.contains("columns") && widgetDef["columns"].is_array()) {
+                std::optional<int> clipRows;
 
-                    if (widgetDef.contains("clipRows") && widgetDef["clipRows"].is_number_integer()) {
-                        clipRows.emplace(widgetDef["clipRows"].template get<int>());
-                    }
-
-                    return makeWidget(view, id, extractColumns(widgetDef["columns"]), clipRows, maybeStyle);
+                if (widgetDef.contains("clipRows") && widgetDef["clipRows"].is_number_integer()) {
+                    clipRows.emplace(widgetDef["clipRows"].template get<int>());
                 }
+
+                return makeWidget(view, id, extractColumns(widgetDef["columns"]), clipRows, maybeStyle);
             }
 
-            throw std::invalid_argument("Invalid JSON data");
+            // throw std::invalid_argument("Invalid JSON data");
         }
 
         static std::unique_ptr<Table> makeWidget(ReactImgui* view, const int id, const std::vector<TableColumn>& columns, std::optional<int> clipRows, std::optional<WidgetStyle>& style) {
@@ -98,8 +96,8 @@ class Table final : public StyledWidget {
         }
 
         // TODO: this is repeated a million times
-        void Init() override {
-            Element::Init();
+        void Init(const json& elementDef) override {
+            Element::Init(elementDef);
 
             YGNodeSetContext(m_layoutNode->m_node, this);
             YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);

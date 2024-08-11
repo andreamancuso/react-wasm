@@ -12,7 +12,7 @@ private:
 
 public:
     static std::unique_ptr<Image> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-        if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer() && widgetDef.contains("url")) {
+        if (widgetDef.contains("url")) {
             auto id = widgetDef["id"].template get<int>();
             auto url = widgetDef["url"].template get<std::string>();
 
@@ -56,8 +56,8 @@ public:
 
     void HandleFetchImageFailure(emscripten_fetch_t *fetch);
 
-    void Init() override {
-        Element::Init();
+    void Init(const json& elementDef) override {
+        Element::Init(elementDef);
 
         YGNodeSetContext(m_layoutNode->m_node, this);
         YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);

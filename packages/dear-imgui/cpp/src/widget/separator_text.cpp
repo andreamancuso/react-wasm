@@ -4,12 +4,10 @@
 #include "reactimgui.h"
 
 void SeparatorText::Patch(const json& widgetPatchDef, ReactImgui* view) {
-    if (widgetPatchDef.is_object()) {
-        StyledWidget::Patch(widgetPatchDef, view);
+    StyledWidget::Patch(widgetPatchDef, view);
 
-        if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-            m_label = widgetPatchDef["label"].template get<std::string>();
-        }
+    if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
+        m_label = widgetPatchDef["label"].template get<std::string>();
     }
 };
 

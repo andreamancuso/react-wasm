@@ -23,15 +23,13 @@ class InputText final : public StyledWidget {
         std::string m_label;
 
         static std::unique_ptr<InputText> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                const auto id = widgetDef["id"].template get<int>();
-                const auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_string() ? widgetDef["defaultValue"].template get<std::string>() : "";
-                const auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+            const auto id = widgetDef["id"].template get<int>();
+            const auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_string() ? widgetDef["defaultValue"].template get<std::string>() : "";
+            const auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
 
-                return makeWidget(view, id, defaultValue, label, maybeStyle);
-            }
+            return makeWidget(view, id, defaultValue, label, maybeStyle);
 
-            throw std::invalid_argument("Invalid JSON data");
+            // throw std::invalid_argument("Invalid JSON data");
         }
 
         static std::unique_ptr<InputText> makeWidget(ReactImgui* view, const int id, const std::string& defaultValue, const std::string& label, std::optional<WidgetStyle>& style) {
@@ -66,8 +64,8 @@ class InputText final : public StyledWidget {
             strncpy(m_bufferPointer.get(), value.c_str(), 99);
         }
 
-        void Init() override {
-            Element::Init();
+        void Init(const json& elementDef) override {
+            Element::Init(elementDef);
 
             YGNodeSetContext(m_layoutNode->m_node, this);
             YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);

@@ -15,15 +15,13 @@ class Checkbox final : public StyledWidget {
         std::string m_label;
 
         static std::unique_ptr<Checkbox> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
-            if (widgetDef.is_object() && widgetDef.contains("id") && widgetDef["id"].is_number_integer()) {
-                const auto id = widgetDef["id"].template get<int>();
-                const auto defaultChecked = widgetDef.contains("defaultChecked") && widgetDef["defaultChecked"].is_boolean() ? widgetDef["defaultChecked"].template get<bool>() : false;
-                const auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+            const auto id = widgetDef["id"].template get<int>();
+            const auto defaultChecked = widgetDef.contains("defaultChecked") && widgetDef["defaultChecked"].is_boolean() ? widgetDef["defaultChecked"].template get<bool>() : false;
+            const auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
 
-                return makeWidget(view, id, label, defaultChecked, maybeStyle);
-            }
+            return makeWidget(view, id, label, defaultChecked, maybeStyle);
 
-            throw std::invalid_argument("Invalid JSON data");
+            // throw std::invalid_argument("Invalid JSON data");
         }
 
         static std::unique_ptr<Checkbox> makeWidget(ReactImgui* view, const int id,  const std::string& label, const bool defaultChecked, std::optional<WidgetStyle>& style) {
@@ -49,8 +47,8 @@ class Checkbox final : public StyledWidget {
 
         void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
-        void Init() override {
-            Element::Init();
+        void Init(const json& elementDef) override {
+            Element::Init(elementDef);
 
             YGNodeSetContext(m_layoutNode->m_node, this);
             YGNodeSetMeasureFunc(m_layoutNode->m_node, Measure);
