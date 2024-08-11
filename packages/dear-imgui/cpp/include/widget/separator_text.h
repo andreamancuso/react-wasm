@@ -5,12 +5,14 @@ public:
     std::string m_label;
 
     static std::unique_ptr<SeparatorText> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
+        if (!widgetDef.contains("label") || !widgetDef["label"].is_string()) {
+            throw std::invalid_argument("Missing label or not a string");
+        }
+
         auto id = widgetDef["id"].template get<int>();
         auto label = widgetDef["label"].template get<std::string>();
 
         return std::make_unique<SeparatorText>(view, id, label, maybeStyle);
-
-        // throw std::invalid_argument("Invalid JSON data");
     }
 
     static YGSize Measure(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {

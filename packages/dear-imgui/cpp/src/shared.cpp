@@ -116,9 +116,9 @@ HEXA IV4toHEXATuple(const ImVec4& imVec4) {
 };
 
 json IV4toJsonHEXATuple(const ImVec4& imVec4) {
-    auto hexa = IV4toHEXATuple(imVec4);
+    auto [hex, a] = IV4toHEXATuple(imVec4);
 
-    json j = {std::get<0>(hexa), std::get<1>(hexa) };
+    json j = {hex, a };
 
     return j;
 };

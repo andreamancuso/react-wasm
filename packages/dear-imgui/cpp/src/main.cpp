@@ -297,35 +297,39 @@ void _exit() {
     pRunner->exit();
 }
 
-void resizeWindow(int width, int height) {
+void resizeWindow(const int width, const int height) {
     pRunner->resizeWindow(width, height);
 }
 
+// emscripten::bind cannot receive `elementJson` by reference
 void setElement(std::string elementJson) {
     pRunner->setElement(elementJson);
 }
 
-void patchElement(int id, std::string elementJson) {
+void patchElement(const int id, std::string elementJson) {
     pRunner->patchElement(id, elementJson);
 }
 
-void elementInternalOp(int id, std::string elementJson) {
+// emscripten::bind cannot receive `elementJson` by reference
+void elementInternalOp(const int id, std::string elementJson) {
     pRunner->elementInternalOp(id, elementJson);
 }
 
-void setChildren(int id, std::string childrenIds) {
+// emscripten::bind cannot receive `childrenIds` by reference
+void setChildren(const int id, std::string childrenIds) {
     pRunner->setChildren(id, JsonToVector<int>(childrenIds));
 }
 
-void appendChild(int parentId, int childId) {
+void appendChild(const int parentId, const int childId) {
     pRunner->appendChild(parentId, childId);
 }
 
-std::string getChildren(int id) {
+std::string getChildren(const int id) {
     return IntVectorToJson(pRunner->getChildren(id)).dump();
 }
 
-void appendTextToClippedMultiLineTextRenderer(int id, std::string data) {
+// emscripten::bind cannot receive `data` by reference
+void appendTextToClippedMultiLineTextRenderer(const int id, std::string data) {
     pRunner->appendTextToClippedMultiLineTextRenderer(id, data);
 }
 
@@ -333,6 +337,7 @@ std::string getStyle() {
     return pRunner->getStyle();
 }
 
+// emscripten::bind cannot receive `styleDef` by reference
 void patchStyle(std::string styleDef) {
     return pRunner->patchStyle(styleDef);
 }

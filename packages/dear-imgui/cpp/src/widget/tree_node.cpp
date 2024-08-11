@@ -132,6 +132,7 @@ void TreeNode::SetSelectable(bool selectable) {
 
     if (m_selectable == false) {
         m_selected = false;
+        m_localSelected = false;
     }
 };
 

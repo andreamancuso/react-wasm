@@ -2,7 +2,7 @@
 #include "mapgenerator.h"
 #include "styled_widget.h"
 
-typedef std::function<void(void*, size_t)> fetchImageCallback;
+using fetchImageCallback = std::function<void(void*, size_t)>;
 
 class Image final : public StyledWidget {
 private:

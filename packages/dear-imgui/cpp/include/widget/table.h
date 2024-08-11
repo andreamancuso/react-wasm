@@ -2,10 +2,10 @@
 
 // todo: for those use cases where we expect large quantities of data, should we preallocate?
 class Table final : public StyledWidget {
-    typedef struct {
+    using TableColumn = struct {
         std::optional<std::string> fieldId;
         std::string heading;
-    } TableColumn;
+    };
 
     protected:
         ImGuiTableFlags m_flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;

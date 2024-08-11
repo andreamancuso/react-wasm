@@ -223,6 +223,9 @@ void ReactImgui::CreateElement(const json& elementDef) {
                         m_elements[id]->Init(elementDef);
 
                         m_hierarchy[id] = std::vector<int>();
+                    } catch (const nlohmann::json::exception& ex) {
+                        // todo: signal that widget creation was not successful!
+                        printf("An error occurred while decoding JSON element creation definition %d (%s): %s\n", id, type.c_str(), ex.what());
                     } catch (const std::exception& ex) {
                         // todo: signal that widget creation was not successful!
                         printf("An error occurred while creating widget %d (%s): %s\n", id, type.c_str(), ex.what());
@@ -342,9 +345,9 @@ void ReactImgui::RenderElementTree(const int id) {
                 std::string border;
 
                 if (m_elements[id]->m_baseDrawStyle.value().borderColor.has_value()) {
-                    auto borderColorHexa = IV4toHEXATuple(m_elements[id]->m_baseDrawStyle.value().borderColor.value());
+                    auto [borderColorHex, _] = IV4toHEXATuple(m_elements[id]->m_baseDrawStyle.value().borderColor.value());
 
-                    border += std::get<0>(borderColorHexa);
+                    border += borderColorHex;
                 }
 
                 ImGui::Text("%s", border.c_str());
@@ -575,7 +578,15 @@ void ReactImgui::PatchElement(const json& patchDef) {
         if (m_elements.contains(id)) {
             const auto pElement = m_elements[id].get();
 
-            pElement->Patch(patchDef, this);
+            try {
+                pElement->Patch(patchDef, this);
+            } catch (const nlohmann::json::exception& ex) {
+                // todo: signal that widget creation was not successful!
+                printf("An error occurred while decoding JSON element patching definition %d (%s): %s\n", id, pElement->m_type.c_str(), ex.what());
+            } catch (const std::exception& ex) {
+                // todo: signal that widget creation was not successful!
+                printf("An error occurred while patching widget %d (%s): %s\n", id, pElement->m_type.c_str(), ex.what());
+            }
         }
     }
 }
@@ -588,7 +599,15 @@ void ReactImgui::HandleElementInternalOp(const json& opDef) {
     if (m_elements.contains(id)) {
         const auto pElement = m_elements[id].get();
 
-        pElement->HandleInternalOp(opDef);
+        try {
+            pElement->HandleInternalOp(opDef);
+        } catch (const nlohmann::json::exception& ex) {
+            // todo: signal that widget creation was not successful!
+            printf("An error occurred while decoding JSON element internal op definition %d (%s): %s\n", id, pElement->m_type.c_str(), ex.what());
+        } catch (const std::exception& ex) {
+            // todo: signal that widget creation was not successful!
+            printf("An error occurred while invoking widget %d (%s)'s interal op (%s): %s\n", id, pElement->m_type.c_str(), opDef.dump().c_str(), ex.what());
+        }
     }
 }
 
