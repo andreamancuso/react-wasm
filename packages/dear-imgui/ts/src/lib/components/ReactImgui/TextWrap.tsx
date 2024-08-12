@@ -6,8 +6,8 @@ export const TextWrap: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMa
     style,
 }) => {
     return (
-        <widget type="TextWrap" width={width} style={style}>
+        <text-wrap width={width} style={style}>
             {children}
-        </widget>
+        </text-wrap>
     );
 };

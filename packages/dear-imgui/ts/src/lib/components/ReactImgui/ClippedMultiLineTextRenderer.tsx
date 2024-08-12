@@ -32,5 +32,5 @@ export const ClippedMultiLineTextRenderer = forwardRef<
         [],
     );
 
-    return <widget type="ClippedMultiLineTextRenderer" id={idRef.current} style={style} />;
+    return <clipped-multi-line-text-renderer id={idRef.current} style={style} />;
 });

@@ -9,8 +9,8 @@ export const CollapsingHeader: WidgetFunctionComponent<
     const idRef = useRef(widgetRegistratonService.generateId());
 
     return (
-        <widget type="CollapsingHeader" id={idRef.current} label={label} style={style}>
+        <collapsing-header id={idRef.current} label={label} style={style}>
             {children}
-        </widget>
+        </collapsing-header>
     );
 };

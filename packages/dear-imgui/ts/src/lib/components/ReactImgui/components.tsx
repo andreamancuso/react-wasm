@@ -19,7 +19,6 @@ import { TextWrap } from "./TextWrap";
 import { TreeNode } from "./TreeNode";
 import { UnformattedText } from "./UnformattedText";
 import { MapView } from "./MapView";
-import { Unknown } from "./Unknown";
 import { Table } from "./Table";
 import { Child } from "./Child";
 import { Group } from "./Group";
@@ -30,7 +29,6 @@ import { Image } from "./Image";
 
 export const components = {
     UnformattedText,
-    Unknown,
     InputText,
     CollapsingHeader,
     TreeNode,

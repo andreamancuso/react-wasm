@@ -4,7 +4,7 @@
 #include "widget/styled_widget.h"
 
 TreeNode::TreeNode(ReactImgui* view, const int id, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-    m_type = "TreeNode";
+    m_type = "tree-node";
     m_handlesChildrenWithinRenderMethod = true;
 }
 

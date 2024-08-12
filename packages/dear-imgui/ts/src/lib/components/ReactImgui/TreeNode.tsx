@@ -19,8 +19,7 @@ export const TreeNode: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMa
     const idRef = useRef(widgetRegistratonService.generateId());
 
     return (
-        <widget
-            type="TreeNode"
+        <tree-node
             itemId={itemId}
             id={idRef.current}
             label={label}
@@ -34,6 +33,6 @@ export const TreeNode: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMa
             style={style}
         >
             {leaf ? null : children}
-        </widget>
+        </tree-node>
     );
 };

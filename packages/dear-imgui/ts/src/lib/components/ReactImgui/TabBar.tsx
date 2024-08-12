@@ -28,8 +28,8 @@ export const TabBar: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap[
     }, [children]);
 
     return (
-        <widget type="TabBar" id={idRef.current} style={style}>
+        <tab-bar id={idRef.current} style={style}>
             {tabs}
-        </widget>
+        </tab-bar>
     );
 };

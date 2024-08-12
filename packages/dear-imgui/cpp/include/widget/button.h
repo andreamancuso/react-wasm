@@ -5,7 +5,7 @@ class ReactImgui;
 class Button final : public StyledWidget {
     protected:
         Button(ReactImgui* view, const int id, const std::string& label, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-            m_type = "Button";
+            m_type = "di-button";
             m_label = label;
         }
     public:

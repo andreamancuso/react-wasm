@@ -10,7 +10,6 @@
 using json = nlohmann::json;
 
 Widget::Widget(ReactImgui* view, const int id) : Element(view, id, false) {
-    m_type = "Unknown";
     m_handlesChildrenWithinRenderMethod = false;
 }
 

@@ -29,7 +29,7 @@ public:
     }
 
     SeparatorText(ReactImgui* view, const int id, const std::string& label, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-        m_type = "SeparatorText";
+        m_type = "separator-text";
         m_label = label;
     }
 

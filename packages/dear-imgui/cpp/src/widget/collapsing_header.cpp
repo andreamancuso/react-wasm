@@ -4,7 +4,7 @@
 #include "widget/collapsing_header.h"
 
 CollapsingHeader::CollapsingHeader(ReactImgui* view, const int id, const std::string& label, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-    m_type = "CollapsingHeader";
+    m_type = "collapsing-header";
     m_handlesChildrenWithinRenderMethod = true;
     m_label = label;
 }

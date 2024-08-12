@@ -11,7 +11,7 @@ class Table final : public StyledWidget {
         ImGuiTableFlags m_flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
 
         Table(ReactImgui* view, const int id, const std::vector<TableColumn>& columns, const std::optional<int> clipRows, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-            m_type = "Table";
+            m_type = "di-table";
             m_columns = columns;
             m_clipRows = 0;
 

@@ -4,5 +4,5 @@ export const UnformattedText: WidgetFunctionComponent<WidgetPropsMap["Unformatte
     text,
     style,
 }) => {
-    return <widget type="UnformattedText" text={text} style={style} />;
+    return <unformatted-text text={text} style={style} />;
 };

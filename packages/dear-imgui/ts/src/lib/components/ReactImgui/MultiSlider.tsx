@@ -20,8 +20,7 @@ export const MultiSlider: WidgetFunctionComponent<WidgetPropsMap["MultiSlider"]>
     }
 
     return (
-        <widget
-            type="MultiSlider"
+        <multi-slider
             label={label}
             id={idRef.current}
             defaultValues={defaultValues}

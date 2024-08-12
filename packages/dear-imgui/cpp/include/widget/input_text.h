@@ -7,7 +7,7 @@ class InputText final : public StyledWidget {
         static int InputTextCb(ImGuiInputTextCallbackData* data);
 
         InputText(ReactImgui* view, const int id, const std::string& defaultValue, const std::string& label, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-            m_type = "InputText";
+            m_type = "input-text";
             m_bufferPointer = std::make_unique<char[]>(100);
             m_defaultValue = defaultValue;
             m_label = label;

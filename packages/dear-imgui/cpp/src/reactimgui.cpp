@@ -117,36 +117,36 @@ void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glf
 };
 
 void ReactImgui::SetUpElementCreatorFunctions() {
-    m_element_init_fn["Group"] = &makeWidget<Group>;
-    m_element_init_fn["Child"] = &makeWidget<Child>;
-    m_element_init_fn["DIWindow"] = &makeWidget<Window>;
-    m_element_init_fn["Separator"] = &makeWidget<Separator>;
+    m_element_init_fn["group"] = &makeWidget<Group>;
+    m_element_init_fn["child"] = &makeWidget<Child>;
+    m_element_init_fn["di-window"] = &makeWidget<Window>;
+    m_element_init_fn["separator"] = &makeWidget<Separator>;
 
-    m_element_init_fn["CollapsingHeader"] = &makeWidget<CollapsingHeader>;
-    m_element_init_fn["TabBar"] = &makeWidget<TabBar>;
-    m_element_init_fn["TabItem"] = &makeWidget<TabItem>;
-    m_element_init_fn["TreeNode"] = &makeWidget<TreeNode>;
+    m_element_init_fn["collapsing-header"] = &makeWidget<CollapsingHeader>;
+    m_element_init_fn["tab-bar"] = &makeWidget<TabBar>;
+    m_element_init_fn["tab-item"] = &makeWidget<TabItem>;
+    m_element_init_fn["tree-node"] = &makeWidget<TreeNode>;
 
-    m_element_init_fn["Table"] = &makeWidget<Table>;
-    m_element_init_fn["ClippedMultiLineTextRenderer"] = &makeWidget<ClippedMultiLineTextRenderer>;
-    m_element_init_fn["Image"] = &makeWidget<Image>;
-    m_element_init_fn["MapView"] = &makeWidget<MapView>;
-    m_element_init_fn["PlotView"] = &makeWidget<PlotView>;
+    m_element_init_fn["di-table"] = &makeWidget<Table>;
+    m_element_init_fn["clippedMultiLineTextRenderer"] = &makeWidget<ClippedMultiLineTextRenderer>;
+    m_element_init_fn["di-image"] = &makeWidget<Image>;
+    m_element_init_fn["map-view"] = &makeWidget<MapView>;
+    m_element_init_fn["plot-view"] = &makeWidget<PlotView>;
 
-    m_element_init_fn["ItemTooltip"] = &makeWidget<ItemTooltip>;
+    m_element_init_fn["item-tooltip"] = &makeWidget<ItemTooltip>;
 
-    m_element_init_fn["Combo"] = &makeWidget<Combo>;
-    m_element_init_fn["Slider"] = &makeWidget<Slider>;
-    m_element_init_fn["InputText"] = &makeWidget<InputText>;
-    m_element_init_fn["MultiSlider"] = &makeWidget<MultiSlider>;
-    m_element_init_fn["Checkbox"] = &makeWidget<Checkbox>;
-    m_element_init_fn["Button"] = &makeWidget<Button>;
+    m_element_init_fn["combo"] = &makeWidget<Combo>;
+    m_element_init_fn["slider"] = &makeWidget<Slider>;
+    m_element_init_fn["input-text"] = &makeWidget<InputText>;
+    m_element_init_fn["multi-slider"] = &makeWidget<MultiSlider>;
+    m_element_init_fn["checkbox"] = &makeWidget<Checkbox>;
+    m_element_init_fn["di-button"] = &makeWidget<Button>;
     
-    m_element_init_fn["SeparatorText"] = &makeWidget<SeparatorText>;
-    m_element_init_fn["BulletText"] = &makeWidget<BulletText>;
-    m_element_init_fn["UnformattedText"] = &makeWidget<UnformattedText>;
-    m_element_init_fn["DisabledText"] = &makeWidget<DisabledText>;
-    m_element_init_fn["TextWrap"] = &makeWidget<TextWrap>;
+    m_element_init_fn["separator-text"] = &makeWidget<SeparatorText>;
+    m_element_init_fn["bullet-text"] = &makeWidget<BulletText>;
+    m_element_init_fn["unformatted-text"] = &makeWidget<UnformattedText>;
+    m_element_init_fn["disabled-text"] = &makeWidget<DisabledText>;
+    m_element_init_fn["text-wrap"] = &makeWidget<TextWrap>;
 };
 
 void ReactImgui::RenderElementById(const int id) {
@@ -201,12 +201,12 @@ void ReactImgui::CreateElement(const json& elementDef) {
             if (elementDef.contains("id") && elementDef["id"].is_number_integer()) {
                 int id = elementDef["id"].template get<int>();
 
-                if (m_element_init_fn.contains(type) || type == "Node") {
+                if (m_element_init_fn.contains(type) || type == "node") {
                     const std::lock_guard<std::mutex> elementLock(m_elements_mutex);
                     const std::lock_guard<std::mutex> hierarchyLock(m_hierarchy_mutex);
 
                     try {
-                        if (type == "Node") {
+                        if (type == "node") {
                             m_elements[id] = makeElement(elementDef, this);
                         } else if (m_element_init_fn.contains(type)) {
                             m_elements[id] = m_element_init_fn[type](elementDef, StyledWidget::ExtractStyle(elementDef, this), this);
@@ -231,10 +231,10 @@ void ReactImgui::CreateElement(const json& elementDef) {
                         printf("An error occurred while creating widget %d (%s): %s\n", id, type.c_str(), ex.what());
                     }
                 } else {
-                    printf("element has no ID: '%s'\n", elementDef.dump().c_str());
+                    printf("unrecognised element type: '%s'\n", type.c_str());
                 }
             } else {
-                printf("unrecognised element type: '%s'\n", type.c_str());
+                printf("element has no ID: '%s'\n", elementDef.dump().c_str());
             }
         } else {
             printf("received JSON does not contain type property\n");

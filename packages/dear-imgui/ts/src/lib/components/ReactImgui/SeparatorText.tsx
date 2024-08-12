@@ -8,5 +8,5 @@ export const SeparatorText: WidgetFunctionComponent<WidgetPropsMap["SeparatorTex
     label,
     style,
 }) => {
-    return <widget type="SeparatorText" label={label} style={style} />;
+    return <separator-text label={label} style={style} />;
 };

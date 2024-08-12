@@ -15,8 +15,7 @@ export const Slider: WidgetFunctionComponent<WidgetPropsMap["Slider"]> = ({
     const idRef = useRef(widgetRegistratonService.generateId());
 
     return (
-        <widget
-            type="Slider"
+        <slider
             label={label}
             id={idRef.current}
             defaultValue={defaultValue}

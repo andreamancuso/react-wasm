@@ -24,8 +24,7 @@ export const Combo = forwardRef<ComboImperativeHandle, WidgetPropsMap["Combo"]>(
         );
 
         return (
-            <widget
-                type="Combo"
+            <combo
                 placeholder={placeholder}
                 id={idRef.current}
                 initialSelectedIndex={initialSelectedIndex}

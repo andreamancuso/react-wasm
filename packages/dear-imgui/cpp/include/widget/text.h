@@ -36,7 +36,7 @@ class BulletText final : public Text {
         static std::unique_ptr<BulletText> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view);
 
         BulletText(ReactImgui* view, const int id, const std::string& text, std::optional<WidgetStyle>& style) : Text(view, id, text, style) {
-            m_type = "BulletText";
+            m_type = "bullet-text";
         }
 
         void Render(ReactImgui* view) override;
@@ -47,7 +47,7 @@ class UnformattedText final : public Text {
         static std::unique_ptr<UnformattedText> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view);
 
         UnformattedText(ReactImgui* view, const int id, const std::string& text, std::optional<WidgetStyle>& style) : Text(view, id, text, style) {
-            m_type = "UnformattedText";
+            m_type = "unformatted-text";
         }
 
         void Render(ReactImgui* view) override;
@@ -58,7 +58,7 @@ class DisabledText final : public Text {
         static std::unique_ptr<DisabledText> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view);
 
         DisabledText(ReactImgui* view, const int id, const std::string& text, std::optional<WidgetStyle>& style) : Text(view, id, text, style) {
-            m_type = "DisabledText";
+            m_type = "disabled-text";
         }
 
         void Render(ReactImgui* view) override;

@@ -4,5 +4,5 @@ export const BulletText: WidgetFunctionComponent<WidgetPropsMap["BulletText"]> =
     text,
     style,
 }) => {
-    return <widget type="BulletText" text={text} style={style} />;
+    return <bullet-text text={text} style={style} />;
 };

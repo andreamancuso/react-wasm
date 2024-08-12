@@ -1,7 +1,7 @@
 #include "widget/text_wrap.h"
 
 TextWrap::TextWrap(ReactImgui* view, const int id, const float& width, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-    m_type = "TextWrap";
+    m_type = "text-wrap";
     m_handlesChildrenWithinRenderMethod = true;
     m_width = width;
 }

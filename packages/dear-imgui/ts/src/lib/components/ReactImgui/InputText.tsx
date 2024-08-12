@@ -24,8 +24,7 @@ export const InputText = forwardRef<InputTextImperativeHandle, WidgetPropsMap["I
         );
 
         return (
-            <widget
-                type="InputText"
+            <input-text
                 id={idRef.current}
                 defaultValue={defaultValue}
                 label={label}

@@ -3,7 +3,7 @@
 class MultiSlider final : public StyledWidget {
     protected:
         MultiSlider(ReactImgui* view, const int id, const std::string& label, const float min, const float max, const int numValues, const int decimalDigits, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-            m_type = "MultiSlider";
+            m_type = "multi-slider";
             m_label = label;
             m_numValues = numValues;
             m_values = std::make_unique<float[]>(numValues);
