@@ -687,7 +687,7 @@ void ReactImgui::AppendTextToClippedMultiLineTextRenderer(const int id, const st
     if (m_elements.contains(id) && std::strcmp(m_elements[id]->GetElementType(), "widget") != 0) {
         const auto element = dynamic_cast<Widget*>(m_elements[id].get());
 
-        if (element->m_type == "ClippedMultiLineTextRenderer") {
+        if (element->m_type == "clipped-multi-line-text-renderer") {
             dynamic_cast<ClippedMultiLineTextRenderer*>(m_elements[id].get())->AppendText(data.c_str());
         }
     }
