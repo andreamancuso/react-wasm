@@ -12,8 +12,7 @@ export const Checkbox: WidgetFunctionComponent<WidgetPropsMap["Checkbox"]> = ({
     const idRef = useRef(widgetRegistratonService.generateId());
 
     return (
-        <widget
-            type="Checkbox"
+        <checkbox
             label={label}
             id={idRef.current}
             defaultChecked={defaultChecked}

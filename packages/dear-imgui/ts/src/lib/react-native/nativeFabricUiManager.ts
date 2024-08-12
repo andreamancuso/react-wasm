@@ -1,7 +1,6 @@
 import { ReplaySubject, Subscription } from "rxjs";
 import { MainModule } from "../wasm/wasm-app-types";
 import { WidgetRegistrationService } from "../widgetRegistrationService";
-import { WidgetsRequiringId } from "../components/ReactImgui/types";
 
 type CloningNode = { id: number; childrenIds: number[] } | null;
 type DispatchEventFn = (id: number, topLevelType: string, nativeEventParam: any) => void;
@@ -16,22 +15,22 @@ export default class {
     eventSubject: ReplaySubject<Event>;
     eventSubjectSubscription: Subscription;
 
-    linkedWidgetTypes: WidgetsRequiringId[] = [
-        "InputText",
-        "CollapsingHeader",
-        "TreeNode",
-        "Combo",
-        "Checkbox",
-        "TabBar",
-        "TabItem",
-        "Slider",
-        "MultiSlider",
-        "Button",
-        "Table",
-        "ClippedMultiLineTextRenderer",
-        "MapView",
-        "PlotView",
-        "Image",
+    linkedWidgetTypes: string[] = [
+        "di-button",
+        "checkbox",
+        "clipped-multi-line-text-renderer",
+        "collapsing-header",
+        "combo",
+        "di-image",
+        "input-text",
+        "map-view",
+        "multi-slider",
+        "plot-view",
+        "slider",
+        "tree-node",
+        "tab-bar",
+        "tab-item",
+        "table",
     ];
 
     constructor() {
@@ -84,7 +83,7 @@ export default class {
             element = {
                 ...element,
                 ...props,
-                type: fiberNode.type === "node" ? "Node" : type,
+                type: fiberNode.type,
             };
 
             // todo: is there a good reason why we shouldn't keep track of all widgets?
@@ -92,7 +91,7 @@ export default class {
                 this.widgetRegistrationService?.linkWidgetIds(id, generatedId);
             }
         } else {
-            element.type = "Node";
+            element.type = "node";
         }
 
         // console.log(JSON.stringify(widget));

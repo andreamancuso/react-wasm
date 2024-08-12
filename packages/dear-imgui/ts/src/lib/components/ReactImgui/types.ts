@@ -62,43 +62,86 @@ export type CheckboxChangeEvent = SyntheticEvent<
 >;
 
 export type WidgetPropsMap = {
-    Unknown: {};
-    Child: WidgetStyleProps;
-    DIWindow: WidgetStyleProps & { title: string };
-    Group: WidgetStyleProps;
-    TabBar: WidgetStyleProps;
-    TabItem: WidgetStyleProps & {
-        label: string;
-        onOpenChange?: (event: TabItemChangeEvent) => void;
-    };
-    ItemTooltip: WidgetStyleProps;
-    TextWrap: WidgetStyleProps & { width: number };
-    Indent: WidgetStyleProps;
-    UnformattedText: WidgetStyleProps & {
-        text: string;
-    };
-    DisabledText: WidgetStyleProps & {
-        text: string;
-    };
-    HelpMarker: WidgetStyleProps & {
-        text: string;
-    };
     BulletText: WidgetStyleProps & {
         // todo: What about `fmt` ?
         text: string;
     };
-    Separator: WidgetStyleProps;
-    SeparatorText: WidgetStyleProps & {
-        label: string;
+    Button: WidgetStyleProps & {
+        onClick?: () => void;
+        label?: string;
+        size?: ImVec2;
     };
+    Checkbox: WidgetStyleProps & {
+        defaultChecked?: boolean;
+        label?: string;
+        onChange?: (event: CheckboxChangeEvent) => void;
+    };
+    Child: WidgetStyleProps;
+    ClippedMultiLineTextRenderer: WidgetStyleProps;
+    CollapsingHeader: WidgetStyleProps & {
+        label?: string;
+    };
+    Combo: WidgetStyleProps & {
+        placeholder?: string;
+        options?: string[];
+        optionsList?: string;
+        initialSelectedIndex?: number;
+        onChange?: (event: ComboChangeEvent) => void;
+    };
+    DisabledText: WidgetStyleProps & {
+        text: string;
+    };
+    DIWindow: WidgetStyleProps & { title: string; width?: number; height?: number };
+    Group: WidgetStyleProps;
+    HelpMarker: WidgetStyleProps & {
+        text: string;
+    };
+    Image: WidgetStyleProps & { url: string; width?: number; height?: number };
+    Indent: WidgetStyleProps;
     InputText: WidgetStyleProps & {
         defaultValue?: string;
         label?: string;
         onChange?: (event: InputTextChangeEvent) => void;
     };
-    CollapsingHeader: WidgetStyleProps & {
+    ItemTooltip: WidgetStyleProps;
+    MapView: WidgetStyleProps;
+    MultiSlider: WidgetStyleProps & {
+        numValues: 2 | 3 | 4;
         label?: string;
+        defaultValues?: number[];
+        min?: number;
+        max?: number;
+        decimalDigits?: number;
+        onChange?: (event: MultiSliderChangeEvent) => void;
     };
+    PlotView: WidgetStyleProps & {
+        xAxisDecimalDigits?: number;
+        yAxisDecimalDigits?: number;
+        axisAutoFit?: boolean;
+    };
+    Separator: WidgetStyleProps;
+    SeparatorText: WidgetStyleProps & {
+        label: string;
+    };
+    Slider: WidgetStyleProps & {
+        sliderType?: SliderTypes;
+        label: string;
+        defaultValue?: number;
+        min?: number;
+        max?: number;
+        onChange?: (event: SliderChangeEvent) => void;
+    };
+    TabBar: WidgetStyleProps;
+    TabItem: WidgetStyleProps & {
+        label: string;
+        onOpenChange?: (event: TabItemChangeEvent) => void;
+    };
+    Table: WidgetStyleProps & {
+        columns: { heading: string; fieldId?: string }[];
+        initialData?: string;
+        clipRows?: number;
+    };
+    TextWrap: WidgetStyleProps & { width: number };
     TreeNode: WidgetStyleProps & {
         itemId: string;
         onClick?: () => void;
@@ -110,52 +153,8 @@ export type WidgetPropsMap = {
         selectable?: boolean;
         label?: string;
     };
-    Combo: WidgetStyleProps & {
-        placeholder?: string;
-        options?: string[];
-        optionsList?: string;
-        initialSelectedIndex?: number;
-        onChange?: (event: ComboChangeEvent) => void;
-    };
-    Slider: WidgetStyleProps & {
-        sliderType?: SliderTypes;
-        label: string;
-        defaultValue?: number;
-        min?: number;
-        max?: number;
-        onChange?: (event: SliderChangeEvent) => void;
-    };
-    MultiSlider: WidgetStyleProps & {
-        numValues: 2 | 3 | 4;
-        label?: string;
-        defaultValues?: number[];
-        min?: number;
-        max?: number;
-        decimalDigits?: number;
-        onChange?: (event: MultiSliderChangeEvent) => void;
-    };
-    Checkbox: WidgetStyleProps & {
-        defaultChecked?: boolean;
-        label?: string;
-        onChange?: (event: CheckboxChangeEvent) => void;
-    };
-    Button: WidgetStyleProps & {
-        onClick?: () => void;
-        label?: string;
-        size?: ImVec2;
-    };
-    Table: WidgetStyleProps & {
-        columns: { heading: string; fieldId?: string }[];
-        initialData?: string;
-        clipRows?: number;
-    };
-    ClippedMultiLineTextRenderer: WidgetStyleProps;
-    MapView: WidgetStyleProps;
-    Image: WidgetStyleProps & { url: string; width?: number; height?: number };
-    PlotView: WidgetStyleProps & {
-        xAxisDecimalDigits?: number;
-        yAxisDecimalDigits?: number;
-        axisAutoFit?: boolean;
+    UnformattedText: WidgetStyleProps & {
+        text: string;
     };
 };
 
@@ -206,17 +205,15 @@ export type ReactElementWidget<
 > = K extends WidgetsRequiringId
     ? { [L in keyof Omit<P, "children">]: P[L] } & {
           id: string;
-          type: K;
           root?: boolean;
           children?: WidgetReactNode;
       } & { onChange?: any; onClick?: any }
     : { [L in keyof Omit<P, "children">]: P[L] } & {
-          type: K;
           root?: boolean;
           children?: WidgetReactNode;
       };
 
-type ReactElementWidgets = {
+export type ReactElementWidgets = {
     [K in WidgetKeys]: ReactElementWidget<K, WidgetPropsMap[K]>;
 };
 

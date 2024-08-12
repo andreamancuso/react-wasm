@@ -3,9 +3,5 @@ import { PropsWithChildren, WidgetFunctionComponent, WidgetPropsMap } from "./ty
 export const ItemTooltip: WidgetFunctionComponent<
     PropsWithChildren & WidgetPropsMap["ItemTooltip"]
 > = ({ children, style }) => {
-    return (
-        <widget type="ItemTooltip" style={style}>
-            {children}
-        </widget>
-    );
+    return <item-tooltip style={style}>{children}</item-tooltip>;
 };

@@ -48,7 +48,7 @@ public:
     bool HasCustomHeight() override;
 
     PlotView(ReactImgui* view, const int id, const int xAxisDecimalDigits, const int yAxisDecimalDigits, const bool axisAutoFit, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-        m_type = "PlotView";
+        m_type = "plot-view";
         m_xAxisDecimalDigits = xAxisDecimalDigits;
         m_yAxisDecimalDigits = yAxisDecimalDigits;
         m_axisAutoFit = axisAutoFit;

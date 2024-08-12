@@ -3,7 +3,7 @@
 class Slider final : public StyledWidget {
     protected:
         Slider(ReactImgui* view, const int id, const std::string& label, const float defaultValue, const float min, const float max, const std::string& sliderType, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-            m_type = "Slider";
+            m_type = "slider";
             m_sliderType = sliderType;
             m_label = label;
             m_value = defaultValue;

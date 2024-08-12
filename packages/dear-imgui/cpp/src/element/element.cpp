@@ -8,7 +8,7 @@
 using json = nlohmann::json;
 
 Element::Element(ReactImgui* view, const int id, const bool isRoot) {
-    m_type = "Element";
+    m_type = "node";
     m_id = id;
     m_view = view;
     m_handlesChildrenWithinRenderMethod = true;

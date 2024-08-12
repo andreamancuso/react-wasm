@@ -3,6 +3,74 @@ import deepDiffer from "./deepDiffer.js";
 
 const uiManager = new NativeFabricUIManager();
 
+const commonAttributes = ["id", "style"];
+
+const attributesForElements = {
+    "bullet-text": ["type", "text"],
+    "di-button": ["onClick", "label", "size"],
+    checkbox: ["defaultChecked", "label", "onChange"],
+    child: ["defaultChecked", "label", "onChange"],
+    "clipped-multi-line-text-renderer": [],
+    "collapsing-header": ["label"],
+    combo: ["placeholder", "options", "optionsList", "initialSelectedIndex", "onChange"],
+    "disabled-text": ["text"],
+    "di-window": ["title", "width", "number"],
+    group: [],
+    "help-marker": ["text"],
+    "di-image": ["url", "width", "number"],
+    indent: [],
+    "input-text": ["defaultValue", "label", "onChange"],
+    "item-tooltip": [],
+    "map-view": [],
+    "multi-slider": [
+        "numValues",
+        "label",
+        "defaultValues",
+        "min",
+        "max",
+        "decimalDigits",
+        "onChange",
+    ],
+    "plot-view": ["xAxisDecimalDigits", "yAxisDecimalDigits", "axisAutoFit"],
+    separator: [],
+    "separator-text": ["label"],
+    slider: ["sliderType", "label", "defaultValue", "min", "max", "onChange"],
+    "tab-bar": ["label"],
+    "tab-item": ["label", "onOpenChange"],
+    "di-table": ["columns", "initialData", "clipRows"],
+    "text-wrap": ["width"],
+    "tree-node": [
+        "itemId",
+        "onClick",
+        "leaf",
+        "open",
+        "defaultOpen",
+        "selected",
+        "defaultSelected",
+        "selectable",
+        "label",
+    ],
+    "unformatted-text": ["text"],
+
+    node: ["root"],
+};
+
+const attributesForElementsMap = Object.fromEntries(
+    Object.entries(attributesForElements).map(([key, attributes]) => {
+        const attributeMap = attributes.reduce((acc, item) => {
+            acc[item] = true;
+
+            return acc;
+        }, {});
+
+        commonAttributes.forEach((commonAttribute) => {
+            attributeMap[commonAttribute] = true;
+        });
+
+        return [key, { validAttributes: attributeMap }];
+    }),
+);
+
 export default {
     createPublicInstance(current, renderLanes, workInProgress) {
         // console.log("createPublicInstance", current, renderLanes, workInProgress);
@@ -26,63 +94,13 @@ export default {
                 onClick: { registrationName: "onClick" },
             },
             get(elementType, ...unknownArgs) {
-                switch (elementType) {
-                    case "widget":
-                        return {
-                            validAttributes: {
-                                type: true,
-                                id: true,
-                                label: true,
-                                placeholder: true,
-                                text: true,
-                                defaultValues: true,
-                                defaultValue: true,
-                                initialSelectedIndex: true,
-                                min: true,
-                                max: true,
-                                width: true,
-                                height: true,
-                                options: true,
-                                sliderType: true,
-                                numValues: true,
-                                decimalDigits: true,
-                                defaultChecked: true,
-                                size: true,
-                                onChange: true,
-                                onClick: true,
-                                columns: true,
-                                title: true,
-                                clipRows: true,
-                                xAxisDecimalDigits: true,
-                                yAxisDecimalDigits: true,
-                                axisAutoFit: true,
-                                open: true,
-                                defaultOpen: true,
-                                defaultSelected: true,
-                                selected: true,
-                                selectable: true,
-                                leaf: true,
-                                itemId: true,
-                                url: true,
-                                style: true,
-                                root: true,
-                            },
-                        };
-
-                    case "node":
-                        return {
-                            validAttributes: {
-                                id: true,
-                                type: true,
-                                style: true,
-                                root: true,
-                            },
-                        };
+                if (attributesForElementsMap[elementType] === undefined) {
+                    console.log(`Unrecognised element type: ${elementType}`);
                 }
 
-                return {
-                    validAttributes: [],
-                };
+                return attributesForElementsMap[elementType] !== undefined
+                    ? attributesForElementsMap[elementType]
+                    : { validAttributes: {} };
             },
         };
     },

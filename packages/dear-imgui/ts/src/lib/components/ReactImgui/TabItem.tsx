@@ -17,8 +17,8 @@ export const TabItem: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap
     const idRef = useRef(widgetRegistratonService.generateId());
 
     return (
-        <widget type="TabItem" id={idRef.current} label={label} style={style}>
+        <tab-item id={idRef.current} label={label} style={style}>
             {children}
-        </widget>
+        </tab-item>
     );
 };

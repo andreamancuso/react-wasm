@@ -4,7 +4,7 @@
 class ClippedMultiLineTextRenderer final : public StyledWidget {
     protected:
         ClippedMultiLineTextRenderer(ReactImgui* view, const int id, const int numberOfLines, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-            m_type = "ClippedMultiLineTextRenderer";
+            m_type = "clipped-multi-line-text-renderer";
             m_numberOfLines = numberOfLines;
         }
 

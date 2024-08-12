@@ -9,8 +9,8 @@ export const DIWindow: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMa
     style,
 }) => {
     return (
-        <widget type="DIWindow" width={width} height={height} title={title} style={style}>
+        <di-window width={width} height={height} title={title} style={style}>
             {children}
-        </widget>
+        </di-window>
     );
 };

@@ -4,5 +4,5 @@ export const DisabledText: WidgetFunctionComponent<WidgetPropsMap["DisabledText"
     text,
     style,
 }) => {
-    return <widget type="DisabledText" text={text} style={style} />;
+    return <disabled-text text={text} style={style} />;
 };

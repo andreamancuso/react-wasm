@@ -5,9 +5,5 @@ export const Group: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap["
     children,
     style,
 }) => {
-    return (
-        <widget type="Group" style={style}>
-            {children}
-        </widget>
-    );
+    return <group style={style}>{children}</group>;
 };

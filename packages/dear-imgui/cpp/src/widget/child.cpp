@@ -2,7 +2,7 @@
 #include "widget/child.h"
 
 Child::Child(ReactImgui* view, const int id, const float width, const float height, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-    m_type = "Child";
+    m_type = "child";
     m_handlesChildrenWithinRenderMethod = true;
 
     m_width = width;

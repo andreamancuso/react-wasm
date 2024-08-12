@@ -27,14 +27,6 @@ export const Table = forwardRef<TableImperativeHandle, WidgetPropsMap["Table"]>(
             [],
         );
 
-        return (
-            <widget
-                type="Table"
-                id={idRef.current}
-                columns={columns}
-                clipRows={clipRows}
-                style={style}
-            />
-        );
+        return <di-table id={idRef.current} columns={columns} clipRows={clipRows} style={style} />;
     },
 );

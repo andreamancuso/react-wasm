@@ -4,7 +4,7 @@
 #include "widget/widget.h"
 
 ItemTooltip::ItemTooltip(ReactImgui* view, const int id, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-    m_type = "ItemTooltip";
+    m_type = "item-tooltip";
     m_handlesChildrenWithinRenderMethod = true;
 }
 

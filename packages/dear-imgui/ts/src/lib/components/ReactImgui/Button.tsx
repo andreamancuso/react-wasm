@@ -10,7 +10,5 @@ export const Button: WidgetFunctionComponent<WidgetPropsMap["Button"]> = ({
     const widgetRegistratonService = useWidgetRegistrationService();
     const idRef = useRef(widgetRegistratonService.generateId());
 
-    return (
-        <widget type="Button" label={label} id={idRef.current} onClick={onClick} style={style} />
-    );
+    return <di-button label={label} id={idRef.current} onClick={onClick} style={style} />;
 };

@@ -5,7 +5,7 @@
 class Checkbox final : public StyledWidget {
     protected:
         Checkbox(ReactImgui* view, const int id, const std::string& label, const bool defaultChecked, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-            m_type = "Checkbox";
+            m_type = "checkbox";
             m_checked = defaultChecked;
             m_label = label;
         }

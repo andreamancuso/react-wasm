@@ -28,14 +28,7 @@ export const Image = forwardRef<MapImperativeHandle, WidgetPropsMap["Image"]>(
         );
 
         return (
-            <widget
-                type="Image"
-                id={idRef.current}
-                style={style}
-                url={url}
-                width={width}
-                height={height}
-            />
+            <di-image id={idRef.current} style={style} url={url} width={width} height={height} />
         );
     },
 );

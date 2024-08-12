@@ -3,7 +3,7 @@
 class Combo final : public StyledWidget {
     protected:
         Combo(ReactImgui* view, const int id, const std::string& placeholder, const int initialSelectedIndex, const std::vector<std::string>& options, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-            m_type = "Combo";
+            m_type = "combo";
             m_placeholder = placeholder;
             m_options = options;
 

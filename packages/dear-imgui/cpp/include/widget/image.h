@@ -42,7 +42,7 @@ public:
     bool HasCustomHeight() override;
 
     Image(ReactImgui* view, const int id, const std::string& url, const std::optional<ImVec2>& size, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style), m_texture() {
-        m_type = "Image";
+        m_type = "di-image";
         m_url = url;
 
         m_size = size;

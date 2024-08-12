@@ -46,8 +46,7 @@ export const PlotView = forwardRef<PlotViewImperativeHandle, WidgetPropsMap["Plo
         );
 
         return (
-            <widget
-                type="PlotView"
+            <plot-view
                 id={idRef.current}
                 xAxisDecimalDigits={xAxisDecimalDigits}
                 yAxisDecimalDigits={yAxisDecimalDigits}

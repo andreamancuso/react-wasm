@@ -27,6 +27,6 @@ export const MapView = forwardRef<MapImperativeHandle, WidgetPropsMap["MapView"]
             [],
         );
 
-        return <widget type="MapView" id={idRef.current} style={style} />;
+        return <map-view id={idRef.current} style={style} />;
     },
 );

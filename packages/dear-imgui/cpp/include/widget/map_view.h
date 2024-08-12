@@ -24,7 +24,7 @@ public:
     bool HasCustomHeight() override;
 
     MapView(ReactImgui* view, const int id, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-        m_type = "MapView";
+        m_type = "map-view";
 
         m_offset = ImVec2(0.0f, 0.0f);
     }
