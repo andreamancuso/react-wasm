@@ -5,12 +5,12 @@
 
 void Slider::Render(ReactImgui* view) {
     ImGui::PushID(m_id);
-    if (m_type == "angle") {
-        if (ImGui::SliderAngle(m_label.c_str(), &m_value, m_min, m_max, "%.0f")) {
+    if (m_sliderType == "angle") {
+        if (ImGui::SliderAngle("", &m_value, -360.0f, 360.0f, "%.0f")) {
             view->m_onNumericValueChange(m_id, m_value);
         }
     } else {
-        if (ImGui::SliderFloat(m_label.c_str(), &m_value, m_min, m_max, "%.0f")) {
+        if (ImGui::SliderFloat("", &m_value, m_min, m_max, "%.0f")) {
             view->m_onNumericValueChange(m_id, m_value);
         }
     }
@@ -20,9 +20,6 @@ void Slider::Render(ReactImgui* view) {
 void Slider::Patch(const json& widgetPatchDef, ReactImgui* view) {
     StyledWidget::Patch(widgetPatchDef, view);
 
-    if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-        m_label = widgetPatchDef["label"].template get<std::string>();
-    }
     if (widgetPatchDef.contains("min") && widgetPatchDef["min"].is_number()) {
         m_min = widgetPatchDef["min"].template get<float>();
     }

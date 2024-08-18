@@ -1,467 +1,153 @@
-import React, { SyntheticEvent, useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { useWidgetRegistrationService } from "src/lib/hooks";
 import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
-import { HelpMarker } from "./HelpMarker/HelpMarker";
-import { UserGuide } from "./UserGuide/UserGuide";
-import { StyleEditor } from "./StyleEditor/StyleEditor";
-import { ClippedMultiLineTextRendererImperativeHandle } from "../ReactImgui/ClippedMultiLineTextRenderer";
+// import { HelpMarker } from "./HelpMarker/HelpMarker";
 import faIconMap from "../../fa-icons";
 import RWStyleSheet from "../../stylesheet/stylesheet";
 import { Tables } from "./Tables/Tables";
-import { WidgetReactElement } from "../ReactImgui/types";
 import { Maps } from "./Maps/Maps";
-import { StyleSelector } from "./StyleEditor/StyleSelector/StyleSelector";
 import { Plots } from "./Plots/Plots";
+import { TreeViewItem } from "../ReactImgui/TreeView";
+import { Images } from "./Images/Images";
+import { Icons } from "./Icons/Icons";
+import { TextFields } from "./TextFields/TextFields";
+import { ClippedMultiLineTextRenderers } from "./ClippedMultiLineTextRenderers/ClippedMultiLineTextRenderers";
+import { Sliders } from "./Sliders/Sliders";
+
+const componentMap = {
+    textField: TextFields,
+    icons: Icons,
+    images: Images,
+    sliders: Sliders,
+    maps: Maps,
+    plots: Plots,
+    tables: Tables,
+    clippedMultiLineTextRenderers: ClippedMultiLineTextRenderers,
+};
+
+type ComponentKeys = keyof typeof componentMap;
 
 export const ImGuiDemo = () => {
     const widgetRegistratonService = useWidgetRegistrationService();
 
-    const [isTopLevelTreeNodeOpen, setTopLevelTreeNodeOpen] = useState(true);
-    const [color, setColor] = useState("#ff6e59");
+    const [selectedItemIds, setSelectedItemIds] = useState<ComponentKeys[]>(["textField"]);
+
+    const treeViewItems: TreeViewItem[] = useMemo(() => {
+        return [
+            {
+                itemId: "textField",
+                label: "Text Field",
+            },
+            {
+                itemId: "icons",
+                label: "Icons",
+            },
+            {
+                itemId: "images",
+                label: "Images",
+            },
+            {
+                itemId: "sliders",
+                label: "Sliders",
+            },
+            {
+                itemId: "maps",
+                label: "Maps",
+            },
+            {
+                itemId: "plots",
+                label: "Plots",
+            },
+            {
+                itemId: "tables",
+                label: "Tables",
+            },
+            {
+                itemId: "clippedMultiLineTextRenderers",
+                label: "ClippedMultiLineTextRenderers",
+            },
+        ];
+    }, []);
+
     const styleSheet = useMemo(
         () =>
             RWStyleSheet.create({
+                rootNode: {
+                    height: "100%",
+                    padding: {
+                        all: 10,
+                    },
+                    gap: { row: 12 },
+                },
+                mainLayoutNode: {
+                    flex: 1,
+                    flexDirection: "row",
+                    gap: { column: 12 },
+                },
+                sidebarNode: {
+                    flexBasis: 200,
+                    height: "100%",
+                    borderColor: "#000",
+                    borderThickness: 1,
+                },
+                contentNode: {
+                    flex: 1,
+                    height: "100%",
+                    borderColor: "#000",
+                    borderThickness: 1,
+                    padding: { all: 5 },
+                },
                 title: {
                     colors: { [ImGuiCol.Text]: "#ff6e59" },
                     font: { name: "roboto-regular", size: 24 },
                 },
-                clippedText: {
-                    colors: { [ImGuiCol.Text]: color },
-                },
-                inputWindow: {
-                    vars: { [ImGuiStyleVar.WindowPadding]: [20, 10] },
+                debugButton: {
+                    positionType: "absolute",
+                    position: { right: 15, bottom: 15 },
+                    flexDirection: "row",
+                    gap: { column: 10 },
                 },
             }),
-        [color],
-    );
-
-    const handleToggleColorClicked = useCallback(
-        () => setColor((currentColor) => (currentColor === "#ff6e59" ? "#1a1a1a" : "#ff6e59")),
         [],
     );
-
-    const clippedMultiLineTextRendererRef =
-        useRef<ClippedMultiLineTextRendererImperativeHandle>(null);
-    const [text, setText] = useState("Hello, world!");
-    const [tripleSliderValue, setTripleSliderValue] = useState<[number, number, number]>([0, 0, 0]);
-    const [quadSliderValue, setQuadSliderValue] = useState<[number, number, number, number]>([
-        0, 0, 0, 0,
-    ]);
-
-    const handleInputTextChanged = useCallback(
-        (event: SyntheticEvent<WidgetReactElement<"InputText">, { value: string }>) => {
-            if (event?.nativeEvent) {
-                setText(String(event?.nativeEvent.value));
-            }
-        },
-        [],
-    );
-
-    const handleTripleSliderValueChanged = useCallback((event: any) => {
-        if (event.nativeEvent) {
-            setTripleSliderValue([
-                event.nativeEvent.values[0],
-                event.nativeEvent.values[1],
-                event.nativeEvent.values[2],
-            ]);
-        }
-    }, []);
-
-    const handleQuadSliderValueChanged = useCallback((event: any) => {
-        if (event.nativeEvent) {
-            setQuadSliderValue([
-                event.nativeEvent.values[0],
-                event.nativeEvent.values[1],
-                event.nativeEvent.values[2],
-                event.nativeEvent.values[3],
-            ]);
-        }
-    }, []);
-
-    const handleAppendTextToTextRenderer = useCallback(() => {
-        if (clippedMultiLineTextRendererRef.current) {
-            clippedMultiLineTextRendererRef.current.appendTextToClippedMultiLineTextRenderer(
-                `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n`.repeat(
-                    100,
-                ),
-            );
-        }
-    }, [clippedMultiLineTextRendererRef]);
-
-    const topLevelTreeNodeClicked = useCallback(() => {
-        setTopLevelTreeNodeOpen((isOpen) => !isOpen);
-    }, []);
 
     const debugModeBtnClicked = useCallback(() => {
         widgetRegistratonService.setDebug(true);
     }, []);
 
+    const onToggleItemSelection = useCallback((itemId: string, selected: boolean) => {
+        setSelectedItemIds((selection) => {
+            if (selected) {
+                return [itemId as ComponentKeys];
+            } else {
+                return selection.filter((item) => item !== itemId);
+            }
+        });
+    }, []);
+
+    const Component = componentMap[selectedItemIds[0]];
+
     return (
-        <ReactImgui.Node
-            root
-            style={{
-                height: "100%",
-                gap: { row: 10 },
-                padding: {
-                    all: 10,
-                },
-                borderColor: "#000",
-                borderThickness: 1,
-            }}
-        >
-            <ReactImgui.Node
-                style={{
-                    positionType: "absolute",
-                    position: { right: 10, bottom: 10 },
-                    flexDirection: "row",
-                    gap: { column: 10 },
-                }}
-            >
+        <ReactImgui.Node root style={styleSheet.rootNode}>
+            <ReactImgui.UnformattedText text="React Dear Imgui bindings" style={styleSheet.title} />
+
+            <ReactImgui.Node style={styleSheet.mainLayoutNode}>
+                <ReactImgui.Node style={styleSheet.sidebarNode}>
+                    <ReactImgui.TreeView
+                        items={treeViewItems}
+                        selectedItemIds={selectedItemIds}
+                        onToggleItemSelection={onToggleItemSelection}
+                    />
+                </ReactImgui.Node>
+                <ReactImgui.Node style={styleSheet.contentNode}>
+                    {Component && <Component />}
+                </ReactImgui.Node>
+            </ReactImgui.Node>
+
+            <ReactImgui.Node style={styleSheet.debugButton}>
                 <ReactImgui.Button label={faIconMap.bug} onClick={debugModeBtnClicked} />
-                {/* <ReactImgui.Button label={faIconMap["window-maximize"]} /> */}
             </ReactImgui.Node>
-
-            <ReactImgui.Node
-                style={{
-                    width: 400,
-                    height: "100%",
-                    borderColor: "#000",
-                    borderThickness: 1,
-                }}
-            >
-                <ReactImgui.TreeNode
-                    itemId="components"
-                    label="Components"
-                    onClick={topLevelTreeNodeClicked}
-                    open={isTopLevelTreeNodeOpen}
-                    style={{
-                        padding: {
-                            left: 20,
-                        },
-                    }}
-                >
-                    <ReactImgui.Node
-                        style={{
-                            width: "100%",
-                            height: "100%",
-                            borderColor: "#000",
-                            borderThickness: 1,
-                        }}
-                    >
-                        <ReactImgui.TreeNode
-                            itemId="textField"
-                            label="Text Field"
-                            leaf
-                            selectable
-                            style={{
-                                padding: {
-                                    left: 20,
-                                },
-                            }}
-                        ></ReactImgui.TreeNode>
-                        <ReactImgui.TreeNode
-                            itemId="images"
-                            label="Images"
-                            leaf
-                            selectable
-                            style={{
-                                padding: {
-                                    left: 20,
-                                },
-                            }}
-                        >
-                            <ReactImgui.Node
-                                style={{
-                                    flexDirection: "row",
-                                    gap: { column: 5 },
-                                    alignItems: "center",
-                                    borderColor: "red",
-                                    borderThickness: 2,
-                                    width: "auto",
-                                }}
-                            >
-                                <ReactImgui.Image
-                                    url="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
-                                    width={40}
-                                    height={40}
-                                />
-
-                                <ReactImgui.Node
-                                    style={{
-                                        width: 100,
-                                        height: 100,
-                                        backgroundColor: "#000000",
-                                        borderColor: "lightgreen",
-                                        borderThickness: 5,
-                                        rounding: 5,
-                                        roundCorners: ["topLeft"],
-                                    }}
-                                >
-                                    <ReactImgui.UnformattedText
-                                        text="Inside"
-                                        style={{ colors: { [ImGuiCol.Text]: "#FFFFFF" } }}
-                                    />
-                                    <ReactImgui.Image
-                                        url="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
-                                        style={{
-                                            flex: 1,
-                                        }}
-                                    />
-                                </ReactImgui.Node>
-                            </ReactImgui.Node>
-                        </ReactImgui.TreeNode>
-                        <ReactImgui.TreeNode
-                            itemId="icons"
-                            label="Icons"
-                            leaf
-                            selectable
-                            style={{
-                                padding: {
-                                    left: 20,
-                                },
-                            }}
-                        >
-                            <ReactImgui.Node
-                                style={{
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    gap: { column: 5 },
-                                    borderColor: "#000",
-                                    borderThickness: 1,
-                                }}
-                            >
-                                <ReactImgui.UnformattedText
-                                    text={faIconMap["circle-arrow-right"]}
-                                />
-                                <ReactImgui.Node
-                                    style={{ width: 4, height: 20, backgroundColor: "#f0cb69" }}
-                                />
-                                <ReactImgui.Node style={{ backgroundColor: "#000000" }}>
-                                    <ReactImgui.UnformattedText
-                                        text="Inside"
-                                        style={{
-                                            colors: { [ImGuiCol.Text]: "#FFFFFF" },
-                                        }}
-                                    />
-                                </ReactImgui.Node>
-                            </ReactImgui.Node>
-                        </ReactImgui.TreeNode>
-                    </ReactImgui.Node>
-                </ReactImgui.TreeNode>
-            </ReactImgui.Node>
-
-            {/* <ReactImgui.Node
-                style={{
-                    width: "100%",
-                    height: 400,
-                    flexDirection: "row",
-                    gap: { column: 5 },
-                }}
-            >
-                <ReactImgui.Node
-                    style={{
-                        width: "45%",
-                        height: "100%",
-                    }}
-                >
-                    <Maps />
-                </ReactImgui.Node>
-            </ReactImgui.Node>
-
-            <ReactImgui.Node
-                style={{
-                    width: "100%",
-                    height: 400,
-                    flexDirection: "row",
-                    gap: { column: 5 },
-                }}
-            >
-                <ReactImgui.Node
-                    style={{
-                        width: "45%",
-                        height: "100%",
-                    }}
-                >
-                    <Plots />
-                </ReactImgui.Node>
-            </ReactImgui.Node>
-
-            <ReactImgui.Image
-                url="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
-                width={400}
-                height={300}
-            />
-
-            <ReactImgui.UnformattedText text="Before" />
-            <ReactImgui.UnformattedText text="Before" />
-
-            <ReactImgui.TabBar style={{ width: "50%" }}>
-                <ReactImgui.TabItem label="Tab 1">
-                    <ReactImgui.UnformattedText text="Inside 1-1" />
-                    <ReactImgui.UnformattedText text="Inside 1-2" />
-                </ReactImgui.TabItem>
-
-                <ReactImgui.TabItem label="Tab 2">
-                    <ReactImgui.UnformattedText text="Inside 2-1" />
-                    <ReactImgui.TabBar style={{ width: "50%" }}>
-                        <ReactImgui.TabItem label="Tab 1-1">
-                            <ReactImgui.UnformattedText text="Inside 2-1-1" />
-                            <ReactImgui.UnformattedText text="Inside 2-1-2" />
-                        </ReactImgui.TabItem>
-                        <ReactImgui.TabItem label="Tab 2-1">
-                            <ReactImgui.UnformattedText text="Inside 2-2-1" />
-                            <ReactImgui.UnformattedText text="Inside 2-2-2" />
-                        </ReactImgui.TabItem>
-                    </ReactImgui.TabBar>
-                    <ReactImgui.UnformattedText text="Inside 2-2" />
-                </ReactImgui.TabItem>
-
-                <ReactImgui.TabItem label="Tab 3">
-                    <ReactImgui.UnformattedText text="Inside 3-1" />
-                    <ReactImgui.UnformattedText text="Inside 3-2" />
-                </ReactImgui.TabItem>
-
-                <ReactImgui.TabItem label="Tab 4">
-                    <ReactImgui.UnformattedText text="Inside 4-1" />
-                    <ReactImgui.UnformattedText text="Inside 4-2" />
-                </ReactImgui.TabItem>
-            </ReactImgui.TabBar>
-
-            <ReactImgui.UnformattedText text="After 1" />
-            <ReactImgui.UnformattedText text="After 2" />
-            <ReactImgui.UnformattedText text="After 3" />
-
-            <ReactImgui.CollapsingHeader label="Collapsing header 1">
-                <ReactImgui.UnformattedText text="Content of collapsing header 1 - 1" />
-
-                <ReactImgui.CollapsingHeader label="Collapsing header 1">
-                    <ReactImgui.UnformattedText text="Content of collapsing header 1 - 1 - 1" />
-
-                    <ReactImgui.UnformattedText text="Content of collapsing header 1 - 1 - 2" />
-                </ReactImgui.CollapsingHeader>
-
-                <ReactImgui.UnformattedText text="Content of collapsing header 1 - 2" />
-            </ReactImgui.CollapsingHeader>
-
-            <ReactImgui.UnformattedText text="After 1" />
-            <ReactImgui.UnformattedText text="After 2" />
-            <ReactImgui.UnformattedText text="After 3" />
-
-            <ReactImgui.TreeNode label="Tree Node">
-                <ReactImgui.UnformattedText text="Coming soon!" />
-            </ReactImgui.TreeNode>
-
-            <ReactImgui.UnformattedText text="After TreeNode 1" />
-            <ReactImgui.UnformattedText text="After TreeNode 2" />
-            <ReactImgui.UnformattedText text="After TreeNode 3" />
-
-            <StyleSelector />
-
-            <ReactImgui.UnformattedText text="After Style Selector 1" />
-
-            <ReactImgui.Node
-                style={{
-                    width: "45%",
-                    height: "100%",
-                }}
-            >
-                <Tables />
-            </ReactImgui.Node> */}
-
-            {/* <ReactImgui.UnformattedText
-                text={`dear imgui says hello! ${faIconMap["address-book"]} ${faIconMap["wine-bottle"]}`}
-                style={styleSheet.title}
-            />
-
-            <ReactImgui.CollapsingHeader label="Help">
-                <ReactImgui.SeparatorText label="ABOUT THIS DEMO:" />
-                <ReactImgui.BulletText text="Sections below are demonstrating many aspects of the library." />
-                <ReactImgui.BulletText text='The "Examples" menu above leads to more demo contents.' />
-                <ReactImgui.BulletText
-                    text={`The "Tools" menu above gives access to: About Box, Style Editor,\nand Metrics/Debugger (general purpose Dear ImGui debugging tool).`}
-                />
-                <ReactImgui.SeparatorText label="PROGRAMMER GUIDE:" />
-                <ReactImgui.BulletText text="See the ShowDemoWindow() code in imgui_demo.cpp. <- you are here!" />
-                <ReactImgui.BulletText text="See comments in imgui.cpp." />
-                <ReactImgui.BulletText text="See example applications in the examples/ folder." />
-                <ReactImgui.BulletText text="Read the FAQ at https://www.dearimgui.com/faq/" />
-                <ReactImgui.BulletText text="Set 'io.ConfigFlags |= NavEnableKeyboard' for keyboard controls." />
-                <ReactImgui.BulletText text="Set 'io.ConfigFlags |= NavEnableGamepad' for gamepad controls." />
-
-                <ReactImgui.SeparatorText label="USER GUIDE:" />
-                <UserGuide />
-            </ReactImgui.CollapsingHeader>
-            <ReactImgui.CollapsingHeader label="Configuration">
-                <ReactImgui.TreeNode label="Configuration">
-                    <ReactImgui.UnformattedText text="Coming soon!" />
-                </ReactImgui.TreeNode>
-                <ReactImgui.TreeNode label="Backend Flags">
-                    <HelpMarker
-                        text={`Those flags are set by the backends (imgui_impl_xxx files) to specify their capabilities.\nHere we expose them as read-only fields to avoid breaking interactions with your backend.`}
-                    />
-                    <ReactImgui.UnformattedText text="Coming soon!" />
-                </ReactImgui.TreeNode>
-                <ReactImgui.TreeNode label="Style">
-                    <HelpMarker text="The same contents can be accessed in 'Tools->Style Editor' or by calling the ShowStyleEditor() function." />
-                    <StyleEditor />
-                </ReactImgui.TreeNode>
-            </ReactImgui.CollapsingHeader>
-            <ReactImgui.CollapsingHeader label="Window options">
-                <ReactImgui.UnformattedText text="Coming soon!" />
-            </ReactImgui.CollapsingHeader>
-            <ReactImgui.CollapsingHeader label="Widgets">
-                <ReactImgui.Node style={{ flexDirection: "row" }}>
-                    <ReactImgui.UnformattedText text="Triple Slider" />
-                    <ReactImgui.MultiSlider
-                        numValues={3}
-                        onChange={handleTripleSliderValueChanged}
-                    />
-                    <ReactImgui.UnformattedText text={tripleSliderValue.join(", ")} />
-                </ReactImgui.Node>
-                <ReactImgui.Node style={{ flexDirection: "row" }}>
-                    <ReactImgui.UnformattedText text="Quadruple Slider" />
-                    <ReactImgui.MultiSlider numValues={4} onChange={handleQuadSliderValueChanged} />
-                    <ReactImgui.UnformattedText text={quadSliderValue.join(", ")} />
-                </ReactImgui.Node>
-            </ReactImgui.CollapsingHeader>
-
-            <ReactImgui.DIWindow title="clipped multi line text renderer" width={820} height={600}>
-                <ReactImgui.Child height={-40}>
-                    <ReactImgui.ClippedMultiLineTextRenderer
-                        ref={clippedMultiLineTextRendererRef}
-                        style={styleSheet.clippedText}
-                    />
-                </ReactImgui.Child>
-                <ReactImgui.Node style={{ flexDirection: "row" }}>
-                    <ReactImgui.Button onClick={handleAppendTextToTextRenderer} label="Add text" />
-                    <ReactImgui.Button onClick={handleToggleColorClicked} label="Toggle color" />
-                </ReactImgui.Node>
-            </ReactImgui.DIWindow>
-
-            <ReactImgui.DIWindow
-                title="input widgets"
-                width={820}
-                height={600}
-                style={styleSheet.inputWindow}
-            >
-                <ReactImgui.Child width={400} height={0}>
-                    <ReactImgui.InputText
-                        defaultValue={text}
-                        onChange={handleInputTextChanged}
-                        style={{ width: 0.8 }}
-                    />
-                    <ReactImgui.UnformattedText text={text} />
-                </ReactImgui.Child>
-            </ReactImgui.DIWindow> */}
-
-            {/* <ReactImgui.DIWindow title="tables" width={1000} height={600}> */}
-
-            {/* </ReactImgui.DIWindow> */}
-
-            {/* <ReactImgui.DIWindow title="map" width={500} height={500}> */}
-
-            {/* </ReactImgui.DIWindow> */}
         </ReactImgui.Node>
     );
 };

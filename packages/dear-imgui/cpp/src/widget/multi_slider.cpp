@@ -8,15 +8,15 @@ void MultiSlider::Render(ReactImgui* view) {
     ImGui::PushID(m_id);
 
     if (m_numValues == 2) {
-        if (ImGui::SliderFloat2(m_label.c_str(), m_values.get(), m_min, m_max, view->m_floatFormatChars[m_decimalDigits].get())) {
+        if (ImGui::SliderFloat2("", m_values.get(), m_min, m_max, view->m_floatFormatChars[m_decimalDigits].get())) {
             view->m_onMultiValueChange(m_id, m_values.get(), m_numValues);
         }
     } else if (m_numValues == 3) {
-        if (ImGui::SliderFloat3(m_label.c_str(), m_values.get(), m_min, m_max, view->m_floatFormatChars[m_decimalDigits].get())) {
+        if (ImGui::SliderFloat3("", m_values.get(), m_min, m_max, view->m_floatFormatChars[m_decimalDigits].get())) {
             view->m_onMultiValueChange(m_id, m_values.get(), m_numValues);
         }
     } else if (m_numValues == 4) {
-        if (ImGui::SliderFloat4(m_label.c_str(), m_values.get(), m_min, m_max, view->m_floatFormatChars[m_decimalDigits].get())) {
+        if (ImGui::SliderFloat4("", m_values.get(), m_min, m_max, view->m_floatFormatChars[m_decimalDigits].get())) {
             view->m_onMultiValueChange(m_id, m_values.get(), m_numValues);
         }
     }
@@ -27,9 +27,6 @@ void MultiSlider::Render(ReactImgui* view) {
 void MultiSlider::Patch(const json& widgetPatchDef, ReactImgui* view) {
     StyledWidget::Patch(widgetPatchDef, view);
 
-    if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-        m_label = widgetPatchDef["label"].template get<std::string>();
-    }
     if (widgetPatchDef.contains("min") && widgetPatchDef["min"].is_number()) {
         m_min = widgetPatchDef["min"].template get<float>();
     }

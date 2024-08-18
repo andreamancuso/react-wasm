@@ -3,7 +3,6 @@ import { useWidgetRegistrationService } from "../../hooks";
 import { WidgetFunctionComponent, WidgetPropsMap } from "./types";
 
 export const MultiSlider: WidgetFunctionComponent<WidgetPropsMap["MultiSlider"]> = ({
-    label,
     min,
     max,
     onChange,
@@ -21,7 +20,6 @@ export const MultiSlider: WidgetFunctionComponent<WidgetPropsMap["MultiSlider"]>
 
     return (
         <multi-slider
-            label={label}
             id={idRef.current}
             defaultValues={defaultValues}
             min={min}

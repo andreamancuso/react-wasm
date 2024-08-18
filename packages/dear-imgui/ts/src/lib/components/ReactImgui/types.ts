@@ -5,6 +5,7 @@ import { StyleRules } from "src/lib/stylesheet/stylesheet";
 import { ImVec2 } from "src/lib/wasm/wasm-app-types";
 import { YogaStyle } from "src/lib/stylesheet/yoga-style";
 import { BaseDrawStyle } from "src/lib/stylesheet/base-draw-style";
+import { TreeViewItem } from "./TreeView";
 
 export type ModuleEventHandlers = {
     onTextChange: (id: number, value: string) => void;
@@ -51,9 +52,9 @@ export type ComboChangeEvent = SyntheticEvent<WidgetReactElement<"Combo">, { val
 
 export type SliderChangeEvent = SyntheticEvent<WidgetReactElement<"Slider">, { value: number }>;
 
-export type MultiSliderChangeEvent = SyntheticEvent<
+export type MultiSliderChangeEvent<T extends Primitive = Primitive> = SyntheticEvent<
     WidgetReactElement<"MultiSlider">,
-    { value: Primitive[] }
+    { values: T[] }
 >;
 
 export type CheckboxChangeEvent = SyntheticEvent<
@@ -107,12 +108,11 @@ export type WidgetPropsMap = {
     MapView: WidgetStyleProps;
     MultiSlider: WidgetStyleProps & {
         numValues: 2 | 3 | 4;
-        label?: string;
         defaultValues?: number[];
         min?: number;
         max?: number;
         decimalDigits?: number;
-        onChange?: (event: MultiSliderChangeEvent) => void;
+        onChange?: (event: MultiSliderChangeEvent<number>) => void;
     };
     PlotView: WidgetStyleProps & {
         xAxisDecimalDigits?: number;
@@ -125,7 +125,6 @@ export type WidgetPropsMap = {
     };
     Slider: WidgetStyleProps & {
         sliderType?: SliderTypes;
-        label: string;
         defaultValue?: number;
         min?: number;
         max?: number;
@@ -153,6 +152,13 @@ export type WidgetPropsMap = {
         selectable?: boolean;
         label?: string;
     };
+    TreeView: WidgetStyleProps & {
+        items: TreeViewItem[];
+        defaultSelectedItemIds?: string[];
+        selectedItemIds?: string[];
+        allowMultipleSelection?: boolean;
+        onToggleItemSelection?: (itemId: string, selected: boolean) => void;
+    };
     UnformattedText: WidgetStyleProps & {
         text: string;
     };
@@ -163,26 +169,27 @@ export type WidgetKeys = keyof WidgetPropsMap;
 type ReactImguiType = typeof ReactImgui;
 
 export type WidgetsRequiringId =
-    | "InputText"
-    | "CollapsingHeader"
-    | "TreeNode"
-    | "Combo"
+    | "Button"
     | "Checkbox"
+    | "ClippedMultiLineTextRenderer"
+    | "CollapsingHeader"
+    | "Combo"
+    | "Image"
+    | "InputText"
+    | "MapView"
+    | "MultiSlider"
+    | "PlotView"
+    | "Slider"
+    | "Table"
     | "TabBar"
     | "TabItem"
-    | "Slider"
-    | "MultiSlider"
-    | "Button"
-    | "Table"
-    | "ClippedMultiLineTextRenderer"
-    | "Image"
-    | "MapView"
-    | "PlotView";
+    | "TreeNode";
 
 export type WidgetReactNode =
     | WidgetReactElementsFlat
     | null
     | undefined
+    | false
     | Iterable<WidgetReactNode>;
 
 export type WidgetReactElement<K extends WidgetKeys> = ReactElement<
