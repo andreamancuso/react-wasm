@@ -30,7 +30,7 @@ export default class {
         "tree-node",
         "tab-bar",
         "tab-item",
-        "table",
+        "di-table",
     ];
 
     constructor() {
@@ -78,12 +78,13 @@ export default class {
         // console.log("createNode", generatedId, uiViewClassName, requiresClone, payload, fiberNode);
 
         if (payload) {
-            const { children, type, id, elementType, ...props } = payload;
+            const { children, id, elementType, ...props } = payload;
+            const { type } = fiberNode;
 
             element = {
                 ...element,
                 ...props,
-                type: fiberNode.type,
+                type,
             };
 
             // todo: is there a good reason why we shouldn't keep track of all widgets?
@@ -94,7 +95,7 @@ export default class {
             element.type = "node";
         }
 
-        // console.log(JSON.stringify(widget));
+        // console.log(JSON.stringify(element));
 
         this.fiberNodesMap.set(generatedId, fiberNode);
         this.wasmModule?.setElement(JSON.stringify(element));

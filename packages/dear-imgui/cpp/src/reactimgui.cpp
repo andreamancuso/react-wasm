@@ -128,7 +128,7 @@ void ReactImgui::SetUpElementCreatorFunctions() {
     m_element_init_fn["tree-node"] = &makeWidget<TreeNode>;
 
     m_element_init_fn["di-table"] = &makeWidget<Table>;
-    m_element_init_fn["clippedMultiLineTextRenderer"] = &makeWidget<ClippedMultiLineTextRenderer>;
+    m_element_init_fn["clipped-multi-line-text-renderer"] = &makeWidget<ClippedMultiLineTextRenderer>;
     m_element_init_fn["di-image"] = &makeWidget<Image>;
     m_element_init_fn["map-view"] = &makeWidget<MapView>;
     m_element_init_fn["plot-view"] = &makeWidget<PlotView>;
@@ -684,10 +684,8 @@ json ReactImgui::GetAvailableFonts() {
 void ReactImgui::AppendTextToClippedMultiLineTextRenderer(const int id, const std::string& data) {
     const std::lock_guard<std::mutex> lock(m_elements_mutex);
 
-    if (m_elements.contains(id) && std::strcmp(m_elements[id]->GetElementType(), "widget") != 0) {
-        const auto element = dynamic_cast<Widget*>(m_elements[id].get());
-
-        if (element->m_type == "clipped-multi-line-text-renderer") {
+    if (m_elements.contains(id)) {
+        if (m_elements[id]->m_type == "clipped-multi-line-text-renderer") {
             dynamic_cast<ClippedMultiLineTextRenderer*>(m_elements[id].get())->AppendText(data.c_str());
         }
     }

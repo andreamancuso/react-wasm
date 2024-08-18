@@ -5,6 +5,7 @@ import { StyleRules } from "src/lib/stylesheet/stylesheet";
 import { ImVec2 } from "src/lib/wasm/wasm-app-types";
 import { YogaStyle } from "src/lib/stylesheet/yoga-style";
 import { BaseDrawStyle } from "src/lib/stylesheet/base-draw-style";
+import { TreeViewItem } from "./TreeView";
 
 export type ModuleEventHandlers = {
     onTextChange: (id: number, value: string) => void;
@@ -153,6 +154,13 @@ export type WidgetPropsMap = {
         selectable?: boolean;
         label?: string;
     };
+    TreeView: WidgetStyleProps & {
+        items: TreeViewItem[];
+        defaultSelectedItemIds?: string[];
+        selectedItemIds?: string[];
+        allowMultipleSelection?: boolean;
+        onToggleItemSelection?: (itemId: string, selected: boolean) => void;
+    };
     UnformattedText: WidgetStyleProps & {
         text: string;
     };
@@ -163,26 +171,27 @@ export type WidgetKeys = keyof WidgetPropsMap;
 type ReactImguiType = typeof ReactImgui;
 
 export type WidgetsRequiringId =
-    | "InputText"
-    | "CollapsingHeader"
-    | "TreeNode"
-    | "Combo"
+    | "Button"
     | "Checkbox"
+    | "ClippedMultiLineTextRenderer"
+    | "CollapsingHeader"
+    | "Combo"
+    | "Image"
+    | "InputText"
+    | "MapView"
+    | "MultiSlider"
+    | "PlotView"
+    | "Slider"
+    | "Table"
     | "TabBar"
     | "TabItem"
-    | "Slider"
-    | "MultiSlider"
-    | "Button"
-    | "Table"
-    | "ClippedMultiLineTextRenderer"
-    | "Image"
-    | "MapView"
-    | "PlotView";
+    | "TreeNode";
 
 export type WidgetReactNode =
     | WidgetReactElementsFlat
     | null
     | undefined
+    | false
     | Iterable<WidgetReactNode>;
 
 export type WidgetReactElement<K extends WidgetKeys> = ReactElement<

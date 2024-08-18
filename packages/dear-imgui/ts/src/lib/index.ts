@@ -5,13 +5,8 @@ import { WidgetRegistrationServiceContext } from "./contexts";
 import { ImGuiDemo } from "./components/ImGuiDemo/ImGuiDemo";
 import faIconMap from "./fa-icons";
 import { ImGuiCol, ImVec2, WasmExitStatus, ImGuiStyleVar } from "./wasm/wasm-app-types";
-import {
-    ImGuiStyleForPatching,
-    ImGuiStyle,
-    HEXA,
-    StyleColValue,
-    StyleVarValue,
-} from "./stylesheet/imgui-style";
+import { ImGuiStyleForPatching, ImGuiStyle, StyleVarValue } from "./stylesheet/imgui-style";
+import { HEXA, StyleColValue } from "./stylesheet/types";
 import { TableImperativeHandle } from "./components/ReactImgui/Table";
 import { ClippedMultiLineTextRendererImperativeHandle } from "./components/ReactImgui/ClippedMultiLineTextRenderer";
 import {
@@ -22,8 +17,15 @@ import {
     MultiSliderChangeEvent,
     Primitive,
     SliderChangeEvent,
-    StyleProps,
     TabItemChangeEvent,
+    NodeStyleProps,
+    WidgetStyleProps,
+    NodeStyle,
+    WidgetStyle,
+    SliderTypes,
+    WidgetPropsMap,
+    WidgetReactNode,
+    NodeProps,
 } from "./components/ReactImgui/types";
 
 export {
@@ -48,7 +50,14 @@ export {
     ClippedMultiLineTextRendererImperativeHandle,
     Primitive,
     FontDef,
-    StyleProps,
+    NodeStyleProps,
+    WidgetStyleProps,
+    NodeStyle,
+    WidgetStyle,
+    SliderTypes,
+    WidgetPropsMap,
+    WidgetReactNode,
+    NodeProps,
     TabItemChangeEvent,
     InputTextChangeEvent,
     ComboChangeEvent,

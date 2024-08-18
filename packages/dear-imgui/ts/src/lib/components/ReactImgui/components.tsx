@@ -3,57 +3,59 @@ import { attachSubComponents } from "../../attachSubComponents";
 import { BulletText } from "./BulletText";
 import { Button } from "./Button";
 import { Checkbox } from "./Checkbox";
+import { Child } from "./Child";
+import { ClippedMultiLineTextRenderer } from "./ClippedMultiLineTextRenderer";
 import { CollapsingHeader } from "./CollapsingHeader";
 import { Combo } from "./Combo";
-import { Node } from "./Node";
+import { DisabledText } from "./DisabledText";
+import { DIWindow } from "./DIWindow";
+import { Group } from "./Group";
+import { Image } from "./Image";
 import { InputText } from "./InputText";
 import { ItemTooltip } from "./ItemTooltip";
+import { MapView } from "./MapView";
 import { MultiSlider } from "./MultiSlider";
+import { Node } from "./Node";
+import { PlotView } from "./PlotView";
 import { Separator } from "./Separator";
 import { SeparatorText } from "./SeparatorText";
 import { Slider } from "./Slider";
 import { TabBar } from "./TabBar";
 import { TabItem } from "./TabItem";
-import { DisabledText } from "./DisabledText";
+import { Table } from "./Table";
 import { TextWrap } from "./TextWrap";
 import { TreeNode } from "./TreeNode";
+import { TreeView } from "./TreeView";
 import { UnformattedText } from "./UnformattedText";
-import { MapView } from "./MapView";
-import { Table } from "./Table";
-import { Child } from "./Child";
-import { Group } from "./Group";
-import { DIWindow } from "./DIWindow";
-import { ClippedMultiLineTextRenderer } from "./ClippedMultiLineTextRenderer";
-import { PlotView } from "./PlotView";
-import { Image } from "./Image";
 
 export const components = {
-    UnformattedText,
-    InputText,
-    CollapsingHeader,
-    TreeNode,
-    SeparatorText,
     BulletText,
-    DisabledText,
-    ItemTooltip,
-    TextWrap,
-    Combo,
-    Slider,
-    MultiSlider,
-    Checkbox,
     Button,
-    Separator,
-    DIWindow,
+    Checkbox,
     Child,
+    ClippedMultiLineTextRenderer,
+    CollapsingHeader,
+    Combo,
+    DIWindow,
+    DisabledText,
     Group,
+    Image,
+    InputText,
+    ItemTooltip,
+    MapView,
+    MultiSlider,
+    Node,
+    PlotView,
+    SeparatorText,
+    Separator,
+    Slider,
     TabBar,
     TabItem,
     Table,
-    ClippedMultiLineTextRenderer,
-    MapView,
-    PlotView,
-    Image,
-    Node,
+    TextWrap,
+    TreeNode,
+    TreeView,
+    UnformattedText,
 } as const;
 
 export const ReactImgui = attachSubComponents("ReactImgui", MainComponent, components);
