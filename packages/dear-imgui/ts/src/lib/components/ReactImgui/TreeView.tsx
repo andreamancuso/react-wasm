@@ -56,8 +56,8 @@ export const TreeView: WidgetFunctionComponent<WidgetPropsMap["TreeView"]> = ({
     onToggleItemSelection,
     style,
 }) => {
-    const widgetRegistratonService = useWidgetRegistrationService();
-    const idRef = useRef(widgetRegistratonService.generateId());
+    const widgetRegistrationService = useWidgetRegistrationService();
+    const idRef = useRef(widgetRegistrationService.generateId());
 
     const [localSelectedItemIds, setLocalSelectedItemIds] = useState(defaultSelectedItemIds ?? []);
 
@@ -74,7 +74,6 @@ export const TreeView: WidgetFunctionComponent<WidgetPropsMap["TreeView"]> = ({
                     );
                 }
             }
-            console.log(itemId, selected);
         },
         [onToggleItemSelection, localSelectedItemIds],
     );

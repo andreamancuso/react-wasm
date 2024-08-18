@@ -3,7 +3,6 @@ import { useWidgetRegistrationService } from "../../hooks";
 import { WidgetFunctionComponent, WidgetPropsMap } from "./types";
 
 export const Slider: WidgetFunctionComponent<WidgetPropsMap["Slider"]> = ({
-    label,
     min,
     max,
     onChange,
@@ -16,7 +15,6 @@ export const Slider: WidgetFunctionComponent<WidgetPropsMap["Slider"]> = ({
 
     return (
         <slider
-            label={label}
             id={idRef.current}
             defaultValue={defaultValue}
             min={min}

@@ -52,9 +52,9 @@ export type ComboChangeEvent = SyntheticEvent<WidgetReactElement<"Combo">, { val
 
 export type SliderChangeEvent = SyntheticEvent<WidgetReactElement<"Slider">, { value: number }>;
 
-export type MultiSliderChangeEvent = SyntheticEvent<
+export type MultiSliderChangeEvent<T extends Primitive = Primitive> = SyntheticEvent<
     WidgetReactElement<"MultiSlider">,
-    { value: Primitive[] }
+    { values: T[] }
 >;
 
 export type CheckboxChangeEvent = SyntheticEvent<
@@ -108,12 +108,11 @@ export type WidgetPropsMap = {
     MapView: WidgetStyleProps;
     MultiSlider: WidgetStyleProps & {
         numValues: 2 | 3 | 4;
-        label?: string;
         defaultValues?: number[];
         min?: number;
         max?: number;
         decimalDigits?: number;
-        onChange?: (event: MultiSliderChangeEvent) => void;
+        onChange?: (event: MultiSliderChangeEvent<number>) => void;
     };
     PlotView: WidgetStyleProps & {
         xAxisDecimalDigits?: number;
@@ -126,7 +125,6 @@ export type WidgetPropsMap = {
     };
     Slider: WidgetStyleProps & {
         sliderType?: SliderTypes;
-        label: string;
         defaultValue?: number;
         min?: number;
         max?: number;

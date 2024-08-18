@@ -13,11 +13,13 @@ import { Images } from "./Images/Images";
 import { Icons } from "./Icons/Icons";
 import { TextFields } from "./TextFields/TextFields";
 import { ClippedMultiLineTextRenderers } from "./ClippedMultiLineTextRenderers/ClippedMultiLineTextRenderers";
+import { Sliders } from "./Sliders/Sliders";
 
 const componentMap = {
     textField: TextFields,
     icons: Icons,
     images: Images,
+    sliders: Sliders,
     maps: Maps,
     plots: Plots,
     tables: Tables,
@@ -44,6 +46,10 @@ export const ImGuiDemo = () => {
             {
                 itemId: "images",
                 label: "Images",
+            },
+            {
+                itemId: "sliders",
+                label: "Sliders",
             },
             {
                 itemId: "maps",
@@ -90,6 +96,7 @@ export const ImGuiDemo = () => {
                     height: "100%",
                     borderColor: "#000",
                     borderThickness: 1,
+                    padding: { all: 5 },
                 },
                 title: {
                     colors: { [ImGuiCol.Text]: "#ff6e59" },
@@ -109,18 +116,15 @@ export const ImGuiDemo = () => {
         widgetRegistratonService.setDebug(true);
     }, []);
 
-    const onToggleItemSelection = useCallback(
-        (itemId: string, selected: boolean) => {
-            setSelectedItemIds((selection) => {
-                if (selected) {
-                    return [itemId as ComponentKeys];
-                } else {
-                    return selection.filter((item) => item !== itemId);
-                }
-            });
-        },
-        [selectedItemIds],
-    );
+    const onToggleItemSelection = useCallback((itemId: string, selected: boolean) => {
+        setSelectedItemIds((selection) => {
+            if (selected) {
+                return [itemId as ComponentKeys];
+            } else {
+                return selection.filter((item) => item !== itemId);
+            }
+        });
+    }, []);
 
     const Component = componentMap[selectedItemIds[0]];
 
