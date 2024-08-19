@@ -11,6 +11,6 @@ void SeparatorText::Patch(const json& widgetPatchDef, ReactImgui* view) {
     }
 };
 
-void SeparatorText::Render(ReactImgui* view) {
+void SeparatorText::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::SeparatorText(m_label.c_str());
 };

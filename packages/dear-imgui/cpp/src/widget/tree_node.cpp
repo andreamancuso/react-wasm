@@ -39,7 +39,7 @@ void TreeNode::Init(const json &elementDef) {
     }
 };
 
-void TreeNode::Render(ReactImgui* view) {
+void TreeNode::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     YGNodeStyleSetMargin(m_layoutNode->m_node, YGEdgeBottom, m_view->GetWidgetFontSize(this));
 
     ImGui::PushID(m_id);
@@ -97,7 +97,7 @@ void TreeNode::Render(ReactImgui* view) {
 
         ImGui::SetCursorPos(ImVec2(0, 0));
 
-        Widget::HandleChildren(view);
+        Widget::HandleChildren(view, viewport);
 
         ImGui::EndChild();
     } else {

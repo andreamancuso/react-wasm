@@ -9,7 +9,7 @@
 
 using json = nlohmann::json;
 
-Widget::Widget(ReactImgui* view, const int id) : Element(view, id, false) {
+Widget::Widget(ReactImgui* view, const int id) : Element(view, id, false, false) {
     m_handlesChildrenWithinRenderMethod = false;
 }
 
@@ -18,8 +18,8 @@ const char* Widget::GetElementType() {
 };
 
 // todo: seems redundant
-void Widget::HandleChildren(ReactImgui* view) {
-    view->RenderChildren(m_id);
+void Widget::HandleChildren(ReactImgui* view, const std::optional<ImRect>& viewport) {
+    view->RenderChildren(m_id, std::nullopt);
 };
 
 void Widget::SetChildrenDisplay(ReactImgui* view, YGDisplay display) const {
@@ -32,6 +32,6 @@ void Widget::Patch(const json& elementPatchDef, ReactImgui* view) {
 
 void Widget::PreRender(ReactImgui* view) {};
 
-void Widget::Render(ReactImgui* view) {};
+void Widget::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {};
 
 void Widget::PostRender(ReactImgui* view) {};

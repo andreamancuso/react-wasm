@@ -15,7 +15,7 @@ public:
 
     CollapsingHeader(ReactImgui* view, int id, const std::string& label, std::optional<WidgetStyle>& style);
 
-    void Render(ReactImgui* view) override;
+    void Render(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 
     void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 

@@ -48,7 +48,7 @@ public:
         m_size = size;
     }
 
-    void Render(ReactImgui* view) override;
+    void Render(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 
     static YGSize Measure(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode);
 

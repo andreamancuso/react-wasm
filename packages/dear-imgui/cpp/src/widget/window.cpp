@@ -10,7 +10,7 @@ Window::Window(ReactImgui* view, const int id, const std::string& title, const f
     m_type = "di-window";
 }
 
-void Window::Render(ReactImgui* view) {
+void Window::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     // ImGui::PushID(m_id);
     ImGui::SetNextWindowSize(ImVec2(m_width, m_height), ImGuiCond_FirstUseEver);
 
@@ -18,7 +18,7 @@ void Window::Render(ReactImgui* view) {
         ImGui::End();
         return;
     }
-    Widget::HandleChildren(view);
+    Widget::HandleChildren(view, viewport);
     ImGui::End();
     // ImGui::PopID();
 };

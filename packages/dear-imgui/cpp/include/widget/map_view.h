@@ -29,7 +29,7 @@ public:
         m_offset = ImVec2(0.0f, 0.0f);
     }
 
-    void Render(ReactImgui* view) override;
+    void Render(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 
     bool HasInternalOps() override;
 

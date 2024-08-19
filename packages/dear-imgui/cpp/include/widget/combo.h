@@ -83,7 +83,7 @@ class Combo final : public StyledWidget {
             m_selectedIndex = -1;
         }
 
-        void Render(ReactImgui* view) override;
+        void Render(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 
         void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 

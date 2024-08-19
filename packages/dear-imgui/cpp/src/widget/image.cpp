@@ -12,7 +12,7 @@ bool Image::HasCustomHeight() {
     return false;
 }
 
-void Image::Render(ReactImgui* view) {
+void Image::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     if (m_texture.textureView != nullptr) {
         auto imageSize = m_size.has_value() ? m_size.value() : ImVec2(YGNodeLayoutGetWidth(m_layoutNode->m_node), YGNodeLayoutGetHeight(m_layoutNode->m_node));
 

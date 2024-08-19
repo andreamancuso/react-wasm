@@ -52,7 +52,7 @@ const attributesForElements = {
     ],
     "unformatted-text": ["text"],
 
-    node: ["root"],
+    node: ["root", "cull"],
 };
 
 const attributesForElementsMap = Object.fromEntries(

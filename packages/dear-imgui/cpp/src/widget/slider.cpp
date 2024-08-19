@@ -3,7 +3,7 @@
 #include "widget/slider.h"
 #include "widget/styled_widget.h"
 
-void Slider::Render(ReactImgui* view) {
+void Slider::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::PushID(m_id);
     if (m_sliderType == "angle") {
         if (ImGui::SliderAngle("", &m_value, -360.0f, 360.0f, "%.0f")) {

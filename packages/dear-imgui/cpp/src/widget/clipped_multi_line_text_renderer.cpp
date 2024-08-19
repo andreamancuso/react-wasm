@@ -1,7 +1,7 @@
 #include "widget/styled_widget.h"
 #include "widget/clipped_multi_line_text_renderer.h"
 
-void ClippedMultiLineTextRenderer::Render(ReactImgui* view) {
+void ClippedMultiLineTextRenderer::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::PushID(m_id);
 
     const char* buf = m_textBuffer.begin();

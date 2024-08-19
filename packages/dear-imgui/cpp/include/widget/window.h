@@ -21,7 +21,7 @@ public:
 
     Window(ReactImgui* view, int id, const std::string& title, float width, float height, std::optional<WidgetStyle>& style);
 
-    void Render(ReactImgui* view) override;
+    void Render(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 
     void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 };

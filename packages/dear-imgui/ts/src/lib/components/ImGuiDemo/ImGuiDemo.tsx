@@ -31,7 +31,7 @@ type ComponentKeys = keyof typeof componentMap;
 export const ImGuiDemo = () => {
     const widgetRegistratonService = useWidgetRegistrationService();
 
-    const [selectedItemIds, setSelectedItemIds] = useState<ComponentKeys[]>(["textField"]);
+    const [selectedItemIds, setSelectedItemIds] = useState<ComponentKeys[]>(["icons"]);
 
     const treeViewItems: TreeViewItem[] = useMemo(() => {
         return [
@@ -140,7 +140,7 @@ export const ImGuiDemo = () => {
                         onToggleItemSelection={onToggleItemSelection}
                     />
                 </ReactImgui.Node>
-                <ReactImgui.Node style={styleSheet.contentNode}>
+                <ReactImgui.Node style={styleSheet.contentNode} cull>
                     {Component && <Component />}
                 </ReactImgui.Node>
             </ReactImgui.Node>

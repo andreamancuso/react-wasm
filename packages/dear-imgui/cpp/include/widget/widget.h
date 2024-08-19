@@ -21,13 +21,13 @@ class Widget : public Element {
 
         const char* GetElementType() override;
 
-        void HandleChildren(ReactImgui* view) override;
+        void HandleChildren(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 
         void SetChildrenDisplay(ReactImgui* view, YGDisplay display) const;
 
         void PreRender(ReactImgui* view) override;
 
-        void Render(ReactImgui* view) override;
+        void Render(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 
         void PostRender(ReactImgui* view) override;
 

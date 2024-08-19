@@ -9,10 +9,10 @@ Child::Child(ReactImgui* view, const int id, const float width, const float heig
     m_height = height;
 };
 
-void Child::Render(ReactImgui* view) {
+void Child::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::PushID(m_id);
     ImGui::BeginChild("", ImVec2(m_width, m_height), m_flags);
-    Widget::HandleChildren(view);
+    Widget::HandleChildren(view, viewport);
     ImGui::EndChild();
     ImGui::PopID();
 };
