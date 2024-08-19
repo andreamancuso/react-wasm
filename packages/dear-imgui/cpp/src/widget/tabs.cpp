@@ -14,7 +14,7 @@ bool TabBar::HasCustomHeight() {
     return false;
 }
 
-void TabBar::Render(ReactImgui* view) {
+void TabBar::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::PushID(m_id);
     // todo: double-check if we need to pass a proper id here?
 
@@ -28,7 +28,7 @@ void TabBar::Render(ReactImgui* view) {
     ImGui::BeginChild("##", ImVec2(width, height), ImGuiChildFlags_None);
 
     if (ImGui::BeginTabBar("", ImGuiTabBarFlags_None)) {
-        Widget::HandleChildren(view);
+        Widget::HandleChildren(view, viewport);
         ImGui::EndTabBar();
     }
 
@@ -50,7 +50,7 @@ bool TabItem::HasCustomHeight() {
     return false;
 }
 
-void TabItem::Render(ReactImgui* view) {
+void TabItem::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::PushID(m_id);
     if (ImGui::BeginTabItem(m_label.c_str())) {
         m_layoutNode->SetDisplay(YGDisplayFlex);
@@ -62,7 +62,7 @@ void TabItem::Render(ReactImgui* view) {
 
         ImGui::BeginChild("##", ImVec2(width, height), ImGuiChildFlags_None);
 
-        Widget::HandleChildren(view);
+        Widget::HandleChildren(view, viewport);
 
         ImGui::EndChild();
         ImGui::EndTabItem();

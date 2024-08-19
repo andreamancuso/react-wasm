@@ -228,6 +228,7 @@ export type ReactElementWidgetsFlat = ReactElementWidgets[keyof ReactElementWidg
 
 export type NodeProps = {
     root?: boolean;
+    cull?: boolean;
     children?: WidgetReactNode;
 } & NodeStyleProps;
 

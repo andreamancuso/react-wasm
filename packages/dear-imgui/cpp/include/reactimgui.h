@@ -2,12 +2,12 @@
 #include <mutex>
 #include <rpp/rpp.hpp>
 #include "imgui.h"
+#include "imgui_internal.h"
 #include <nlohmann/json.hpp>
-
-using json = nlohmann::json;
-
 #include "yoga/YGEnums.h"
 #include "implotview.h"
+
+using json = nlohmann::json;
 
 #pragma once
 
@@ -84,7 +84,7 @@ class ReactImgui : public ImPlotView {
 
         void ShowDebugWindow();
 
-        void RenderElementById(int id);
+        void RenderElementById(int id, const std::optional<ImRect>& viewport = std::nullopt);
 
         void SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) override;
 
@@ -106,11 +106,11 @@ class ReactImgui : public ImPlotView {
 
         void SetChildrenDisplay(int id, YGDisplay display);
 
-        void RenderChildren(int id);
+        void RenderChildren(int id, const std::optional<ImRect>& viewport = std::nullopt);
 
         void RenderElementTree(int id = 0);
 
-        void RenderElements(int id = 0);
+        void RenderElements(int id = 0, const std::optional<ImRect>& viewport = std::nullopt);
 
         void QueueCreateElement(std::string& elementJsonAsString);
 

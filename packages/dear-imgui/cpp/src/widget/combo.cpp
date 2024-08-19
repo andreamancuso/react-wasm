@@ -3,7 +3,7 @@
 #include "widget/combo.h"
 #include "reactimgui.h"
 
-void Combo::Render(ReactImgui* view) {
+void Combo::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::PushID(m_id);
 
     if (ImGui::BeginCombo("",

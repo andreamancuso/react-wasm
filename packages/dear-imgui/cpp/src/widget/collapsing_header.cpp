@@ -9,7 +9,7 @@ CollapsingHeader::CollapsingHeader(ReactImgui* view, const int id, const std::st
     m_label = label;
 }
 
-void CollapsingHeader::Render(ReactImgui* view) {
+void CollapsingHeader::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     YGNodeStyleSetMargin(m_layoutNode->m_node, YGEdgeBottom, m_view->GetFrameHeightWithSpacing(this));
 
     ImGui::PushID(m_id);
@@ -27,7 +27,7 @@ void CollapsingHeader::Render(ReactImgui* view) {
 
         ImGui::SetCursorPos(ImVec2(0, 0));
 
-        Widget::HandleChildren(view);
+        Widget::HandleChildren(view, viewport);
 
         ImGui::EndChild();
     } else {

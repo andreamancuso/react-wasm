@@ -26,7 +26,7 @@ public:
 
     void Init(const json& elementDef) override;
 
-    void Render(ReactImgui* view) override;
+    void Render(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 
     void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 

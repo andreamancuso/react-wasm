@@ -3,16 +3,20 @@
 
 #include "shared.h"
 #include "element/element.h"
+
+#include <imgui_internal.h>
+
 #include "reactimgui.h"
 
 using json = nlohmann::json;
 
-Element::Element(ReactImgui* view, const int id, const bool isRoot) {
+Element::Element(ReactImgui* view, const int id, const bool isRoot, const bool cull) {
     m_type = "node";
     m_id = id;
     m_view = view;
     m_handlesChildrenWithinRenderMethod = true;
     m_isRoot = isRoot;
+    m_cull = cull;
     m_layoutNode = std::make_unique<LayoutNode>();
 }
 
@@ -31,7 +35,8 @@ const char* Element::GetType() const {
 std::unique_ptr<Element> Element::makeElement(const json& nodeDef, ReactImgui* view) {
     auto id = nodeDef["id"].template get<int>();
     bool isRoot = (nodeDef.contains("root") && nodeDef["root"].is_boolean()) ? nodeDef["root"].template get<bool>() : false;
-    auto element = std::make_unique<Element>(view, id, isRoot);
+    bool cull = (nodeDef.contains("cull") && nodeDef["cull"].is_boolean()) ? nodeDef["cull"].template get<bool>() : false;
+    auto element = std::make_unique<Element>(view, id, isRoot, cull);
 
     return element;
 };
@@ -91,8 +96,28 @@ const char* Element::GetElementType() {
     return "node";
 };
 
-void Element::HandleChildren(ReactImgui* view) {
-    view->RenderChildren(m_id);
+ImRect Element::GetScrollingAwareViewport() {
+    auto innerClipRect = ImGui::GetCurrentWindow()->InnerClipRect;
+    auto clippedSize = ImVec2(innerClipRect.Max.x - innerClipRect.Min.x, innerClipRect.Max.y - innerClipRect.Min.y);
+    auto viewport = ImRect(ImGui::GetCurrentWindow()->Scroll.x, ImGui::GetCurrentWindow()->Scroll.y, ImGui::GetCurrentWindow()->Scroll.x + clippedSize.x, ImGui::GetCurrentWindow()->Scroll.y + clippedSize.y);
+
+    // printf("%d %d %d %d\n", (int)viewport.Min.x, (int)viewport.Min.y, (int)viewport.Max.x, (int)viewport.Max.y);
+
+    return viewport;
+};
+
+void Element::HandleChildren(ReactImgui* view, const std::optional<ImRect>& parentViewport) {
+    if (parentViewport.has_value()) {
+        // printf("%d has parent viewport\n", m_id);
+
+        view->RenderChildren(m_id, parentViewport);
+    } else if (m_cull) {
+        auto viewport = GetScrollingAwareViewport();
+
+        view->RenderChildren(m_id, viewport);
+    } else {
+        view->RenderChildren(m_id);
+    }
 };
 
 float Element::GetLayoutLeftFromParentNode(YGNodeRef node, float left) {
@@ -127,7 +152,7 @@ float Element::GetLayoutTopFromParentNode(YGNodeRef node, float top) {
     }
 }
 
-void Element::Render(ReactImgui* view) {
+void Element::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImVec2 contentRegionAvail = ImGui::GetContentRegionAvail();
 
     YGNodeRef owner = YGNodeGetOwner(m_layoutNode->m_node);
@@ -145,13 +170,15 @@ void Element::Render(ReactImgui* view) {
 
     ImGui::PushID(m_id);
 
-    ImGui::BeginChild("##", ImVec2(width, height), ImGuiChildFlags_None);
+    const auto size = ImVec2(width, height);
+
+    ImGui::BeginChild("##", size, ImGuiChildFlags_None);
 
     if (m_baseDrawStyle.has_value()) {
         DrawBaseEffects();
     }
 
-    HandleChildren(view);
+    HandleChildren(view, viewport);
 
     ImGui::EndChild();
 
@@ -196,6 +223,36 @@ void Element::DrawBaseEffects() const {
         }
     }
 };
+
+bool Element::ShouldRenderContent(const std::optional<ImRect>& viewport) const {
+    if (m_type != "node") {
+        // TODO: are we sure about this? Limits culling of content to nodes - not their contents. Hence, quite coarse at the moment.
+        return true;
+    }
+
+    const float left = YGNodeLayoutGetLeft(m_layoutNode->m_node);
+    const float top = YGNodeLayoutGetTop(m_layoutNode->m_node);
+    const float width = YGNodeLayoutGetWidth(m_layoutNode->m_node);
+    const float height = YGNodeLayoutGetHeight(m_layoutNode->m_node);
+
+    if (viewport.has_value()) {
+        // printf("%d %d %d %d\n", (int)viewport.value().Min.x, (int)viewport.value().Max.x, (int)viewport.value().Min.y, (int)viewport.value().Max.y);
+        // if (left < viewport.value().Min.x || left > viewport.value().Max.x || top < viewport.value().Min.y || top > viewport.value().Max.y) {
+        if ((left + width) < viewport.value().Min.x || (top + height) < viewport.value().Min.y) {
+            // printf("Not rendering content (before) for %d\n", m_id);
+            // Completely outside (before) the viewport
+            return false;
+        }
+
+        if (left > viewport.value().Max.x || top > viewport.value().Max.y) {
+            // printf("Not rendering content (after) for %d\n", m_id);
+            // Completely outside (after) the viewport
+            return false;
+        }
+    }
+
+    return true;
+}
 
 bool Element::ShouldRender(ReactImgui* view) const {
     return LayoutNode::ShouldRender(m_layoutNode->m_node);

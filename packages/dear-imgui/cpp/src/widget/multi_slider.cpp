@@ -4,7 +4,7 @@
 #include "widget/multi_slider.h"
 #include "reactimgui.h"
 
-void MultiSlider::Render(ReactImgui* view) {
+void MultiSlider::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::PushID(m_id);
 
     if (m_numValues == 2) {

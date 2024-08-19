@@ -5,9 +5,10 @@ export const Node: FunctionComponent<PropsWithChildren & NodeProps> = ({
     root,
     children,
     style,
+    cull,
 }) => {
     return (
-        <node root={root} style={style}>
+        <node root={root} cull={cull} style={style}>
             {children}
         </node>
     );

@@ -149,33 +149,35 @@ void ReactImgui::SetUpElementCreatorFunctions() {
     m_element_init_fn["text-wrap"] = &makeWidget<TextWrap>;
 };
 
-void ReactImgui::RenderElementById(const int id) {
+void ReactImgui::RenderElementById(const int id, const std::optional<ImRect>& viewport) {
     if (m_elements[id]->ShouldRender(this)) {
         m_elements[id]->m_layoutNode->SetDisplay(YGDisplayFlex);
 
-        m_elements[id]->PreRender(this);
-        m_elements[id]->Render(this);
-        m_elements[id]->PostRender(this);
+        if (!viewport.has_value() || m_elements[id]->ShouldRenderContent(viewport)) {
+            m_elements[id]->PreRender(this);
+            m_elements[id]->Render(this, viewport);
+            m_elements[id]->PostRender(this);
+        }
     } else {
         m_elements[id]->m_layoutNode->SetDisplay(YGDisplayNone);
     }
 };
 
-void ReactImgui::RenderElements(const int id) {
+void ReactImgui::RenderElements(const int id, const std::optional<ImRect>& viewport) {
     if (m_elements.contains(id)) {
-        RenderElementById(id);
+        RenderElementById(id, viewport);
     }
 
     if (!m_elements.contains(id) || m_elements[id]->m_handlesChildrenWithinRenderMethod == false) {
-        RenderChildren(id);
+        RenderChildren(id, viewport);
     }
 };
 
-void ReactImgui::RenderChildren(const int id) {
+void ReactImgui::RenderChildren(const int id, const std::optional<ImRect>& viewport) {
     if (m_hierarchy.contains(id)) {
         if (!m_hierarchy[id].empty()) {
             for (const auto& childId : m_hierarchy[id]) {
-                RenderElements(childId);
+                RenderElements(childId, viewport);
             }
         }
     }

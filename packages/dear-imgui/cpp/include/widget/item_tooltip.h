@@ -12,5 +12,5 @@ public:
 
     ItemTooltip(ReactImgui* view, int id, std::optional<WidgetStyle>& style);
 
-    void Render(ReactImgui* view) override;
+    void Render(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 };

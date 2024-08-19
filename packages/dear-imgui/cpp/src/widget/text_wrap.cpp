@@ -6,10 +6,10 @@ TextWrap::TextWrap(ReactImgui* view, const int id, const float& width, std::opti
     m_width = width;
 }
 
-void TextWrap::Render(ReactImgui* view) {
+void TextWrap::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::PushTextWrapPos(m_width);
     
-    Widget::HandleChildren(view);
+    Widget::HandleChildren(view, viewport);
 
     ImGui::PopTextWrapPos();
 };

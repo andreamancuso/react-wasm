@@ -8,9 +8,9 @@ ItemTooltip::ItemTooltip(ReactImgui* view, const int id, std::optional<WidgetSty
     m_handlesChildrenWithinRenderMethod = true;
 }
 
-void ItemTooltip::Render(ReactImgui* view) {
+void ItemTooltip::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     if (ImGui::BeginItemTooltip()) {
-        Widget::HandleChildren(view);
+        Widget::HandleChildren(view, viewport);
 
         ImGui::EndTooltip();
     }

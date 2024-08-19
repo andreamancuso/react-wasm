@@ -1,3 +1,4 @@
+#include <imgui_internal.h>
 #include <sstream>
 #include <nlohmann/json.hpp>
 
@@ -24,10 +25,11 @@ class Element {
         ReactImgui* m_view;
         bool m_handlesChildrenWithinRenderMethod;
         bool m_isRoot;
+        bool m_cull;
         std::unique_ptr<LayoutNode> m_layoutNode;
         std::optional<BaseDrawStyle> m_baseDrawStyle;
 
-        Element(ReactImgui* view, int id, bool isRoot);
+        Element(ReactImgui* view, int id, bool isRoot, bool cull);
 
         static std::unique_ptr<Element> makeElement(const json& val, ReactImgui* view);
 
@@ -37,13 +39,15 @@ class Element {
 
         virtual const char* GetElementType();
 
-        virtual void HandleChildren(ReactImgui* view);
+        virtual void HandleChildren(ReactImgui* view, const std::optional<ImRect>& parentViewport);
+
+        bool ShouldRenderContent(const std::optional<ImRect>& viewport) const;
 
         virtual bool ShouldRender(ReactImgui* view) const;
 
         virtual void PreRender(ReactImgui* view);
 
-        virtual void Render(ReactImgui* view);
+        virtual void Render(ReactImgui* view, const std::optional<ImRect>& viewport);
 
         virtual void PostRender(ReactImgui* view);
 
@@ -52,6 +56,8 @@ class Element {
         void ResetStyle();
 
         void SetStyle(const json& styleDef);
+
+        ImRect GetScrollingAwareViewport();
 
         virtual void Patch(const json& elementPatchDef, ReactImgui* view);
 

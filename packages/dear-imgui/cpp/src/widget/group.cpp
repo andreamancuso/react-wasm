@@ -5,8 +5,8 @@ Group::Group(ReactImgui* view, const int id, std::optional<WidgetStyle>& style) 
     m_handlesChildrenWithinRenderMethod = true;
 }
 
-void Group::Render(ReactImgui* view) {
+void Group::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::BeginGroup();
-    Widget::HandleChildren(view);
+    Widget::HandleChildren(view, viewport);
     ImGui::EndGroup();
 };

@@ -39,7 +39,7 @@ class BulletText final : public Text {
             m_type = "bullet-text";
         }
 
-        void Render(ReactImgui* view) override;
+        void Render(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 };
 
 class UnformattedText final : public Text {
@@ -50,7 +50,7 @@ class UnformattedText final : public Text {
             m_type = "unformatted-text";
         }
 
-        void Render(ReactImgui* view) override;
+        void Render(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 };
 
 class DisabledText final : public Text {
@@ -61,5 +61,5 @@ class DisabledText final : public Text {
             m_type = "disabled-text";
         }
 
-        void Render(ReactImgui* view) override;
+        void Render(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 };

@@ -22,7 +22,7 @@ public:
 
     Separator(ReactImgui* view, const int id, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {}
 
-    void Render(ReactImgui* view) override;
+    void Render(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 
     void Init(const json& elementDef) override {
         Element::Init(elementDef);

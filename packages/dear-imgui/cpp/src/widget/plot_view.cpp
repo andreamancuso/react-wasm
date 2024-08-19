@@ -11,7 +11,7 @@ bool PlotView::HasCustomHeight() {
     return false;
 }
 
-void PlotView::Render(ReactImgui* view) {
+void PlotView::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     // static int e = 0;
     // ImGui::RadioButton("line plot", &e, 0);
     // ImGui::SameLine();

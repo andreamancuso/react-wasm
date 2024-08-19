@@ -13,7 +13,7 @@ bool MapView::HasCustomHeight() {
     return false;
 }
 
-void MapView::Render(ReactImgui* view) {
+void MapView::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     if (m_textures.contains(0)) {
 
         auto imageSize = ImVec2(YGNodeLayoutGetWidth(m_layoutNode->m_node), YGNodeLayoutGetHeight(m_layoutNode->m_node));

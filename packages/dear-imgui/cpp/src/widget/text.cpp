@@ -20,7 +20,7 @@ std::unique_ptr<BulletText> BulletText::makeWidget(const json& widgetDef, std::o
     // throw std::invalid_argument("Invalid JSON data");
 };
 
-void BulletText::Render(ReactImgui* view) {
+void BulletText::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::BulletText("%s", m_text.c_str());
 };
 
@@ -33,7 +33,7 @@ std::unique_ptr<UnformattedText> UnformattedText::makeWidget(const json& widgetD
     // throw std::invalid_argument("Invalid JSON data");
 };
 
-void UnformattedText::Render(ReactImgui* view) {
+void UnformattedText::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::TextUnformatted(m_text.c_str());
 };
 
@@ -46,6 +46,6 @@ std::unique_ptr<DisabledText> DisabledText::makeWidget(const json& widgetDef, st
     // throw std::invalid_argument("Invalid JSON data");
 };
 
-void DisabledText::Render(ReactImgui* view) {
+void DisabledText::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::TextDisabled("%s", m_text.c_str());
 };

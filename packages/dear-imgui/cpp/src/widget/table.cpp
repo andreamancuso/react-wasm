@@ -1,7 +1,7 @@
 #include "widget/table.h"
 #include "reactimgui.h"
 
-void Table::Render(ReactImgui* view) {
+void Table::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::PushID(m_id);
 
     ImGui::BeginGroup();

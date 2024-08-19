@@ -69,7 +69,7 @@ class Table final : public StyledWidget {
 
         static YGSize Measure(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode);
 
-        void Render(ReactImgui* view) override;
+        void Render(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 
         void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 

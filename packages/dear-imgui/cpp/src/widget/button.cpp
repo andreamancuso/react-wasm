@@ -21,7 +21,7 @@ bool Button::HasCustomHeight() {
     return false;
 }
 
-void Button::Render(ReactImgui* view) {
+void Button::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImGui::PushID(m_id);
 
     ImVec2 size = ImVec2(YGNodeLayoutGetWidth(m_layoutNode->m_node), YGNodeLayoutGetHeight(m_layoutNode->m_node));
