@@ -61,6 +61,13 @@ export enum ImGuiCol {
     COUNT,
 }
 
+export enum ImPlotScale {
+    Linear,
+    Time,
+    Log10,
+    SymLog,
+}
+
 export enum ImGuiStyleVar {
     Alpha, // float     Alpha
     DisabledAlpha, // float     DisabledAlpha

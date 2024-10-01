@@ -17,9 +17,11 @@ void PlotView::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     // ImGui::SameLine();
     // ImGui::RadioButton("scatter plot", &e, 1);
 
+    ImGui::PushID(m_id);
+
     auto size = ImVec2(YGNodeLayoutGetWidth(m_layoutNode->m_node), YGNodeLayoutGetHeight(m_layoutNode->m_node));
 
-    if (ImPlot::BeginPlot("Line Plots", size, ImPlotFlags_NoMenus | ImPlotFlags_NoMouseText | ImPlotFlags_NoLegend | ImPlotFlags_NoTitle)) {
+    if (ImPlot::BeginPlot("plot", size, ImPlotFlags_NoMenus | ImPlotFlags_NoMouseText | ImPlotFlags_NoLegend | ImPlotFlags_NoTitle)) {
         if (m_axisAutoFit) {
             ImPlot::SetupAxes("x","y", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
         } else {
@@ -27,6 +29,9 @@ void PlotView::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
             // TODO: compute axes limits?
             // ImPlot::SetupAxesLimits(0,15000,0,1000);
         }
+
+        ImPlot::SetupAxisScale(ImAxis_X1, m_xAxisScale);
+        ImPlot::SetupAxisScale(ImAxis_Y1, m_yAxisScale);
 
         if (m_xAxisDecimalDigits > 0) {
             ImPlot::SetupAxisFormat(ImAxis_X1, axisValueFormatter, (void*)m_xAxisDecimalDigits);
@@ -47,6 +52,8 @@ void PlotView::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
         // }
         ImPlot::EndPlot();
     }
+
+    ImGui::PopID();
 };
 
 void PlotView::Patch(const json& widgetPatchDef, ReactImgui* view) {

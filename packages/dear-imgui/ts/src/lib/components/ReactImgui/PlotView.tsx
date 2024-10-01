@@ -11,7 +11,14 @@ export type PlotViewImperativeHandle = {
 
 export const PlotView = forwardRef<PlotViewImperativeHandle, WidgetPropsMap["PlotView"]>(
     (
-        { xAxisDecimalDigits, yAxisDecimalDigits, axisAutoFit, style }: WidgetPropsMap["PlotView"],
+        {
+            xAxisDecimalDigits,
+            yAxisDecimalDigits,
+            xAxisScale,
+            yAxisScale,
+            axisAutoFit,
+            style,
+        }: WidgetPropsMap["PlotView"],
         ref,
     ) => {
         const widgetRegistratonService = useWidgetRegistrationService();
@@ -50,6 +57,8 @@ export const PlotView = forwardRef<PlotViewImperativeHandle, WidgetPropsMap["Plo
                 id={idRef.current}
                 xAxisDecimalDigits={xAxisDecimalDigits}
                 yAxisDecimalDigits={yAxisDecimalDigits}
+                xAxisScale={xAxisScale}
+                yAxisScale={yAxisScale}
                 axisAutoFit={axisAutoFit}
                 style={style}
             />

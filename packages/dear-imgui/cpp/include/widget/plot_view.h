@@ -10,6 +10,9 @@ private:
     int m_xAxisDecimalDigits;
     int m_yAxisDecimalDigits;
 
+    ImPlotScale m_xAxisScale = ImPlotScale_Linear;
+    ImPlotScale m_yAxisScale = ImPlotScale_Linear;
+
     int m_dataPointsLimit = 6000;
 
     bool m_axisAutoFit;
@@ -19,6 +22,8 @@ public:
         auto id = widgetDef["id"].template get<int>();
         int xAxisDecimalDigits = 0;
         int yAxisDecimalDigits = 0;
+        ImPlotScale xAxisScale = ImPlotScale_Linear;
+        ImPlotScale yAxisScale = ImPlotScale_Linear;
         bool axisAutoFit = false;
 
         if (widgetDef.contains("xAxisDecimalDigits") && widgetDef.contains("yAxisDecimalDigits")) {
@@ -26,11 +31,19 @@ public:
             yAxisDecimalDigits = widgetDef["yAxisDecimalDigits"].template get<int>();
         }
 
+        if (widgetDef.contains("xAxisScale")) {
+            xAxisScale = widgetDef["xAxisScale"].template get<int>();
+        }
+
+        if (widgetDef.contains("yAxisScale")) {
+            yAxisScale = widgetDef["yAxisScale"].template get<int>();
+        }
+
         if (widgetDef.contains("axisAutoFit")) {
             axisAutoFit = widgetDef["axisAutoFit"].template get<bool>();
         }
 
-        return std::make_unique<PlotView>(view, id, xAxisDecimalDigits, yAxisDecimalDigits, axisAutoFit, maybeStyle);
+        return std::make_unique<PlotView>(view, id, xAxisDecimalDigits, yAxisDecimalDigits, xAxisScale, yAxisScale, axisAutoFit, maybeStyle);
 
         // throw std::invalid_argument("Invalid JSON data");
     }
@@ -47,10 +60,12 @@ public:
 
     bool HasCustomHeight() override;
 
-    PlotView(ReactImgui* view, const int id, const int xAxisDecimalDigits, const int yAxisDecimalDigits, const bool axisAutoFit, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
+    PlotView(ReactImgui* view, const int id, const int xAxisDecimalDigits, const int yAxisDecimalDigits, const ImPlotScale xAxisScale, const ImPlotScale yAxisScale, const bool axisAutoFit, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
         m_type = "plot-view";
         m_xAxisDecimalDigits = xAxisDecimalDigits;
         m_yAxisDecimalDigits = yAxisDecimalDigits;
+        m_xAxisScale = xAxisScale;
+        m_yAxisScale = yAxisScale;
         m_axisAutoFit = axisAutoFit;
 
         m_xValues.reserve(m_dataPointsLimit);
@@ -61,9 +76,9 @@ public:
 
     void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
-    bool HasInternalOps();
+    bool HasInternalOps() override;
 
-    void HandleInternalOp(const json& opDef);
+    void HandleInternalOp(const json& opDef) override;
 
     void AppendData(const double x, const double y) {
         if (m_xValues.size() >= m_dataPointsLimit) {
