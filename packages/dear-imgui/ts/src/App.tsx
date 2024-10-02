@@ -4,11 +4,12 @@ import { ReactImgui } from "./lib/components/ReactImgui/components";
 import getWasmModule from "./lib/wasm/reactDearImgui.mjs";
 // @ts-ignore
 import wasmDataPackage from "./lib/wasm/reactDearImgui.data";
-import { ImGuiDemo } from "./lib";
+// import { ImGuiDemo } from "./lib";
 import { GetWasmModule, ImGuiCol } from "./lib/wasm/wasm-app-types";
 import { ImGuiStyleForPatching } from "./lib/stylesheet/imgui-style";
 
 import "./App.css";
+import { TradingGuiDemo } from "./lib/components/TradingGuiDemo/TradingGuiDemo";
 
 export const themeColors = {
     black: "#1a1a1a",
@@ -110,7 +111,8 @@ function App() {
                 defaultFont={defaultFont}
                 styleOverrides={styleOverrides}
             >
-                <ImGuiDemo />
+                {/* <ImGuiDemo /> */}
+                <TradingGuiDemo />
             </ReactImgui>
         </div>
     );
