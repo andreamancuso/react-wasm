@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { subMinutes } from "date-fns";
-
+import { Subscribe } from "@react-rxjs/core";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { useWidgetRegistrationService } from "src/lib/hooks";
 import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
@@ -11,23 +11,27 @@ import { Plots } from "./Plots/Plots";
 import { TreeViewItem } from "../ReactImgui/TreeView";
 import { useStore } from "./store";
 import { CryptoAssetsList } from "./CryptoAssetsList/CryptoAssetsList";
+import { DataService } from "./dataService";
+import { DataServiceContext } from "./dataServiceContext";
+import { cryptoSymbols } from "./cryptoSymbols";
 
 const componentMap = {
     cryptoAssetsList: CryptoAssetsList,
-    plots: Plots,
+    // plots: Plots,
 };
+
+const dataService = new DataService();
 
 type ComponentKeys = keyof typeof componentMap;
 
 export const TradingGuiDemo = () => {
     const symbols = useStore((state) => state.symbols);
     const setCryptoAssets = useStore((state) => state.setCryptoAssets);
-    const setCryptoQuote = useStore((state) => state.setCryptoQuote);
 
     const socketRef = useRef<WebSocket>();
     const widgetRegistratonService = useWidgetRegistrationService();
 
-    const [selectedItemIds, setSelectedItemIds] = useState<ComponentKeys[]>(["plots"]);
+    const [selectedItemIds, setSelectedItemIds] = useState<ComponentKeys[]>(["cryptoAssetsList"]);
 
     const treeViewItems: TreeViewItem[] = useMemo(() => {
         return [
@@ -108,27 +112,20 @@ export const TradingGuiDemo = () => {
         socketRef.current.addEventListener("message", (event) => {
             const data = JSON.parse(event.data);
 
-            console.log(data);
-
             if (data.cryptoAssets) {
-                setCryptoAssets(data.cryptoAssets);
+                // todo: remove filtering
+                setCryptoAssets(
+                    data.cryptoAssets.filter((asset: any) => cryptoSymbols.includes(asset.symbol)),
+                );
             } else if (data.cryptoQuote) {
-                setCryptoQuote(data.cryptoQuote);
+                dataService.addCryptoQuote(data.cryptoQuote);
+            } else if (data.latestCryptoQuotes) {
+                // console.log(data.latestCryptoQuotes);
+
+                Object.entries(data.latestCryptoQuotes).forEach(([symbol, cryptoQuote]) =>
+                    dataService.addCryptoQuote({ ...(cryptoQuote as any), S: symbol }),
+                );
             }
-
-            // if (Array.isArray(data)) {
-            //     console.log(data.map(({ symbol }) => symbol));
-            // } else {
-            //     const ref = plotRefs[data.S];
-
-            //     if (ref && ref.current) {
-            //         const timestamp = Number(new Date(data.Timestamp)) / 1000;
-
-            //         console.log(timestamp);
-
-            //         ref.current.appendData(timestamp, data.BidPrice);
-            //     }
-            // }
         });
     }, [setCryptoAssets]);
 
@@ -141,7 +138,7 @@ export const TradingGuiDemo = () => {
                 symbols,
             });
 
-            console.log(message);
+            // console.log(message);
 
             socketRef.current.send(message);
         }
@@ -161,7 +158,7 @@ export const TradingGuiDemo = () => {
                 options: { start, end },
             });
 
-            console.log(message);
+            // console.log(message);
 
             socketRef.current.send(message);
         }
@@ -181,7 +178,7 @@ export const TradingGuiDemo = () => {
                 options: { start, end },
             });
 
-            console.log(message);
+            // console.log(message);
 
             socketRef.current.send(message);
         }
@@ -201,22 +198,26 @@ export const TradingGuiDemo = () => {
                 // options: { start, end },
             });
 
-            console.log(message);
+            // console.log(message);
 
             socketRef.current.send(message);
         }
     }, [symbols]);
 
-    const getCryptoAssets = useCallback(() => {
-        if (socketRef.current) {
-            const message = JSON.stringify({
-                passkey: "",
-                action: "getCryptoAssets",
-            });
+    const getCryptoAssets = useCallback(
+        (symbols?: string[]) => {
+            if (socketRef.current) {
+                const message = JSON.stringify({
+                    passkey: "",
+                    action: "getCryptoAssets",
+                    symbols,
+                });
 
-            socketRef.current.send(message);
-        }
-    }, [symbols]);
+                socketRef.current.send(message);
+            }
+        },
+        [symbols],
+    );
 
     const debugModeBtnClicked = useCallback(() => {
         widgetRegistratonService.setDebug(true);
@@ -273,8 +274,12 @@ export const TradingGuiDemo = () => {
                         onToggleItemSelection={onToggleItemSelection}
                     />
                 </ReactImgui.Node>
-                <ReactImgui.Node style={styleSheet.contentNode} cull>
-                    {Component && <Component />}
+                <ReactImgui.Node style={styleSheet.contentNode} cull={false}>
+                    {Component && (
+                        <DataServiceContext.Provider value={dataService}>
+                            <Component />
+                        </DataServiceContext.Provider>
+                    )}
                 </ReactImgui.Node>
             </ReactImgui.Node>
 

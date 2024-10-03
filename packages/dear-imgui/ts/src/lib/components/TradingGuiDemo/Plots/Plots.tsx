@@ -23,8 +23,6 @@ type Props = {};
 export const Plots = ({}: Props) => {
     const symbols = useStore((state) => state.symbols);
 
-    const cryptoQuotes;
-
     const plotRefs: PlotRefs = symbols.reduce((acc, item) => {
         acc[item] = useRef<PlotViewImperativeHandle>(null);
 
