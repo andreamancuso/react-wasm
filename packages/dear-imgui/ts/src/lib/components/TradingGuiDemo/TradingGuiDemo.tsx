@@ -14,9 +14,11 @@ import { CryptoAssetsList } from "./CryptoAssetsList/CryptoAssetsList";
 import { DataService } from "./dataService";
 import { DataServiceContext } from "./dataServiceContext";
 import { cryptoSymbols } from "./cryptoSymbols";
+import { CryptoAssetPanels } from "./CryptoAssetPanels/CryptoAssetPanels";
 
 const componentMap = {
-    cryptoAssetsList: CryptoAssetsList,
+    cryptoAssetPanels: CryptoAssetPanels,
+    cryptoAssetList: CryptoAssetsList,
     // plots: Plots,
 };
 
@@ -31,13 +33,17 @@ export const TradingGuiDemo = () => {
     const socketRef = useRef<WebSocket>();
     const widgetRegistratonService = useWidgetRegistrationService();
 
-    const [selectedItemIds, setSelectedItemIds] = useState<ComponentKeys[]>(["cryptoAssetsList"]);
+    const [selectedItemIds, setSelectedItemIds] = useState<ComponentKeys[]>(["cryptoAssetPanels"]);
 
     const treeViewItems: TreeViewItem[] = useMemo(() => {
         return [
             {
-                itemId: "cryptoAssetsList",
-                label: "Crypto Assets List",
+                itemId: "cryptoAssetPanels",
+                label: "Crypto Asset Panels",
+            },
+            {
+                itemId: "cryptoAssetList",
+                label: "Crypto Asset List",
             },
             {
                 itemId: "plots",
@@ -125,12 +131,14 @@ export const TradingGuiDemo = () => {
                 Object.entries(data.latestCryptoQuotes).forEach(([symbol, cryptoQuote]) =>
                     dataService.addCryptoQuote({ ...(cryptoQuote as any), S: symbol }),
                 );
+            } else if (data.cryptoSnapshots) {
+                dataService.addCryptoSnapshot(data.cryptoSnapshots);
+                // console.log(data.cryptoSnapshots);
             }
         });
     }, [setCryptoAssets]);
 
     const subscribeToLiveData = useCallback(() => {
-        // BTC/USD,ETH/USD
         if (socketRef.current) {
             const message = JSON.stringify({
                 passkey: "",
@@ -138,14 +146,11 @@ export const TradingGuiDemo = () => {
                 symbols,
             });
 
-            // console.log(message);
-
             socketRef.current.send(message);
         }
     }, [symbols]);
 
     const getLatestQuotes = useCallback(() => {
-        // BTC/USD,ETH/USD
         if (socketRef.current) {
             const currentDate = new Date();
             const end = currentDate.toISOString();
@@ -158,14 +163,11 @@ export const TradingGuiDemo = () => {
                 options: { start, end },
             });
 
-            // console.log(message);
-
             socketRef.current.send(message);
         }
     }, [symbols]);
 
     const getCryptoQuotes = useCallback(() => {
-        // BTC/USD,ETH/USD
         if (socketRef.current) {
             const currentDate = new Date();
             const end = currentDate.toISOString();
@@ -178,27 +180,29 @@ export const TradingGuiDemo = () => {
                 options: { start, end },
             });
 
-            // console.log(message);
+            socketRef.current.send(message);
+        }
+    }, [symbols]);
+
+    const getCryptoSnapshots = useCallback(() => {
+        if (socketRef.current) {
+            const message = JSON.stringify({
+                passkey: "",
+                action: "getCryptoSnapshots",
+                symbols,
+            });
 
             socketRef.current.send(message);
         }
     }, [symbols]);
 
     const getLatestCryptoQuotes = useCallback(() => {
-        // BTC/USD,ETH/USD
         if (socketRef.current) {
-            // const currentDate = new Date();
-            // const end = currentDate.toISOString();
-            // const start = subMinutes(currentDate, 1);
-
             const message = JSON.stringify({
                 passkey: "",
                 action: "getLatestCryptoQuotes",
                 symbols,
-                // options: { start, end },
             });
-
-            // console.log(message);
 
             socketRef.current.send(message);
         }
@@ -258,8 +262,9 @@ export const TradingGuiDemo = () => {
                 <ReactImgui.Button onClick={connect} label="Connect" />
                 <ReactImgui.Button onClick={subscribeToLiveData} label="Subscribe to live data" />
                 <ReactImgui.Button onClick={getCryptoAssets} label="Get Crypto Assets" />
-                <ReactImgui.Button onClick={getLatestQuotes} label="Get Latest Quotes" />
+                {/* <ReactImgui.Button onClick={getLatestQuotes} label="Get Latest Quotes" /> */}
                 <ReactImgui.Button onClick={getCryptoQuotes} label="Get Crypto Quotes" />
+                <ReactImgui.Button onClick={getCryptoSnapshots} label="Get Crypto Snapshots" />
                 <ReactImgui.Button
                     onClick={getLatestCryptoQuotes}
                     label="Get Latest Crypto Quotes"

@@ -1,14 +1,42 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import RWStyleSheet from "src/lib/stylesheet/stylesheet";
 import { useStore } from "../store";
-import { CryptoQuotePrice } from "./CryptoQuotePrice";
-import { HelpMarker } from "../../ImGuiDemo/HelpMarker/HelpMarker";
+import { TableImperativeHandle } from "../../ReactImgui/Table";
+import { useDataService } from "../dataServiceContext";
 
 type Props = {};
 
 export const CryptoAssetsList = ({}: Props) => {
+    const dataService = useDataService();
+    const tableRef = useRef<TableImperativeHandle>(null);
     const cryptoAssets = useStore((state) => state.cryptoAssets);
+
+    const tableColumns = useMemo(
+        () => [
+            {
+                heading: "Symbol",
+                fieldId: "symbol",
+            },
+            {
+                heading: "ASK",
+                fieldId: "askPrice",
+            },
+            {
+                heading: "Change",
+                fieldId: "askChange",
+            },
+            {
+                heading: "BID",
+                fieldId: "bidPrice",
+            },
+            {
+                heading: "Change",
+                fieldId: "bidChange",
+            },
+        ],
+        [],
+    );
 
     const styleSheet = useMemo(
         () =>
@@ -38,23 +66,36 @@ export const CryptoAssetsList = ({}: Props) => {
         [],
     );
 
-    return (
-        <ReactImgui.Node style={styleSheet.mainWrapperNode}>
-            {cryptoAssets.map((asset) => {
-                return (
-                    <ReactImgui.Node key={asset.id} style={styleSheet.asset}>
-                        <ReactImgui.UnformattedText style={styleSheet.symbol} text={asset.symbol} />
-                        {/* <ReactImgui.ItemTooltip>
-                            <ReactImgui.UnformattedText text={asset.name} />
-                        </ReactImgui.ItemTooltip> */}
+    useEffect(() => {
+        const subscription = dataService
+            .getCryptoSnapshots()
+            // .pipe(filter((cryptoQuote) => cryptoQuote.S === symbol))
+            .subscribe((snapshots) => {
+                const data = Object.entries(snapshots).map(([symbol, snapshot]) => ({
+                    symbol,
+                    askPrice: snapshot.LatestQuote.AskPrice.toFixed(6),
+                    bidPrice: snapshot.LatestQuote.BidPrice.toFixed(6),
+                    // todo: totally unsure here
+                    askChange: (snapshot.LatestQuote.AskPrice - snapshot.DailyBar.Open).toFixed(6),
+                    bidChange: (snapshot.LatestQuote.BidPrice - snapshot.DailyBar.Open).toFixed(6),
+                }));
+                data.sort((a, b) => {
+                    if (a.symbol < b.symbol) {
+                        return -1;
+                    } else if (a.symbol > b.symbol) {
+                        return 1;
+                    }
 
-                        {/** Fix tooltip! */}
-                        {/* <HelpMarker text={asset.name} /> */}
+                    return 0;
+                });
 
-                        <CryptoQuotePrice symbol={asset.symbol} />
-                    </ReactImgui.Node>
-                );
-            })}
-        </ReactImgui.Node>
-    );
+                tableRef.current?.setTableData(data);
+            });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [dataService]);
+
+    return <ReactImgui.Table ref={tableRef} columns={tableColumns} />;
 };

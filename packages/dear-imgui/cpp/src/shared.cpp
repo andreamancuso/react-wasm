@@ -413,3 +413,25 @@ bool LoadTexture(WGPUDevice device, const void* data, const int numBytes, Textur
 
     return true;
 }
+
+TableData parseJsonTableData(const json& data) {
+    auto tableData = TableData();
+
+    if (data.is_array()) {
+        for (auto& [parsedItemKey, parsedRow] : data.items()) {
+            if (parsedRow.is_object()) {
+                auto row = TableRow();
+
+                for (auto& [parsedRowFieldKey, parsedRowFieldValue] : parsedRow.items()) {
+                    if (parsedRowFieldValue.is_string()) {
+                        row[parsedRowFieldKey] = parsedRowFieldValue.template get<std::string>();
+                    }
+                }
+
+                tableData.push_back(row);
+            }
+        }
+    }
+
+    return tableData;
+}

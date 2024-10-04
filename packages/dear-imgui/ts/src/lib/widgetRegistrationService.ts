@@ -80,6 +80,21 @@ export class WidgetRegistrationService {
         }
     }
 
+    setTableData(id: string, data: any[]) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            try {
+                this.wasmModule.elementInternalOp(
+                    fabricWidgetId,
+                    JSON.stringify({ op: "setData", data }),
+                );
+            } catch (error) {
+                // todo: propagate this?
+                console.error(error);
+            }
+        }
+    }
+
     appendDataToPlotView(id: string, x: number, y: number) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
