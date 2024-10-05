@@ -15,6 +15,7 @@ import { DataService } from "./dataService";
 import { DataServiceContext } from "./dataServiceContext";
 import { cryptoSymbols } from "./cryptoSymbols";
 import { CryptoAssetPanels } from "./CryptoAssetPanels/CryptoAssetPanels";
+import { theme2Colors } from "src/lib/stylesheet/themes";
 
 const componentMap = {
     cryptoAssetPanels: CryptoAssetPanels,
@@ -89,6 +90,19 @@ export const TradingGuiDemo = () => {
                     position: { right: 15, bottom: 15 },
                     flexDirection: "row",
                     gap: { column: 10 },
+                },
+                button: {
+                    colors: {
+                        [ImGuiCol.Text]: theme2Colors.green,
+                        [ImGuiCol.Border]: theme2Colors.green,
+                    },
+                    // borderColor: theme2Colors.green,
+                    // borderThickness: 1,
+                    padding: { all: 8 },
+                    vars: {
+                        [ImGuiStyleVar.FrameBorderSize]: 1,
+                        [ImGuiStyleVar.FrameRounding]: 5,
+                    },
                 },
             }),
         [],
@@ -238,6 +252,8 @@ export const TradingGuiDemo = () => {
     }, []);
 
     useEffect(() => {
+        return;
+
         connect();
 
         setTimeout(() => {
@@ -259,15 +275,32 @@ export const TradingGuiDemo = () => {
                     gap: { column: 15 },
                 }}
             >
-                <ReactImgui.Button onClick={connect} label="Connect" />
-                <ReactImgui.Button onClick={subscribeToLiveData} label="Subscribe to live data" />
-                <ReactImgui.Button onClick={getCryptoAssets} label="Get Crypto Assets" />
+                <ReactImgui.Button onClick={connect} label="Connect" style={styleSheet.button} />
+                <ReactImgui.Button
+                    onClick={subscribeToLiveData}
+                    label="Subscribe to live data"
+                    style={styleSheet.button}
+                />
+                <ReactImgui.Button
+                    onClick={getCryptoAssets}
+                    label="Get Crypto Assets"
+                    style={styleSheet.button}
+                />
                 {/* <ReactImgui.Button onClick={getLatestQuotes} label="Get Latest Quotes" /> */}
-                <ReactImgui.Button onClick={getCryptoQuotes} label="Get Crypto Quotes" />
-                <ReactImgui.Button onClick={getCryptoSnapshots} label="Get Crypto Snapshots" />
+                <ReactImgui.Button
+                    onClick={getCryptoQuotes}
+                    label="Get Crypto Quotes"
+                    style={styleSheet.button}
+                />
+                <ReactImgui.Button
+                    onClick={getCryptoSnapshots}
+                    label="Get Crypto Snapshots"
+                    style={styleSheet.button}
+                />
                 <ReactImgui.Button
                     onClick={getLatestCryptoQuotes}
                     label="Get Latest Crypto Quotes"
+                    style={styleSheet.button}
                 />
             </ReactImgui.Node>
 
