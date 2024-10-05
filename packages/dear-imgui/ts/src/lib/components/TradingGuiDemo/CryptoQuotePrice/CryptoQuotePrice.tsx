@@ -5,6 +5,8 @@ import { useDataService } from "../dataServiceContext";
 import { filter } from "rxjs";
 import { interval, intervalToDuration, formatDuration, differenceInMilliseconds } from "date-fns";
 import { CryptoQuoteWithSymbol } from "../dataService";
+import { ImGuiCol } from "src/lib/wasm/wasm-app-types";
+import { theme2Colors } from "src/lib/stylesheet/themes";
 
 type Props = { symbol: string };
 
@@ -68,9 +70,19 @@ export const CryptoQuotePrice = ({ symbol }: Props) => {
                 price: {
                     width: 100,
                     height: "auto",
-                    borderColor: "#000",
-                    borderThickness: 1,
+                    // borderColor: "#000",
+                    // borderThickness: 1,
                     alignItems: "center",
+                },
+                ask: {
+                    colors: {
+                        [ImGuiCol.Text]: theme2Colors.red,
+                    },
+                },
+                bid: {
+                    colors: {
+                        [ImGuiCol.Text]: theme2Colors.green,
+                    },
                 },
             }),
         [],
@@ -80,23 +92,25 @@ export const CryptoQuotePrice = ({ symbol }: Props) => {
         <>
             <ReactImgui.Node style={styleSheet.pricesWrapper}>
                 <ReactImgui.Node style={styleSheet.price}>
-                    <ReactImgui.UnformattedText text="ASK" />
+                    <ReactImgui.UnformattedText text="ASK" style={styleSheet.ask} />
                     <ReactImgui.UnformattedText
                         text={
                             typeof data?.quote?.AskPrice === "number"
                                 ? data?.quote?.AskPrice.toFixed(6)
                                 : "n/a"
                         }
+                        style={styleSheet.ask}
                     />
                 </ReactImgui.Node>
                 <ReactImgui.Node style={styleSheet.price}>
-                    <ReactImgui.UnformattedText text="BID" />
+                    <ReactImgui.UnformattedText text="BID" style={styleSheet.bid} />
                     <ReactImgui.UnformattedText
                         text={
                             typeof data?.quote?.BidPrice === "number"
                                 ? data?.quote?.BidPrice.toFixed(6)
                                 : "n/a"
                         }
+                        style={styleSheet.bid}
                     />
                 </ReactImgui.Node>
             </ReactImgui.Node>

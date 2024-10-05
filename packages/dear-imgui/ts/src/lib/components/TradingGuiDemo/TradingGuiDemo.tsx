@@ -82,7 +82,7 @@ export const TradingGuiDemo = () => {
                     padding: { all: 5 },
                 },
                 title: {
-                    colors: { [ImGuiCol.Text]: "#ff6e59" },
+                    colors: { [ImGuiCol.Text]: theme2Colors.green },
                     font: { name: "roboto-regular", size: 24 },
                 },
                 debugButton: {
@@ -252,8 +252,6 @@ export const TradingGuiDemo = () => {
     }, []);
 
     useEffect(() => {
-        return;
-
         connect();
 
         setTimeout(() => {
