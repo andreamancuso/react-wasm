@@ -1,5 +1,8 @@
 #include "styled_widget.h"
 
+using TableRow = std::unordered_map<std::string, std::string, StringHash, std::equal_to<>>;
+using TableData = std::vector<TableRow>;
+
 // todo: for those use cases where we expect large quantities of data, should we preallocate?
 class Table final : public StyledWidget {
     using TableColumn = struct {
@@ -68,6 +71,8 @@ class Table final : public StyledWidget {
         }
 
         static YGSize Measure(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode);
+
+        static TableData parseTableData(const json& jsonTableData);
 
         void Render(ReactImgui* view, const std::optional<ImRect>& viewport) override;
 

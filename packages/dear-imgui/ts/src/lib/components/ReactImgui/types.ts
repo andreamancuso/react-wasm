@@ -2,7 +2,7 @@ import { FunctionComponent, JSXElementConstructor, ReactElement, SyntheticEvent 
 import { ReactImgui } from "./components";
 import { MainComponentProps } from "../ReactImgui";
 import { StyleRules } from "src/lib/stylesheet/stylesheet";
-import { ImVec2 } from "src/lib/wasm/wasm-app-types";
+import { ImPlotScale, ImVec2 } from "src/lib/wasm/wasm-app-types";
 import { YogaStyle } from "src/lib/stylesheet/yoga-style";
 import { BaseDrawStyle } from "src/lib/stylesheet/base-draw-style";
 import { TreeViewItem } from "./TreeView";
@@ -24,6 +24,14 @@ export type WasmDeps = {
 export type Primitive = string | number | boolean;
 
 export type SliderTypes = "default" | "angle";
+
+export type PlotCandlestickDataItem = {
+    date: number;
+    open: number;
+    close: number;
+    low: number;
+    high: number;
+};
 
 export type FontDef = {
     name: string;
@@ -114,9 +122,16 @@ export type WidgetPropsMap = {
         decimalDigits?: number;
         onChange?: (event: MultiSliderChangeEvent<number>) => void;
     };
-    PlotView: WidgetStyleProps & {
+    PlotCandlestick: WidgetStyleProps & {
+        bullColor?: string;
+        bearColor?: string;
+        axisAutoFit?: boolean;
+    };
+    PlotLine: WidgetStyleProps & {
         xAxisDecimalDigits?: number;
         yAxisDecimalDigits?: number;
+        xAxisScale?: ImPlotScale;
+        yAxisScale?: ImPlotScale;
         axisAutoFit?: boolean;
     };
     Separator: WidgetStyleProps;
@@ -178,7 +193,8 @@ export type WidgetsRequiringId =
     | "InputText"
     | "MapView"
     | "MultiSlider"
-    | "PlotView"
+    | "PlotLine"
+    | "PlotCandlestick"
     | "Slider"
     | "Table"
     | "TabBar"

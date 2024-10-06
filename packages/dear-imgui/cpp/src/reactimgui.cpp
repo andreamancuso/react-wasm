@@ -28,7 +28,8 @@
 #include "widget/item_tooltip.h"
 #include "widget/map_view.h"
 #include "widget/multi_slider.h"
-#include "widget/plot_view.h"
+#include "widget/plot_candlestick.h"
+#include "widget/plot_line.h"
 #include "widget/separator.h"
 #include "widget/separator_text.h"
 #include "widget/slider.h"
@@ -131,7 +132,8 @@ void ReactImgui::SetUpElementCreatorFunctions() {
     m_element_init_fn["clipped-multi-line-text-renderer"] = &makeWidget<ClippedMultiLineTextRenderer>;
     m_element_init_fn["di-image"] = &makeWidget<Image>;
     m_element_init_fn["map-view"] = &makeWidget<MapView>;
-    m_element_init_fn["plot-view"] = &makeWidget<PlotView>;
+    m_element_init_fn["plot-line"] = &makeWidget<PlotLine>;
+    m_element_init_fn["plot-candlestick"] = &makeWidget<PlotCandlestick>;
 
     m_element_init_fn["item-tooltip"] = &makeWidget<ItemTooltip>;
 

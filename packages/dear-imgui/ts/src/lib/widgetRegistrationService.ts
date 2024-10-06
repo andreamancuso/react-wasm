@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { MainModule } from "./wasm/wasm-app-types";
 import { ImGuiStyle } from "./stylesheet/imgui-style";
+import { PlotCandlestickDataItem } from "./components/ReactImgui/types";
 
 export class WidgetRegistrationService {
     private wasmModule: MainModule;
@@ -80,7 +81,22 @@ export class WidgetRegistrationService {
         }
     }
 
-    appendDataToPlotView(id: string, x: number, y: number) {
+    setTableData(id: string, data: any[]) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            try {
+                this.wasmModule.elementInternalOp(
+                    fabricWidgetId,
+                    JSON.stringify({ op: "setData", data }),
+                );
+            } catch (error) {
+                // todo: propagate this?
+                console.error(error);
+            }
+        }
+    }
+
+    appendDataToPlotLine(id: string, x: number, y: number) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
             try {
@@ -95,7 +111,7 @@ export class WidgetRegistrationService {
         }
     }
 
-    setPlotViewAxesDecimalDigits(id: string, x: number, y: number) {
+    setPlotLineAxesDecimalDigits(id: string, x: number, y: number) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
             try {
@@ -110,7 +126,7 @@ export class WidgetRegistrationService {
         }
     }
 
-    setPlotViewAutoAxisFitEnabled(id: string, enabled: boolean) {
+    setPlotLineAutoAxisFitEnabled(id: string, enabled: boolean) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
             try {
@@ -125,7 +141,38 @@ export class WidgetRegistrationService {
         }
     }
 
-    resetPlotViewData(id: string) {
+    setPlotCandlestickData(id: string, data: PlotCandlestickDataItem[]) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            try {
+                this.wasmModule.elementInternalOp(
+                    fabricWidgetId,
+                    JSON.stringify({ op: "setData", data }),
+                );
+            } catch (error) {
+                // todo: propagate this?
+                console.error(error);
+            }
+        }
+    }
+
+    // todo: 'merge'?
+    setPlotCandlestickAutoAxisFitEnabled(id: string, enabled: boolean) {
+        const fabricWidgetId = this.fabricWidgetsMapping.get(id);
+        if (fabricWidgetId !== undefined) {
+            try {
+                this.wasmModule.elementInternalOp(
+                    fabricWidgetId,
+                    JSON.stringify({ op: "setAxesAutoFit", enabled }),
+                );
+            } catch (error) {
+                // todo: propagate this?
+                console.error(error);
+            }
+        }
+    }
+
+    resetPlotData(id: string) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
             try {

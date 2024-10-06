@@ -31,7 +31,7 @@ type ComponentKeys = keyof typeof componentMap;
 export const ImGuiDemo = () => {
     const widgetRegistratonService = useWidgetRegistrationService();
 
-    const [selectedItemIds, setSelectedItemIds] = useState<ComponentKeys[]>(["icons"]);
+    const [selectedItemIds, setSelectedItemIds] = useState<ComponentKeys[]>(["plots"]);
 
     const treeViewItems: TreeViewItem[] = useMemo(() => {
         return [

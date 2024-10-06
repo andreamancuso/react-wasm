@@ -95,23 +95,13 @@ void Table::HandleInternalOp(const json& opDef) {
         auto op = opDef["op"].template get<std::string>();
 
         if (op == "appendData" && opDef.contains("data") && opDef["data"].is_array()) {
-            auto tableData = TableData();
-
-            for (auto& [parsedItemKey, parsedRow] : opDef["data"].items()) {
-                if (parsedRow.is_object()) {
-                    auto row = TableRow();
-
-                    for (auto& [parsedRowFieldKey, parsedRowFieldValue] : parsedRow.items()) {
-                        if (parsedRowFieldValue.is_string()) {
-                            row[parsedRowFieldKey] = parsedRowFieldValue.template get<std::string>();
-                        }
-                    }
-
-                    tableData.push_back(row);
-                }
-            }
+            auto tableData = parseTableData(opDef["data"]);
 
             AppendData(tableData);
+        } else if (op == "setData" && opDef.contains("data") && opDef["data"].is_array()) {
+            auto tableData = parseTableData(opDef["data"]);
+
+            SetData(tableData);
         }
     }
 };
@@ -133,3 +123,25 @@ YGSize Table::Measure(const YGNodeConstRef node, const float width, YGMeasureMod
 
     return size;
 };
+
+TableData Table::parseTableData(const json& jsonTableData) {
+    auto tableData = TableData();
+
+    if (jsonTableData.is_array()) {
+        for (auto& [parsedItemKey, parsedRow] : jsonTableData.items()) {
+            if (parsedRow.is_object()) {
+                auto row = TableRow();
+
+                for (auto& [parsedRowFieldKey, parsedRowFieldValue] : parsedRow.items()) {
+                    if (parsedRowFieldValue.is_string()) {
+                        row[parsedRowFieldKey] = parsedRowFieldValue.template get<std::string>();
+                    }
+                }
+
+                tableData.push_back(row);
+            }
+        }
+    }
+
+    return tableData;
+}

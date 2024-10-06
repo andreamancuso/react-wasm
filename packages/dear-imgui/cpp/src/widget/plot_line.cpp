@@ -1,25 +1,22 @@
 #include <imgui.h>
 
-#include "widget/plot_view.h"
+#include "widget/plot_line.h"
 #include "reactimgui.h"
 
-bool PlotView::HasCustomWidth() {
+bool PlotLine::HasCustomWidth() {
     return false;
 }
 
-bool PlotView::HasCustomHeight() {
+bool PlotLine::HasCustomHeight() {
     return false;
 }
 
-void PlotView::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
-    // static int e = 0;
-    // ImGui::RadioButton("line plot", &e, 0);
-    // ImGui::SameLine();
-    // ImGui::RadioButton("scatter plot", &e, 1);
+void PlotLine::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
+    ImGui::PushID(m_id);
 
     auto size = ImVec2(YGNodeLayoutGetWidth(m_layoutNode->m_node), YGNodeLayoutGetHeight(m_layoutNode->m_node));
 
-    if (ImPlot::BeginPlot("Line Plots", size, ImPlotFlags_NoMenus | ImPlotFlags_NoMouseText | ImPlotFlags_NoLegend | ImPlotFlags_NoTitle)) {
+    if (ImPlot::BeginPlot("plot_line", size, ImPlotFlags_NoMenus | ImPlotFlags_NoMouseText | ImPlotFlags_NoLegend | ImPlotFlags_NoTitle)) {
         if (m_axisAutoFit) {
             ImPlot::SetupAxes("x","y", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
         } else {
@@ -27,6 +24,9 @@ void PlotView::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
             // TODO: compute axes limits?
             // ImPlot::SetupAxesLimits(0,15000,0,1000);
         }
+
+        ImPlot::SetupAxisScale(ImAxis_X1, m_xAxisScale);
+        ImPlot::SetupAxisScale(ImAxis_Y1, m_yAxisScale);
 
         if (m_xAxisDecimalDigits > 0) {
             ImPlot::SetupAxisFormat(ImAxis_X1, axisValueFormatter, (void*)m_xAxisDecimalDigits);
@@ -39,17 +39,16 @@ void PlotView::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
         double* x_valuesPtr = m_xValues.data();
         double* y_valuesPtr = m_yValues.data();
 
-        // if (e == 0) {
-            ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
-            ImPlot::PlotLine("line-plot", x_valuesPtr, y_valuesPtr, m_xValues.size());
-        // } else {
-            // ImPlot::PlotScatter("scatter-plot", x_valuesPtr, y_valuesPtr, m_xValues.size());
-        // }
+        ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+        ImPlot::PlotLine("line-plot", x_valuesPtr, y_valuesPtr, m_xValues.size());
+
         ImPlot::EndPlot();
     }
+
+    ImGui::PopID();
 };
 
-void PlotView::Patch(const json& widgetPatchDef, ReactImgui* view) {
+void PlotLine::Patch(const json& widgetPatchDef, ReactImgui* view) {
     StyledWidget::Patch(widgetPatchDef, view);
 
     if (widgetPatchDef.contains("xAxisDecimalDigits") && widgetPatchDef.contains("yAxisDecimalDigits")) {
@@ -65,12 +64,12 @@ void PlotView::Patch(const json& widgetPatchDef, ReactImgui* view) {
     }
 };
 
-bool PlotView::HasInternalOps() {
+bool PlotLine::HasInternalOps() {
     return true;
 }
 
 // void ReactImgui::RenderMap(int id, double centerX, double centerY, int zoom)
-void PlotView::HandleInternalOp(const json& opDef) {
+void PlotLine::HandleInternalOp(const json& opDef) {
     if (opDef.contains("op") && opDef["op"].is_string()) {
         const auto op = opDef["op"].template get<std::string>();
 
