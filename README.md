@@ -1,6 +1,6 @@
 # React WASM GUI bindings
 
-<video src='https://github.com/user-attachments/assets/61fbc418-a419-4bdc-8202-50ff16c5ee56' width=1200></video>
+<video src='https://github.com/user-attachments/assets/61fbc418-a419-4bdc-8202-50ff16c5ee56' style="width:90%"></video>
 
 ## Motivation
 
