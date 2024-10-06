@@ -1,11 +1,11 @@
 import React from "react";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { useStore } from "../store";
-import { CryptoLinePlot } from "./CryptoLinePlot";
+import { CryptoCandlestickPlot } from "./CryptoCandlestickPlot";
 
 type Props = {};
 
-export const CryptoPlots = ({}: Props) => {
+export const CryptoCandlestickPlots = ({}: Props) => {
     const symbols = useStore((state) => state.symbols);
 
     return (
@@ -18,7 +18,7 @@ export const CryptoPlots = ({}: Props) => {
             }}
         >
             {symbols.map((sym) => (
-                <CryptoLinePlot key={sym} symbol={sym} />
+                <CryptoCandlestickPlot key={sym} symbol={sym} />
             ))}
         </ReactImgui.Node>
     );

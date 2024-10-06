@@ -11,7 +11,7 @@ import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 // import { HelpMarker } from "./HelpMarker/HelpMarker";
 import faIconMap from "../../fa-icons";
 import RWStyleSheet from "../../stylesheet/stylesheet";
-import { CryptoPlots } from "./CryptoPlots/CryptoPlots";
+import { CryptoLinePlots } from "./CryptoPlots/CryptoLinePlots";
 import { TreeViewItem } from "../ReactImgui/TreeView";
 import { useStore } from "./store";
 import { CryptoAssetsList } from "./CryptoAssetsList/CryptoAssetsList";
@@ -20,11 +20,13 @@ import { DataServiceContext } from "./dataServiceContext";
 import { cryptoSymbols } from "./cryptoSymbols";
 import { CryptoAssetPanels } from "./CryptoAssetPanels/CryptoAssetPanels";
 import { theme2Colors } from "src/lib/stylesheet/themes";
+import { CryptoCandlestickPlots } from "./CryptoPlots/CryptoCandlestickPlots";
 
 const componentMap = {
     cryptoAssetPanels: CryptoAssetPanels,
     cryptoAssetList: CryptoAssetsList,
-    cryptoPlots: CryptoPlots,
+    cryptoLinePlots: CryptoLinePlots,
+    cryptoCandlestickPlots: CryptoCandlestickPlots,
 };
 
 const dataService = new DataService();
@@ -51,8 +53,12 @@ export const TradingGuiDemo = () => {
                 label: "Crypto Asset List",
             },
             {
-                itemId: "cryptoPlots",
-                label: "Crypto Plots",
+                itemId: "cryptoLinePlots",
+                label: "Crypto Line Plots",
+            },
+            {
+                itemId: "cryptoCandlestickPlots",
+                label: "Crypto Candlestick Plots",
             },
         ];
     }, []);
@@ -151,11 +157,12 @@ export const TradingGuiDemo = () => {
                     dataService.addCryptoQuote({ ...(cryptoQuote as any), S: symbol }),
                 );
             } else if (data.cryptoSnapshots) {
-                dataService.addCryptoSnapshot(data.cryptoSnapshots);
+                dataService.addCryptoSnapshots(data.cryptoSnapshots);
                 // console.log(data.cryptoSnapshots);
             } else if (data.latestCryptoBars) {
                 console.log(data.latestCryptoBars);
             } else if (data.cryptoBars) {
+                dataService.addCryptoBars(data.cryptoBars);
                 console.log(data.cryptoBars);
             }
         });

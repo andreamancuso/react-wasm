@@ -7,7 +7,7 @@ import { filter } from "rxjs";
 
 type Props = { symbol: string };
 
-export const CryptoLinePlot = ({ symbol }: Props) => {
+export const CryptoCandlestickPlot = ({ symbol }: Props) => {
     const dataService = useDataService();
 
     const plotRef = useRef<PlotLineImperativeHandle>(null);
