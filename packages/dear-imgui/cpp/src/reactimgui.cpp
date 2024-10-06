@@ -331,6 +331,14 @@ void ReactImgui::RenderElementTree(const int id) {
 
             ImGui::TableNextColumn();
 
+            if (m_elements[id]->m_hovered) {
+                ImGui::TextUnformatted("Yes");
+            } else {
+                ImGui::TextUnformatted("No");
+            }
+
+            ImGui::TableNextColumn();
+
             ImGui::Text("%d, %d",
                 (int)YGNodeLayoutGetLeft(m_elements[id]->m_layoutNode->m_node),
                 (int)YGNodeLayoutGetTop(m_elements[id]->m_layoutNode->m_node)
@@ -398,10 +406,11 @@ void ReactImgui::RenderDebugWindow() {
     ImGui::SetNextWindowSize(ImVec2(1000, 700));
     ImGui::Begin("debug", nullptr);
 
-    if (ImGui::BeginTable("Elements", 6, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingStretchProp)) {
+    if (ImGui::BeginTable("Elements", 7, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingStretchProp)) {
         ImGui::TableSetupColumn("Widget ID", ImGuiTableColumnFlags_NoHide, 100.0f);
         ImGui::TableSetupColumn("Widget Type", ImGuiTableColumnFlags_NoHide, 100.0f);
         ImGui::TableSetupColumn("Child N.", ImGuiTableColumnFlags_NoHide, 30.0f);
+        ImGui::TableSetupColumn("Hovered", ImGuiTableColumnFlags_NoHide, 30.0f);
         ImGui::TableSetupColumn("Left, Top", ImGuiTableColumnFlags_NoHide, 60.0f);
         ImGui::TableSetupColumn("Width, Height", ImGuiTableColumnFlags_NoHide, 60.0f);
         ImGui::TableSetupColumn("Border", ImGuiTableColumnFlags_NoHide, 60.0f);

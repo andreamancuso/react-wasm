@@ -113,16 +113,6 @@ bool StyledWidget::HasCustomHeight() {
 };
 
 // Assumes m_style is not null, you should call HasCustomStyles() first
-bool StyledWidget::HasCustomHorizontalAlignment() const {
-    return m_style.value()->maybeHorizontalAlignment.has_value();
-};
-
-// Assumes m_style is not null, you should call HasCustomStyles() first
-bool StyledWidget::HasRightHorizontalAlignment() const {
-    return HasCustomHorizontalAlignment() && m_style.value()->maybeHorizontalAlignment.value() == HorizontalAlignment_Right;
-};
-
-// Assumes m_style is not null, you should call HasCustomStyles() first
 bool StyledWidget::HasCustomColors() const {
     return m_style.value()->maybeColors.has_value();
 };
@@ -190,6 +180,8 @@ void StyledWidget::PostRender(ReactImgui* view) {
             ImGui::PopStyleVar(m_style.value()->maybeStyleVars.value().size());
         }
     }
+
+    m_hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNone);
 };
 
 bool StyledWidget::HasCustomStyleVar(const ImGuiStyleVar key) const {

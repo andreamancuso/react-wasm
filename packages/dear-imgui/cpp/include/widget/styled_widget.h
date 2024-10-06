@@ -9,12 +9,13 @@ struct WidgetStyle {
     std::optional<StyleColors> maybeColors;
     std::optional<StyleVars> maybeStyleVars;
     std::optional<int> maybeFontIndex;
-    std::optional<HorizontalAlignment> maybeHorizontalAlignment;
 };
 
 class StyledWidget : public Widget {
 public:
     std::optional<std::unique_ptr<WidgetStyle>> m_style;
+
+    std::optional<std::unique_ptr<WidgetStyle>> m_styleOnHover;
 
     static std::optional<WidgetStyle> ExtractStyle(const json& widgetDef, ReactImgui* view);
 
@@ -37,10 +38,6 @@ public:
     virtual bool HasCustomHeight();
 
     [[nodiscard]] bool HasCustomStyleVars() const;
-
-    [[nodiscard]] bool HasCustomHorizontalAlignment() const;
-
-    [[nodiscard]] bool HasRightHorizontalAlignment() const;
 
     void ReplaceStyle(WidgetStyle& newStyle);
 

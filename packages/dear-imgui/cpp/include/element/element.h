@@ -21,11 +21,12 @@ struct BaseDrawStyle {
 class Element {
     public:
         int m_id;
-    std::string m_type;
+        std::string m_type;
         ReactImgui* m_view;
         bool m_handlesChildrenWithinRenderMethod;
         bool m_isRoot;
         bool m_cull;
+        bool m_hovered;
         std::unique_ptr<LayoutNode> m_layoutNode;
         std::optional<BaseDrawStyle> m_baseDrawStyle;
 

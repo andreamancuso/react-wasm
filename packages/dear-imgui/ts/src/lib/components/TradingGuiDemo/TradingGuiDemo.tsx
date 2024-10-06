@@ -68,29 +68,57 @@ export const TradingGuiDemo = () => {
             RWStyleSheet.create({
                 rootNode: {
                     height: "100%",
-                    padding: {
-                        all: 10,
-                    },
-                    gap: { row: 12 },
+                    // padding: {
+                    //     all: 10,
+                    // },
+                    // gap: { row: 12 },
                 },
                 mainLayoutNode: {
                     flex: 1,
                     flexDirection: "row",
-                    gap: { column: 12 },
+                    // gap: { column: 12 },
                 },
                 sidebarNode: {
-                    flexBasis: 200,
+                    flexBasis: 60,
                     height: "100%",
-                    borderColor: "#000",
+                    borderColor: "#1B1D20",
                     borderThickness: 1,
                 },
-                contentNode: {
-                    flex: 1,
-                    height: "100%",
-                    borderColor: "#000",
-                    borderThickness: 1,
-                    padding: { all: 5 },
+                sideBarItem: {
+                    width: 58,
+                    height: 58,
+                    justifyContent: "center",
+                    alignItems: "center",
                 },
+                icon: {
+                    width: 48,
+                    height: 48,
+                    font: { name: "roboto-regular", size: 36 },
+                    colors: {
+                        [ImGuiCol.ButtonHovered]: "#001033",
+                        [ImGuiCol.ButtonActive]: "#001033",
+                    },
+                    vars: { [ImGuiStyleVar.FrameRounding]: 24 },
+                },
+                iconActive: {
+                    width: 48,
+                    height: 48,
+                    font: { name: "roboto-regular", size: 36 },
+                    vars: { [ImGuiStyleVar.FrameRounding]: 24 },
+                    colors: {
+                        [ImGuiCol.Text]: "#588AF5",
+                        [ImGuiCol.Button]: "#001033",
+                        [ImGuiCol.ButtonHovered]: "#001033",
+                        [ImGuiCol.ButtonActive]: "#001033",
+                    },
+                },
+                // contentNode: {
+                //     flex: 1,
+                //     height: "100%",
+                //     borderColor: "#000",
+                //     borderThickness: 1,
+                //     padding: { all: 5 },
+                // },
                 title: {
                     colors: { [ImGuiCol.Text]: theme2Colors.green },
                     font: { name: "roboto-regular", size: 24 },
@@ -286,9 +314,9 @@ export const TradingGuiDemo = () => {
 
     return (
         <ReactImgui.Node root style={styleSheet.rootNode}>
-            <ReactImgui.UnformattedText text="Trading GUI demo" style={styleSheet.title} />
+            {/* <ReactImgui.UnformattedText text="Trading GUI demo" style={styleSheet.title} /> */}
 
-            <ReactImgui.Node
+            {/* <ReactImgui.Node
                 style={{
                     width: "100%",
                     flexDirection: "row",
@@ -307,7 +335,6 @@ export const TradingGuiDemo = () => {
                     label="Get Crypto Assets"
                     style={styleSheet.button}
                 />
-                {/* <ReactImgui.Button onClick={getLatestQuotes} label="Get Latest Quotes" /> */}
                 <ReactImgui.Button
                     onClick={getCryptoQuotes}
                     label="Get Crypto Quotes"
@@ -333,23 +360,119 @@ export const TradingGuiDemo = () => {
                     label="Get Latest Crypto Bars"
                     style={styleSheet.button}
                 />
-            </ReactImgui.Node>
+            </ReactImgui.Node> */}
 
             <ReactImgui.Node style={styleSheet.mainLayoutNode}>
                 <ReactImgui.Node style={styleSheet.sidebarNode}>
-                    <ReactImgui.TreeView
+                    {/* <ReactImgui.TreeView
                         items={treeViewItems}
                         selectedItemIds={selectedItemIds}
                         onToggleItemSelection={onToggleItemSelection}
-                    />
+                    /> */}
+                    <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.UnformattedText
+                            text={faIconMap.otter}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node>
+                    {/* <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.UnformattedText
+                            text={faIconMap["cart-plus"]}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node>
+                    <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.UnformattedText
+                            text={faIconMap["wallet"]}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node>
+                    <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.UnformattedText
+                            text={faIconMap["coins"]}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node>
+                    <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.UnformattedText
+                            text={faIconMap["dollar-sign"]}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node>
+                    <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.UnformattedText
+                            text={faIconMap["wave-square"]}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node>
+                    <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.UnformattedText
+                            text={faIconMap["stairs"]}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node>
+                    <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.UnformattedText
+                            text={faIconMap["square-poll-vertical"]}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node>
+                    <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.UnformattedText
+                            text={faIconMap["chart-pie"]}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node>
+                    <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.UnformattedText
+                            text={faIconMap["chart-line"]}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node>
+                    <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.UnformattedText
+                            text={faIconMap["chart-column"]}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node>
+                    <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.UnformattedText
+                            text={faIconMap["chart-bar"]}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node>
+                    <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.UnformattedText
+                            text={faIconMap["chart-area"]}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node> */}
+                    <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.Button
+                            label={faIconMap["arrow-trend-up"]}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node>
+                    <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.Button
+                            label={faIconMap["arrow-trend-up"]}
+                            style={styleSheet.iconActive}
+                        />
+                    </ReactImgui.Node>
+                    {/* <ReactImgui.Node style={styleSheet.sideBarItem}>
+                        <ReactImgui.UnformattedText
+                            text={faIconMap["arrow-trend-down"]}
+                            style={styleSheet.icon}
+                        />
+                    </ReactImgui.Node> */}
                 </ReactImgui.Node>
-                <ReactImgui.Node style={styleSheet.contentNode} cull={false}>
+                {/* <ReactImgui.Node style={styleSheet.contentNode} cull={false}>
                     {Component && (
                         <DataServiceContext.Provider value={dataService}>
                             <Component />
                         </DataServiceContext.Provider>
                     )}
-                </ReactImgui.Node>
+                </ReactImgui.Node> */}
             </ReactImgui.Node>
 
             <ReactImgui.Node style={styleSheet.debugButton}>
