@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { subHours, subMinutes } from "date-fns";
+import { subDays, subHours, subMinutes } from "date-fns";
 import { Subscribe } from "@react-rxjs/core";
 import {
     GetCryptoBarsParams,
@@ -163,7 +163,7 @@ export const TradingGuiDemo = () => {
                 console.log(data.latestCryptoBars);
             } else if (data.cryptoBars) {
                 dataService.addCryptoBars(data.cryptoBars);
-                console.log(data.cryptoBars);
+                // console.log(data.cryptoBars);
             }
         });
     }, [setCryptoAssets]);
@@ -215,8 +215,8 @@ export const TradingGuiDemo = () => {
     const getCryptoBars = useCallback(() => {
         const currentDate = new Date();
         const end = currentDate.toISOString();
-        const start = subHours(currentDate, 1).toISOString();
-        const options: GetCryptoBarsParams = { start, end, timeframe: "15Min" };
+        const start = subDays(currentDate, 30).toISOString();
+        const options: GetCryptoBarsParams = { start, end, timeframe: "1D" };
 
         sendMessage({
             action: "getCryptoBars",

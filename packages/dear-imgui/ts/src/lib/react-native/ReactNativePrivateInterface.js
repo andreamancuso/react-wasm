@@ -38,7 +38,7 @@ const attributesForElements = {
         "yAxisScale",
         "axisAutoFit",
     ],
-    "plot-candlestick": ["dates", "opens", "highs", "lows", "closes", "bullCol", "bearCol"],
+    "plot-candlestick": ["axisAutoFit", "bullColor", "bearColor"],
     separator: [],
     "separator-text": ["label"],
     slider: ["sliderType", "label", "defaultValue", "min", "max", "onChange"],

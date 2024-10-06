@@ -1,7 +1,5 @@
 #include "styled_widget.h"
 
-
-
 class PlotLine final : public StyledWidget {
 private:
     std::vector<double> m_xValues;

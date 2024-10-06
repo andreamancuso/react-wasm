@@ -27,6 +27,7 @@ declare global {
             "map-view": ReactElementWidgets["MapView"];
             "multi-slider": ReactElementWidgets["MultiSlider"];
             "plot-line": ReactElementWidgets["PlotLine"];
+            "plot-candlestick": ReactElementWidgets["PlotCandlestick"];
             separator: ReactElementWidgets["Separator"];
             "separator-text": ReactElementWidgets["SeparatorText"];
             slider: ReactElementWidgets["Slider"];

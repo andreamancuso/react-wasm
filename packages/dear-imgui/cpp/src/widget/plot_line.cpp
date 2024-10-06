@@ -16,7 +16,7 @@ void PlotLine::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
 
     auto size = ImVec2(YGNodeLayoutGetWidth(m_layoutNode->m_node), YGNodeLayoutGetHeight(m_layoutNode->m_node));
 
-    if (ImPlot::BeginPlot("plot", size, ImPlotFlags_NoMenus | ImPlotFlags_NoMouseText | ImPlotFlags_NoLegend | ImPlotFlags_NoTitle)) {
+    if (ImPlot::BeginPlot("plot_line", size, ImPlotFlags_NoMenus | ImPlotFlags_NoMouseText | ImPlotFlags_NoLegend | ImPlotFlags_NoTitle)) {
         if (m_axisAutoFit) {
             ImPlot::SetupAxes("x","y", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
         } else {

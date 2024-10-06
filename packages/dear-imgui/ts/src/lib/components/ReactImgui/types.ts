@@ -25,6 +25,14 @@ export type Primitive = string | number | boolean;
 
 export type SliderTypes = "default" | "angle";
 
+export type PlotCandlestickDataItem = {
+    date: number;
+    open: number;
+    close: number;
+    low: number;
+    high: number;
+};
+
 export type FontDef = {
     name: string;
     sizes: number[];
@@ -114,6 +122,11 @@ export type WidgetPropsMap = {
         decimalDigits?: number;
         onChange?: (event: MultiSliderChangeEvent<number>) => void;
     };
+    PlotCandlestick: WidgetStyleProps & {
+        bullColor?: string;
+        bearColor?: string;
+        axisAutoFit?: boolean;
+    };
     PlotLine: WidgetStyleProps & {
         xAxisDecimalDigits?: number;
         yAxisDecimalDigits?: number;
@@ -181,6 +194,7 @@ export type WidgetsRequiringId =
     | "MapView"
     | "MultiSlider"
     | "PlotLine"
+    | "PlotCandlestick"
     | "Slider"
     | "Table"
     | "TabBar"

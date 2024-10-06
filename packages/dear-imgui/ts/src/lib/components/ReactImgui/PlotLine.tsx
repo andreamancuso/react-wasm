@@ -45,7 +45,7 @@ export const PlotLine = forwardRef<PlotLineImperativeHandle, WidgetPropsMap["Plo
                         );
                     },
                     resetData: () => {
-                        widgetRegistratonService.resetPlotLineData(idRef.current);
+                        widgetRegistratonService.resetPlotData(idRef.current);
                     },
                 };
             },

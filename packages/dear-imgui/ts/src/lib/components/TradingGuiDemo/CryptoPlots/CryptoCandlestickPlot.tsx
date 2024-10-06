@@ -1,28 +1,38 @@
-import React, { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
+import { map } from "rxjs";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
-import { PlotLineImperativeHandle } from "../../ReactImgui/PlotLine";
-import { ImPlotScale } from "src/lib/wasm/wasm-app-types";
 import { useDataService } from "../dataServiceContext";
-import { filter } from "rxjs";
+import { PlotCandlestickImperativeHandle } from "../../ReactImgui/PlotCandlestick";
+import { PlotCandlestickDataItem } from "../../ReactImgui/types";
 
 type Props = { symbol: string };
 
 export const CryptoCandlestickPlot = ({ symbol }: Props) => {
     const dataService = useDataService();
 
-    const plotRef = useRef<PlotLineImperativeHandle>(null);
+    const plotRef = useRef<PlotCandlestickImperativeHandle>(null);
 
     // const [axisAutoFit, setAxisAutoFit] = useState(true);
 
     useEffect(() => {
         const subscription = dataService
-            .getCryptoQuotes()
-            .pipe(filter((cryptoQuote) => cryptoQuote.S === symbol))
-            .subscribe((quote) => {
+            .getCryptoBarDatasets()
+            .pipe(map((cryptoBars) => cryptoBars[symbol]))
+            .subscribe((cryptoBarsForSymbol) => {
                 if (plotRef.current) {
-                    const date = new Date(quote.Timestamp);
+                    const data: PlotCandlestickDataItem[] = cryptoBarsForSymbol.map(
+                        (cryptoBar) => ({
+                            date: Number(new Date(cryptoBar.Timestamp)) / 1000,
+                            open: cryptoBar.Open,
+                            close: cryptoBar.Close,
+                            high: cryptoBar.High,
+                            low: cryptoBar.Low,
+                        }),
+                    );
 
-                    plotRef.current.appendData(Number(date) / 1000, quote.BidPrice);
+                    // console.log(data);
+
+                    plotRef.current.setData(data);
                 }
             });
 
@@ -36,8 +46,7 @@ export const CryptoCandlestickPlot = ({ symbol }: Props) => {
     // }, []);
 
     return (
-        <ReactImgui.PlotLine
-            xAxisScale={ImPlotScale.Time}
+        <ReactImgui.PlotCandlestick
             ref={plotRef}
             style={{ width: "100%", height: 400 }}
             // axisAutoFit={axisAutoFit}
