@@ -1,13 +1,17 @@
-import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { subMinutes } from "date-fns";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { subHours, subMinutes } from "date-fns";
 import { Subscribe } from "@react-rxjs/core";
+import {
+    GetCryptoBarsParams,
+    GetQuotesParams,
+} from "@alpacahq/alpaca-trade-api/dist/resources/datav2/rest_v2";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { useWidgetRegistrationService } from "src/lib/hooks";
 import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 // import { HelpMarker } from "./HelpMarker/HelpMarker";
 import faIconMap from "../../fa-icons";
 import RWStyleSheet from "../../stylesheet/stylesheet";
-import { Plots } from "./Plots/Plots";
+import { CryptoPlots } from "./CryptoPlots/CryptoPlots";
 import { TreeViewItem } from "../ReactImgui/TreeView";
 import { useStore } from "./store";
 import { CryptoAssetsList } from "./CryptoAssetsList/CryptoAssetsList";
@@ -20,7 +24,7 @@ import { theme2Colors } from "src/lib/stylesheet/themes";
 const componentMap = {
     cryptoAssetPanels: CryptoAssetPanels,
     cryptoAssetList: CryptoAssetsList,
-    // plots: Plots,
+    cryptoPlots: CryptoPlots,
 };
 
 const dataService = new DataService();
@@ -47,8 +51,8 @@ export const TradingGuiDemo = () => {
                 label: "Crypto Asset List",
             },
             {
-                itemId: "plots",
-                label: "Plots",
+                itemId: "cryptoPlots",
+                label: "Crypto Plots",
             },
         ];
     }, []);
@@ -108,6 +112,7 @@ export const TradingGuiDemo = () => {
         [],
     );
 
+    // todo: move to dataService.ts ?
     const connect = useCallback(() => {
         socketRef.current = new WebSocket("ws://localhost:4000");
 
@@ -148,92 +153,104 @@ export const TradingGuiDemo = () => {
             } else if (data.cryptoSnapshots) {
                 dataService.addCryptoSnapshot(data.cryptoSnapshots);
                 // console.log(data.cryptoSnapshots);
+            } else if (data.latestCryptoBars) {
+                console.log(data.latestCryptoBars);
+            } else if (data.cryptoBars) {
+                console.log(data.cryptoBars);
             }
         });
     }, [setCryptoAssets]);
 
-    const subscribeToLiveData = useCallback(() => {
+    const sendMessage = useCallback((message: any) => {
         if (socketRef.current) {
-            const message = JSON.stringify({
+            socketRef.current.send(JSON.stringify(message));
+        }
+    }, []);
+
+    const subscribeToLiveData = useCallback(
+        () =>
+            sendMessage({
                 passkey: "",
                 action: "subscribeForCryptoQuotes",
                 symbols,
-            });
-
-            socketRef.current.send(message);
-        }
-    }, [symbols]);
+            }),
+        [sendMessage, symbols],
+    );
 
     const getLatestQuotes = useCallback(() => {
-        if (socketRef.current) {
-            const currentDate = new Date();
-            const end = currentDate.toISOString();
-            const start = subMinutes(currentDate, 1);
+        const currentDate = new Date();
+        const end = currentDate.toISOString();
+        const start = subMinutes(currentDate, 1);
 
-            const message = JSON.stringify({
-                passkey: "",
-                action: "getQuotes",
-                symbols,
-                options: { start, end },
-            });
-
-            socketRef.current.send(message);
-        }
+        sendMessage({
+            action: "getQuotes",
+            symbols,
+            options: { start, end },
+        });
     }, [symbols]);
 
     const getCryptoQuotes = useCallback(() => {
-        if (socketRef.current) {
-            const currentDate = new Date();
-            const end = currentDate.toISOString();
-            const start = subMinutes(currentDate, 1);
+        const currentDate = new Date();
+        const end = currentDate.toISOString();
+        const start = subMinutes(currentDate, 1).toISOString();
+        const options: GetQuotesParams = {
+            start,
+            end,
+        };
 
-            const message = JSON.stringify({
-                passkey: "",
-                action: "getCryptoQuotes",
-                symbols,
-                options: { start, end },
-            });
-
-            socketRef.current.send(message);
-        }
+        sendMessage({
+            action: "getCryptoQuotes",
+            symbols,
+            options,
+        });
     }, [symbols]);
 
-    const getCryptoSnapshots = useCallback(() => {
-        if (socketRef.current) {
-            const message = JSON.stringify({
-                passkey: "",
+    const getCryptoBars = useCallback(() => {
+        const currentDate = new Date();
+        const end = currentDate.toISOString();
+        const start = subHours(currentDate, 1).toISOString();
+        const options: GetCryptoBarsParams = { start, end, timeframe: "15Min" };
+
+        sendMessage({
+            action: "getCryptoBars",
+            symbols,
+            options,
+        });
+    }, [symbols]);
+
+    const getCryptoSnapshots = useCallback(
+        () =>
+            sendMessage({
                 action: "getCryptoSnapshots",
                 symbols,
-            });
+            }),
+        [symbols],
+    );
 
-            socketRef.current.send(message);
-        }
-    }, [symbols]);
-
-    const getLatestCryptoQuotes = useCallback(() => {
-        if (socketRef.current) {
-            const message = JSON.stringify({
-                passkey: "",
+    const getLatestCryptoQuotes = useCallback(
+        () =>
+            sendMessage({
                 action: "getLatestCryptoQuotes",
                 symbols,
-            });
+            }),
+        [symbols],
+    );
 
-            socketRef.current.send(message);
-        }
-    }, [symbols]);
+    const getLatestCryptoBars = useCallback(
+        () =>
+            sendMessage({
+                action: "getLatestCryptoBars",
+                symbols,
+            }),
+        [symbols],
+    );
 
     const getCryptoAssets = useCallback(
-        (symbols?: string[]) => {
-            if (socketRef.current) {
-                const message = JSON.stringify({
-                    passkey: "",
-                    action: "getCryptoAssets",
-                    symbols,
-                });
-
-                socketRef.current.send(message);
-            }
-        },
+        (symbols?: string[]) =>
+            sendMessage({
+                action: "getCryptoAssets",
+                symbols,
+            }),
         [symbols],
     );
 
@@ -296,8 +313,18 @@ export const TradingGuiDemo = () => {
                     style={styleSheet.button}
                 />
                 <ReactImgui.Button
+                    onClick={getCryptoBars}
+                    label="Get Crypto Bars"
+                    style={styleSheet.button}
+                />
+                <ReactImgui.Button
                     onClick={getLatestCryptoQuotes}
                     label="Get Latest Crypto Quotes"
+                    style={styleSheet.button}
+                />
+                <ReactImgui.Button
+                    onClick={getLatestCryptoBars}
+                    label="Get Latest Crypto Bars"
                     style={styleSheet.button}
                 />
             </ReactImgui.Node>

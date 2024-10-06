@@ -31,13 +31,14 @@ const attributesForElements = {
         "decimalDigits",
         "onChange",
     ],
-    "plot-view": [
+    "plot-line": [
         "xAxisDecimalDigits",
         "yAxisDecimalDigits",
         "xAxisScale",
         "yAxisScale",
         "axisAutoFit",
     ],
+    "plot-candlestick": ["dates", "opens", "highs", "lows", "closes", "bullCol", "bearCol"],
     separator: [],
     "separator-text": ["label"],
     slider: ["sliderType", "label", "defaultValue", "min", "max", "onChange"],

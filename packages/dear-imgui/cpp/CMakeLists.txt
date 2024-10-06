@@ -111,7 +111,7 @@ if (DEFINED EMSCRIPTEN)
         src/widget/item_tooltip.cpp
         src/widget/map_view.cpp
         src/widget/multi_slider.cpp
-        src/widget/plot_view.cpp
+            src/widget/plot_line.cpp
         src/widget/separator.cpp
         src/widget/separator_text.cpp
         src/widget/slider.cpp

@@ -2,14 +2,14 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import { useWidgetRegistrationService } from "../../hooks";
 import { WidgetPropsMap } from "./types";
 
-export type PlotViewImperativeHandle = {
+export type PlotLineImperativeHandle = {
     appendData: (x: number, y: number) => void;
     setAxesDecimalDigits: (x: number, y: number) => void;
     setAxesAutoFit: (enabled: boolean) => void;
     resetData: () => void;
 };
 
-export const PlotView = forwardRef<PlotViewImperativeHandle, WidgetPropsMap["PlotView"]>(
+export const PlotLine = forwardRef<PlotLineImperativeHandle, WidgetPropsMap["PlotLine"]>(
     (
         {
             xAxisDecimalDigits,
@@ -18,7 +18,7 @@ export const PlotView = forwardRef<PlotViewImperativeHandle, WidgetPropsMap["Plo
             yAxisScale,
             axisAutoFit,
             style,
-        }: WidgetPropsMap["PlotView"],
+        }: WidgetPropsMap["PlotLine"],
         ref,
     ) => {
         const widgetRegistratonService = useWidgetRegistrationService();
@@ -33,19 +33,19 @@ export const PlotView = forwardRef<PlotViewImperativeHandle, WidgetPropsMap["Plo
             () => {
                 return {
                     appendData: (x: number, y: number) => {
-                        widgetRegistratonService.appendDataToPlotView(idRef.current, x, y);
+                        widgetRegistratonService.appendDataToPlotLine(idRef.current, x, y);
                     },
                     setAxesDecimalDigits: (x: number, y: number) => {
-                        widgetRegistratonService.setPlotViewAxesDecimalDigits(idRef.current, x, y);
+                        widgetRegistratonService.setPlotLineAxesDecimalDigits(idRef.current, x, y);
                     },
                     setAxesAutoFit: (enabled: boolean) => {
-                        widgetRegistratonService.setPlotViewAutoAxisFitEnabled(
+                        widgetRegistratonService.setPlotLineAutoAxisFitEnabled(
                             idRef.current,
                             enabled,
                         );
                     },
                     resetData: () => {
-                        widgetRegistratonService.resetPlotViewData(idRef.current);
+                        widgetRegistratonService.resetPlotLineData(idRef.current);
                     },
                 };
             },
@@ -53,7 +53,7 @@ export const PlotView = forwardRef<PlotViewImperativeHandle, WidgetPropsMap["Plo
         );
 
         return (
-            <plot-view
+            <plot-line
                 id={idRef.current}
                 xAxisDecimalDigits={xAxisDecimalDigits}
                 yAxisDecimalDigits={yAxisDecimalDigits}

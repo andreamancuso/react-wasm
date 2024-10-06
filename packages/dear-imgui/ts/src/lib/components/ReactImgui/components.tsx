@@ -16,7 +16,7 @@ import { ItemTooltip } from "./ItemTooltip";
 import { MapView } from "./MapView";
 import { MultiSlider } from "./MultiSlider";
 import { Node } from "./Node";
-import { PlotView } from "./PlotView";
+import { PlotLine } from "./PlotLine";
 import { Separator } from "./Separator";
 import { SeparatorText } from "./SeparatorText";
 import { Slider } from "./Slider";
@@ -45,7 +45,7 @@ export const components = {
     MapView,
     MultiSlider,
     Node,
-    PlotView,
+    PlotLine,
     SeparatorText,
     Separator,
     Slider,

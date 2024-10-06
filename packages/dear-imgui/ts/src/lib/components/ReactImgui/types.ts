@@ -114,7 +114,7 @@ export type WidgetPropsMap = {
         decimalDigits?: number;
         onChange?: (event: MultiSliderChangeEvent<number>) => void;
     };
-    PlotView: WidgetStyleProps & {
+    PlotLine: WidgetStyleProps & {
         xAxisDecimalDigits?: number;
         yAxisDecimalDigits?: number;
         xAxisScale?: ImPlotScale;
@@ -180,7 +180,7 @@ export type WidgetsRequiringId =
     | "InputText"
     | "MapView"
     | "MultiSlider"
-    | "PlotView"
+    | "PlotLine"
     | "Slider"
     | "Table"
     | "TabBar"

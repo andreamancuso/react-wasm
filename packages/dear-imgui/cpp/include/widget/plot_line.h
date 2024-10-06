@@ -2,7 +2,7 @@
 
 
 
-class PlotView final : public StyledWidget {
+class PlotLine final : public StyledWidget {
 private:
     std::vector<double> m_xValues;
     std::vector<double> m_yValues;
@@ -18,7 +18,7 @@ private:
     bool m_axisAutoFit;
 
 public:
-    static std::unique_ptr<PlotView> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
+    static std::unique_ptr<PlotLine> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
         auto id = widgetDef["id"].template get<int>();
         int xAxisDecimalDigits = 0;
         int yAxisDecimalDigits = 0;
@@ -43,7 +43,7 @@ public:
             axisAutoFit = widgetDef["axisAutoFit"].template get<bool>();
         }
 
-        return std::make_unique<PlotView>(view, id, xAxisDecimalDigits, yAxisDecimalDigits, xAxisScale, yAxisScale, axisAutoFit, maybeStyle);
+        return std::make_unique<PlotLine>(view, id, xAxisDecimalDigits, yAxisDecimalDigits, xAxisScale, yAxisScale, axisAutoFit, maybeStyle);
 
         // throw std::invalid_argument("Invalid JSON data");
     }
@@ -60,8 +60,8 @@ public:
 
     bool HasCustomHeight() override;
 
-    PlotView(ReactImgui* view, const int id, const int xAxisDecimalDigits, const int yAxisDecimalDigits, const ImPlotScale xAxisScale, const ImPlotScale yAxisScale, const bool axisAutoFit, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
-        m_type = "plot-view";
+    PlotLine(ReactImgui* view, const int id, const int xAxisDecimalDigits, const int yAxisDecimalDigits, const ImPlotScale xAxisScale, const ImPlotScale yAxisScale, const bool axisAutoFit, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
+        m_type = "plot-line";
         m_xAxisDecimalDigits = xAxisDecimalDigits;
         m_yAxisDecimalDigits = yAxisDecimalDigits;
         m_xAxisScale = xAxisScale;

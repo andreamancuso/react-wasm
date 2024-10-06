@@ -1,9 +1,9 @@
 import React, { useCallback, useRef, useState } from "react";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
-import { PlotViewImperativeHandle } from "../../ReactImgui/PlotView";
+import { PlotLineImperativeHandle } from "../../ReactImgui/PlotLine";
 
 export const Plots = () => {
-    const plotRef = useRef<PlotViewImperativeHandle>(null);
+    const plotRef = useRef<PlotLineImperativeHandle>(null);
     const [axisAutoFit, setAxisAutoFit] = useState(true);
     const counterRef = useRef(0);
 
@@ -46,7 +46,7 @@ export const Plots = () => {
                 <ReactImgui.Button onClick={resetData} label="Reset" />
             </ReactImgui.Node>
 
-            <ReactImgui.PlotView ref={plotRef} style={{ flex: 1 }} axisAutoFit={axisAutoFit} />
+            <ReactImgui.PlotLine ref={plotRef} style={{ flex: 1 }} axisAutoFit={axisAutoFit} />
         </ReactImgui.Node>
     );
 };

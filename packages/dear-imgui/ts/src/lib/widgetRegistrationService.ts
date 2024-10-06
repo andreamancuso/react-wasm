@@ -95,7 +95,7 @@ export class WidgetRegistrationService {
         }
     }
 
-    appendDataToPlotView(id: string, x: number, y: number) {
+    appendDataToPlotLine(id: string, x: number, y: number) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
             try {
@@ -110,7 +110,7 @@ export class WidgetRegistrationService {
         }
     }
 
-    setPlotViewAxesDecimalDigits(id: string, x: number, y: number) {
+    setPlotLineAxesDecimalDigits(id: string, x: number, y: number) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
             try {
@@ -125,7 +125,7 @@ export class WidgetRegistrationService {
         }
     }
 
-    setPlotViewAutoAxisFitEnabled(id: string, enabled: boolean) {
+    setPlotLineAutoAxisFitEnabled(id: string, enabled: boolean) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
             try {
@@ -140,7 +140,7 @@ export class WidgetRegistrationService {
         }
     }
 
-    resetPlotViewData(id: string) {
+    resetPlotLineData(id: string) {
         const fabricWidgetId = this.fabricWidgetsMapping.get(id);
         if (fabricWidgetId !== undefined) {
             try {
