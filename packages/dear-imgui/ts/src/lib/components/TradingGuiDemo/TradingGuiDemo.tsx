@@ -253,7 +253,7 @@ export const TradingGuiDemo = () => {
     );
 
     const getCryptoAssets = useCallback(
-        (symbols?: string[]) =>
+        () =>
             sendMessage({
                 action: "getCryptoAssets",
                 symbols,
@@ -276,11 +276,10 @@ export const TradingGuiDemo = () => {
     }, []);
 
     useEffect(() => {
-        connect();
-
-        setTimeout(() => {
-            getCryptoAssets();
-        }, 1000);
+        // connect();
+        // setTimeout(() => {
+        //     getCryptoAssets();
+        // }, 1000);
     }, [connect, getCryptoAssets]);
 
     const Component = componentMap[selectedItemIds[0]];

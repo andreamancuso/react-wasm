@@ -1,5 +1,7 @@
 # React WASM GUI bindings
 
+<video src='https://github.com/user-attachments/assets/61fbc418-a419-4bdc-8202-50ff16c5ee56' width=1200 />
+
 ## Motivation
 
 I've always found WebAssembly very interesting conceptually but I never really needed to use it - until relatively recently.
@@ -49,7 +51,7 @@ Perhaps there are other options I could/should have considered. Feel free to let
 
 ### egui
 
--   [egui](https://github.com/andreamancuso/react-wasm/tree/main/packages/egui) (work in progress) ([very basic online demo](https://andreamancuso.github.io/react-wasm/egui)) Browser support: Chrome, Firefox, Edge
+- [egui](https://github.com/andreamancuso/react-wasm/tree/main/packages/egui) (work in progress) ([very basic online demo](https://andreamancuso.github.io/react-wasm/egui)) Browser support: Chrome, Firefox, Edge
 
 ![egui hello world](/screenshots/egui/egui-hello-world.png?raw=true)
 
