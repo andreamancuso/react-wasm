@@ -3,7 +3,7 @@ import deepDiffer from "./deepDiffer.js";
 
 const uiManager = new NativeFabricUIManager();
 
-const commonAttributes = ["id", "style"];
+const commonAttributes = ["id", "style", "hoverStyle", "activeStyle", "disabledStyle"];
 
 const attributesForElements = {
     "bullet-text": ["type", "text"],

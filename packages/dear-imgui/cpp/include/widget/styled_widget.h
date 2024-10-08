@@ -5,17 +5,31 @@
 
 class ReactImgui;
 
-struct WidgetStyle {
+struct WidgetStyleParts {
     std::optional<StyleColors> maybeColors;
     std::optional<StyleVars> maybeStyleVars;
     std::optional<int> maybeFontIndex;
 };
 
+struct WidgetStyle {
+    std::optional<WidgetStyleParts> maybeBase;
+    std::optional<WidgetStyleParts> maybeDisabled;
+    std::optional<WidgetStyleParts> maybeHover;
+    std::optional<WidgetStyleParts> maybeActive;
+
+    bool HasCustomFont(std::optional<ElementState> widgetState, ReactImgui* view);
+    bool HasCustomStyleVar(std::optional<ElementState> widgetState, ImGuiStyleVar key);
+    bool HasCustomColors(std::optional<ElementState> widgetState);
+    bool HasCustomStyleVars(std::optional<ElementState> widgetState);
+    std::optional<int> GetCustomFontId(std::optional<ElementState> widgetState, ReactImgui* view);
+    StyleVarValue GetCustomStyleVar(std::optional<ElementState> widgetState, ImGuiStyleVar key);
+};
+
+WidgetStyleParts extractStyle(const json& styleDef, ReactImgui* view);
+
 class StyledWidget : public Widget {
 public:
     std::optional<std::unique_ptr<WidgetStyle>> m_style;
-
-    std::optional<std::unique_ptr<WidgetStyle>> m_styleOnHover;
 
     static std::optional<WidgetStyle> ExtractStyle(const json& widgetDef, ReactImgui* view);
 
@@ -45,5 +59,5 @@ public:
 
     [[nodiscard]] bool HasCustomStyleVar(ImGuiStyleVar key) const;
 
-    [[nodiscard]] StyleVarValue& GetCustomStyleVar(ImGuiStyleVar key) const;
+    [[nodiscard]] StyleVarValue GetCustomStyleVar(ImGuiStyleVar key) const;
 };

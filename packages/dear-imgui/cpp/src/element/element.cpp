@@ -274,3 +274,12 @@ bool Element::HasInternalOps() {
 };
 
 void Element::HandleInternalOp(const json& opDef) {};
+
+// todo: what about the other states?
+ElementState Element::GetState() const {
+    if (m_hovered) {
+        return ElementState_Hover;
+    }
+
+    return ElementState_Base;
+};

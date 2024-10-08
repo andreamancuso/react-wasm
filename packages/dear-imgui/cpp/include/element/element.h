@@ -10,6 +10,14 @@ using json = nlohmann::json;
 
 class ReactImgui;
 
+// For simplicity, only 1 'non-base' state at a time is allowed
+enum ElementState {
+    ElementState_Base = 0,
+    ElementState_Disabled = 1,
+    ElementState_Hover = 2,
+    ElementState_Active = 3,
+};
+
 struct BaseDrawStyle {
     std::optional<ImVec4> backgroundColor;
     std::optional<ImVec4> borderColor;
@@ -51,6 +59,8 @@ class Element {
         virtual void Render(ReactImgui* view, const std::optional<ImRect>& viewport);
 
         virtual void PostRender(ReactImgui* view);
+
+        virtual ElementState GetState() const;
 
         void DrawBaseEffects() const;
 
