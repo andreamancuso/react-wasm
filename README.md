@@ -2,6 +2,8 @@
 
 <video src='https://github.com/user-attachments/assets/61fbc418-a419-4bdc-8202-50ff16c5ee56' style="width:90%"></video>
 
+![React Dear Imgui screenshot](https://github.com/user-attachments/assets/1a9b8ae9-d529-45af-ab7b-7e173799136f)
+
 ## Motivation
 
 I've always found WebAssembly very interesting conceptually but I never really needed to use it - until relatively recently.
@@ -38,12 +40,6 @@ Perhaps there are other options I could/should have considered. Feel free to let
 ### Dear Imgui
 
 [Dear Imgui](https://github.com/andreamancuso/react-wasm/tree/main/packages/dear-imgui) (work in progress) ([very basic online demo](https://andreamancuso.github.io/react-wasm/dear-imgui)) Browser support: latest Chrome and Edge only presently.
-
-![React Dear Imgui screenshot 1](/screenshots/dear-imgui/react-wasm-dear-imgui-s1.png?raw=true)
-
-![React Dear Imgui screenshot 2](/screenshots/dear-imgui/react-wasm-dear-imgui-s0.png?raw=true)
-
-![React Dear Imgui screenshot 3](/screenshots/dear-imgui/react-wasm-dear-imgui-s2.png?raw=true)
 
 ![React Dear Imgui screenshot 4](/screenshots/dear-imgui/screenshot-react-wasm-dear-imgui-sample-code.png?raw=true)
 
