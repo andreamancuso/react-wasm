@@ -451,6 +451,7 @@ export const TradingGuiDemo = () => {
                         <ReactImgui.Button
                             label={faIconMap["arrow-trend-up"]}
                             style={styleSheet.icon}
+                            hoverStyle={styleSheet.iconActive}
                         />
                     </ReactImgui.Node>
                     <ReactImgui.Node style={styleSheet.sideBarItem}>

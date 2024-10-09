@@ -4,9 +4,18 @@ export const TextWrap: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMa
     children,
     width,
     style,
+    hoverStyle,
+    activeStyle,
+    disabledStyle,
 }) => {
     return (
-        <text-wrap width={width} style={style}>
+        <text-wrap
+            width={width}
+            style={style}
+            hoverStyle={hoverStyle}
+            activeStyle={activeStyle}
+            disabledStyle={disabledStyle}
+        >
             {children}
         </text-wrap>
     );

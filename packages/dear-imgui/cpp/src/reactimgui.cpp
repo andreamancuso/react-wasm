@@ -748,12 +748,12 @@ StyleVarValueRef ReactImgui::GetStyleVar(const ImGuiStyleVar key) {
 
 // todo: ensure this returns the font based on current state of the widget, i.e. 'base', 'hover', 'active'
 ImFont* ReactImgui::GetWidgetFont(const StyledWidget* widget) {
-    if (widget->HasCustomStyles()) {
-        auto result = widget->m_style.value()->GetCustomFontId(widget->GetState(), this);
+    if (widget->HasCustomStyles() && widget->HasCustomFont(this)) {
+        // auto result = widget->m_style.value()->GetCustomFontId(widget->GetState(), this);
 
-        if (result.has_value()) {
-            return m_loadedFonts[result.value()];
-        }
+        // if (result.has_value()) {
+            return m_loadedFonts[widget->m_style.value()->GetCustomFontId(widget->GetState(), this)];
+        // }
     }
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -764,12 +764,12 @@ ImFont* ReactImgui::GetWidgetFont(const StyledWidget* widget) {
 
 // todo: ensure this returns the font size based on current state of the widget, i.e. 'base', 'hover', 'active'
 float ReactImgui::GetWidgetFontSize(const StyledWidget* widget) {
-    if (widget->HasCustomStyles()) {
-        auto result = widget->m_style.value()->GetCustomFontId(widget->GetState(), this);
+    if (widget->HasCustomStyles() && widget->HasCustomFont(this)) {
+        // auto result = widget->m_style.value()->GetCustomFontId(widget->GetState(), this);
 
-        if (result.has_value()) {
-            return m_loadedFonts[result.value()]->FontSize;
-        }
+        // if (result.has_value()) {
+            return m_loadedFonts[widget->m_style.value()->GetCustomFontId(widget->GetState(), this)]->FontSize;
+        // }
     }
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;

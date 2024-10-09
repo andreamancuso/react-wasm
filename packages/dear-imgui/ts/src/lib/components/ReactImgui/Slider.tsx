@@ -9,6 +9,9 @@ export const Slider: WidgetFunctionComponent<WidgetPropsMap["Slider"]> = ({
     defaultValue,
     sliderType = "default",
     style,
+    hoverStyle,
+    activeStyle,
+    disabledStyle,
 }) => {
     const widgetRegistratonService = useWidgetRegistrationService();
     const idRef = useRef(widgetRegistratonService.generateId());
@@ -22,6 +25,9 @@ export const Slider: WidgetFunctionComponent<WidgetPropsMap["Slider"]> = ({
             sliderType={sliderType}
             onChange={onChange}
             style={style}
+            hoverStyle={hoverStyle}
+            activeStyle={activeStyle}
+            disabledStyle={disabledStyle}
         />
     );
 };

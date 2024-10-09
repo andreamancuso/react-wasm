@@ -21,7 +21,9 @@ struct WidgetStyle {
     [[nodiscard]] bool HasCustomStyleVar(std::optional<ElementState> widgetState, ImGuiStyleVar key) const;
     [[nodiscard]] bool HasCustomColors(std::optional<ElementState> widgetState) const;
     [[nodiscard]] bool HasCustomStyleVars(std::optional<ElementState> widgetState) const;
-    std::optional<int> GetCustomFontId(std::optional<ElementState> widgetState, ReactImgui* view);
+    StyleColors& GetCustomColors(std::optional<ElementState> widgetState);
+    StyleVars& GetCustomStyleVars(std::optional<ElementState> widgetState);
+    int GetCustomFontId(std::optional<ElementState> widgetState, ReactImgui* view);
     StyleVarValue GetCustomStyleVar(std::optional<ElementState> widgetState, ImGuiStyleVar key);
 };
 

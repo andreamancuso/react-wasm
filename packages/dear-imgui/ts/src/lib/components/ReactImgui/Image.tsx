@@ -7,7 +7,18 @@ export type MapImperativeHandle = {
 };
 
 export const Image = forwardRef<MapImperativeHandle, WidgetPropsMap["Image"]>(
-    ({ url, width, height, style }: WidgetPropsMap["Image"], ref) => {
+    (
+        {
+            url,
+            width,
+            height,
+            style,
+            hoverStyle,
+            activeStyle,
+            disabledStyle,
+        }: WidgetPropsMap["Image"],
+        ref,
+    ) => {
         const widgetRegistratonService = useWidgetRegistrationService();
         const idRef = useRef(widgetRegistratonService.generateId());
 
@@ -28,7 +39,16 @@ export const Image = forwardRef<MapImperativeHandle, WidgetPropsMap["Image"]>(
         );
 
         return (
-            <di-image id={idRef.current} style={style} url={url} width={width} height={height} />
+            <di-image
+                id={idRef.current}
+                url={url}
+                width={width}
+                height={height}
+                style={style}
+                hoverStyle={hoverStyle}
+                activeStyle={activeStyle}
+                disabledStyle={disabledStyle}
+            />
         );
     },
 );

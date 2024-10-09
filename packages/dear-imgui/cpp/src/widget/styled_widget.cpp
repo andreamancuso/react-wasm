@@ -100,15 +100,91 @@ bool WidgetStyle::HasCustomStyleVar(const std::optional<ElementState> widgetStat
     }
 }
 
-std::optional<int> WidgetStyle::GetCustomFontId(std::optional<ElementState> widgetState, ReactImgui* view) {
-    // if (HasCustomFont(widgetState, view)) {
-    //     return maybeDisabled.value().maybeFontIndex.value();
-    // } else
-    if (HasCustomFont(ElementState_Base, view)) {
-        return maybeBase.value().maybeFontIndex.value();
-    } else {
-        return std::nullopt;
+StyleColors& WidgetStyle::GetCustomColors(std::optional<ElementState> widgetState) {
+    auto& baseColors = maybeBase.value().maybeColors.value();
+
+    switch(widgetState.value_or(ElementState_Base)) {
+        case ElementState_Disabled: {
+            if (maybeDisabled.has_value() && maybeDisabled.value().maybeColors.has_value()) {
+                return maybeDisabled.value().maybeColors.value();
+            }
+        }
+
+        case ElementState_Hover: {
+            if (maybeHover.has_value() && maybeHover.value().maybeColors.has_value()) {
+                return maybeHover.value().maybeColors.value();
+            }
+        }
+
+        case ElementState_Active: {
+            if (maybeActive.has_value() && maybeActive.value().maybeColors.has_value()) {
+                return maybeActive.value().maybeColors.value();
+            }
+        }
+
+        default:
+            break;
     }
+
+    return baseColors;
+}
+
+StyleVars& WidgetStyle::GetCustomStyleVars(std::optional<ElementState> widgetState) {
+    auto& baseStyleVars = maybeBase.value().maybeStyleVars.value();
+
+    switch(widgetState.value_or(ElementState_Base)) {
+        case ElementState_Disabled: {
+            if (maybeDisabled.has_value() && maybeDisabled.value().maybeStyleVars.has_value()) {
+                return maybeDisabled.value().maybeStyleVars.value();
+            }
+        }
+
+        case ElementState_Hover: {
+            if (maybeHover.has_value() && maybeHover.value().maybeStyleVars.has_value()) {
+                return maybeHover.value().maybeStyleVars.value();
+            }
+        }
+
+        case ElementState_Active: {
+            if (maybeActive.has_value() && maybeActive.value().maybeStyleVars.has_value()) {
+                return maybeActive.value().maybeStyleVars.value();
+            }
+        }
+
+        default:
+            break;
+    }
+
+    return baseStyleVars;
+}
+
+int WidgetStyle::GetCustomFontId(std::optional<ElementState> widgetState, ReactImgui* view) {
+    auto fontIndex = maybeBase.value().maybeFontIndex.value();
+
+    switch(widgetState.value_or(ElementState_Base)) {
+        case ElementState_Disabled: {
+            if (maybeDisabled.has_value() && maybeDisabled.value().maybeFontIndex.has_value()) {
+                return maybeDisabled.value().maybeFontIndex.value();
+            }
+        }
+
+        case ElementState_Hover: {
+            if (maybeHover.has_value() && maybeHover.value().maybeFontIndex.has_value()) {
+                return maybeHover.value().maybeFontIndex.value();
+            }
+        }
+
+        case ElementState_Active: {
+            if (maybeActive.has_value() && maybeActive.value().maybeFontIndex.has_value()) {
+                return maybeActive.value().maybeFontIndex.value();
+            }
+        }
+
+        default:
+            break;
+    }
+
+    return fontIndex;
 }
 
 // todo: is it really that difficult to return the variant by reference?
@@ -279,17 +355,17 @@ void StyledWidget::PreRender(ReactImgui* view) {
 
     if (HasCustomStyles()) {
         if (HasCustomFont(view)) {
-            view->PushFont(m_style.value()->maybeBase.value().maybeFontIndex.value());
+            view->PushFont(m_style.value()->GetCustomFontId(GetState(), view));
         }
 
         if (HasCustomColors()) {
-            for (auto const& [key, val] : m_style.value()->maybeBase.value().maybeColors.value()) {
+            for (auto const& [key, val] : m_style.value()->GetCustomColors(GetState())) {
                 ImGui::PushStyleColor(key, val);
             }
         }
 
         if (HasCustomStyleVars()) {
-            for (auto const& [key, val] : m_style.value()->maybeBase.value().maybeStyleVars.value()) {
+            for (auto const& [key, val] : m_style.value()->GetCustomStyleVars(GetState())) {
                 if (std::holds_alternative<float>(val)) {
                     ImGui::PushStyleVar(key, std::get<float>(val));
                 } else if (std::holds_alternative<ImVec2>(val)) {
@@ -313,12 +389,12 @@ void StyledWidget::PostRender(ReactImgui* view) {
         }
 
         if (HasCustomColors()) {
-            ImGui::PopStyleColor(m_style.value()->maybeBase.value().maybeColors.value().size());
+            ImGui::PopStyleColor(m_style.value()->GetCustomColors(GetState()).size());
         }
 
         if (HasCustomStyleVars()) {
             // Big, big assumption that this will match exactly the number of style vars being pushed above... Maybe we should actually keep track
-            ImGui::PopStyleVar(m_style.value()->maybeBase.value().maybeStyleVars.value().size());
+            ImGui::PopStyleVar(m_style.value()->GetCustomStyleVars(GetState()).size());
         }
     }
 

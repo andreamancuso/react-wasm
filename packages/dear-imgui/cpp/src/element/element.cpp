@@ -276,6 +276,7 @@ bool Element::HasInternalOps() {
 void Element::HandleInternalOp(const json& opDef) {};
 
 // todo: what about the other states?
+// todo: also, this is currently called multiple times - unnecessarily?
 ElementState Element::GetState() const {
     if (m_hovered) {
         return ElementState_Hover;

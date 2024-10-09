@@ -11,6 +11,9 @@ import { TabItem } from "./TabItem";
 export const TabBar: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap["TabBar"]> = ({
     children,
     style,
+    hoverStyle,
+    activeStyle,
+    disabledStyle,
 }) => {
     const widgetRegistratonService = useWidgetRegistrationService();
     const idRef = useRef(widgetRegistratonService.generateId());
@@ -28,7 +31,13 @@ export const TabBar: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap[
     }, [children]);
 
     return (
-        <tab-bar id={idRef.current} style={style}>
+        <tab-bar
+            id={idRef.current}
+            style={style}
+            hoverStyle={hoverStyle}
+            activeStyle={activeStyle}
+            disabledStyle={disabledStyle}
+        >
             {tabs}
         </tab-bar>
     );

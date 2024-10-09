@@ -11,42 +11,58 @@ export type PlotCandlestickImperativeHandle = {
 export const PlotCandlestick = forwardRef<
     PlotCandlestickImperativeHandle,
     WidgetPropsMap["PlotCandlestick"]
->(({ axisAutoFit, bearColor, bullColor, style }: WidgetPropsMap["PlotCandlestick"], ref) => {
-    const widgetRegistratonService = useWidgetRegistrationService();
-    const idRef = useRef(widgetRegistratonService.generateId());
-
-    useEffect(() => {
-        widgetRegistratonService.registerTable(idRef.current);
-    }, [widgetRegistratonService]);
-
-    useImperativeHandle(
+>(
+    (
+        {
+            axisAutoFit,
+            bearColor,
+            bullColor,
+            style,
+            hoverStyle,
+            activeStyle,
+            disabledStyle,
+        }: WidgetPropsMap["PlotCandlestick"],
         ref,
-        () => {
-            return {
-                setData: (data: PlotCandlestickDataItem[]) => {
-                    widgetRegistratonService.setPlotCandlestickData(idRef.current, data);
-                },
-                setAxesAutoFit: (enabled: boolean) => {
-                    widgetRegistratonService.setPlotCandlestickAutoAxisFitEnabled(
-                        idRef.current,
-                        enabled,
-                    );
-                },
-                resetData: () => {
-                    widgetRegistratonService.resetPlotData(idRef.current);
-                },
-            };
-        },
-        [],
-    );
+    ) => {
+        const widgetRegistratonService = useWidgetRegistrationService();
+        const idRef = useRef(widgetRegistratonService.generateId());
 
-    return (
-        <plot-candlestick
-            id={idRef.current}
-            bearColor={bearColor}
-            bullColor={bullColor}
-            axisAutoFit={axisAutoFit}
-            style={style}
-        />
-    );
-});
+        useEffect(() => {
+            widgetRegistratonService.registerTable(idRef.current);
+        }, [widgetRegistratonService]);
+
+        useImperativeHandle(
+            ref,
+            () => {
+                return {
+                    setData: (data: PlotCandlestickDataItem[]) => {
+                        widgetRegistratonService.setPlotCandlestickData(idRef.current, data);
+                    },
+                    setAxesAutoFit: (enabled: boolean) => {
+                        widgetRegistratonService.setPlotCandlestickAutoAxisFitEnabled(
+                            idRef.current,
+                            enabled,
+                        );
+                    },
+                    resetData: () => {
+                        widgetRegistratonService.resetPlotData(idRef.current);
+                    },
+                };
+            },
+            [],
+        );
+
+        return (
+            <plot-candlestick
+                id={idRef.current}
+                bearColor={bearColor}
+                bullColor={bullColor}
+                axisAutoFit={axisAutoFit}
+                style={style}
+                hoverStyle={hoverStyle}
+                activeStyle={activeStyle}
+                disabledStyle={disabledStyle}
+            />
+        );
+    },
+);

@@ -4,6 +4,18 @@ import { PropsWithChildren, WidgetFunctionComponent, WidgetPropsMap } from "./ty
 export const Group: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap["Group"]> = ({
     children,
     style,
+    hoverStyle,
+    activeStyle,
+    disabledStyle,
 }) => {
-    return <group style={style}>{children}</group>;
+    return (
+        <group
+            style={style}
+            hoverStyle={hoverStyle}
+            activeStyle={activeStyle}
+            disabledStyle={disabledStyle}
+        >
+            {children}
+        </group>
+    );
 };

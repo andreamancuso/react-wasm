@@ -4,5 +4,13 @@ export const BulletText: WidgetFunctionComponent<WidgetPropsMap["BulletText"]> =
     text,
     style,
 }) => {
-    return <bullet-text text={text} style={style} />;
+    return (
+        <bullet-text
+            text={text}
+            style={style}
+            hoverStyle={hoverStyle}
+            activeStyle={activeStyle}
+            disabledStyle={disabledStyle}
+        />
+    );
 };
