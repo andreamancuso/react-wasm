@@ -23,6 +23,7 @@ import { CryptoCandlestickPlots } from "./CryptoPlots/CryptoCandlestickPlots";
 import { Sidebar } from "./Sidebar/Sidebar";
 import { CryptoSymbolPair } from "./CryptoSymbolPairs/CryptoSymbolPair";
 import { CryptoSymbolBlock } from "./CryptoSymbolBlock/CryptoSymbolBlock";
+import { Tabs } from "./Tabs/Tabs";
 
 const componentMap = {
     cryptoAssetPanels: CryptoAssetPanels,
@@ -75,31 +76,79 @@ export const TradingGuiDemo = () => {
                         [ImGuiStyleVar.FrameRounding]: 5,
                     },
                 },
-                mainContentNode: {
+                mainNode: {
                     flex: 1,
-                    borderColor: "#1B1D20",
-                    borderThickness: 1,
                 },
                 mainTitleNode: {
                     flexDirection: "row",
-                    borderColor: "#1B1D20", // todo: remove double border
-                    borderThickness: 1,
+                    borderBottom: {
+                        color: "#1B1D20", // todo: remove double border
+                        thickness: 1,
+                    },
+                    borderRight: {
+                        color: "#1B1D20", // todo: remove double border
+                        thickness: 1,
+                    },
                     padding: { all: 20 },
                 },
                 mainTitle: {
                     font: { name: "roboto-bold", size: 32 },
                 },
-                tabs: { flexDirection: "row" },
-                tab: {
-                    font: { name: "roboto-bold", size: 32 },
-                    padding: { vertical: 10, horizontal: 20 },
-                    roundCorners: ["topLeft", "topRight"],
-                    rounding: 4,
-                    borderColor: "#fff",
-                    borderThickness: 1,
+                contentNode: {
+                    padding: {
+                        left: 8,
+                    },
                 },
-                tabText: {
-                    font: { name: "roboto-bold", size: 18 },
+                tabContent: {
+                    height: "100%",
+                    width: 350,
+                    gap: { row: 10 },
+                    padding: {
+                        horizontal: 8,
+                        vertical: 16,
+                    },
+                    borderLeft: {
+                        color: "#1C1E22",
+                        thickness: 1,
+                    },
+                },
+                marketSearchInput: {
+                    vars: {
+                        [ImGuiStyleVar.FrameBorderSize]: 1,
+                        [ImGuiStyleVar.FramePadding]: [10, 10],
+                    },
+                    colors: {
+                        [ImGuiCol.Border]: "#1C1E22",
+                    },
+                },
+                marketSearchFilterWrapper: {
+                    flexDirection: "row",
+                    gap: { all: 8 },
+                    flexWrap: "wrap",
+                },
+                marketSearchFilter: {
+                    width: 60,
+                    colors: {
+                        [ImGuiCol.Button]: "#1E2025",
+                        [ImGuiCol.ButtonHovered]: "#1E2025",
+                        [ImGuiCol.ButtonActive]: "#1E2025",
+                        [ImGuiCol.Text]: "#777B84",
+                    },
+                    vars: {
+                        [ImGuiStyleVar.FrameRounding]: 5,
+                    },
+                },
+                marketSearchFilterActive: {
+                    width: 60,
+                    colors: {
+                        [ImGuiCol.Button]: "#fff",
+                        [ImGuiCol.ButtonHovered]: "#fff",
+                        [ImGuiCol.ButtonActive]: "#fff",
+                        [ImGuiCol.Text]: "#292A2C",
+                    },
+                    vars: {
+                        [ImGuiStyleVar.FrameRounding]: 5,
+                    },
                 },
             }),
         [],
@@ -323,16 +372,68 @@ export const TradingGuiDemo = () => {
 
             <ReactImgui.Node style={styleSheet.mainLayoutNode}>
                 <Sidebar />
-                <ReactImgui.Node style={styleSheet.mainContentNode}>
+                <ReactImgui.Node style={styleSheet.mainNode}>
                     <ReactImgui.Node style={styleSheet.mainTitleNode}>
                         <ReactImgui.UnformattedText text="Trade" style={styleSheet.mainTitle} />
                     </ReactImgui.Node>
 
-                    <CryptoSymbolBlock symbol="BTC/USD" />
+                    <ReactImgui.Node style={styleSheet.contentNode}>
+                        <CryptoSymbolBlock symbol="BTC/USD" />
 
-                    <ReactImgui.Node style={styleSheet.tabs}>
-                        <ReactImgui.Node style={styleSheet.tab}>
-                            <ReactImgui.UnformattedText text="Markets" style={styleSheet.tabText} />
+                        <Tabs />
+
+                        <ReactImgui.Node style={styleSheet.tabContent}>
+                            <ReactImgui.InputText
+                                hint={`${faIconMap["magnifying-glass"]} SEARCH MARKETS`}
+                                style={styleSheet.marketSearchInput}
+                            />
+                            <ReactImgui.Node style={styleSheet.marketSearchFilterWrapper}>
+                                <ReactImgui.Button
+                                    label={faIconMap["star"]}
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="ALL"
+                                    style={styleSheet.marketSearchFilterActive}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="TOP"
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="BTC"
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="ETH"
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="USD"
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="USDC"
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="DAI"
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="MKR"
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                            </ReactImgui.Node>
                         </ReactImgui.Node>
                     </ReactImgui.Node>
                 </ReactImgui.Node>

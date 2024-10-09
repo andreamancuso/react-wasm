@@ -356,8 +356,8 @@ void ReactImgui::RenderElementTree(const int id) {
             if (m_elements[id]->m_baseDrawStyle.has_value()) {
                 std::string border;
 
-                if (m_elements[id]->m_baseDrawStyle.value().borderColor.has_value()) {
-                    auto [borderColorHex, _] = IV4toHEXATuple(m_elements[id]->m_baseDrawStyle.value().borderColor.value());
+                if (m_elements[id]->m_baseDrawStyle.value().borderAll.has_value()) {
+                    auto [borderColorHex, _] = IV4toHEXATuple(m_elements[id]->m_baseDrawStyle.value().borderAll.value().color);
 
                     border += borderColorHex;
                 }

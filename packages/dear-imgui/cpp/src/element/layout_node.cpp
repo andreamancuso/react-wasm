@@ -97,8 +97,24 @@ void LayoutNode::ApplyStyle(const json& styleDef) const {
         ApplyOptionalMultiEdgeStyleProperty<YGEdge, float>(styleDef, "padding", ResolveEdge);
 
         // Currently we support only same thickness borders
-        if (styleDef.contains("borderThickness") && styleDef["borderThickness"].is_number()) {
-            SetBorder(YGEdgeAll, styleDef["borderThickness"].template get<float>());
+        if (styleDef.contains("border") && styleDef["border"]["thickness"].is_number()) {
+            SetBorder(YGEdgeAll, styleDef["border"]["thickness"].template get<float>());
+        }
+
+        if (styleDef.contains("borderTop") && styleDef["borderTop"]["thickness"].is_number()) {
+            SetBorder(YGEdgeTop, styleDef["borderTop"]["thickness"].template get<float>());
+        }
+
+        if (styleDef.contains("borderRight") && styleDef["borderRight"]["thickness"].is_number()) {
+            SetBorder(YGEdgeRight, styleDef["borderRight"]["thickness"].template get<float>());
+        }
+
+        if (styleDef.contains("borderBottom") && styleDef["borderBottom"]["thickness"].is_number()) {
+            SetBorder(YGEdgeBottom, styleDef["borderBottom"]["thickness"].template get<float>());
+        }
+
+        if (styleDef.contains("borderLeft") && styleDef["borderLeft"]["thickness"].is_number()) {
+            SetBorder(YGEdgeLeft, styleDef["borderLeft"]["thickness"].template get<float>());
         }
 
         if (styleDef.contains("gap") && styleDef["gap"].is_object()) {

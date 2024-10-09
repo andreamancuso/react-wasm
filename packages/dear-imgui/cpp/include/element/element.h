@@ -18,11 +18,21 @@ enum ElementState {
     ElementState_Active = 3,
 };
 
+struct BorderStyle {
+    ImVec4 color;
+    float thickness = 0;
+};
+
+BorderStyle extractBorderStyle(const json& borderStyleDef);
+
 struct BaseDrawStyle {
     std::optional<ImVec4> backgroundColor;
-    std::optional<ImVec4> borderColor;
+    std::optional<BorderStyle> borderTop;
+    std::optional<BorderStyle> borderRight;
+    std::optional<BorderStyle> borderBottom;
+    std::optional<BorderStyle> borderLeft;
+    std::optional<BorderStyle> borderAll;
     std::optional<float> rounding;
-    std::optional<float> borderThickness;
     ImDrawFlags drawFlags = ImDrawFlags_RoundCornersNone;
 };
 

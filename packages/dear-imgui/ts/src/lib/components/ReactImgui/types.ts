@@ -115,7 +115,7 @@ export type WidgetPropsMap = {
     Indent: WidgetStyleProps;
     InputText: WidgetStyleProps & {
         defaultValue?: string;
-        label?: string;
+        hint?: string;
         onChange?: (event: InputTextChangeEvent) => void;
     };
     ItemTooltip: WidgetStyleProps;

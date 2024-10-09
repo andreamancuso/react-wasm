@@ -6,11 +6,11 @@ class InputText final : public StyledWidget {
 
         static int InputTextCb(ImGuiInputTextCallbackData* data);
 
-        InputText(ReactImgui* view, const int id, const std::string& defaultValue, const std::string& label, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
+        InputText(ReactImgui* view, const int id, const std::string& defaultValue, const std::string& hint, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
             m_type = "input-text";
             m_bufferPointer = std::make_unique<char[]>(100);
             m_defaultValue = defaultValue;
-            m_label = label;
+            m_hint = hint;
 
             if (!defaultValue.empty()) {
                 strncpy(m_bufferPointer.get(), defaultValue.c_str(), 99);
@@ -20,20 +20,20 @@ class InputText final : public StyledWidget {
     public:
         std::unique_ptr<char[]> m_bufferPointer;
         std::string m_defaultValue;
-        std::string m_label;
+        std::string m_hint;
 
         static std::unique_ptr<InputText> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
             const auto id = widgetDef["id"].template get<int>();
             const auto defaultValue = widgetDef.contains("defaultValue") && widgetDef["defaultValue"].is_string() ? widgetDef["defaultValue"].template get<std::string>() : "";
-            const auto label = widgetDef.contains("label") && widgetDef["label"].is_string() ? widgetDef["label"].template get<std::string>() : "";
+            const auto hint = widgetDef.contains("hint") && widgetDef["hint"].is_string() ? widgetDef["hint"].template get<std::string>() : "";
 
-            return makeWidget(view, id, defaultValue, label, maybeStyle);
+            return makeWidget(view, id, defaultValue, hint, maybeStyle);
 
             // throw std::invalid_argument("Invalid JSON data");
         }
 
-        static std::unique_ptr<InputText> makeWidget(ReactImgui* view, const int id, const std::string& defaultValue, const std::string& label, std::optional<WidgetStyle>& style) {
-            InputText instance(view, id, defaultValue, label, style);
+        static std::unique_ptr<InputText> makeWidget(ReactImgui* view, const int id, const std::string& defaultValue, const std::string& hint, std::optional<WidgetStyle>& style) {
+            InputText instance(view, id, defaultValue, hint, style);
             return std::make_unique<InputText>(std::move(instance));
         }
 

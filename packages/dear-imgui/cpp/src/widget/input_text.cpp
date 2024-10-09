@@ -9,15 +9,15 @@ void InputText::Render(ReactImgui* view, const std::optional<ImRect>& viewport) 
     ImGui::PushID(m_id);
     // imgui_stdlib.cpp
     // bool ImGui::InputText(const char* label, std::string* str, ImGuiInputTextFlags flags, ImGuiInputTextCallback callback, void* user_data)
-    ImGui::InputText(m_label.c_str(), m_bufferPointer.get(), 100, inputTextFlags, InputTextCb, (void*)this);
+    ImGui::InputTextWithHint("", m_hint.c_str(), m_bufferPointer.get(), 100, inputTextFlags, InputTextCb, (void*)this);
     ImGui::PopID();
 };
 
 void InputText::Patch(const json& widgetPatchDef, ReactImgui* view) {
     StyledWidget::Patch(widgetPatchDef, view);
 
-    if (widgetPatchDef.contains("label") && widgetPatchDef["label"].is_string()) {
-        m_label = widgetPatchDef["label"].template get<std::string>();
+    if (widgetPatchDef.contains("hint") && widgetPatchDef["hint"].is_string()) {
+        m_hint = widgetPatchDef["hint"].template get<std::string>();
     }
 };
 

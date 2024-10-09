@@ -19,7 +19,7 @@ export const CryptoSymbolBlock = ({ symbol }: Props) => {
                 block: {
                     flexDirection: "row",
                     padding: {
-                        horizontal: 2,
+                        // horizontal: 2,
                         vertical: 8,
                     },
                     gap: { column: 5 },

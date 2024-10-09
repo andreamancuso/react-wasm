@@ -78,6 +78,7 @@ export const theme2Colors = {
     darkerGrey: "#2a2e39",
     darkGrey: "#363b4a",
     lightGrey: "#5a5a5a",
+    lighterGrey: "#7A818C",
     evenLighterGrey: "#8491a3",
     black: "#0A0B0D",
     green: "#75f986",
@@ -90,7 +91,7 @@ export const theme2: ImGuiStyleForPatching = {
     // framePadding: [0, 0],
     colors: {
         [ImGuiCol.Text]: [theme2Colors.white, 1],
-        [ImGuiCol.TextDisabled]: [theme2Colors.lightGrey, 1],
+        [ImGuiCol.TextDisabled]: [theme2Colors.lighterGrey, 1],
         [ImGuiCol.WindowBg]: [theme2Colors.black, 1],
         [ImGuiCol.ChildBg]: [theme2Colors.black, 1],
         [ImGuiCol.PopupBg]: [theme2Colors.white, 1],

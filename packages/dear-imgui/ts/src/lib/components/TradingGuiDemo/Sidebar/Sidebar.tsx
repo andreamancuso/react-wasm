@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
-// import { HelpMarker } from "./HelpMarker/HelpMarker";
 import faIconMap from "../../../fa-icons";
 import RWStyleSheet from "../../../stylesheet/stylesheet";
 
@@ -12,14 +11,19 @@ export const Sidebar = () => {
                 sidebarNode: {
                     flexBasis: 60,
                     height: "100%",
-                    borderColor: "#1B1D20",
-                    borderThickness: 1,
+                    border: {
+                        color: "#1B1D20",
+                        thickness: 1,
+                    },
                 },
                 sideBarItem: {
                     width: 58,
                     height: 58,
                     justifyContent: "center",
                     alignItems: "center",
+                },
+                logo: {
+                    font: { name: "roboto-regular", size: 36 },
                 },
                 icon: {
                     width: 48,
@@ -50,7 +54,7 @@ export const Sidebar = () => {
     return (
         <ReactImgui.Node style={styleSheet.sidebarNode}>
             <ReactImgui.Node style={styleSheet.sideBarItem}>
-                <ReactImgui.UnformattedText text={faIconMap.otter} style={styleSheet.icon} />
+                <ReactImgui.UnformattedText text={faIconMap.otter} style={styleSheet.logo} />
             </ReactImgui.Node>
 
             <ReactImgui.Node style={styleSheet.sideBarItem}>

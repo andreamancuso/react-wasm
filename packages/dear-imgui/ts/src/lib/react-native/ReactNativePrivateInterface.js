@@ -19,7 +19,7 @@ const attributesForElements = {
     "help-marker": ["text"],
     "di-image": ["url", "width", "number"],
     indent: [],
-    "input-text": ["defaultValue", "label", "onChange"],
+    "input-text": ["defaultValue", "hint", "onChange"],
     "item-tooltip": [],
     "map-view": [],
     "multi-slider": [
