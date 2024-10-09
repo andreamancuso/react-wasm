@@ -5,12 +5,29 @@
 
 class ReactImgui;
 
-struct WidgetStyle {
+struct WidgetStyleParts {
     std::optional<StyleColors> maybeColors;
     std::optional<StyleVars> maybeStyleVars;
     std::optional<int> maybeFontIndex;
-    std::optional<HorizontalAlignment> maybeHorizontalAlignment;
 };
+
+struct WidgetStyle {
+    std::optional<WidgetStyleParts> maybeBase;
+    std::optional<WidgetStyleParts> maybeDisabled;
+    std::optional<WidgetStyleParts> maybeHover;
+    std::optional<WidgetStyleParts> maybeActive;
+
+    bool HasCustomFont(std::optional<ElementState> widgetState, ReactImgui* view);
+    [[nodiscard]] bool HasCustomStyleVar(std::optional<ElementState> widgetState, ImGuiStyleVar key) const;
+    [[nodiscard]] bool HasCustomColors(std::optional<ElementState> widgetState) const;
+    [[nodiscard]] bool HasCustomStyleVars(std::optional<ElementState> widgetState) const;
+    StyleColors& GetCustomColors(std::optional<ElementState> widgetState);
+    StyleVars& GetCustomStyleVars(std::optional<ElementState> widgetState);
+    int GetCustomFontId(std::optional<ElementState> widgetState, ReactImgui* view);
+    StyleVarValue GetCustomStyleVar(std::optional<ElementState> widgetState, ImGuiStyleVar key);
+};
+
+WidgetStyleParts extractStyle(const json& styleDef, ReactImgui* view);
 
 class StyledWidget : public Widget {
 public:
@@ -38,15 +55,11 @@ public:
 
     [[nodiscard]] bool HasCustomStyleVars() const;
 
-    [[nodiscard]] bool HasCustomHorizontalAlignment() const;
-
-    [[nodiscard]] bool HasRightHorizontalAlignment() const;
-
     void ReplaceStyle(WidgetStyle& newStyle);
 
     void Patch(const json& widgetPatchDef, ReactImgui* view) override;
 
     [[nodiscard]] bool HasCustomStyleVar(ImGuiStyleVar key) const;
 
-    [[nodiscard]] StyleVarValue& GetCustomStyleVar(ImGuiStyleVar key) const;
+    [[nodiscard]] StyleVarValue GetCustomStyleVar(ImGuiStyleVar key) const;
 };

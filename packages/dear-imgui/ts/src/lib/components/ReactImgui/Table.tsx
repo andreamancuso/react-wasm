@@ -8,7 +8,18 @@ export type TableImperativeHandle = {
 };
 
 export const Table = forwardRef<TableImperativeHandle, WidgetPropsMap["Table"]>(
-    ({ columns, clipRows, initialData, style }: WidgetPropsMap["Table"], ref) => {
+    (
+        {
+            columns,
+            clipRows,
+            initialData,
+            style,
+            hoverStyle,
+            activeStyle,
+            disabledStyle,
+        }: WidgetPropsMap["Table"],
+        ref,
+    ) => {
         const widgetRegistratonService = useWidgetRegistrationService();
         const idRef = useRef(widgetRegistratonService.generateId());
 
@@ -31,6 +42,16 @@ export const Table = forwardRef<TableImperativeHandle, WidgetPropsMap["Table"]>(
             [],
         );
 
-        return <di-table id={idRef.current} columns={columns} clipRows={clipRows} style={style} />;
+        return (
+            <di-table
+                id={idRef.current}
+                columns={columns}
+                clipRows={clipRows}
+                style={style}
+                hoverStyle={hoverStyle}
+                activeStyle={activeStyle}
+                disabledStyle={disabledStyle}
+            />
+        );
     },
 );

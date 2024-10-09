@@ -9,28 +9,46 @@ export type ClippedMultiLineTextRendererImperativeHandle = {
 export const ClippedMultiLineTextRenderer = forwardRef<
     ClippedMultiLineTextRendererImperativeHandle,
     WidgetPropsMap["ClippedMultiLineTextRenderer"]
->(({ style }: WidgetPropsMap["ClippedMultiLineTextRenderer"], ref) => {
-    const widgetRegistratonService = useWidgetRegistrationService();
-    const idRef = useRef(widgetRegistratonService.generateId());
-
-    useEffect(() => {
-        widgetRegistratonService.registerTable(idRef.current);
-    }, [widgetRegistratonService]);
-
-    useImperativeHandle(
+>(
+    (
+        {
+            style,
+            hoverStyle,
+            activeStyle,
+            disabledStyle,
+        }: WidgetPropsMap["ClippedMultiLineTextRenderer"],
         ref,
-        () => {
-            return {
-                appendTextToClippedMultiLineTextRenderer(data: string) {
-                    widgetRegistratonService.appendTextToClippedMultiLineTextRenderer(
-                        idRef.current,
-                        data,
-                    );
-                },
-            };
-        },
-        [],
-    );
+    ) => {
+        const widgetRegistratonService = useWidgetRegistrationService();
+        const idRef = useRef(widgetRegistratonService.generateId());
 
-    return <clipped-multi-line-text-renderer id={idRef.current} style={style} />;
-});
+        useEffect(() => {
+            widgetRegistratonService.registerTable(idRef.current);
+        }, [widgetRegistratonService]);
+
+        useImperativeHandle(
+            ref,
+            () => {
+                return {
+                    appendTextToClippedMultiLineTextRenderer(data: string) {
+                        widgetRegistratonService.appendTextToClippedMultiLineTextRenderer(
+                            idRef.current,
+                            data,
+                        );
+                    },
+                };
+            },
+            [],
+        );
+
+        return (
+            <clipped-multi-line-text-renderer
+                id={idRef.current}
+                style={style}
+                hoverStyle={hoverStyle}
+                activeStyle={activeStyle}
+                disabledStyle={disabledStyle}
+            />
+        );
+    },
+);

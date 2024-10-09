@@ -10,22 +10,41 @@ using json = nlohmann::json;
 
 class ReactImgui;
 
+// For simplicity, only 1 'non-base' state at a time is allowed
+enum ElementState {
+    ElementState_Base = 0,
+    ElementState_Disabled = 1,
+    ElementState_Hover = 2,
+    ElementState_Active = 3,
+};
+
+struct BorderStyle {
+    ImVec4 color;
+    float thickness = 0;
+};
+
+BorderStyle extractBorderStyle(const json& borderStyleDef);
+
 struct BaseDrawStyle {
     std::optional<ImVec4> backgroundColor;
-    std::optional<ImVec4> borderColor;
+    std::optional<BorderStyle> borderTop;
+    std::optional<BorderStyle> borderRight;
+    std::optional<BorderStyle> borderBottom;
+    std::optional<BorderStyle> borderLeft;
+    std::optional<BorderStyle> borderAll;
     std::optional<float> rounding;
-    std::optional<float> borderThickness;
     ImDrawFlags drawFlags = ImDrawFlags_RoundCornersNone;
 };
 
 class Element {
     public:
         int m_id;
-    std::string m_type;
+        std::string m_type;
         ReactImgui* m_view;
         bool m_handlesChildrenWithinRenderMethod;
         bool m_isRoot;
         bool m_cull;
+        bool m_hovered;
         std::unique_ptr<LayoutNode> m_layoutNode;
         std::optional<BaseDrawStyle> m_baseDrawStyle;
 
@@ -50,6 +69,8 @@ class Element {
         virtual void Render(ReactImgui* view, const std::optional<ImRect>& viewport);
 
         virtual void PostRender(ReactImgui* view);
+
+        virtual ElementState GetState() const;
 
         void DrawBaseEffects() const;
 

@@ -46,49 +46,68 @@ void Element::ResetStyle() {
     m_baseDrawStyle.reset();
 };
 
+BorderStyle extractBorderStyle(const json& borderStyleDef) {
+    BorderStyle borderStyle;
+
+    if (auto maybeColor = extractColor(borderStyleDef["color"]); maybeColor.has_value()) {
+        borderStyle.color = maybeColor.value();
+    }
+
+    if (borderStyleDef.contains("thickness")) {
+        borderStyle.thickness = borderStyleDef["thickness"].template get<float>();
+    }
+
+    return borderStyle;
+}
+
 void Element::SetStyle(const json& styleDef) {
     if (styleDef.is_object()) {
         m_layoutNode->ApplyStyle(styleDef);
 
-        if (styleDef.contains("backgroundColor") || styleDef.contains("borderColor")) {
-            BaseDrawStyle baseDrawStyle;
+        BaseDrawStyle baseDrawStyle;
 
-            if (styleDef.contains("backgroundColor")) {
-                if (auto maybeColor = extractColor(styleDef["backgroundColor"]); maybeColor.has_value()) {
-                    baseDrawStyle.backgroundColor = maybeColor.value();
-                }
-            }
-
-            if (styleDef.contains("borderColor")) {
-                if (auto maybeColor = extractColor(styleDef["borderColor"]); maybeColor.has_value()) {
-                    baseDrawStyle.borderColor = maybeColor.value();
-                }
-            }
-
-            if (baseDrawStyle.backgroundColor.has_value() || baseDrawStyle.borderColor.has_value()) {
-
-                if (styleDef.contains("rounding")) {
-                    baseDrawStyle.rounding = styleDef["rounding"].template get<float>();
-                }
-
-                if (styleDef.contains("borderThickness")) {
-                    baseDrawStyle.borderThickness = styleDef["borderThickness"].template get<float>();
-                }
-
-                if (styleDef.contains("roundCorners") && styleDef["roundCorners"].is_array()) {
-                    const auto roundCorners = styleDef["roundCorners"].template get<std::vector<std::string>>();
-
-                    baseDrawStyle.drawFlags = std::accumulate(
-                        roundCorners.begin(),
-                        roundCorners.end(),
-                        static_cast<ImDrawFlags>(ImDrawFlags_None),
-                        cornersToDrawFlags
-                    );
-                }
-
-                m_baseDrawStyle.emplace(baseDrawStyle);
+        if (styleDef.contains("backgroundColor")) {
+            if (auto maybeColor = extractColor(styleDef["backgroundColor"]); maybeColor.has_value()) {
+                baseDrawStyle.backgroundColor = maybeColor.value();
             }
         }
+
+        if (styleDef.contains("border")) {
+            baseDrawStyle.borderAll = extractBorderStyle(styleDef["border"]);
+        }
+
+        if (styleDef.contains("borderTop")) {
+            baseDrawStyle.borderTop = extractBorderStyle(styleDef["borderTop"]);
+        }
+
+        if (styleDef.contains("borderRight")) {
+            baseDrawStyle.borderRight = extractBorderStyle(styleDef["borderRight"]);
+        }
+
+        if (styleDef.contains("borderBottom")) {
+            baseDrawStyle.borderBottom = extractBorderStyle(styleDef["borderBottom"]);
+        }
+
+        if (styleDef.contains("borderLeft")) {
+            baseDrawStyle.borderLeft = extractBorderStyle(styleDef["borderLeft"]);
+        }
+
+        if (styleDef.contains("rounding")) {
+            baseDrawStyle.rounding = styleDef["rounding"].template get<float>();
+        }
+
+        if (styleDef.contains("roundCorners") && styleDef["roundCorners"].is_array()) {
+            const auto roundCorners = styleDef["roundCorners"].template get<std::vector<std::string>>();
+
+            baseDrawStyle.drawFlags = std::accumulate(
+                roundCorners.begin(),
+                roundCorners.end(),
+                static_cast<ImDrawFlags>(ImDrawFlags_None),
+                cornersToDrawFlags
+            );
+        }
+
+        m_baseDrawStyle.emplace(baseDrawStyle);
     }
 }
 
@@ -209,16 +228,64 @@ void Element::DrawBaseEffects() const {
             );
         }
 
-        if (m_baseDrawStyle.value().borderColor.has_value()) {
-            const ImU32 col = ImColor(m_baseDrawStyle.value().borderColor.value());
+        if (m_baseDrawStyle.value().borderAll.has_value()) {
+            const ImU32 col = ImColor(m_baseDrawStyle.value().borderAll.value().color);
 
             drawList->AddRect(
                 p0,
                 p1,
                 col,
                 m_baseDrawStyle.value().rounding.value_or(0),
-                ImDrawFlags_RoundCornersTopLeft | ImDrawFlags_RoundCornersBottomRight,
-                m_baseDrawStyle.value().borderThickness.value_or(1.0f)
+                m_baseDrawStyle.value().drawFlags,
+                m_baseDrawStyle.value().borderAll.value().thickness
+            );
+
+            // auto rounding = m_baseDrawStyle.value().rounding.value_or(0);
+            // auto thickness = m_baseDrawStyle.value().borderAll.value().thickness;
+
+            // todo: have to figure out how to implement rounded corners.....
+            // drawList->PathArcToFast(ImVec2(p0.x + rounding, p1.y - rounding), rounding, 3, 6); // bottom-left
+            // drawList->PathArcToFast(ImVec2(p0.x + rounding, p0.y + rounding), rounding, 6, 9); // top-left
+            // drawList->PathArcToFast(ImVec2(p1.x - rounding, p0.y + rounding), rounding, 9, 12); // top-right
+            // drawList->PathArcToFast(ImVec2(p1.x - rounding, p1.y - rounding), rounding, 0, 3); // bottom-right
+
+            // drawList->PathStroke(col, ImDrawFlags_Closed, m_baseDrawStyle.value().borderThickness.value_or(1.0f));
+        }
+
+        if (m_baseDrawStyle.value().borderTop.has_value()) {
+            drawList->AddLine(
+                ImVec2(p0.x, p0.y),
+                ImVec2(p1.x, p0.y),
+                ImColor(m_baseDrawStyle.value().borderTop.value().color),
+                m_baseDrawStyle.value().borderTop.value().thickness
+            );
+        }
+        if (m_baseDrawStyle.value().borderRight.has_value()) {
+            auto thickness = m_baseDrawStyle.value().borderRight.value().thickness;
+
+            drawList->AddLine(
+                ImVec2(p1.x - thickness, p0.y),
+                ImVec2(p1.x - thickness, p1.y),
+                ImColor(m_baseDrawStyle.value().borderRight.value().color),
+                m_baseDrawStyle.value().borderRight.value().thickness
+            );
+        }
+        if (m_baseDrawStyle.value().borderBottom.has_value()) {
+            auto thickness = m_baseDrawStyle.value().borderBottom.value().thickness;
+
+            drawList->AddLine(
+                ImVec2(p0.x, p1.y - thickness),
+                ImVec2(p1.x, p1.y - thickness),
+                ImColor(m_baseDrawStyle.value().borderBottom.value().color),
+                m_baseDrawStyle.value().borderBottom.value().thickness
+            );
+        }
+        if (m_baseDrawStyle.value().borderLeft.has_value()) {
+            drawList->AddLine(
+                ImVec2(p0.x, p1.y),
+                ImVec2(p0.x, p0.y),
+                ImColor(m_baseDrawStyle.value().borderLeft.value().color),
+                m_baseDrawStyle.value().borderLeft.value().thickness
             );
         }
     }
@@ -274,3 +341,13 @@ bool Element::HasInternalOps() {
 };
 
 void Element::HandleInternalOp(const json& opDef) {};
+
+// todo: what about the other states?
+// todo: also, this is currently called multiple times - unnecessarily?
+ElementState Element::GetState() const {
+    if (m_hovered) {
+        return ElementState_Hover;
+    }
+
+    return ElementState_Base;
+};

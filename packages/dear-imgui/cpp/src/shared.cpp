@@ -125,7 +125,9 @@ json IV4toJsonHEXATuple(const ImVec4& imVec4) {
 
 std::optional<ImVec4> jsonHEXATupleToIV4(const json& tupleDef) {
     if (!tupleDef.is_array() || tupleDef.size() != 2
-        || !tupleDef[0].is_string() || !tupleDef[1].is_number_unsigned()) {
+        || !tupleDef[0].is_string() || !tupleDef[1].is_number()) {
+        printf("Color definition not recognised: %s\n", tupleDef.dump().c_str());
+
         return std::nullopt;
         }
 
@@ -147,8 +149,12 @@ ImDrawFlags cornersToDrawFlags(ImDrawFlags accumulator, const std::string_view s
     if (side == "all") {
         accumulator |= ImDrawFlags_RoundCornersAll;
     } else if (side == "topLeft") {
+        printf("topLeft\n");
+
         accumulator |= ImDrawFlags_RoundCornersTopLeft;
     } else if (side == "topRight") {
+        printf("topRight\n");
+
         accumulator |= ImDrawFlags_RoundCornersTopRight;
     } else if (side == "bottomLeft") {
         accumulator |= ImDrawFlags_RoundCornersBottomLeft;

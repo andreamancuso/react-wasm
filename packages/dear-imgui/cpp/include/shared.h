@@ -28,18 +28,12 @@ struct StringHash {
     }
 };
 
-enum HorizontalAlignment
-{
-    // HorizontalAlignment_None    = -1,
-    HorizontalAlignment_Left    = 0,
-    HorizontalAlignment_Right   = 1,
-    HorizontalAlignment_Center  = 2 // Wondering this will ever be supported the way I'd like
-};
-
 using StyleVarValue = std::variant<std::monostate, ImVec2, float>;
 using StyleVarValueRef = std::variant<std::monostate, const ImVec2*, const float*>;
 using StyleColors = std::unordered_map<ImGuiCol, ImVec4>;
 using StyleVars = std::unordered_map<ImGuiStyleVar, StyleVarValue>;
+
+using WidgetColors = std::tuple<std::optional<StyleColors>, std::optional<StyleColors>>;
 
 using HEXA = std::tuple<std::string, float>;
 

@@ -2,67 +2,284 @@
 
 #include "widget/styled_widget.h"
 
-std::optional<WidgetStyle> StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
-    std::optional<WidgetStyle> maybeStyle;
-        
-    if (widgetDef.contains("style") && widgetDef["style"].is_object()) {
-        // Perhaps a bit optimistic, but also rather convenient
-        maybeStyle.emplace(WidgetStyle{});
+bool WidgetStyle::HasCustomFont(const std::optional<ElementState> widgetState, ReactImgui* view) {
+    const auto hasBaseValue = maybeBase.has_value() && maybeBase.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeBase.value().maybeFontIndex.value());
 
-        if (widgetDef["style"].contains("font") 
-            && widgetDef["style"]["font"].is_object() 
-            && widgetDef["style"]["font"]["name"].is_string() 
-            && widgetDef["style"]["font"]["size"].is_number_unsigned()) {
-
-            maybeStyle.value().maybeFontIndex.emplace(view->GetFontIndex(
-                widgetDef["style"]["font"]["name"].template get<std::string>(), 
-                widgetDef["style"]["font"]["size"].template get<int>()
-            ));
+    switch(widgetState.value_or(ElementState_Base)) {
+        case ElementState_Disabled: {
+            const auto hasDisabledValue = maybeDisabled.has_value() && maybeDisabled.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeDisabled.value().maybeFontIndex.value());
+            return hasDisabledValue || hasBaseValue;
         }
 
-        if (widgetDef["style"].contains("colors") 
-            && widgetDef["style"]["colors"].is_object()) {
+        case ElementState_Hover: {
+            const auto hasOverValue = maybeHover.has_value() && maybeHover.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeHover.value().maybeFontIndex.value());
+            return hasOverValue || hasBaseValue;
+        }
 
-            StyleColors colors;
+        case ElementState_Active: {
+            const auto hasActiveValue = maybeActive.has_value() && maybeActive.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeActive.value().maybeFontIndex.value());
+            return hasActiveValue || hasBaseValue;
+        }
 
-            for (auto& [key, item] : widgetDef["style"]["colors"].items()) {
-                if (auto maybeColor = extractColor(item); maybeColor.has_value()) {
-                    colors[stoi(key)] = maybeColor.value();
-                }
-            }
+        default:
+            break;
+    }
 
-            if (!colors.empty()) {
-                maybeStyle.value().maybeColors.emplace(colors);
+    return hasBaseValue;
+}
+
+bool WidgetStyle::HasCustomColors(const std::optional<ElementState> widgetState) const {
+    const auto hasBaseValue = maybeBase.has_value() && maybeBase.value().maybeColors.has_value();
+
+    switch(widgetState.value_or(ElementState_Base)) {
+        case ElementState_Disabled: {
+            const auto hasDisabledValue = maybeDisabled.has_value() && maybeDisabled.value().maybeColors.has_value();
+            return hasDisabledValue || hasBaseValue;
+        }
+
+        case ElementState_Hover: {
+            const auto hasHoverValue = maybeHover.has_value() && maybeHover.value().maybeColors.has_value();
+            return hasHoverValue || hasBaseValue;
+        }
+
+        case ElementState_Active: {
+            const auto hasActiveValue = maybeActive.has_value() && maybeActive.value().maybeColors.has_value();
+            return hasActiveValue || hasBaseValue;
+        }
+
+        default:
+            return hasBaseValue;
+    }
+}
+
+bool WidgetStyle::HasCustomStyleVars(const std::optional<ElementState> widgetState) const {
+    const auto hasBaseValue = maybeBase.has_value() && maybeBase.value().maybeStyleVars.has_value();
+
+    switch(widgetState.value_or(ElementState_Base)) {
+        case ElementState_Disabled: {
+            const auto hasDisabledValue = maybeDisabled.has_value() && maybeDisabled.value().maybeStyleVars.has_value();
+            return hasDisabledValue || hasBaseValue;
+        }
+
+        case ElementState_Hover: {
+            const auto hasHoverValue = maybeHover.has_value() && maybeHover.value().maybeStyleVars.has_value();
+            return hasHoverValue || hasBaseValue;
+        }
+
+        case ElementState_Active: {
+            const auto hasActiveValue = maybeActive.has_value() && maybeActive.value().maybeStyleVars.has_value();
+            return hasActiveValue || hasBaseValue;
+        }
+
+        default:
+            return hasBaseValue;
+    }
+}
+
+bool WidgetStyle::HasCustomStyleVar(const std::optional<ElementState> widgetState, const ImGuiStyleVar key) const {
+    const auto hasBaseValue = maybeBase.has_value() && maybeBase.value().maybeStyleVars.has_value() && maybeBase.value().maybeStyleVars.value().contains(key);
+
+    switch(widgetState.value_or(ElementState_Base)) {
+        case ElementState_Disabled: {
+            const auto hasDisabledValue = maybeDisabled.has_value() && maybeDisabled.value().maybeStyleVars.has_value() && maybeDisabled.value().maybeStyleVars.value().contains(key);
+            return hasDisabledValue || hasBaseValue;
+        }
+
+        case ElementState_Hover: {
+            const auto hasHoverValue = maybeHover.has_value() && maybeHover.value().maybeStyleVars.has_value() && maybeHover.value().maybeStyleVars.value().contains(key);
+            return hasHoverValue || hasBaseValue;
+        }
+
+        case ElementState_Active: {
+            const auto hasActiveValue = maybeActive.has_value() && maybeActive.value().maybeStyleVars.has_value() && maybeActive.value().maybeStyleVars.value().contains(key);
+            return hasActiveValue || hasBaseValue;
+        }
+
+        default:
+            return hasBaseValue;
+    }
+}
+
+StyleColors& WidgetStyle::GetCustomColors(std::optional<ElementState> widgetState) {
+    auto& baseColors = maybeBase.value().maybeColors.value();
+
+    switch(widgetState.value_or(ElementState_Base)) {
+        case ElementState_Disabled: {
+            if (maybeDisabled.has_value() && maybeDisabled.value().maybeColors.has_value()) {
+                return maybeDisabled.value().maybeColors.value();
             }
         }
 
-        if (widgetDef["style"].contains("vars") 
-            && widgetDef["style"]["vars"].is_object()) {
-            StyleVars styleVars;
-
-            for (auto& [key, item] : widgetDef["style"]["vars"].items()) {
-                StyleVarValue value;
-
-                if (item.is_array() && item.size() == 2
-                     && item[0].is_number_unsigned() && item[1].is_number_unsigned()) { // ImVec2
-                    value = ImVec2(
-                        item[0].template get<float>(), 
-                        item[1].template get<float>()
-                    );
-                } else if (item.is_number_unsigned()) { // float
-                    value = item.template get<float>();
-                }
-
-                if (value.index() != 0) {
-                    styleVars[stoi(key)] = value;
-                }
+        case ElementState_Hover: {
+            if (maybeHover.has_value() && maybeHover.value().maybeColors.has_value()) {
+                return maybeHover.value().maybeColors.value();
             }
+        }
 
-            if (!styleVars.empty()) {
-                maybeStyle.value().maybeStyleVars.emplace(styleVars);
+        case ElementState_Active: {
+            if (maybeActive.has_value() && maybeActive.value().maybeColors.has_value()) {
+                return maybeActive.value().maybeColors.value();
             }
+        }
+
+        default:
+            break;
+    }
+
+    return baseColors;
+}
+
+StyleVars& WidgetStyle::GetCustomStyleVars(std::optional<ElementState> widgetState) {
+    auto& baseStyleVars = maybeBase.value().maybeStyleVars.value();
+
+    switch(widgetState.value_or(ElementState_Base)) {
+        case ElementState_Disabled: {
+            if (maybeDisabled.has_value() && maybeDisabled.value().maybeStyleVars.has_value()) {
+                return maybeDisabled.value().maybeStyleVars.value();
+            }
+        }
+
+        case ElementState_Hover: {
+            if (maybeHover.has_value() && maybeHover.value().maybeStyleVars.has_value()) {
+                return maybeHover.value().maybeStyleVars.value();
+            }
+        }
+
+        case ElementState_Active: {
+            if (maybeActive.has_value() && maybeActive.value().maybeStyleVars.has_value()) {
+                return maybeActive.value().maybeStyleVars.value();
+            }
+        }
+
+        default:
+            break;
+    }
+
+    return baseStyleVars;
+}
+
+int WidgetStyle::GetCustomFontId(std::optional<ElementState> widgetState, ReactImgui* view) {
+    auto fontIndex = maybeBase.value().maybeFontIndex.value();
+
+    switch(widgetState.value_or(ElementState_Base)) {
+        case ElementState_Disabled: {
+            if (maybeDisabled.has_value() && maybeDisabled.value().maybeFontIndex.has_value()) {
+                return maybeDisabled.value().maybeFontIndex.value();
+            }
+        }
+
+        case ElementState_Hover: {
+            if (maybeHover.has_value() && maybeHover.value().maybeFontIndex.has_value()) {
+                return maybeHover.value().maybeFontIndex.value();
+            }
+        }
+
+        case ElementState_Active: {
+            if (maybeActive.has_value() && maybeActive.value().maybeFontIndex.has_value()) {
+                return maybeActive.value().maybeFontIndex.value();
+            }
+        }
+
+        default:
+            break;
+    }
+
+    return fontIndex;
+}
+
+// todo: is it really that difficult to return the variant by reference?
+StyleVarValue WidgetStyle::GetCustomStyleVar(std::optional<ElementState> widgetState, ImGuiStyleVar key) {
+    // if (HasCustomStyleVar(widgetState, key)) {
+    //     return maybeDisabled.value().maybeFontIndex.value();
+    // } else
+    if (HasCustomStyleVar(ElementState_Base, key)) {
+        return maybeBase.value().maybeStyleVars.value().at(key);
+    } else {
+        StyleVarValue nothing;
+
+        return nothing;
+    }
+}
+
+WidgetStyleParts extractStyle(const json& styleDef, ReactImgui* view) {
+    auto widgetStyleParts = WidgetStyleParts{};
+
+    if (styleDef.contains("font")
+        && styleDef["font"].is_object()
+        && styleDef["font"]["name"].is_string()
+        && styleDef["font"]["size"].is_number_unsigned()) {
+
+        widgetStyleParts.maybeFontIndex.emplace(view->GetFontIndex(
+            styleDef["font"]["name"].template get<std::string>(),
+            styleDef["font"]["size"].template get<int>()
+        ));
+    }
+
+    if (styleDef.contains("colors") && styleDef["colors"].is_object()) {
+        StyleColors colors;
+
+        for (auto& [key, item] : styleDef["colors"].items()) {
+            if (auto maybeColor = extractColor(item); maybeColor.has_value()) {
+                colors[stoi(key)] = maybeColor.value();
+            }
+        }
+
+        if (!colors.empty()) {
+            widgetStyleParts.maybeColors.emplace(colors);
         }
     }
+
+    if (styleDef.contains("vars") && styleDef["vars"].is_object()) {
+        StyleVars styleVars;
+
+        for (auto& [key, item] : styleDef["vars"].items()) {
+            StyleVarValue value;
+
+            if (item.is_array() && item.size() == 2
+                 && item[0].is_number_unsigned() && item[1].is_number_unsigned()) { // ImVec2
+                value = ImVec2(
+                    item[0].template get<float>(),
+                    item[1].template get<float>()
+                );
+            } else if (item.is_number_unsigned()) { // float
+                value = item.template get<float>();
+            }
+
+            if (value.index() != 0) {
+                styleVars[stoi(key)] = value;
+            }
+        }
+
+        if (!styleVars.empty()) {
+            widgetStyleParts.maybeStyleVars.emplace(styleVars);
+        }
+    }
+
+    return widgetStyleParts;
+}
+
+std::optional<WidgetStyle> StyledWidget::ExtractStyle(const json& widgetDef, ReactImgui* view) {
+    std::optional<WidgetStyle> maybeStyle;
+
+    WidgetStyle widgetStyle;
+
+    if (widgetDef.contains("style") && widgetDef["style"].is_object()) {
+        widgetStyle.maybeBase = extractStyle(widgetDef["style"], view);
+    }
+
+    if (widgetDef.contains("hoverStyle") && widgetDef["hoverStyle"].is_object()) {
+        widgetStyle.maybeHover = extractStyle(widgetDef["hoverStyle"], view);
+    }
+
+    if (widgetDef.contains("activeStyle") && widgetDef["activeStyle"].is_object()) {
+        widgetStyle.maybeActive = extractStyle(widgetDef["activeStyle"], view);
+    }
+
+    if (widgetDef.contains("disabledStyle") && widgetDef["disabledStyle"].is_object()) {
+        widgetStyle.maybeDisabled = extractStyle(widgetDef["disabledStyle"], view);
+    }
+
+    maybeStyle.emplace(widgetStyle);
 
     return maybeStyle;
 };
@@ -99,7 +316,7 @@ bool StyledWidget::HasCustomStyles() const {
 
 // Assumes m_style is not null, you should call HasCustomStyles() first
 bool StyledWidget::HasCustomFont(ReactImgui* view) const {
-    return m_style.value()->maybeFontIndex.has_value() && view->IsFontIndexValid(m_style.value()->maybeFontIndex.value());
+    return m_style.value()->HasCustomFont(GetState(), view);
 };
 
 // Assumes m_style is not null, you should call HasCustomStyles() first
@@ -113,23 +330,13 @@ bool StyledWidget::HasCustomHeight() {
 };
 
 // Assumes m_style is not null, you should call HasCustomStyles() first
-bool StyledWidget::HasCustomHorizontalAlignment() const {
-    return m_style.value()->maybeHorizontalAlignment.has_value();
-};
-
-// Assumes m_style is not null, you should call HasCustomStyles() first
-bool StyledWidget::HasRightHorizontalAlignment() const {
-    return HasCustomHorizontalAlignment() && m_style.value()->maybeHorizontalAlignment.value() == HorizontalAlignment_Right;
-};
-
-// Assumes m_style is not null, you should call HasCustomStyles() first
 bool StyledWidget::HasCustomColors() const {
-    return m_style.value()->maybeColors.has_value();
+    return m_style.value()->HasCustomColors(GetState());
 };
 
 // Assumes m_style is not null, you should call HasCustomStyles() first
 bool StyledWidget::HasCustomStyleVars() const {
-    return m_style.value()->maybeStyleVars.has_value();
+    return m_style.value()->HasCustomStyleVars(GetState());
 };
 
 void StyledWidget::PreRender(ReactImgui* view) {
@@ -148,17 +355,17 @@ void StyledWidget::PreRender(ReactImgui* view) {
 
     if (HasCustomStyles()) {
         if (HasCustomFont(view)) {
-            view->PushFont(m_style.value()->maybeFontIndex.value());
+            view->PushFont(m_style.value()->GetCustomFontId(GetState(), view));
         }
 
         if (HasCustomColors()) {
-            for (auto const& [key, val] : m_style.value()->maybeColors.value()) {
+            for (auto const& [key, val] : m_style.value()->GetCustomColors(GetState())) {
                 ImGui::PushStyleColor(key, val);
             }
         }
 
         if (HasCustomStyleVars()) {
-            for (auto const& [key, val] : m_style.value()->maybeStyleVars.value()) {
+            for (auto const& [key, val] : m_style.value()->GetCustomStyleVars(GetState())) {
                 if (std::holds_alternative<float>(val)) {
                     ImGui::PushStyleVar(key, std::get<float>(val));
                 } else if (std::holds_alternative<ImVec2>(val)) {
@@ -182,21 +389,33 @@ void StyledWidget::PostRender(ReactImgui* view) {
         }
 
         if (HasCustomColors()) {
-            ImGui::PopStyleColor(m_style.value()->maybeColors.value().size());
+            ImGui::PopStyleColor(m_style.value()->GetCustomColors(GetState()).size());
         }
 
         if (HasCustomStyleVars()) {
             // Big, big assumption that this will match exactly the number of style vars being pushed above... Maybe we should actually keep track
-            ImGui::PopStyleVar(m_style.value()->maybeStyleVars.value().size());
+            ImGui::PopStyleVar(m_style.value()->GetCustomStyleVars(GetState()).size());
         }
     }
+
+    m_hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNone);
 };
 
 bool StyledWidget::HasCustomStyleVar(const ImGuiStyleVar key) const {
-    return m_style.has_value() && m_style.value()->maybeStyleVars.has_value() && m_style.value()->maybeStyleVars.value().contains(key);
+    if (!m_style.has_value()) {
+        return false;
+    }
+
+    return m_style.value()->HasCustomStyleVar(GetState(), key);
 };
 
-// IMPORTANT: call HasCustomStyleVar() first
-StyleVarValue& StyledWidget::GetCustomStyleVar(const ImGuiStyleVar key) const {
-    return m_style.value()->maybeStyleVars.value().at(key);
+// todo: is it really that difficult to return the variant by reference?
+StyleVarValue StyledWidget::GetCustomStyleVar(const ImGuiStyleVar key) const {
+    if (!m_style.has_value()) {
+        StyleVarValue nothing;
+
+        return nothing;
+    }
+
+    return m_style.value()->GetCustomStyleVar(GetState(), key);
 };

@@ -2,6 +2,15 @@ import { PropsWithChildren, WidgetFunctionComponent, WidgetPropsMap } from "./ty
 
 export const ItemTooltip: WidgetFunctionComponent<
     PropsWithChildren & WidgetPropsMap["ItemTooltip"]
-> = ({ children, style }) => {
-    return <item-tooltip style={style}>{children}</item-tooltip>;
+> = ({ children, style, hoverStyle, activeStyle, disabledStyle }) => {
+    return (
+        <item-tooltip
+            style={style}
+            hoverStyle={hoverStyle}
+            activeStyle={activeStyle}
+            disabledStyle={disabledStyle}
+        >
+            {children}
+        </item-tooltip>
+    );
 };

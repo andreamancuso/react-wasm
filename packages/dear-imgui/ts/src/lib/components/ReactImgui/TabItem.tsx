@@ -12,12 +12,22 @@ export const TabItem: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMap
     onOpenChange,
     label,
     style,
+    hoverStyle,
+    activeStyle,
+    disabledStyle,
 }) => {
     const widgetRegistratonService = useWidgetRegistrationService();
     const idRef = useRef(widgetRegistratonService.generateId());
 
     return (
-        <tab-item id={idRef.current} label={label} style={style}>
+        <tab-item
+            id={idRef.current}
+            label={label}
+            style={style}
+            hoverStyle={hoverStyle}
+            activeStyle={activeStyle}
+            disabledStyle={disabledStyle}
+        >
             {children}
         </tab-item>
     );

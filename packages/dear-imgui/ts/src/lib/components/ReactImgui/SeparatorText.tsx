@@ -7,6 +7,17 @@ export type SeparatorTextProps = {
 export const SeparatorText: WidgetFunctionComponent<WidgetPropsMap["SeparatorText"]> = ({
     label,
     style,
+    hoverStyle,
+    activeStyle,
+    disabledStyle,
 }) => {
-    return <separator-text label={label} style={style} />;
+    return (
+        <separator-text
+            label={label}
+            style={style}
+            hoverStyle={hoverStyle}
+            activeStyle={activeStyle}
+            disabledStyle={disabledStyle}
+        />
+    );
 };

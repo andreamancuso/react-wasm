@@ -10,6 +10,9 @@ export const MultiSlider: WidgetFunctionComponent<WidgetPropsMap["MultiSlider"]>
     numValues,
     decimalDigits,
     style,
+    hoverStyle,
+    activeStyle,
+    disabledStyle,
 }) => {
     const widgetRegistratonService = useWidgetRegistrationService();
     const idRef = useRef(widgetRegistratonService.generateId());
@@ -28,6 +31,9 @@ export const MultiSlider: WidgetFunctionComponent<WidgetPropsMap["MultiSlider"]>
             numValues={numValues}
             onChange={onChange}
             style={style}
+            hoverStyle={hoverStyle}
+            activeStyle={activeStyle}
+            disabledStyle={disabledStyle}
         />
     );
 };

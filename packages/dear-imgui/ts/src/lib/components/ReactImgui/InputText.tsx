@@ -7,7 +7,7 @@ export type InputTextImperativeHandle = {
 };
 
 export const InputText = forwardRef<InputTextImperativeHandle, WidgetPropsMap["InputText"]>(
-    ({ onChange, defaultValue, label, style }, ref) => {
+    ({ onChange, defaultValue, hint, style, hoverStyle, activeStyle, disabledStyle }, ref) => {
         const widgetRegistratonService = useWidgetRegistrationService();
         const idRef = useRef(widgetRegistratonService.generateId());
 
@@ -27,9 +27,12 @@ export const InputText = forwardRef<InputTextImperativeHandle, WidgetPropsMap["I
             <input-text
                 id={idRef.current}
                 defaultValue={defaultValue}
-                label={label}
+                hint={hint}
                 onChange={onChange}
                 style={style}
+                hoverStyle={hoverStyle}
+                activeStyle={activeStyle}
+                disabledStyle={disabledStyle}
             />
         );
     },

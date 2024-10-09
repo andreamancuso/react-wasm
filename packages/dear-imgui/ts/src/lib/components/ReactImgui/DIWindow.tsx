@@ -7,9 +7,20 @@ export const DIWindow: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMa
     height,
     children,
     style,
+    hoverStyle,
+    activeStyle,
+    disabledStyle,
 }) => {
     return (
-        <di-window width={width} height={height} title={title} style={style}>
+        <di-window
+            width={width}
+            height={height}
+            title={title}
+            style={style}
+            hoverStyle={hoverStyle}
+            activeStyle={activeStyle}
+            disabledStyle={disabledStyle}
+        >
             {children}
         </di-window>
     );

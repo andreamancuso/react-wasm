@@ -3,7 +3,7 @@ import deepDiffer from "./deepDiffer.js";
 
 const uiManager = new NativeFabricUIManager();
 
-const commonAttributes = ["id", "style"];
+const commonAttributes = ["id", "style", "hoverStyle", "activeStyle", "disabledStyle"];
 
 const attributesForElements = {
     "bullet-text": ["type", "text"],
@@ -19,7 +19,7 @@ const attributesForElements = {
     "help-marker": ["text"],
     "di-image": ["url", "width", "number"],
     indent: [],
-    "input-text": ["defaultValue", "label", "onChange"],
+    "input-text": ["defaultValue", "hint", "onChange"],
     "item-tooltip": [],
     "map-view": [],
     "multi-slider": [

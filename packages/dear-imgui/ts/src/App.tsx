@@ -17,9 +17,9 @@ function App() {
 
     const fontDefs = useMemo(
         () => [
-            { name: "roboto-regular", sizes: [12, 14, 16, 18, 24, 48] },
-            { name: "roboto-bold", sizes: [12, 14, 16, 18, 24] },
-            { name: "roboto-light", sizes: [12, 14, 16, 18, 24] },
+            { name: "roboto-regular", sizes: [16, 18, 20, 24, 28, 32, 36, 48] },
+            { name: "roboto-bold", sizes: [16, 18, 20, 24, 28, 32, 36, 48] },
+            // { name: "roboto-light", sizes: [12, 14, 16, 18, 20, 24, 28, 32, 36, 48] },
             { name: "roboto-mono-regular", sizes: [14, 16] },
         ],
         [],

@@ -331,6 +331,14 @@ void ReactImgui::RenderElementTree(const int id) {
 
             ImGui::TableNextColumn();
 
+            if (m_elements[id]->m_hovered) {
+                ImGui::TextUnformatted("Yes");
+            } else {
+                ImGui::TextUnformatted("No");
+            }
+
+            ImGui::TableNextColumn();
+
             ImGui::Text("%d, %d",
                 (int)YGNodeLayoutGetLeft(m_elements[id]->m_layoutNode->m_node),
                 (int)YGNodeLayoutGetTop(m_elements[id]->m_layoutNode->m_node)
@@ -348,13 +356,19 @@ void ReactImgui::RenderElementTree(const int id) {
             if (m_elements[id]->m_baseDrawStyle.has_value()) {
                 std::string border;
 
-                if (m_elements[id]->m_baseDrawStyle.value().borderColor.has_value()) {
-                    auto [borderColorHex, _] = IV4toHEXATuple(m_elements[id]->m_baseDrawStyle.value().borderColor.value());
+                if (m_elements[id]->m_baseDrawStyle.value().borderAll.has_value()) {
+                    auto [borderColorHex, _] = IV4toHEXATuple(m_elements[id]->m_baseDrawStyle.value().borderAll.value().color);
 
                     border += borderColorHex;
                 }
 
-                ImGui::Text("%s", border.c_str());
+                ImGui::Text("%s, t: %f, r: %f, b: %f, l: %f",
+                border.c_str(),
+                YGNodeLayoutGetBorder(m_elements[id]->m_layoutNode->m_node, YGEdgeTop),
+                YGNodeLayoutGetBorder(m_elements[id]->m_layoutNode->m_node, YGEdgeRight),
+                YGNodeLayoutGetBorder(m_elements[id]->m_layoutNode->m_node, YGEdgeBottom),
+                YGNodeLayoutGetBorder(m_elements[id]->m_layoutNode->m_node, YGEdgeLeft)
+                );
             }
         }
     }
@@ -398,13 +412,14 @@ void ReactImgui::RenderDebugWindow() {
     ImGui::SetNextWindowSize(ImVec2(1000, 700));
     ImGui::Begin("debug", nullptr);
 
-    if (ImGui::BeginTable("Elements", 6, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingStretchProp)) {
-        ImGui::TableSetupColumn("Widget ID", ImGuiTableColumnFlags_NoHide, 100.0f);
+    if (ImGui::BeginTable("Elements", 7, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingStretchProp)) {
+        ImGui::TableSetupColumn("Widget ID", ImGuiTableColumnFlags_NoHide, 35.0f);
         ImGui::TableSetupColumn("Widget Type", ImGuiTableColumnFlags_NoHide, 100.0f);
         ImGui::TableSetupColumn("Child N.", ImGuiTableColumnFlags_NoHide, 30.0f);
-        ImGui::TableSetupColumn("Left, Top", ImGuiTableColumnFlags_NoHide, 60.0f);
-        ImGui::TableSetupColumn("Width, Height", ImGuiTableColumnFlags_NoHide, 60.0f);
-        ImGui::TableSetupColumn("Border", ImGuiTableColumnFlags_NoHide, 60.0f);
+        ImGui::TableSetupColumn("Hovered", ImGuiTableColumnFlags_NoHide, 30.0f);
+        ImGui::TableSetupColumn("Left, Top", ImGuiTableColumnFlags_NoHide, 30.0f);
+        ImGui::TableSetupColumn("Width, Height", ImGuiTableColumnFlags_NoHide, 40.0f);
+        ImGui::TableSetupColumn("Border", ImGuiTableColumnFlags_NoHide, 175.0f);
 
         ImGui::TableHeadersRow();
 
@@ -737,9 +752,14 @@ StyleVarValueRef ReactImgui::GetStyleVar(const ImGuiStyleVar key) {
     return value;
 };
 
+// todo: ensure this returns the font based on current state of the widget, i.e. 'base', 'hover', 'active'
 ImFont* ReactImgui::GetWidgetFont(const StyledWidget* widget) {
     if (widget->HasCustomStyles() && widget->HasCustomFont(this)) {
-        return m_loadedFonts[widget->m_style.value()->maybeFontIndex.value()];
+        // auto result = widget->m_style.value()->GetCustomFontId(widget->GetState(), this);
+
+        // if (result.has_value()) {
+            return m_loadedFonts[widget->m_style.value()->GetCustomFontId(widget->GetState(), this)];
+        // }
     }
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -748,9 +768,14 @@ ImFont* ReactImgui::GetWidgetFont(const StyledWidget* widget) {
     return io.FontDefault;
 }
 
+// todo: ensure this returns the font size based on current state of the widget, i.e. 'base', 'hover', 'active'
 float ReactImgui::GetWidgetFontSize(const StyledWidget* widget) {
     if (widget->HasCustomStyles() && widget->HasCustomFont(this)) {
-        return m_loadedFonts[widget->m_style.value()->maybeFontIndex.value()]->FontSize;
+        // auto result = widget->m_style.value()->GetCustomFontId(widget->GetState(), this);
+
+        // if (result.has_value()) {
+            return m_loadedFonts[widget->m_style.value()->GetCustomFontId(widget->GetState(), this)]->FontSize;
+        // }
     }
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;

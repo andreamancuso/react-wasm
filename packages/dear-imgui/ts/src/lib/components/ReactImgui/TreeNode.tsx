@@ -6,7 +6,6 @@ export const TreeNode: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMa
     children,
     itemId,
     label,
-    style,
     onClick,
     open,
     defaultOpen,
@@ -14,6 +13,10 @@ export const TreeNode: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMa
     selectable,
     selected,
     leaf,
+    style,
+    hoverStyle,
+    activeStyle,
+    disabledStyle,
 }) => {
     const widgetRegistratonService = useWidgetRegistrationService();
     const idRef = useRef(widgetRegistratonService.generateId());
@@ -31,6 +34,9 @@ export const TreeNode: WidgetFunctionComponent<PropsWithChildren & WidgetPropsMa
             defaultSelected={defaultSelected}
             leaf={leaf}
             style={style}
+            hoverStyle={hoverStyle}
+            activeStyle={activeStyle}
+            disabledStyle={disabledStyle}
         >
             {leaf ? null : children}
         </tree-node>

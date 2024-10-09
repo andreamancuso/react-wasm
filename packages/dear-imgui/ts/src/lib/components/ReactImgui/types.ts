@@ -43,10 +43,16 @@ export type WidgetStyle = StyleRules & YogaStyle & BaseDrawStyle;
 
 export type NodeStyleProps = {
     style?: NodeStyle;
+    hoverStyle?: NodeStyle;
+    activeStyle?: NodeStyle;
+    disabledStyle?: NodeStyle;
 };
 
 export type WidgetStyleProps = {
     style?: WidgetStyle;
+    hoverStyle?: WidgetStyle;
+    activeStyle?: WidgetStyle;
+    disabledStyle?: WidgetStyle;
 };
 
 export type TabItemChangeEvent = SyntheticEvent<WidgetReactElement<"TabItem">, { value: boolean }>;
@@ -109,7 +115,7 @@ export type WidgetPropsMap = {
     Indent: WidgetStyleProps;
     InputText: WidgetStyleProps & {
         defaultValue?: string;
-        label?: string;
+        hint?: string;
         onChange?: (event: InputTextChangeEvent) => void;
     };
     ItemTooltip: WidgetStyleProps;

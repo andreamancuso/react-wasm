@@ -12,7 +12,6 @@ import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 import faIconMap from "../../fa-icons";
 import RWStyleSheet from "../../stylesheet/stylesheet";
 import { CryptoLinePlots } from "./CryptoPlots/CryptoLinePlots";
-import { TreeViewItem } from "../ReactImgui/TreeView";
 import { useStore } from "./store";
 import { CryptoAssetsList } from "./CryptoAssetsList/CryptoAssetsList";
 import { DataService } from "./dataService";
@@ -21,6 +20,10 @@ import { cryptoSymbols } from "./cryptoSymbols";
 import { CryptoAssetPanels } from "./CryptoAssetPanels/CryptoAssetPanels";
 import { theme2Colors } from "src/lib/stylesheet/themes";
 import { CryptoCandlestickPlots } from "./CryptoPlots/CryptoCandlestickPlots";
+import { Sidebar } from "./Sidebar/Sidebar";
+import { CryptoSymbolPair } from "./CryptoSymbolPairs/CryptoSymbolPair";
+import { CryptoSymbolBlock } from "./CryptoSymbolBlock/CryptoSymbolBlock";
+import { Tabs } from "./Tabs/Tabs";
 
 const componentMap = {
     cryptoAssetPanels: CryptoAssetPanels,
@@ -42,54 +45,15 @@ export const TradingGuiDemo = () => {
 
     const [selectedItemIds, setSelectedItemIds] = useState<ComponentKeys[]>(["cryptoAssetPanels"]);
 
-    const treeViewItems: TreeViewItem[] = useMemo(() => {
-        return [
-            {
-                itemId: "cryptoAssetPanels",
-                label: "Crypto Asset Panels",
-            },
-            {
-                itemId: "cryptoAssetList",
-                label: "Crypto Asset List",
-            },
-            {
-                itemId: "cryptoLinePlots",
-                label: "Crypto Line Plots",
-            },
-            {
-                itemId: "cryptoCandlestickPlots",
-                label: "Crypto Candlestick Plots",
-            },
-        ];
-    }, []);
-
     const styleSheet = useMemo(
         () =>
             RWStyleSheet.create({
                 rootNode: {
                     height: "100%",
-                    padding: {
-                        all: 10,
-                    },
-                    gap: { row: 12 },
                 },
                 mainLayoutNode: {
                     flex: 1,
                     flexDirection: "row",
-                    gap: { column: 12 },
-                },
-                sidebarNode: {
-                    flexBasis: 200,
-                    height: "100%",
-                    borderColor: "#000",
-                    borderThickness: 1,
-                },
-                contentNode: {
-                    flex: 1,
-                    height: "100%",
-                    borderColor: "#000",
-                    borderThickness: 1,
-                    padding: { all: 5 },
                 },
                 title: {
                     colors: { [ImGuiCol.Text]: theme2Colors.green },
@@ -106,11 +70,83 @@ export const TradingGuiDemo = () => {
                         [ImGuiCol.Text]: theme2Colors.green,
                         [ImGuiCol.Border]: theme2Colors.green,
                     },
-                    // borderColor: theme2Colors.green,
-                    // borderThickness: 1,
                     padding: { all: 8 },
                     vars: {
                         [ImGuiStyleVar.FrameBorderSize]: 1,
+                        [ImGuiStyleVar.FrameRounding]: 5,
+                    },
+                },
+                mainNode: {
+                    flex: 1,
+                },
+                mainTitleNode: {
+                    flexDirection: "row",
+                    borderBottom: {
+                        color: "#1B1D20", // todo: remove double border
+                        thickness: 1,
+                    },
+                    borderRight: {
+                        color: "#1B1D20", // todo: remove double border
+                        thickness: 1,
+                    },
+                    padding: { all: 20 },
+                },
+                mainTitle: {
+                    font: { name: "roboto-bold", size: 32 },
+                },
+                contentNode: {
+                    padding: {
+                        left: 8,
+                    },
+                },
+                tabContent: {
+                    height: "100%",
+                    width: 350,
+                    gap: { row: 10 },
+                    padding: {
+                        horizontal: 8,
+                        vertical: 16,
+                    },
+                    borderLeft: {
+                        color: "#1C1E22",
+                        thickness: 1,
+                    },
+                },
+                marketSearchInput: {
+                    vars: {
+                        [ImGuiStyleVar.FrameBorderSize]: 1,
+                        [ImGuiStyleVar.FramePadding]: [10, 10],
+                    },
+                    colors: {
+                        [ImGuiCol.Border]: "#1C1E22",
+                    },
+                },
+                marketSearchFilterWrapper: {
+                    flexDirection: "row",
+                    gap: { all: 8 },
+                    flexWrap: "wrap",
+                },
+                marketSearchFilter: {
+                    width: 60,
+                    colors: {
+                        [ImGuiCol.Button]: "#1E2025",
+                        [ImGuiCol.ButtonHovered]: "#1E2025",
+                        [ImGuiCol.ButtonActive]: "#1E2025",
+                        [ImGuiCol.Text]: "#777B84",
+                    },
+                    vars: {
+                        [ImGuiStyleVar.FrameRounding]: 5,
+                    },
+                },
+                marketSearchFilterActive: {
+                    width: 60,
+                    colors: {
+                        [ImGuiCol.Button]: "#fff",
+                        [ImGuiCol.ButtonHovered]: "#fff",
+                        [ImGuiCol.ButtonActive]: "#fff",
+                        [ImGuiCol.Text]: "#292A2C",
+                    },
+                    vars: {
                         [ImGuiStyleVar.FrameRounding]: 5,
                     },
                 },
@@ -286,9 +322,9 @@ export const TradingGuiDemo = () => {
 
     return (
         <ReactImgui.Node root style={styleSheet.rootNode}>
-            <ReactImgui.UnformattedText text="Trading GUI demo" style={styleSheet.title} />
+            {/* <ReactImgui.UnformattedText text="Trading GUI demo" style={styleSheet.title} /> */}
 
-            <ReactImgui.Node
+            {/* <ReactImgui.Node
                 style={{
                     width: "100%",
                     flexDirection: "row",
@@ -307,7 +343,6 @@ export const TradingGuiDemo = () => {
                     label="Get Crypto Assets"
                     style={styleSheet.button}
                 />
-                {/* <ReactImgui.Button onClick={getLatestQuotes} label="Get Latest Quotes" /> */}
                 <ReactImgui.Button
                     onClick={getCryptoQuotes}
                     label="Get Crypto Quotes"
@@ -333,24 +368,85 @@ export const TradingGuiDemo = () => {
                     label="Get Latest Crypto Bars"
                     style={styleSheet.button}
                 />
-            </ReactImgui.Node>
+            </ReactImgui.Node> */}
 
             <ReactImgui.Node style={styleSheet.mainLayoutNode}>
-                <ReactImgui.Node style={styleSheet.sidebarNode}>
-                    <ReactImgui.TreeView
-                        items={treeViewItems}
-                        selectedItemIds={selectedItemIds}
-                        onToggleItemSelection={onToggleItemSelection}
-                    />
+                <Sidebar />
+                <ReactImgui.Node style={styleSheet.mainNode}>
+                    <ReactImgui.Node style={styleSheet.mainTitleNode}>
+                        <ReactImgui.UnformattedText text="Trade" style={styleSheet.mainTitle} />
+                    </ReactImgui.Node>
+
+                    <ReactImgui.Node style={styleSheet.contentNode}>
+                        <CryptoSymbolBlock symbol="BTC/USD" />
+
+                        <Tabs />
+
+                        <ReactImgui.Node style={styleSheet.tabContent}>
+                            <ReactImgui.InputText
+                                hint={`${faIconMap["magnifying-glass"]} SEARCH MARKETS`}
+                                style={styleSheet.marketSearchInput}
+                            />
+                            <ReactImgui.Node style={styleSheet.marketSearchFilterWrapper}>
+                                <ReactImgui.Button
+                                    label={faIconMap["star"]}
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="ALL"
+                                    style={styleSheet.marketSearchFilterActive}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="TOP"
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="BTC"
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="ETH"
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="USD"
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="USDC"
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="DAI"
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                                <ReactImgui.Button
+                                    label="MKR"
+                                    style={styleSheet.marketSearchFilter}
+                                    hoverStyle={styleSheet.marketSearchFilterActive}
+                                />
+                            </ReactImgui.Node>
+                        </ReactImgui.Node>
+                    </ReactImgui.Node>
                 </ReactImgui.Node>
-                <ReactImgui.Node style={styleSheet.contentNode} cull={false}>
+
+                {/* <ReactImgui.Node style={styleSheet.contentNode} cull={false}>
                     {Component && (
                         <DataServiceContext.Provider value={dataService}>
                             <Component />
                         </DataServiceContext.Provider>
                     )}
-                </ReactImgui.Node>
+                </ReactImgui.Node> */}
             </ReactImgui.Node>
+            <ReactImgui.Node style={styleSheet.sidebarNode}></ReactImgui.Node>
 
             <ReactImgui.Node style={styleSheet.debugButton}>
                 <ReactImgui.Button label={faIconMap.bug} onClick={debugModeBtnClicked} />

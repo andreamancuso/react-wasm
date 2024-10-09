@@ -18,6 +18,9 @@ export const PlotLine = forwardRef<PlotLineImperativeHandle, WidgetPropsMap["Plo
             yAxisScale,
             axisAutoFit,
             style,
+            hoverStyle,
+            activeStyle,
+            disabledStyle,
         }: WidgetPropsMap["PlotLine"],
         ref,
     ) => {
@@ -61,6 +64,9 @@ export const PlotLine = forwardRef<PlotLineImperativeHandle, WidgetPropsMap["Plo
                 yAxisScale={yAxisScale}
                 axisAutoFit={axisAutoFit}
                 style={style}
+                hoverStyle={hoverStyle}
+                activeStyle={activeStyle}
+                disabledStyle={disabledStyle}
             />
         );
     },

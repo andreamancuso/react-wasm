@@ -7,7 +7,19 @@ export type ComboImperativeHandle = {
 };
 
 export const Combo = forwardRef<ComboImperativeHandle, WidgetPropsMap["Combo"]>(
-    ({ placeholder, options, onChange, initialSelectedIndex, style }, ref) => {
+    (
+        {
+            placeholder,
+            options,
+            onChange,
+            initialSelectedIndex,
+            style,
+            hoverStyle,
+            activeStyle,
+            disabledStyle,
+        },
+        ref,
+    ) => {
         const widgetRegistratonService = useWidgetRegistrationService();
         const idRef = useRef(widgetRegistratonService.generateId());
 
@@ -31,6 +43,9 @@ export const Combo = forwardRef<ComboImperativeHandle, WidgetPropsMap["Combo"]>(
                 options={options}
                 onChange={onChange}
                 style={style}
+                hoverStyle={hoverStyle}
+                activeStyle={activeStyle}
+                disabledStyle={disabledStyle}
             />
         );
     },

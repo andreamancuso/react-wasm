@@ -7,6 +7,9 @@ export const Checkbox: WidgetFunctionComponent<WidgetPropsMap["Checkbox"]> = ({
     onChange,
     defaultChecked,
     style,
+    hoverStyle,
+    activeStyle,
+    disabledStyle,
 }) => {
     const widgetRegistratonService = useWidgetRegistrationService();
     const idRef = useRef(widgetRegistratonService.generateId());
@@ -18,6 +21,9 @@ export const Checkbox: WidgetFunctionComponent<WidgetPropsMap["Checkbox"]> = ({
             defaultChecked={defaultChecked}
             onChange={onChange}
             style={style}
+            hoverStyle={hoverStyle}
+            activeStyle={activeStyle}
+            disabledStyle={disabledStyle}
         />
     );
 };
