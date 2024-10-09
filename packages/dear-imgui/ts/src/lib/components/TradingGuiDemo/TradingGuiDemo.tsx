@@ -12,7 +12,6 @@ import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 import faIconMap from "../../fa-icons";
 import RWStyleSheet from "../../stylesheet/stylesheet";
 import { CryptoLinePlots } from "./CryptoPlots/CryptoLinePlots";
-import { TreeViewItem } from "../ReactImgui/TreeView";
 import { useStore } from "./store";
 import { CryptoAssetsList } from "./CryptoAssetsList/CryptoAssetsList";
 import { DataService } from "./dataService";
@@ -21,6 +20,9 @@ import { cryptoSymbols } from "./cryptoSymbols";
 import { CryptoAssetPanels } from "./CryptoAssetPanels/CryptoAssetPanels";
 import { theme2Colors } from "src/lib/stylesheet/themes";
 import { CryptoCandlestickPlots } from "./CryptoPlots/CryptoCandlestickPlots";
+import { Sidebar } from "./Sidebar/Sidebar";
+import { CryptoSymbolPair } from "./CryptoSymbolPairs/CryptoSymbolPair";
+import { CryptoSymbolBlock } from "./CryptoSymbolBlock/CryptoSymbolBlock";
 
 const componentMap = {
     cryptoAssetPanels: CryptoAssetPanels,
@@ -42,83 +44,16 @@ export const TradingGuiDemo = () => {
 
     const [selectedItemIds, setSelectedItemIds] = useState<ComponentKeys[]>(["cryptoAssetPanels"]);
 
-    const treeViewItems: TreeViewItem[] = useMemo(() => {
-        return [
-            {
-                itemId: "cryptoAssetPanels",
-                label: "Crypto Asset Panels",
-            },
-            {
-                itemId: "cryptoAssetList",
-                label: "Crypto Asset List",
-            },
-            {
-                itemId: "cryptoLinePlots",
-                label: "Crypto Line Plots",
-            },
-            {
-                itemId: "cryptoCandlestickPlots",
-                label: "Crypto Candlestick Plots",
-            },
-        ];
-    }, []);
-
     const styleSheet = useMemo(
         () =>
             RWStyleSheet.create({
                 rootNode: {
                     height: "100%",
-                    // padding: {
-                    //     all: 10,
-                    // },
-                    // gap: { row: 12 },
                 },
                 mainLayoutNode: {
                     flex: 1,
                     flexDirection: "row",
-                    // gap: { column: 12 },
                 },
-                sidebarNode: {
-                    flexBasis: 60,
-                    height: "100%",
-                    borderColor: "#1B1D20",
-                    borderThickness: 1,
-                },
-                sideBarItem: {
-                    width: 58,
-                    height: 58,
-                    justifyContent: "center",
-                    alignItems: "center",
-                },
-                icon: {
-                    width: 48,
-                    height: 48,
-                    font: { name: "roboto-regular", size: 36 },
-                    colors: {
-                        [ImGuiCol.ButtonHovered]: "#001033",
-                        [ImGuiCol.ButtonActive]: "#001033",
-                    },
-                    vars: { [ImGuiStyleVar.FrameRounding]: 24 },
-                },
-                iconActive: {
-                    width: 48,
-                    height: 48,
-                    font: { name: "roboto-regular", size: 36 },
-                    vars: { [ImGuiStyleVar.FrameRounding]: 24 },
-                    colors: {
-                        [ImGuiCol.Text]: "#588AF5",
-                        [ImGuiCol.Button]: "#001033",
-                        [ImGuiCol.ButtonHovered]: "#001033",
-                        [ImGuiCol.ButtonActive]: "#001033",
-                    },
-                },
-                // contentNode: {
-                //     flex: 1,
-                //     height: "100%",
-                //     borderColor: "#000",
-                //     borderThickness: 1,
-                //     padding: { all: 5 },
-                // },
                 title: {
                     colors: { [ImGuiCol.Text]: theme2Colors.green },
                     font: { name: "roboto-regular", size: 24 },
@@ -134,13 +69,25 @@ export const TradingGuiDemo = () => {
                         [ImGuiCol.Text]: theme2Colors.green,
                         [ImGuiCol.Border]: theme2Colors.green,
                     },
-                    // borderColor: theme2Colors.green,
-                    // borderThickness: 1,
                     padding: { all: 8 },
                     vars: {
                         [ImGuiStyleVar.FrameBorderSize]: 1,
                         [ImGuiStyleVar.FrameRounding]: 5,
                     },
+                },
+                mainContentNode: {
+                    flex: 1,
+                    borderColor: "#1B1D20",
+                    borderThickness: 1,
+                },
+                mainTitleNode: {
+                    flexDirection: "row",
+                    borderColor: "#1B1D20", // todo: remove double border
+                    borderThickness: 1,
+                    padding: { all: 20 },
+                },
+                mainTitle: {
+                    font: { name: "roboto-bold", size: 32 },
                 },
             }),
         [],
@@ -363,110 +310,15 @@ export const TradingGuiDemo = () => {
             </ReactImgui.Node> */}
 
             <ReactImgui.Node style={styleSheet.mainLayoutNode}>
-                <ReactImgui.Node style={styleSheet.sidebarNode}>
-                    {/* <ReactImgui.TreeView
-                        items={treeViewItems}
-                        selectedItemIds={selectedItemIds}
-                        onToggleItemSelection={onToggleItemSelection}
-                    /> */}
-                    <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.UnformattedText
-                            text={faIconMap.otter}
-                            style={styleSheet.icon}
-                        />
+                <Sidebar />
+                <ReactImgui.Node style={styleSheet.mainContentNode}>
+                    <ReactImgui.Node style={styleSheet.mainTitleNode}>
+                        <ReactImgui.UnformattedText text="Trade" style={styleSheet.mainTitle} />
                     </ReactImgui.Node>
-                    {/* <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.UnformattedText
-                            text={faIconMap["cart-plus"]}
-                            style={styleSheet.icon}
-                        />
-                    </ReactImgui.Node>
-                    <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.UnformattedText
-                            text={faIconMap["wallet"]}
-                            style={styleSheet.icon}
-                        />
-                    </ReactImgui.Node>
-                    <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.UnformattedText
-                            text={faIconMap["coins"]}
-                            style={styleSheet.icon}
-                        />
-                    </ReactImgui.Node>
-                    <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.UnformattedText
-                            text={faIconMap["dollar-sign"]}
-                            style={styleSheet.icon}
-                        />
-                    </ReactImgui.Node>
-                    <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.UnformattedText
-                            text={faIconMap["wave-square"]}
-                            style={styleSheet.icon}
-                        />
-                    </ReactImgui.Node>
-                    <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.UnformattedText
-                            text={faIconMap["stairs"]}
-                            style={styleSheet.icon}
-                        />
-                    </ReactImgui.Node>
-                    <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.UnformattedText
-                            text={faIconMap["square-poll-vertical"]}
-                            style={styleSheet.icon}
-                        />
-                    </ReactImgui.Node>
-                    <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.UnformattedText
-                            text={faIconMap["chart-pie"]}
-                            style={styleSheet.icon}
-                        />
-                    </ReactImgui.Node>
-                    <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.UnformattedText
-                            text={faIconMap["chart-line"]}
-                            style={styleSheet.icon}
-                        />
-                    </ReactImgui.Node>
-                    <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.UnformattedText
-                            text={faIconMap["chart-column"]}
-                            style={styleSheet.icon}
-                        />
-                    </ReactImgui.Node>
-                    <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.UnformattedText
-                            text={faIconMap["chart-bar"]}
-                            style={styleSheet.icon}
-                        />
-                    </ReactImgui.Node>
-                    <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.UnformattedText
-                            text={faIconMap["chart-area"]}
-                            style={styleSheet.icon}
-                        />
-                    </ReactImgui.Node> */}
-                    <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.Button
-                            label={faIconMap["arrow-trend-up"]}
-                            style={styleSheet.icon}
-                            hoverStyle={styleSheet.iconActive}
-                        />
-                    </ReactImgui.Node>
-                    <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.Button
-                            label={faIconMap["arrow-trend-up"]}
-                            style={styleSheet.iconActive}
-                        />
-                    </ReactImgui.Node>
-                    {/* <ReactImgui.Node style={styleSheet.sideBarItem}>
-                        <ReactImgui.UnformattedText
-                            text={faIconMap["arrow-trend-down"]}
-                            style={styleSheet.icon}
-                        />
-                    </ReactImgui.Node> */}
+
+                    <CryptoSymbolBlock symbol="BTC/USD" />
                 </ReactImgui.Node>
+
                 {/* <ReactImgui.Node style={styleSheet.contentNode} cull={false}>
                     {Component && (
                         <DataServiceContext.Provider value={dataService}>
@@ -475,6 +327,7 @@ export const TradingGuiDemo = () => {
                     )}
                 </ReactImgui.Node> */}
             </ReactImgui.Node>
+            <ReactImgui.Node style={styleSheet.sidebarNode}></ReactImgui.Node>
 
             <ReactImgui.Node style={styleSheet.debugButton}>
                 <ReactImgui.Button label={faIconMap.bug} onClick={debugModeBtnClicked} />
