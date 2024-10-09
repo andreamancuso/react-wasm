@@ -2,67 +2,101 @@
 
 #include "widget/styled_widget.h"
 
-bool WidgetStyle::HasCustomFont(std::optional<ElementState> widgetState, ReactImgui* view) {
+bool WidgetStyle::HasCustomFont(const std::optional<ElementState> widgetState, ReactImgui* view) {
+    const auto hasBaseValue = maybeBase.has_value() && maybeBase.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeBase.value().maybeFontIndex.value());
+
     switch(widgetState.value_or(ElementState_Base)) {
-        case ElementState_Disabled:
-            return maybeDisabled.has_value() && maybeDisabled.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeDisabled.value().maybeFontIndex.value());
+        case ElementState_Disabled: {
+            const auto hasDisabledValue = maybeDisabled.has_value() && maybeDisabled.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeDisabled.value().maybeFontIndex.value());
+            return hasDisabledValue || hasBaseValue;
+        }
 
-        case ElementState_Hover:
-            return maybeHover.has_value() && maybeHover.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeHover.value().maybeFontIndex.value());
+        case ElementState_Hover: {
+            const auto hasOverValue = maybeHover.has_value() && maybeHover.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeHover.value().maybeFontIndex.value());
+            return hasOverValue || hasBaseValue;
+        }
 
-        case ElementState_Active:
-            return maybeActive.has_value() && maybeActive.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeActive.value().maybeFontIndex.value());
+        case ElementState_Active: {
+            const auto hasActiveValue = maybeActive.has_value() && maybeActive.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeActive.value().maybeFontIndex.value());
+            return hasActiveValue || hasBaseValue;
+        }
 
         default:
-            return maybeBase.has_value() && maybeBase.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeBase.value().maybeFontIndex.value());
+            break;
+    }
+
+    return hasBaseValue;
+}
+
+bool WidgetStyle::HasCustomColors(const std::optional<ElementState> widgetState) const {
+    const auto hasBaseValue = maybeBase.has_value() && maybeBase.value().maybeColors.has_value();
+
+    switch(widgetState.value_or(ElementState_Base)) {
+        case ElementState_Disabled: {
+            const auto hasDisabledValue = maybeDisabled.has_value() && maybeDisabled.value().maybeColors.has_value();
+            return hasDisabledValue || hasBaseValue;
+        }
+
+        case ElementState_Hover: {
+            const auto hasHoverValue = maybeHover.has_value() && maybeHover.value().maybeColors.has_value();
+            return hasHoverValue || hasBaseValue;
+        }
+
+        case ElementState_Active: {
+            const auto hasActiveValue = maybeActive.has_value() && maybeActive.value().maybeColors.has_value();
+            return hasActiveValue || hasBaseValue;
+        }
+
+        default:
+            return hasBaseValue;
     }
 }
 
-bool WidgetStyle::HasCustomColors(std::optional<ElementState> widgetState) {
+bool WidgetStyle::HasCustomStyleVars(const std::optional<ElementState> widgetState) const {
+    const auto hasBaseValue = maybeBase.has_value() && maybeBase.value().maybeStyleVars.has_value();
+
     switch(widgetState.value_or(ElementState_Base)) {
-        case ElementState_Disabled:
-            return maybeDisabled.has_value() && maybeDisabled.value().maybeColors.has_value();
+        case ElementState_Disabled: {
+            const auto hasDisabledValue = maybeDisabled.has_value() && maybeDisabled.value().maybeStyleVars.has_value();
+            return hasDisabledValue || hasBaseValue;
+        }
 
-        case ElementState_Hover:
-            return maybeHover.has_value() && maybeHover.value().maybeColors.has_value();
+        case ElementState_Hover: {
+            const auto hasHoverValue = maybeHover.has_value() && maybeHover.value().maybeStyleVars.has_value();
+            return hasHoverValue || hasBaseValue;
+        }
 
-        case ElementState_Active:
-            return maybeActive.has_value() && maybeActive.value().maybeColors.has_value();
+        case ElementState_Active: {
+            const auto hasActiveValue = maybeActive.has_value() && maybeActive.value().maybeStyleVars.has_value();
+            return hasActiveValue || hasBaseValue;
+        }
 
         default:
-            return maybeBase.has_value() && maybeBase.value().maybeColors.has_value();
+            return hasBaseValue;
     }
 }
 
-bool WidgetStyle::HasCustomStyleVars(std::optional<ElementState> widgetState) {
+bool WidgetStyle::HasCustomStyleVar(const std::optional<ElementState> widgetState, const ImGuiStyleVar key) const {
+    const auto hasBaseValue = maybeBase.has_value() && maybeBase.value().maybeStyleVars.has_value() && maybeBase.value().maybeStyleVars.value().contains(key);
+
     switch(widgetState.value_or(ElementState_Base)) {
-        case ElementState_Disabled:
-            return maybeDisabled.has_value() && maybeDisabled.value().maybeStyleVars.has_value();
+        case ElementState_Disabled: {
+            const auto hasDisabledValue = maybeDisabled.has_value() && maybeDisabled.value().maybeStyleVars.has_value() && maybeDisabled.value().maybeStyleVars.value().contains(key);
+            return hasDisabledValue || hasBaseValue;
+        }
 
-        case ElementState_Hover:
-            return maybeHover.has_value() && maybeHover.value().maybeStyleVars.has_value();
+        case ElementState_Hover: {
+            const auto hasHoverValue = maybeHover.has_value() && maybeHover.value().maybeStyleVars.has_value() && maybeHover.value().maybeStyleVars.value().contains(key);
+            return hasHoverValue || hasBaseValue;
+        }
 
-        case ElementState_Active:
-            return maybeActive.has_value() && maybeActive.value().maybeStyleVars.has_value();
+        case ElementState_Active: {
+            const auto hasActiveValue = maybeActive.has_value() && maybeActive.value().maybeStyleVars.has_value() && maybeActive.value().maybeStyleVars.value().contains(key);
+            return hasActiveValue || hasBaseValue;
+        }
 
         default:
-            return maybeBase.has_value() && maybeBase.value().maybeStyleVars.has_value();
-    }
-}
-
-bool WidgetStyle::HasCustomStyleVar(std::optional<ElementState> widgetState, const ImGuiStyleVar key) {
-    switch(widgetState.value_or(ElementState_Base)) {
-        case ElementState_Disabled:
-            return maybeDisabled.has_value() && maybeDisabled.value().maybeStyleVars.has_value() && maybeDisabled.value().maybeStyleVars.value().contains(key);
-
-        case ElementState_Hover:
-            return maybeHover.has_value() && maybeHover.value().maybeStyleVars.has_value() && maybeHover.value().maybeStyleVars.value().contains(key);
-
-        case ElementState_Active:
-            return maybeActive.has_value() && maybeActive.value().maybeStyleVars.has_value() && maybeActive.value().maybeStyleVars.value().contains(key);
-
-        default:
-            return maybeBase.has_value() && maybeBase.value().maybeStyleVars.has_value() && maybeBase.value().maybeStyleVars.value().contains(key);
+            return hasBaseValue;
     }
 }
 
