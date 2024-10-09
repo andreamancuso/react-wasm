@@ -362,7 +362,13 @@ void ReactImgui::RenderElementTree(const int id) {
                     border += borderColorHex;
                 }
 
-                ImGui::Text("%s", border.c_str());
+                ImGui::Text("%s, t: %f, r: %f, b: %f, l: %f",
+                border.c_str(),
+                YGNodeLayoutGetBorder(m_elements[id]->m_layoutNode->m_node, YGEdgeTop),
+                YGNodeLayoutGetBorder(m_elements[id]->m_layoutNode->m_node, YGEdgeRight),
+                YGNodeLayoutGetBorder(m_elements[id]->m_layoutNode->m_node, YGEdgeBottom),
+                YGNodeLayoutGetBorder(m_elements[id]->m_layoutNode->m_node, YGEdgeLeft)
+                );
             }
         }
     }
@@ -407,13 +413,13 @@ void ReactImgui::RenderDebugWindow() {
     ImGui::Begin("debug", nullptr);
 
     if (ImGui::BeginTable("Elements", 7, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingStretchProp)) {
-        ImGui::TableSetupColumn("Widget ID", ImGuiTableColumnFlags_NoHide, 100.0f);
+        ImGui::TableSetupColumn("Widget ID", ImGuiTableColumnFlags_NoHide, 35.0f);
         ImGui::TableSetupColumn("Widget Type", ImGuiTableColumnFlags_NoHide, 100.0f);
         ImGui::TableSetupColumn("Child N.", ImGuiTableColumnFlags_NoHide, 30.0f);
         ImGui::TableSetupColumn("Hovered", ImGuiTableColumnFlags_NoHide, 30.0f);
-        ImGui::TableSetupColumn("Left, Top", ImGuiTableColumnFlags_NoHide, 60.0f);
-        ImGui::TableSetupColumn("Width, Height", ImGuiTableColumnFlags_NoHide, 60.0f);
-        ImGui::TableSetupColumn("Border", ImGuiTableColumnFlags_NoHide, 60.0f);
+        ImGui::TableSetupColumn("Left, Top", ImGuiTableColumnFlags_NoHide, 30.0f);
+        ImGui::TableSetupColumn("Width, Height", ImGuiTableColumnFlags_NoHide, 40.0f);
+        ImGui::TableSetupColumn("Border", ImGuiTableColumnFlags_NoHide, 175.0f);
 
         ImGui::TableHeadersRow();
 

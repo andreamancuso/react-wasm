@@ -89,6 +89,18 @@ export const TradingGuiDemo = () => {
                 mainTitle: {
                     font: { name: "roboto-bold", size: 32 },
                 },
+                tabs: { flexDirection: "row" },
+                tab: {
+                    font: { name: "roboto-bold", size: 32 },
+                    padding: { vertical: 10, horizontal: 20 },
+                    roundCorners: ["topLeft", "topRight"],
+                    rounding: 4,
+                    borderColor: "#fff",
+                    borderThickness: 1,
+                },
+                tabText: {
+                    font: { name: "roboto-bold", size: 18 },
+                },
             }),
         [],
     );
@@ -317,6 +329,12 @@ export const TradingGuiDemo = () => {
                     </ReactImgui.Node>
 
                     <CryptoSymbolBlock symbol="BTC/USD" />
+
+                    <ReactImgui.Node style={styleSheet.tabs}>
+                        <ReactImgui.Node style={styleSheet.tab}>
+                            <ReactImgui.UnformattedText text="Markets" style={styleSheet.tabText} />
+                        </ReactImgui.Node>
+                    </ReactImgui.Node>
                 </ReactImgui.Node>
 
                 {/* <ReactImgui.Node style={styleSheet.contentNode} cull={false}>

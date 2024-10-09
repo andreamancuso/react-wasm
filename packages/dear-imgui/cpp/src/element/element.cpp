@@ -212,14 +212,33 @@ void Element::DrawBaseEffects() const {
         if (m_baseDrawStyle.value().borderColor.has_value()) {
             const ImU32 col = ImColor(m_baseDrawStyle.value().borderColor.value());
 
-            drawList->AddRect(
-                p0,
-                p1,
-                col,
-                m_baseDrawStyle.value().rounding.value_or(0),
-                ImDrawFlags_RoundCornersTopLeft | ImDrawFlags_RoundCornersBottomRight,
-                m_baseDrawStyle.value().borderThickness.value_or(1.0f)
-            );
+            // drawList->AddRect(
+            //     p0,
+            //     p1,
+            //     col,
+            //     m_baseDrawStyle.value().rounding.value_or(0),
+            //     m_baseDrawStyle.value().drawFlags,
+            //     m_baseDrawStyle.value().borderThickness.value_or(1.0f)
+            // );
+
+            auto rounding = m_baseDrawStyle.value().rounding.value_or(0);
+
+            drawList->AddLine(ImVec2(p0.x, p1.y), ImVec2(p0.x, p0.y), col, m_baseDrawStyle.value().borderThickness.value_or(1.0f));
+            drawList->AddLine(ImVec2(p0.x, p0.y), ImVec2(p1.x, p0.y), col, m_baseDrawStyle.value().borderThickness.value_or(1.0f));
+            drawList->AddLine(ImVec2(p1.x-1, p0.y), ImVec2(p1.x-1, p1.y), col, m_baseDrawStyle.value().borderThickness.value_or(1.0f));
+
+            // drawList->PathLineTo(ImVec2(p0.x + 0.5f, p1.y + 0.5f));
+            // drawList->PathLineTo(ImVec2(p0.x + 0.5f, p0.y + 0.5f));
+            // drawList->PathLineTo(ImVec2(p1.x + 0.5f, p0.y + 0.5f));
+            // drawList->PathLineTo(ImVec2(p1.x + 0.5f, p1.y + 0.5f));
+
+
+            // drawList->PathArcToFast(ImVec2(p0.x + rounding, p1.y - rounding), rounding, 3, 6); // bottom-left
+            // drawList->PathArcToFast(ImVec2(p0.x + rounding, p0.y + rounding), rounding, 6, 9); // top-left
+            // drawList->PathArcToFast(ImVec2(p1.x - rounding, p0.y + rounding), rounding, 9, 12); // top-right
+            // drawList->PathArcToFast(ImVec2(p1.x - rounding, p1.y - rounding), rounding, 0, 3); // bottom-right
+
+            // drawList->PathStroke(col, ImDrawFlags_Closed, m_baseDrawStyle.value().borderThickness.value_or(1.0f));
         }
     }
 };
