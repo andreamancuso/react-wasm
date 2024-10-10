@@ -58,12 +58,6 @@ const char* Element::GetType() const {
     return m_type.c_str();
 };
 
-void Element::SetState(ElementState state) {
-    // todo: re-apply style only when the state changes!!
-    ApplyStyle();
-}
-
-
 std::unique_ptr<Element> Element::makeElement(const json& nodeDef, ReactImgui* view) {
     auto id = nodeDef["id"].template get<int>();
     bool isRoot = (nodeDef.contains("root") && nodeDef["root"].is_boolean()) ? nodeDef["root"].template get<bool>() : false;
@@ -96,7 +90,8 @@ ElementStyleParts extractStyleParts(const json& styleDef) {
     ElementStyleParts elementStyleParts;
 
     // todo: not sure this fake deep copy is necessary, but let's stay safe for now
-    elementStyleParts.styleDef = json::parse(styleDef.dump());
+    // elementStyleParts.styleDef = json::parse(styleDef.dump());
+    elementStyleParts.styleDef = styleDef;
 
     if (styleDef.contains("backgroundColor")) {
         if (auto maybeColor = extractColor(styleDef["backgroundColor"]); maybeColor.has_value()) {
@@ -146,10 +141,14 @@ void Element::ApplyStyle() {
     if (m_elementStyle.has_value()) {
         auto state = GetState();
 
-        if (state == ElementState_Base && m_elementStyle.value().maybeBase.has_value()) {
-            m_layoutNode->ApplyStyle(m_elementStyle.value().maybeBase.value().styleDef.value());
-        } else if (state == ElementState_Hover && m_elementStyle.value().maybeHover.has_value()) {
-            m_layoutNode->ApplyStyle(m_elementStyle.value().maybeHover.value().styleDef.value());
+        // if (state == ElementState_Base && m_elementStyle.value().maybeBase.has_value()) {
+        //     m_layoutNode->ApplyStyle(m_elementStyle.value().maybeBase.value().styleDef);
+        // } else if (state == ElementState_Hover && m_elementStyle.value().maybeHover.has_value()) {
+        //     m_layoutNode->ApplyStyle(m_elementStyle.value().maybeHover.value().styleDef);
+        // }
+
+        if (m_elementStyle.value().maybeBase.has_value()) {
+            m_layoutNode->ApplyStyle(m_elementStyle.value().maybeBase.value().styleDef);
         }
         // todo: other states?
     }
@@ -283,13 +282,13 @@ const std::optional<ElementStyleParts>& Element::GetElementStyleParts(ElementSta
         return std::nullopt;
     }
 
-    if (state == ElementState_Disabled) {
-        return m_elementStyle.value().maybeDisabled;
-    } else if (state == ElementState_Hover) {
-        return m_elementStyle.value().maybeHover;
-    } else if (state == ElementState_Active) {
-        return m_elementStyle.value().maybeActive;
-    }
+    // if (state == ElementState_Disabled) {
+    //     return m_elementStyle.value().maybeDisabled;
+    // } else if (state == ElementState_Hover) {
+    //     return m_elementStyle.value().maybeHover;
+    // } else if (state == ElementState_Active) {
+    //     return m_elementStyle.value().maybeActive;
+    // }
 
     return m_elementStyle.value().maybeBase;
 }

@@ -24,7 +24,7 @@ struct BorderStyle {
 };
 
 struct ElementStyleParts {
-    std::optional<json> styleDef;
+    json styleDef;
     std::optional<ImVec4> backgroundColor;
     std::optional<BorderStyle> borderTop;
     std::optional<BorderStyle> borderRight;
@@ -80,8 +80,6 @@ class Element {
         virtual void PostRender(ReactImgui* view);
 
         virtual ElementState GetState() const;
-
-        virtual void SetState(ElementState state);
 
         bool HasStyle(ElementState state);
 

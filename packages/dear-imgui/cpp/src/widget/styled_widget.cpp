@@ -404,8 +404,6 @@ void StyledWidget::PostRender(ReactImgui* view) {
     auto hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNone);
 
     if (m_hovered != hovered) {
-        // SetState(hovered ? ElementState_Hover : ElementState_Base);
-
         m_hovered = hovered;
 
         ApplyStyle();
