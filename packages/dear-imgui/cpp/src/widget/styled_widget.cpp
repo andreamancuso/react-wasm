@@ -201,7 +201,7 @@ StyleVarValue WidgetStyle::GetCustomStyleVar(std::optional<ElementState> widgetS
     }
 }
 
-WidgetStyleParts extractStyle(const json& styleDef, ReactImgui* view) {
+WidgetStyleParts extractStyleParts(const json& styleDef, ReactImgui* view) {
     auto widgetStyleParts = WidgetStyleParts{};
 
     if (styleDef.contains("font")
@@ -264,19 +264,19 @@ std::optional<WidgetStyle> StyledWidget::ExtractStyle(const json& widgetDef, Rea
     WidgetStyle widgetStyle;
 
     if (widgetDef.contains("style") && widgetDef["style"].is_object()) {
-        widgetStyle.maybeBase = extractStyle(widgetDef["style"], view);
+        widgetStyle.maybeBase = extractStyleParts(widgetDef["style"], view);
     }
 
     if (widgetDef.contains("hoverStyle") && widgetDef["hoverStyle"].is_object()) {
-        widgetStyle.maybeHover = extractStyle(widgetDef["hoverStyle"], view);
+        widgetStyle.maybeHover = extractStyleParts(widgetDef["hoverStyle"], view);
     }
 
     if (widgetDef.contains("activeStyle") && widgetDef["activeStyle"].is_object()) {
-        widgetStyle.maybeActive = extractStyle(widgetDef["activeStyle"], view);
+        widgetStyle.maybeActive = extractStyleParts(widgetDef["activeStyle"], view);
     }
 
     if (widgetDef.contains("disabledStyle") && widgetDef["disabledStyle"].is_object()) {
-        widgetStyle.maybeDisabled = extractStyle(widgetDef["disabledStyle"], view);
+        widgetStyle.maybeDisabled = extractStyleParts(widgetDef["disabledStyle"], view);
     }
 
     maybeStyle.emplace(widgetStyle);
@@ -299,6 +299,8 @@ void StyledWidget::ReplaceStyle(WidgetStyle& newStyle) {
 
 void StyledWidget::Patch(const json& widgetPatchDef, ReactImgui* view) {
     Widget::Patch(widgetPatchDef, view);
+
+    // todo: we probably need to test all 4 state objects individually
     auto maybeNewStyle = ExtractStyle(widgetPatchDef, view);
 
     if (maybeNewStyle.has_value()) {
@@ -398,7 +400,16 @@ void StyledWidget::PostRender(ReactImgui* view) {
         }
     }
 
-    m_hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNone);
+    // todo: need a way to track state changes that does not kill performance
+    auto hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNone);
+
+    if (m_hovered != hovered) {
+        // SetState(hovered ? ElementState_Hover : ElementState_Base);
+
+        m_hovered = hovered;
+
+        ApplyStyle();
+    }
 };
 
 bool StyledWidget::HasCustomStyleVar(const ImGuiStyleVar key) const {

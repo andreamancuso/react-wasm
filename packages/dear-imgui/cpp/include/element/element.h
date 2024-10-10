@@ -23,9 +23,8 @@ struct BorderStyle {
     float thickness = 0;
 };
 
-BorderStyle extractBorderStyle(const json& borderStyleDef);
-
-struct BaseDrawStyle {
+struct ElementStyleParts {
+    std::optional<json> styleDef;
     std::optional<ImVec4> backgroundColor;
     std::optional<BorderStyle> borderTop;
     std::optional<BorderStyle> borderRight;
@@ -35,6 +34,16 @@ struct BaseDrawStyle {
     std::optional<float> rounding;
     ImDrawFlags drawFlags = ImDrawFlags_RoundCornersNone;
 };
+
+struct ElementStyle {
+    std::optional<ElementStyleParts> maybeBase;
+    std::optional<ElementStyleParts> maybeDisabled;
+    std::optional<ElementStyleParts> maybeHover;
+    std::optional<ElementStyleParts> maybeActive;
+};
+
+BorderStyle extractBorderStyle(const json& borderStyleDef);
+ElementStyleParts extractStyleParts(const json& styleDef);
 
 class Element {
     public:
@@ -46,7 +55,7 @@ class Element {
         bool m_cull;
         bool m_hovered;
         std::unique_ptr<LayoutNode> m_layoutNode;
-        std::optional<BaseDrawStyle> m_baseDrawStyle;
+        std::optional<ElementStyle> m_elementStyle;
 
         Element(ReactImgui* view, int id, bool isRoot, bool cull);
 
@@ -72,13 +81,21 @@ class Element {
 
         virtual ElementState GetState() const;
 
+        virtual void SetState(ElementState state);
+
+        bool HasStyle(ElementState state);
+
+        [[nodiscard]] const std::optional<ElementStyleParts>& GetElementStyleParts(ElementState state) const;
+
         void DrawBaseEffects() const;
 
         void ResetStyle();
 
-        void SetStyle(const json& styleDef);
+        void ApplyStyle();
 
         ImRect GetScrollingAwareViewport();
+
+        virtual std::optional<ElementStyle> ExtractStyle(const json& elementDef);
 
         virtual void Patch(const json& elementPatchDef, ReactImgui* view);
 

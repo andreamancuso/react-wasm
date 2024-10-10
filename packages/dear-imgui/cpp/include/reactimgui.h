@@ -63,7 +63,7 @@ class ReactImgui : public ImPlotView {
 
         std::unordered_map<int, std::unique_ptr<char[]>> m_floatFormatChars;
 
-        ImGuiStyle m_widgetStyle;
+        ImGuiStyle m_appStyle;
 
         OnInitCallback m_onInit;
         OnTextChangedCallback m_onInputTextChange;
