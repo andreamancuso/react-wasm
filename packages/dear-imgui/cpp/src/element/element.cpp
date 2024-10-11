@@ -245,8 +245,6 @@ void Element::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
 
     ImGui::EndChild();
 
-
-
     ImGui::PopID();
 };
 
@@ -284,12 +282,24 @@ const std::optional<ElementStyleParts>& Element::GetElementStyleParts(ElementSta
         return std::nullopt;
     }
 
-    if (state == ElementState_Disabled) {
-        return m_elementStyle.value().maybeDisabled;
-    } else if (state == ElementState_Hover) {
-        return m_elementStyle.value().maybeHover;
-    } else if (state == ElementState_Active) {
-        return m_elementStyle.value().maybeActive;
+    switch (state) {
+        case ElementState_Hover: {
+            if (m_elementStyle.value().maybeHover.has_value()) {
+                return m_elementStyle.value().maybeHover;
+            }
+        }
+        case ElementState_Active: {
+            if (m_elementStyle.value().maybeActive.has_value()) {
+                return m_elementStyle.value().maybeActive;
+            }
+        }
+        case ElementState_Disabled: {
+            if (m_elementStyle.value().maybeDisabled.has_value()) {
+                return m_elementStyle.value().maybeDisabled;
+            }
+        }
+
+        default: break;
     }
 
     return m_elementStyle.value().maybeBase;
@@ -424,8 +434,8 @@ void Element::PreRender(ReactImgui* view) {};
 
 void Element::PostRender(ReactImgui* view) {
     auto hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNone);
-    if (m_hovered != hovered) {
-        m_hovered = hovered;
+    if (m_isHovered != hovered) {
+        m_isHovered = hovered;
 
         ApplyStyle();
     }
@@ -451,7 +461,7 @@ void Element::HandleInternalOp(const json& opDef) {};
 // todo: what about the other states?
 // todo: also, this is currently called multiple times - unnecessarily?
 ElementState Element::GetState() const {
-    if (m_hovered) {
+    if (m_isHovered) {
         return ElementState_Hover;
     }
 

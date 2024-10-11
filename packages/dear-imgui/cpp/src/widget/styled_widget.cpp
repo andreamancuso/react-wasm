@@ -401,10 +401,30 @@ void StyledWidget::PostRender(ReactImgui* view) {
     }
 
     // todo: need a way to track state changes that does not kill performance
-    auto hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNone);
-    if (m_hovered != hovered) {
-        m_hovered = hovered;
+    const auto isHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNone);
+    const auto isActive = ImGui::IsItemActive();
+    const auto isFocused = ImGui::IsItemFocused();
 
+    auto hoveredStateChanged = false;
+    auto activeStateChanged = false;
+    auto focusedStateChanged = false;
+
+    if (m_isHovered != isHovered) {
+        hoveredStateChanged = true;
+        m_isHovered = isHovered;
+    }
+
+    if (m_isActive != isActive) {
+        activeStateChanged = true;
+        m_isActive = isActive;
+    }
+
+    if (m_isFocused != isFocused) {
+        focusedStateChanged = true;
+        m_isFocused = isFocused;
+    }
+
+    if (hoveredStateChanged || activeStateChanged || focusedStateChanged) {
         ApplyStyle();
     }
 };
