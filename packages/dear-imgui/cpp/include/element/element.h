@@ -53,7 +53,7 @@ class Element {
         bool m_handlesChildrenWithinRenderMethod;
         bool m_isRoot;
         bool m_cull;
-        bool m_hovered;
+        bool m_hovered = false;
         std::unique_ptr<LayoutNode> m_layoutNode;
         std::optional<ElementStyle> m_elementStyle;
 

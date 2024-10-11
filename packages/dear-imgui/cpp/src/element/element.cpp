@@ -141,15 +141,15 @@ void Element::ApplyStyle() {
     if (m_elementStyle.has_value()) {
         auto state = GetState();
 
-        // if (state == ElementState_Base && m_elementStyle.value().maybeBase.has_value()) {
-        //     m_layoutNode->ApplyStyle(m_elementStyle.value().maybeBase.value().styleDef);
-        // } else if (state == ElementState_Hover && m_elementStyle.value().maybeHover.has_value()) {
-        //     m_layoutNode->ApplyStyle(m_elementStyle.value().maybeHover.value().styleDef);
-        // }
-
-        if (m_elementStyle.value().maybeBase.has_value()) {
+        if (state == ElementState_Base && m_elementStyle.value().maybeBase.has_value()) {
             m_layoutNode->ApplyStyle(m_elementStyle.value().maybeBase.value().styleDef);
+        } else if (state == ElementState_Hover && m_elementStyle.value().maybeHover.has_value()) {
+            m_layoutNode->ApplyStyle(m_elementStyle.value().maybeHover.value().styleDef);
         }
+
+        // if (m_elementStyle.value().maybeBase.has_value()) {
+        //     m_layoutNode->ApplyStyle(m_elementStyle.value().maybeBase.value().styleDef);
+        // }
         // todo: other states?
     }
 }
@@ -245,6 +245,8 @@ void Element::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
 
     ImGui::EndChild();
 
+
+
     ImGui::PopID();
 };
 
@@ -282,13 +284,13 @@ const std::optional<ElementStyleParts>& Element::GetElementStyleParts(ElementSta
         return std::nullopt;
     }
 
-    // if (state == ElementState_Disabled) {
-    //     return m_elementStyle.value().maybeDisabled;
-    // } else if (state == ElementState_Hover) {
-    //     return m_elementStyle.value().maybeHover;
-    // } else if (state == ElementState_Active) {
-    //     return m_elementStyle.value().maybeActive;
-    // }
+    if (state == ElementState_Disabled) {
+        return m_elementStyle.value().maybeDisabled;
+    } else if (state == ElementState_Hover) {
+        return m_elementStyle.value().maybeHover;
+    } else if (state == ElementState_Active) {
+        return m_elementStyle.value().maybeActive;
+    }
 
     return m_elementStyle.value().maybeBase;
 }
@@ -420,7 +422,14 @@ bool Element::ShouldRender(ReactImgui* view) const {
 
 void Element::PreRender(ReactImgui* view) {};
 
-void Element::PostRender(ReactImgui* view) {};
+void Element::PostRender(ReactImgui* view) {
+    auto hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNone);
+    if (m_hovered != hovered) {
+        m_hovered = hovered;
+
+        ApplyStyle();
+    }
+};
 
 void Element::Patch(const json& elementPatchDef, ReactImgui* view) {
     // if (nodeDef.contains("style") && nodeDef["style"].is_object()) {
@@ -428,6 +437,7 @@ void Element::Patch(const json& elementPatchDef, ReactImgui* view) {
     //     SetStyle(nodeDef["style"]);
     // }
 
+    ResetStyle();
     // todo: we probably need to test all 4 state objects individually
     m_elementStyle = ExtractStyle(elementPatchDef);
 };

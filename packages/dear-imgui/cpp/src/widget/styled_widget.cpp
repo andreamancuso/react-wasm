@@ -402,7 +402,6 @@ void StyledWidget::PostRender(ReactImgui* view) {
 
     // todo: need a way to track state changes that does not kill performance
     auto hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNone);
-
     if (m_hovered != hovered) {
         m_hovered = hovered;
 
