@@ -258,21 +258,22 @@ void Element::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
         DrawBaseEffects();
     }
 
-    if (size.x != 0.0f && size.y != 0.0f) {
-        ImGui::InvisibleButton("###", size);
-
-        const auto isActive = ImGui::IsItemActive();
-        auto activeStateChanged = false;
-
-        if (m_isActive != isActive) {
-            activeStateChanged = true;
-            m_isActive = isActive;
-        }
-
-        if (activeStateChanged) {
-            ApplyStyle();
-        }
-    }
+    // todo: this breaks the chain of events
+    // if (size.x != 0.0f && size.y != 0.0f) {
+    //     ImGui::InvisibleButton("###", size);
+    //
+    //     const auto isActive = ImGui::IsItemActive();
+    //     auto activeStateChanged = false;
+    //
+    //     if (m_isActive != isActive) {
+    //         activeStateChanged = true;
+    //         m_isActive = isActive;
+    //     }
+    //
+    //     if (activeStateChanged) {
+    //         ApplyStyle();
+    //     }
+    // }
 
     HandleChildren(view, viewport);
 
