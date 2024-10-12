@@ -4,7 +4,9 @@ Please note that only Chrome, Edge and [Firefox Nightlies](https://www.mozilla.o
 
 ## Building instructions
 
-We provide instructions for manual setup on Windows as well as a devcontainer configuration. We **strongly** recommend to use the Dev Container approach.
+We provide instructions for manual setup on Windows as well as a devcontainer configuration. We recommend to use the Dev Container approach or JetBrain's CLion:
+
+![React Dear Imgui Electron demo](/screenshots/dear-imgui/clion-toolchain.png?raw=true)
 
 ### Requirements for devcontainer-based setup (massive kudos to [@genautz](https://github.com/genautz))
 
