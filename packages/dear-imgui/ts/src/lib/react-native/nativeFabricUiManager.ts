@@ -89,7 +89,8 @@ export default class {
             };
 
             // todo: is there a good reason why we shouldn't keep track of all widgets?
-            if (this.linkedWidgetTypes.includes(type)) {
+            // if (this.linkedWidgetTypes.includes(type)) {
+            if (typeof id === "string") {
                 this.widgetRegistrationService?.linkWidgetIds(id, generatedId);
             }
         } else {

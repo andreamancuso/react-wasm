@@ -27,7 +27,7 @@ struct WidgetStyle {
     StyleVarValue GetCustomStyleVar(std::optional<ElementState> widgetState, ImGuiStyleVar key);
 };
 
-WidgetStyleParts extractStyle(const json& styleDef, ReactImgui* view);
+WidgetStyleParts extractStyleParts(const json& styleDef, ReactImgui* view);
 
 class StyledWidget : public Widget {
 public:

@@ -251,8 +251,12 @@ export type ReactElementWidgetsFlat = ReactElementWidgets[keyof ReactElementWidg
 export type NodeProps = {
     root?: boolean;
     cull?: boolean;
+    trackMouseClickEvents?: boolean;
     children?: WidgetReactNode;
+    onClick?: () => void;
 } & NodeStyleProps;
+
+export type YogaNode = NodeProps & { id?: string };
 
 export type ImguiWidget<
     K extends WidgetKeys,

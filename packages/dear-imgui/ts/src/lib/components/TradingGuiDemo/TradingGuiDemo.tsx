@@ -121,6 +121,16 @@ export const TradingGuiDemo = () => {
                         [ImGuiCol.Border]: "#1C1E22",
                     },
                 },
+                marketSearchInputHover: {
+                    vars: {
+                        [ImGuiStyleVar.FrameBorderSize]: 1,
+                        [ImGuiStyleVar.FramePadding]: [10, 10],
+                    },
+                    colors: {
+                        [ImGuiCol.Border]: "#fff",
+                        [ImGuiCol.TextDisabled]: "#fff",
+                    },
+                },
                 marketSearchFilterWrapper: {
                     flexDirection: "row",
                     gap: { all: 8 },
@@ -386,6 +396,7 @@ export const TradingGuiDemo = () => {
                             <ReactImgui.InputText
                                 hint={`${faIconMap["magnifying-glass"]} SEARCH MARKETS`}
                                 style={styleSheet.marketSearchInput}
+                                hoverStyle={styleSheet.marketSearchInputHover}
                             />
                             <ReactImgui.Node style={styleSheet.marketSearchFilterWrapper}>
                                 <ReactImgui.Button

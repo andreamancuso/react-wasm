@@ -25,7 +25,7 @@ class Button final : public StyledWidget {
             if (context) {
                 const auto widget = static_cast<Button*>(context);
 
-                size.width = (widget->m_view->m_widgetStyle.FramePadding.x * 2.0f) + widget->m_view->CalcTextSize(widget, widget->m_label.c_str()).x;
+                size.width = (widget->m_view->m_appStyle.FramePadding.x * 2.0f) + widget->m_view->CalcTextSize(widget, widget->m_label.c_str()).x;
                 size.height = widget->m_view->GetFrameHeight(widget);
 
                 if (widget->HasCustomStyles() && widget->HasCustomStyleVar(ImGuiStyleVar_FramePadding)) {

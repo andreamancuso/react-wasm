@@ -7,6 +7,9 @@
 
 using json = nlohmann::json;
 
+
+const auto blankNode = YGNodeNew();
+
 LayoutNode::LayoutNode() {
     using namespace std::placeholders;
 
@@ -36,25 +39,15 @@ size_t LayoutNode::GetChildCount() const {
     return YGNodeGetChildCount(m_node);
 };
 
+// It is somewhat shocking that there's no native method to reset a node's style
+// We achive this by copying the default/blank style from a globally defined blank node into the current node
 void LayoutNode::ResetStyle() const {
-    SetDirection(YGDirectionInherit);
-    SetFlexDirection(YGFlexDirectionColumn);
-    SetJustifyContent(YGJustifyFlexStart);
-    SetAlignContent(YGAlignAuto);
-    SetAlignItems(YGAlignAuto);
-    SetAlignSelf(YGAlignAuto);
-    SetPositionType(YGPositionTypeStatic);
-    SetFlexWrap(YGWrapNoWrap);
-    SetOverflow(YGOverflowVisible);
-    SetDisplay(YGDisplayFlex);
-
-    SetPadding(YGEdgeAll, 0);
-    SetMargin(YGEdgeAll, 0);
-    SetPosition(YGEdgeAll, 0);
+    YGNodeCopyStyle(m_node, blankNode);
 };
 
 void LayoutNode::ApplyStyle(const json& styleDef) const {
     if (styleDef.is_object()) {
+        ResetStyle();
         ApplyOptionalStyleProperty<YGDirection>(styleDef, "direction", ResolveDirection);
         ApplyOptionalStyleProperty<YGFlexDirection>(styleDef, "flexDirection", ResolveFlexDirection);
         ApplyOptionalStyleProperty<YGJustify>(styleDef, "justifyContent", ResolveJustifyContent);

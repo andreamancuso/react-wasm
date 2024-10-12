@@ -59,7 +59,7 @@ const attributesForElements = {
     ],
     "unformatted-text": ["text"],
 
-    node: ["root", "cull"],
+    node: ["root", "cull", "trackMouseClickEvents"],
 };
 
 const attributesForElementsMap = Object.fromEntries(
