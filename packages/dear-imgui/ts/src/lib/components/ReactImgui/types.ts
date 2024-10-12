@@ -253,7 +253,10 @@ export type NodeProps = {
     cull?: boolean;
     trackMouseClickEvents?: boolean;
     children?: WidgetReactNode;
+    onClick?: () => void;
 } & NodeStyleProps;
+
+export type YogaNode = NodeProps & { id?: string };
 
 export type ImguiWidget<
     K extends WidgetKeys,

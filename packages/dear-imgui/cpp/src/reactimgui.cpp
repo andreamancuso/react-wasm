@@ -241,7 +241,7 @@ void ReactImgui::CreateElement(const json& elementDef) {
                 printf("element has no ID: '%s'\n", elementDef.dump().c_str());
             }
         } else {
-            printf("received JSON does not contain type property\n");
+            printf("received JSON does not contain type property: %s\n", elementDef.dump().c_str());
         }
     } else {
         printf("received JSON not an object\n");

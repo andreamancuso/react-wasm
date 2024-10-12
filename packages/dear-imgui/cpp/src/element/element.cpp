@@ -262,7 +262,9 @@ void Element::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
 
     // todo: this breaks the chain of events
     if (m_trackMouseClickEvents && size.x != 0.0f && size.y != 0.0f) {
-        ImGui::InvisibleButton("###", size);
+        if (ImGui::InvisibleButton("###", size)) {
+            view->m_onClick(m_id);
+        }
 
         const auto isActive = ImGui::IsItemActive();
         auto activeStateChanged = false;
