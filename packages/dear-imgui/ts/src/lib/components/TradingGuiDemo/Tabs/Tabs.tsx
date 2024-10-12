@@ -3,11 +3,15 @@ import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import RWStyleSheet from "../../../stylesheet/stylesheet";
 import { theme2Colors } from "src/lib/stylesheet/themes";
 
-type Props = {};
+type Props = {
+    tabs: string[];
+    selectedTabIndex: number;
+    onSelectedTabChange: (index: number) => void;
+};
 
 // todo: fix 1px vertical shift on hover
-export const Tabs = ({}: Props) => {
-    const [selectedItemIds, setSelectedItemIds] = useState("cryptoAssetPanels");
+export const Tabs = ({ tabs, selectedTabIndex, onSelectedTabChange }: Props) => {
+    // const [selectedItemIds, setSelectedItemIds] = useState("cryptoAssetPanels");
 
     const styleSheet = useMemo(
         () =>
@@ -91,20 +95,25 @@ export const Tabs = ({}: Props) => {
 
     return (
         <ReactImgui.Node style={styleSheet.tabs}>
-            <ReactImgui.Node style={styleSheet.selectedTab}>
-                <ReactImgui.UnformattedText text="Markets" style={styleSheet.tabText} />
-            </ReactImgui.Node>
-            <ReactImgui.Node
-                style={styleSheet.tab}
-                hoverStyle={styleSheet.hoveredTab}
-                activeStyle={styleSheet.activeTab}
-                onClick={() => {
-                    console.log("clicked");
-                }}
-                trackMouseClickEvents
-            >
-                <ReactImgui.UnformattedText text="History" style={styleSheet.tabText} />
-            </ReactImgui.Node>
+            {tabs.map((tab, index) => {
+                const isSelected = selectedTabIndex === index;
+
+                return (
+                    <ReactImgui.Node
+                        key={tab}
+                        style={isSelected ? styleSheet.selectedTab : styleSheet.tab}
+                        hoverStyle={isSelected ? styleSheet.selectedTab : styleSheet.hoveredTab}
+                        activeStyle={isSelected ? styleSheet.selectedTab : styleSheet.activeTab}
+                        onClick={() => {
+                            // console.log("clicked");
+                            onSelectedTabChange(index);
+                        }}
+                        trackMouseClickEvents
+                    >
+                        <ReactImgui.UnformattedText text={tab} style={styleSheet.tabText} />
+                    </ReactImgui.Node>
+                );
+            })}
         </ReactImgui.Node>
     );
 };

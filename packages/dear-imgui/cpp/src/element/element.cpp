@@ -486,14 +486,9 @@ void Element::PostRender(ReactImgui* view) {
 };
 
 void Element::Patch(const json& elementPatchDef, ReactImgui* view) {
-    // if (nodeDef.contains("style") && nodeDef["style"].is_object()) {
-    //     ResetStyle();
-    //     SetStyle(nodeDef["style"]);
-    // }
-
-    ResetStyle();
-    // todo: we probably need to test all 4 state objects individually
     m_elementStyle = ExtractStyle(elementPatchDef);
+
+    ApplyStyle();
 };
 
 bool Element::HasInternalOps() {

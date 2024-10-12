@@ -38,6 +38,8 @@ type ComponentKeys = keyof typeof componentMap;
 
 export const TradingGuiDemo = () => {
     const symbols = useStore((state) => state.symbols);
+    const selectedTabIndex = useStore((state) => state.selectedTabIndex);
+    const setSelectedTabIndex = useStore((state) => state.setSelectedTabIndex);
     const setCryptoAssets = useStore((state) => state.setCryptoAssets);
 
     const socketRef = useRef<WebSocket>();
@@ -328,6 +330,8 @@ export const TradingGuiDemo = () => {
         // }, 1000);
     }, [connect, getCryptoAssets]);
 
+    const tabs = useMemo(() => ["Markets", "History"], []);
+
     const Component = componentMap[selectedItemIds[0]];
 
     return (
@@ -390,7 +394,11 @@ export const TradingGuiDemo = () => {
                     <ReactImgui.Node style={styleSheet.contentNode}>
                         <CryptoSymbolBlock symbol="BTC/USD" />
 
-                        <Tabs />
+                        <Tabs
+                            tabs={tabs}
+                            selectedTabIndex={selectedTabIndex}
+                            onSelectedTabChange={setSelectedTabIndex}
+                        />
 
                         <ReactImgui.Node style={styleSheet.tabContent}>
                             <ReactImgui.InputText

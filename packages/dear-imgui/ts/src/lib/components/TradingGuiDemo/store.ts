@@ -39,11 +39,15 @@ export const emptyCryptoQuote = Object.freeze({
 export type State = {
     symbols: string[];
     cryptoAssets: any[];
+    selectedTabIndex: number;
     setCryptoAssets: (cryptoAssets: any[]) => void;
+    setSelectedTabIndex: (index: number) => void;
 };
 
 export const useStore = create<State>((set) => ({
     cryptoAssets: [],
     symbols: cryptoSymbols,
+    selectedTabIndex: 0,
     setCryptoAssets: (cryptoAssets) => set(() => ({ cryptoAssets })),
+    setSelectedTabIndex: (index) => set(() => ({ selectedTabIndex: index })),
 }));
