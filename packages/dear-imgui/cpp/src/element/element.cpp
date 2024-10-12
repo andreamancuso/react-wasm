@@ -162,7 +162,7 @@ void Element::ApplyStyle() {
             }
 
             default: {
-                if (state == ElementState_Base && m_elementStyle.value().maybeBase.has_value()) {
+                if (m_elementStyle.value().maybeBase.has_value()) {
                     m_layoutNode->ApplyStyle(m_elementStyle.value().maybeBase.value().styleDef);
                 }
                 break;
@@ -256,6 +256,22 @@ void Element::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
 
     if (HasStyle(GetState())) {
         DrawBaseEffects();
+    }
+
+    if (size.x != 0.0f && size.y != 0.0f) {
+        ImGui::InvisibleButton("###", size);
+
+        const auto isActive = ImGui::IsItemActive();
+        auto activeStateChanged = false;
+
+        if (m_isActive != isActive) {
+            activeStateChanged = true;
+            m_isActive = isActive;
+        }
+
+        if (activeStateChanged) {
+            ApplyStyle();
+        }
     }
 
     HandleChildren(view, viewport);
@@ -451,22 +467,15 @@ void Element::PreRender(ReactImgui* view) {};
 
 void Element::PostRender(ReactImgui* view) {
     const auto isHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNone);
-    const auto isActive = ImGui::IsItemActive();
 
     auto hoveredStateChanged = false;
-    auto activeStateChanged = false;
 
     if (m_isHovered != isHovered) {
         hoveredStateChanged = true;
         m_isHovered = isHovered;
     }
 
-    if (m_isActive != isActive) {
-        activeStateChanged = true;
-        m_isActive = isActive;
-    }
-
-    if (hoveredStateChanged || activeStateChanged) {
+    if (hoveredStateChanged) {
         ApplyStyle();
     }
 };
@@ -491,9 +500,9 @@ void Element::HandleInternalOp(const json& opDef) {};
 // todo: what about the other states?
 // todo: also, this is currently called multiple times - unnecessarily?
 ElementState Element::GetState() const {
-    // if (m_isActive) {
-    //     return ElementState_Active;
-    // }
+    if (m_isActive) {
+        return ElementState_Active;
+    }
     if (m_isHovered) {
         return ElementState_Hover;
     }

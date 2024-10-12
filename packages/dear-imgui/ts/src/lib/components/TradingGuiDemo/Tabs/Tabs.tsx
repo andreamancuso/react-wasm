@@ -5,6 +5,7 @@ import { theme2Colors } from "src/lib/stylesheet/themes";
 
 type Props = {};
 
+// todo: fix 1px vertical shift on hover
 export const Tabs = ({}: Props) => {
     const [selectedItemIds, setSelectedItemIds] = useState("cryptoAssetPanels");
 
@@ -44,17 +45,23 @@ export const Tabs = ({}: Props) => {
                         color: "#1C1E22",
                         thickness: 1,
                     },
+                    position: {
+                        top: 1, // todo: hack
+                    },
                 },
                 activeTab: {
                     padding: { vertical: 10, horizontal: 20 },
                     borderTop: {
                         // todo: not currently working for hover/active/disabled states
                         color: "#fff",
-                        thickness: 10,
+                        thickness: 1,
                     },
                     borderRight: {
                         color: "#1C1E22",
                         thickness: 1,
+                    },
+                    position: {
+                        top: 1, // todo: hack
                     },
                 },
                 selectedTab: {
