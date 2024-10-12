@@ -141,16 +141,33 @@ void Element::ApplyStyle() {
     if (m_elementStyle.has_value()) {
         auto state = GetState();
 
-        if (state == ElementState_Base && m_elementStyle.value().maybeBase.has_value()) {
-            m_layoutNode->ApplyStyle(m_elementStyle.value().maybeBase.value().styleDef);
-        } else if (state == ElementState_Hover && m_elementStyle.value().maybeHover.has_value()) {
-            m_layoutNode->ApplyStyle(m_elementStyle.value().maybeHover.value().styleDef);
-        }
+        switch (state) {
+            case ElementState_Hover: {
+                if (m_elementStyle.value().maybeHover.has_value()) {
+                    m_layoutNode->ApplyStyle(m_elementStyle.value().maybeHover.value().styleDef);
+                }
+                break;
+            }
+            case ElementState_Active: {
+                if (m_elementStyle.value().maybeActive.has_value()) {
+                    m_layoutNode->ApplyStyle(m_elementStyle.value().maybeActive.value().styleDef);
+                }
+                break;
+            }
+            case ElementState_Disabled: {
+                if (m_elementStyle.value().maybeDisabled.has_value()) {
+                    m_layoutNode->ApplyStyle(m_elementStyle.value().maybeDisabled.value().styleDef);
+                }
+                break;
+            }
 
-        // if (m_elementStyle.value().maybeBase.has_value()) {
-        //     m_layoutNode->ApplyStyle(m_elementStyle.value().maybeBase.value().styleDef);
-        // }
-        // todo: other states?
+            default: {
+                if (state == ElementState_Base && m_elementStyle.value().maybeBase.has_value()) {
+                    m_layoutNode->ApplyStyle(m_elementStyle.value().maybeBase.value().styleDef);
+                }
+                break;
+            }
+        }
     }
 }
 
@@ -433,10 +450,23 @@ bool Element::ShouldRender(ReactImgui* view) const {
 void Element::PreRender(ReactImgui* view) {};
 
 void Element::PostRender(ReactImgui* view) {
-    auto hovered = ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNone);
-    if (m_isHovered != hovered) {
-        m_isHovered = hovered;
+    const auto isHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNone);
+    const auto isActive = ImGui::IsItemActive();
 
+    auto hoveredStateChanged = false;
+    auto activeStateChanged = false;
+
+    if (m_isHovered != isHovered) {
+        hoveredStateChanged = true;
+        m_isHovered = isHovered;
+    }
+
+    if (m_isActive != isActive) {
+        activeStateChanged = true;
+        m_isActive = isActive;
+    }
+
+    if (hoveredStateChanged || activeStateChanged) {
         ApplyStyle();
     }
 };
@@ -461,6 +491,9 @@ void Element::HandleInternalOp(const json& opDef) {};
 // todo: what about the other states?
 // todo: also, this is currently called multiple times - unnecessarily?
 ElementState Element::GetState() const {
+    // if (m_isActive) {
+    //     return ElementState_Active;
+    // }
     if (m_isHovered) {
         return ElementState_Hover;
     }

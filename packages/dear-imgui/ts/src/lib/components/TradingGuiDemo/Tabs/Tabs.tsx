@@ -23,7 +23,6 @@ export const Tabs = ({}: Props) => {
                     },
                 },
                 tab: {
-                    font: { name: "roboto-bold", size: 32 },
                     padding: { vertical: 10, horizontal: 20 },
                     borderTop: {
                         color: "#1C1E22",
@@ -35,7 +34,6 @@ export const Tabs = ({}: Props) => {
                     },
                 },
                 hoveredTab: {
-                    font: { name: "roboto-bold", size: 32 },
                     padding: { vertical: 10, horizontal: 20 },
                     borderTop: {
                         // todo: not currently working for hover/active/disabled states
@@ -47,8 +45,19 @@ export const Tabs = ({}: Props) => {
                         thickness: 1,
                     },
                 },
+                activeTab: {
+                    padding: { vertical: 10, horizontal: 20 },
+                    borderTop: {
+                        // todo: not currently working for hover/active/disabled states
+                        color: "#fff",
+                        thickness: 10,
+                    },
+                    borderRight: {
+                        color: "#1C1E22",
+                        thickness: 1,
+                    },
+                },
                 selectedTab: {
-                    font: { name: "roboto-bold", size: 32 },
                     padding: { vertical: 10, horizontal: 20 },
                     borderTop: {
                         color: "#fff",
@@ -78,7 +87,11 @@ export const Tabs = ({}: Props) => {
             <ReactImgui.Node style={styleSheet.selectedTab}>
                 <ReactImgui.UnformattedText text="Markets" style={styleSheet.tabText} />
             </ReactImgui.Node>
-            <ReactImgui.Node style={styleSheet.tab} hoverStyle={styleSheet.hoveredTab}>
+            <ReactImgui.Node
+                style={styleSheet.tab}
+                hoverStyle={styleSheet.hoveredTab}
+                activeStyle={styleSheet.activeTab}
+            >
                 <ReactImgui.UnformattedText text="History" style={styleSheet.tabText} />
             </ReactImgui.Node>
         </ReactImgui.Node>
