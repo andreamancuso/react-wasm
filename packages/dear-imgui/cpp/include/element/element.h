@@ -56,10 +56,11 @@ class Element {
         bool m_isHovered = false;
         bool m_isActive = false;
         bool m_isFocused = false;
+        bool m_trackMouseClickEvents = false;
         std::unique_ptr<LayoutNode> m_layoutNode;
         std::optional<ElementStyle> m_elementStyle;
 
-        Element(ReactImgui* view, int id, bool isRoot, bool cull);
+        Element(ReactImgui* view, int id, bool isRoot, bool cull, bool trackMouseClickEvents);
 
         static std::unique_ptr<Element> makeElement(const json& val, ReactImgui* view);
 

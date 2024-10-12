@@ -98,6 +98,7 @@ export const Tabs = ({}: Props) => {
                 style={styleSheet.tab}
                 hoverStyle={styleSheet.hoveredTab}
                 activeStyle={styleSheet.activeTab}
+                trackMouseClickEvents
             >
                 <ReactImgui.UnformattedText text="History" style={styleSheet.tabText} />
             </ReactImgui.Node>

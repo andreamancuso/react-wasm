@@ -5,6 +5,7 @@ export const Node: FunctionComponent<PropsWithChildren & NodeProps> = ({
     root,
     children,
     cull,
+    trackMouseClickEvents,
     style,
     hoverStyle,
     activeStyle,
@@ -14,6 +15,7 @@ export const Node: FunctionComponent<PropsWithChildren & NodeProps> = ({
         <node
             root={root}
             cull={cull}
+            trackMouseClickEvents={trackMouseClickEvents}
             style={style}
             hoverStyle={hoverStyle}
             activeStyle={activeStyle}

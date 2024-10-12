@@ -10,13 +10,14 @@
 
 using json = nlohmann::json;
 
-Element::Element(ReactImgui* view, const int id, const bool isRoot, const bool cull) {
+Element::Element(ReactImgui* view, const int id, const bool isRoot, const bool cull, const bool trackMouseClickEvents) {
     m_type = "node";
     m_id = id;
     m_view = view;
     m_handlesChildrenWithinRenderMethod = true;
     m_isRoot = isRoot;
     m_cull = cull;
+    m_trackMouseClickEvents = trackMouseClickEvents;
     m_layoutNode = std::make_unique<LayoutNode>();
 }
 
@@ -62,7 +63,8 @@ std::unique_ptr<Element> Element::makeElement(const json& nodeDef, ReactImgui* v
     auto id = nodeDef["id"].template get<int>();
     bool isRoot = (nodeDef.contains("root") && nodeDef["root"].is_boolean()) ? nodeDef["root"].template get<bool>() : false;
     bool cull = (nodeDef.contains("cull") && nodeDef["cull"].is_boolean()) ? nodeDef["cull"].template get<bool>() : false;
-    auto element = std::make_unique<Element>(view, id, isRoot, cull);
+    bool trackMouseClickEvents = (nodeDef.contains("trackMouseClickEvents") && nodeDef["trackMouseClickEvents"].is_boolean()) ? nodeDef["trackMouseClickEvents"].template get<bool>() : false;
+    auto element = std::make_unique<Element>(view, id, isRoot, cull, trackMouseClickEvents);
 
     return element;
 };
@@ -259,21 +261,21 @@ void Element::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     }
 
     // todo: this breaks the chain of events
-    // if (size.x != 0.0f && size.y != 0.0f) {
-    //     ImGui::InvisibleButton("###", size);
-    //
-    //     const auto isActive = ImGui::IsItemActive();
-    //     auto activeStateChanged = false;
-    //
-    //     if (m_isActive != isActive) {
-    //         activeStateChanged = true;
-    //         m_isActive = isActive;
-    //     }
-    //
-    //     if (activeStateChanged) {
-    //         ApplyStyle();
-    //     }
-    // }
+    if (m_trackMouseClickEvents && size.x != 0.0f && size.y != 0.0f) {
+        ImGui::InvisibleButton("###", size);
+
+        const auto isActive = ImGui::IsItemActive();
+        auto activeStateChanged = false;
+
+        if (m_isActive != isActive) {
+            activeStateChanged = true;
+            m_isActive = isActive;
+        }
+
+        if (activeStateChanged) {
+            ApplyStyle();
+        }
+    }
 
     HandleChildren(view, viewport);
 
