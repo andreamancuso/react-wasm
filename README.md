@@ -2,6 +2,8 @@
 
 <video src='https://github.com/user-attachments/assets/61fbc418-a419-4bdc-8202-50ff16c5ee56' style="width:90%"></video>
 
+![React Dear Imgui screenshot](https://github.com/user-attachments/assets/1512b95f-640d-4555-8a4b-57ad08119876)
+
 ![React Dear Imgui screenshot](https://github.com/user-attachments/assets/1a9b8ae9-d529-45af-ab7b-7e173799136f)
 
 ## Motivation
