@@ -1,0 +1,7 @@
+apiVersion: 1
+
+providers:
+  - name: 'react-wasm-demo'
+    type: file
+    options:
+      path: /etc/grafana/provisioning/dashboards

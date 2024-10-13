@@ -39,7 +39,7 @@ void PlotLine::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
         double* x_valuesPtr = m_xValues.data();
         double* y_valuesPtr = m_yValues.data();
 
-        ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+        ImPlot::SetNextMarkerStyle(m_markerStyle);
         ImPlot::PlotLine("line-plot", x_valuesPtr, y_valuesPtr, m_xValues.size());
 
         ImPlot::EndPlot();

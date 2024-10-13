@@ -68,6 +68,20 @@ export enum ImPlotScale {
     SymLog,
 }
 
+export enum ImPlotMarker {
+    None = -1,
+    Circle,
+    Square,
+    Diamond,
+    Up,
+    Down,
+    Left,
+    Right,
+    Cross,
+    Plus,
+    Asterisk,
+}
+
 export enum ImGuiStyleVar {
     Alpha, // float     Alpha
     DisabledAlpha, // float     DisabledAlpha

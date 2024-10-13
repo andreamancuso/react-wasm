@@ -2,7 +2,7 @@ import { FunctionComponent, JSXElementConstructor, ReactElement, SyntheticEvent 
 import { ReactImgui } from "./components";
 import { MainComponentProps } from "../ReactImgui";
 import { StyleRules } from "src/lib/stylesheet/stylesheet";
-import { ImPlotScale, ImVec2 } from "src/lib/wasm/wasm-app-types";
+import { ImPlotMarker, ImPlotScale, ImVec2 } from "src/lib/wasm/wasm-app-types";
 import { YogaStyle } from "src/lib/stylesheet/yoga-style";
 import { BaseDrawStyle } from "src/lib/stylesheet/base-draw-style";
 import { TreeViewItem } from "./TreeView";
@@ -136,6 +136,7 @@ export type WidgetPropsMap = {
     PlotLine: WidgetStyleProps & {
         xAxisDecimalDigits?: number;
         yAxisDecimalDigits?: number;
+        markerStyle?: ImPlotMarker;
         xAxisScale?: ImPlotScale;
         yAxisScale?: ImPlotScale;
         axisAutoFit?: boolean;

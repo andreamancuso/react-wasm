@@ -4,7 +4,14 @@ import { useWidgetEventManagement, useWidgetRegistrationService, useDearImguiWas
 import { WidgetRegistrationServiceContext } from "./contexts";
 import { ImGuiDemo } from "./components/ImGuiDemo/ImGuiDemo";
 import faIconMap from "./fa-icons";
-import { ImGuiCol, ImVec2, WasmExitStatus, ImGuiStyleVar } from "./wasm/wasm-app-types";
+import {
+    ImGuiCol,
+    ImVec2,
+    WasmExitStatus,
+    ImGuiStyleVar,
+    ImPlotScale,
+    ImPlotMarker,
+} from "./wasm/wasm-app-types";
 import { ImGuiStyleForPatching, ImGuiStyle, StyleVarValue } from "./stylesheet/imgui-style";
 import { HEXA, StyleColValue } from "./stylesheet/types";
 import { TableImperativeHandle } from "./components/ReactImgui/Table";
@@ -27,6 +34,9 @@ import {
     WidgetReactNode,
     NodeProps,
 } from "./components/ReactImgui/types";
+import RWStyleSheet from "./stylesheet/stylesheet";
+import { PlotLineImperativeHandle } from "./components/ReactImgui/PlotLine";
+import { PlotCandlestickImperativeHandle } from "./components/ReactImgui/PlotCandlestick";
 
 export {
     ReactImgui,
@@ -64,4 +74,9 @@ export {
     SliderChangeEvent,
     MultiSliderChangeEvent,
     CheckboxChangeEvent,
+    RWStyleSheet,
+    PlotLineImperativeHandle,
+    PlotCandlestickImperativeHandle,
+    ImPlotScale,
+    ImPlotMarker,
 };

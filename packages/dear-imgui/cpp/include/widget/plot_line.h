@@ -11,6 +11,8 @@ private:
     ImPlotScale m_xAxisScale = ImPlotScale_Linear;
     ImPlotScale m_yAxisScale = ImPlotScale_Linear;
 
+    ImPlotMarker m_markerStyle = ImPlotMarker_None;
+
     int m_dataPointsLimit = 6000;
 
     bool m_axisAutoFit;
@@ -20,6 +22,7 @@ public:
         auto id = widgetDef["id"].template get<int>();
         int xAxisDecimalDigits = 0;
         int yAxisDecimalDigits = 0;
+        ImPlotMarker markerStyle = ImPlotMarker_None;
         ImPlotScale xAxisScale = ImPlotScale_Linear;
         ImPlotScale yAxisScale = ImPlotScale_Linear;
         bool axisAutoFit = false;
@@ -27,6 +30,10 @@ public:
         if (widgetDef.contains("xAxisDecimalDigits") && widgetDef.contains("yAxisDecimalDigits")) {
             xAxisDecimalDigits = widgetDef["xAxisDecimalDigits"].template get<int>();
             yAxisDecimalDigits = widgetDef["yAxisDecimalDigits"].template get<int>();
+        }
+
+        if (widgetDef.contains("markerStyle")) {
+            markerStyle = widgetDef["markerStyle"].template get<int>();
         }
 
         if (widgetDef.contains("xAxisScale")) {
@@ -41,7 +48,7 @@ public:
             axisAutoFit = widgetDef["axisAutoFit"].template get<bool>();
         }
 
-        return std::make_unique<PlotLine>(view, id, xAxisDecimalDigits, yAxisDecimalDigits, xAxisScale, yAxisScale, axisAutoFit, maybeStyle);
+        return std::make_unique<PlotLine>(view, id, xAxisDecimalDigits, yAxisDecimalDigits, markerStyle, xAxisScale, yAxisScale, axisAutoFit, maybeStyle);
 
         // throw std::invalid_argument("Invalid JSON data");
     }
@@ -58,10 +65,21 @@ public:
 
     bool HasCustomHeight() override;
 
-    PlotLine(ReactImgui* view, const int id, const int xAxisDecimalDigits, const int yAxisDecimalDigits, const ImPlotScale xAxisScale, const ImPlotScale yAxisScale, const bool axisAutoFit, std::optional<WidgetStyle>& style) : StyledWidget(view, id, style) {
+    PlotLine(
+        ReactImgui* view,
+        const int id,
+        const int xAxisDecimalDigits,
+        const int yAxisDecimalDigits,
+        const ImPlotMarker markerStyle,
+        const ImPlotScale xAxisScale,
+        const ImPlotScale yAxisScale,
+        const bool axisAutoFit,
+        std::optional<WidgetStyle>& style) : StyledWidget(view, id, style
+            ) {
         m_type = "plot-line";
         m_xAxisDecimalDigits = xAxisDecimalDigits;
         m_yAxisDecimalDigits = yAxisDecimalDigits;
+        m_markerStyle = markerStyle;
         m_xAxisScale = xAxisScale;
         m_yAxisScale = yAxisScale;
         m_axisAutoFit = axisAutoFit;

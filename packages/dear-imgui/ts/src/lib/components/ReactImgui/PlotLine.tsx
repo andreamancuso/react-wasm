@@ -14,6 +14,7 @@ export const PlotLine = forwardRef<PlotLineImperativeHandle, WidgetPropsMap["Plo
         {
             xAxisDecimalDigits,
             yAxisDecimalDigits,
+            markerStyle,
             xAxisScale,
             yAxisScale,
             axisAutoFit,
@@ -58,6 +59,7 @@ export const PlotLine = forwardRef<PlotLineImperativeHandle, WidgetPropsMap["Plo
         return (
             <plot-line
                 id={idRef.current}
+                markerStyle={markerStyle}
                 xAxisDecimalDigits={xAxisDecimalDigits}
                 yAxisDecimalDigits={yAxisDecimalDigits}
                 xAxisScale={xAxisScale}

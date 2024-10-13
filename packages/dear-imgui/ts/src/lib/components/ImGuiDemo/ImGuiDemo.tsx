@@ -88,14 +88,18 @@ export const ImGuiDemo = () => {
                 sidebarNode: {
                     flexBasis: 200,
                     height: "100%",
-                    borderColor: "#000",
-                    borderThickness: 1,
+                    border: {
+                        color: "#000",
+                        thickness: 1,
+                    },
                 },
                 contentNode: {
                     flex: 1,
                     height: "100%",
-                    borderColor: "#000",
-                    borderThickness: 1,
+                    border: {
+                        color: "#000",
+                        thickness: 1,
+                    },
                     padding: { all: 5 },
                 },
                 title: {
