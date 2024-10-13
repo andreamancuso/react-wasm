@@ -37,6 +37,7 @@ const attributesForElements = {
         "xAxisScale",
         "yAxisScale",
         "axisAutoFit",
+        "markerStyle",
     ],
     "plot-candlestick": ["axisAutoFit", "bullColor", "bearColor"],
     separator: [],
