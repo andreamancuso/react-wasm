@@ -85,6 +85,8 @@ Terminating the WASM process throws an `ExitStatus` exception - this is expected
 
 #### Windows
 
+Open an x64 Developer Command Prompt then run the following commands:
+
 - `cd tests`
 - `cmake -S . -B build`
 - `cmake --build ./build --target Google_tests_run`
