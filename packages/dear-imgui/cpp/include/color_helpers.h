@@ -9,6 +9,8 @@
 
 using json = nlohmann::json;
 
+using HEXA = std::tuple<std::string, float>;
+
 ImVec4 RGBAtoIV4(int r, int g, int b, float a);
 ImVec4 RGBAtoIV4(int r, int g, int b);
 

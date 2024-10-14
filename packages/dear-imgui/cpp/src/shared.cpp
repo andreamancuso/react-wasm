@@ -1,12 +1,5 @@
 #include <string>
-#include <sstream>
-#include <iomanip>
-#include <webgpu/webgpu.h>
-#include "csscolorparser.hpp"
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
-#include "imgui.h"
 #include "shared.h"
 
 #pragma once

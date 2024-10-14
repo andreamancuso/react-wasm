@@ -1,4 +1,5 @@
 #include <string>
+#include <optional>
 #include <variant>
 #include <functional>
 
@@ -20,8 +21,6 @@ struct StringHash {
         return std::hash<std::string>{}(txt);
     }
 };
-
-using HEXA = std::tuple<std::string, float>;
 
 using OnInitCallback = void (*)();
 using OnTextChangedCallback = void (*)(int id, const std::string& value);
