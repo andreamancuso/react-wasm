@@ -7,6 +7,8 @@
 #include "yoga/YGEnums.h"
 #include "implotview.h"
 
+#include "imgui_helpers.h"
+
 using json = nlohmann::json;
 
 #pragma once

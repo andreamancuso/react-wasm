@@ -1,11 +1,9 @@
 #include <cstring>
 #include <nlohmann/json.hpp>
-
-#include "shared.h"
-#include "element/element.h"
-
 #include <imgui_internal.h>
 
+#include "element/element.h"
+#include "color_helpers.h"
 #include "reactimgui.h"
 
 using json = nlohmann::json;

@@ -1,7 +1,20 @@
 # 'Google_test' is the subproject name
 cmake_minimum_required(VERSION 3.8)
 
+set(CMAKE_GENERATOR "Ninja")
+set(CMAKE_TOOLCHAIN_FILE deps/vcpkg/scripts/buildsystems/vcpkg.cmake)
+if (WIN32)
+    set(VCPKG_TARGET_TRIPLET "x64-windows")
+    add_compile_options(/bigobj)
+else()
+    set(VCPKG_TARGET_TRIPLET "x64-linux")
+    # TODO: What about other platforms?
+endif()
+
 project(Google_tests)
+
+find_package(imgui CONFIG REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 set(CMAKE_CXX_STANDARD 23)
 

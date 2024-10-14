@@ -1,6 +1,7 @@
 #include <optional>
 
 #include "widget/styled_widget.h"
+#include "color_helpers.h"
 
 bool WidgetStyle::HasCustomFont(const std::optional<ElementState> widgetState, ReactImgui* view) {
     const auto hasBaseValue = maybeBase.has_value() && maybeBase.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeBase.value().maybeFontIndex.value());
