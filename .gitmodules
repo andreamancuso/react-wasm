@@ -19,3 +19,6 @@
 [submodule "packages/dear-imgui/cpp/deps/css-color-parser-cpp"]
 	path = packages/dear-imgui/cpp/deps/css-color-parser-cpp
 	url = https://github.com/andreamancuso/css-color-parser-cpp
+[submodule "packages/dear-imgui/cpp/deps/googletest"]
+	path = packages/dear-imgui/cpp/deps/googletest
+	url = https://github.com/google/googletest.git

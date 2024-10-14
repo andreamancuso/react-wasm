@@ -7,6 +7,7 @@
 #include <emscripten/bind.h>
 #include <nlohmann/json.hpp>
 
+#include "color_helpers.h"
 #include "glwasm.cpp"
 #include "reactimgui.h"
 

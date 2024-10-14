@@ -15,6 +15,8 @@
 
 #include "shared.h"
 #include "reactimgui.h"
+
+#include "color_helpers.h"
 #include "implotview.h"
 #include "widget/button.h"
 #include "widget/checkbox.h"

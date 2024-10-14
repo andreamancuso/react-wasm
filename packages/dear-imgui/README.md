@@ -78,3 +78,22 @@ Please note, not all browsers are currently supported.
 Terminating the WASM process throws an `ExitStatus` exception - this is expected, so long as the status is `0` then it's all good.
 
 `Pthread` support was recently added. At the time of writing this causes Webpack to issue a warning on startup. The warning can be dismissed by clicking on the close (X) button. Enabling the `-s STRICT` linker flag should fix it, however this currently introduces our issues.
+
+## Tests
+
+### Unit tests (Google Test)
+
+#### Windows
+
+Open an x64 Developer Command Prompt then run the following commands:
+
+- `cd tests`
+- `cmake -S . -B build`
+- `cmake --build ./build --target Google_tests_run`
+- `build\Debug\Google_Tests_run.exe`
+
+#### Linux
+
+Coming soon
+
+

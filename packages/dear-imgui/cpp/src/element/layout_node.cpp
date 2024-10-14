@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 
 #include "shared.h"
+#include "yoga_helpers.h"
 #include "element/layout_node.h"
 
 using json = nlohmann::json;
