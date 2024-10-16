@@ -7,6 +7,7 @@ using ::testing::FloatEq;
 using ::testing::Eq;
 using ::testing::Optional;
 using ::testing::IsTrue;
+using ::testing::StrEq;
 
 // Demonstrate some basic assertions.
 TEST(RGBAtoIV4, handlesZeroValues) {
@@ -69,8 +70,54 @@ TEST(HEXAtoIV4, handlesShortHexValuesWithDefaultAlphaValue) {
     EXPECT_THAT(result.w, FloatEq(1.0f));
 }
 
-TEST(IV4toJson, returnsJsonInstanceWithExpectedProperties) {
-    auto result = IV4toJson(ImVec4(0, 0, 0, 0.0f));
+TEST(IV4toJson, returnsJsonObjectWithExpectedProperties) {
+    auto result = IV4toJson(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 
     EXPECT_THAT(result.is_object(), IsTrue());
+    EXPECT_THAT(result["x"].template get<float>(), FloatEq(1.0f));
+    EXPECT_THAT(result["y"].template get<float>(), FloatEq(1.0f));
+    EXPECT_THAT(result["z"].template get<float>(), FloatEq(1.0f));
+    EXPECT_THAT(result["w"].template get<float>(), FloatEq(1.0f));
+}
+
+TEST(IV4toJsonTuple, returnsJsonArrayWithExpectedProperties) {
+    auto result = IV4toJsonTuple(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+    EXPECT_THAT(result.is_array(), IsTrue());
+    EXPECT_THAT(result[0].template get<float>(), FloatEq(1.0f));
+    EXPECT_THAT(result[1].template get<float>(), FloatEq(1.0f));
+    EXPECT_THAT(result[2].template get<float>(), FloatEq(1.0f));
+    EXPECT_THAT(result[3].template get<float>(), FloatEq(1.0f));
+}
+
+TEST(IV4toCSSColor, returnsColorInstance) {
+    auto result = IV4toCSSColor(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+    EXPECT_THAT(result.r, Eq(255));
+    EXPECT_THAT(result.g, Eq(255));
+    EXPECT_THAT(result.b, Eq(255));
+    EXPECT_THAT(result.a, FloatEq(1.0f));
+}
+
+TEST(IV4toJsonRGBATuple, returnsJsonArrayWithExpectedProperties) {
+    auto result = IV4toJsonRGBATuple(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+    EXPECT_THAT(result.is_array(), IsTrue());
+    EXPECT_THAT(result[0].template get<int>(), Eq(255));
+    EXPECT_THAT(result[1].template get<int>(), Eq(255));
+    EXPECT_THAT(result[2].template get<int>(), Eq(255));
+    EXPECT_THAT(result[3].template get<float>(), FloatEq(1.0f));
+}
+
+TEST(IV4toHEXATuple, returnsHEXATuple) {
+    auto result = IV4toHEXATuple(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+    auto& [hexValue, alphaValue] = result.value();
+
+    EXPECT_THAT(hexValue, StrEq("#ffffff"));
+    EXPECT_THAT(alphaValue, FloatEq(1.0f));
+}
+
+TEST(IV4toHEXATuple, handlesInvalidValues) {
+    auto result = IV4toHEXATuple(ImVec4(10.0f, 10.0f, 10.0f, 1.0f));
+    EXPECT_THAT(result, Eq(std::nullopt));
 }

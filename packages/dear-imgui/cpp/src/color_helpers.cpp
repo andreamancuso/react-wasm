@@ -77,7 +77,31 @@ json IV4toJsonRGBATuple(const ImVec4& imVec4) {
     return j;
 };
 
-HEXA IV4toHEXATuple(const ImVec4& imVec4) {
+bool isImVec4ValidForRGBConversion(const ImVec4& imVec4) {
+    if (imVec4.x < 0.0f || imVec4.x > 1.0f) {
+        return false;
+    }
+
+    if (imVec4.y < 0.0f || imVec4.y > 1.0f) {
+        return false;
+    }
+
+    if (imVec4.z < 0.0f || imVec4.z > 1.0f) {
+        return false;
+    }
+
+    if (imVec4.w < 0.0f || imVec4.w > 1.0f) {
+        return false;
+    }
+
+    return true;
+};
+
+std::optional<HEXA> IV4toHEXATuple(const ImVec4& imVec4) {
+    if (!isImVec4ValidForRGBConversion(imVec4)) {
+        return std::nullopt;
+    }
+
     auto rAsInt = (int)(imVec4.x * 255);
     auto gAsInt = (int)(imVec4.y * 255);
     auto bAsInt = (int)(imVec4.z * 255);
@@ -99,8 +123,14 @@ HEXA IV4toHEXATuple(const ImVec4& imVec4) {
     return std::make_tuple(h, imVec4.w);
 };
 
-json IV4toJsonHEXATuple(const ImVec4& imVec4) {
-    auto [hex, a] = IV4toHEXATuple(imVec4);
+std::optional<json> IV4toJsonHEXATuple(const ImVec4& imVec4) {
+    auto maybeTuple = IV4toHEXATuple(imVec4);
+
+    if (!maybeTuple.has_value()) {
+        return std::nullopt;
+    }
+
+    auto [hex, a] = maybeTuple.value();
 
     json j = {hex, a };
 
