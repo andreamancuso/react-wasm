@@ -5,9 +5,10 @@
 
 using ::testing::FloatEq;
 using ::testing::Eq;
+using ::testing::IsTrue;
 
 // Demonstrate some basic assertions.
-TEST(ColorHelpersTest, RGBAtoIV4handlesZeroValues) {
+TEST(RGBAtoIV4, handlesZeroValues) {
     auto result = RGBAtoIV4(0, 0, 0, 0.0f);
 
     EXPECT_THAT(result.x, FloatEq(0.0f));
@@ -16,7 +17,7 @@ TEST(ColorHelpersTest, RGBAtoIV4handlesZeroValues) {
     EXPECT_THAT(result.w, FloatEq(0.0f));
 }
 
-TEST(ColorHelpersTest, RGBAtoIV4handlesNonZeroValues) {
+TEST(RGBAtoIV4, handlesNonZeroValues) {
     auto result = RGBAtoIV4(255, 255, 255, 0.5f);
 
     EXPECT_THAT(result.x, FloatEq(1.0f));
@@ -25,7 +26,7 @@ TEST(ColorHelpersTest, RGBAtoIV4handlesNonZeroValues) {
     EXPECT_THAT(result.w, FloatEq(0.5f));
 }
 
-TEST(ColorHelpersTest, RGBAtoIV4WithoutAlphaValuehandlesNonZeroValues) {
+TEST(RGBAtoIV4, handlesDefaultAlphaValue) {
     auto result = RGBAtoIV4(255, 255, 255);
 
     EXPECT_THAT(result.x, FloatEq(1.0f));
@@ -34,8 +35,41 @@ TEST(ColorHelpersTest, RGBAtoIV4WithoutAlphaValuehandlesNonZeroValues) {
     EXPECT_THAT(result.w, FloatEq(1.0f));
 }
 
-TEST(ColorHelpersTest, HEXAtoIV4ReturnsNulloptWhenItFailsToParseValue) {
-    auto result = HEXAtoIV4(255, 255, 255);
+TEST(HEXAtoIV4, returnsNulloptWhenItFailsToParseValue) {
+    auto result = HEXAtoIV4("");
 
-    EXPECT_(result, Eq(std::nullopt));
+    EXPECT_THAT(result, Eq(std::nullopt));
+}
+
+TEST(HEXAtoIV4, handlesFullLengthHexValuesWithDefaultAlphaValue) {
+    auto result = HEXAtoIV4("#ffffff");
+
+    EXPECT_THAT(result.value().x, FloatEq(1.0f));
+    EXPECT_THAT(result.value().y, FloatEq(1.0f));
+    EXPECT_THAT(result.value().z, FloatEq(1.0f));
+    EXPECT_THAT(result.value().w, FloatEq(1.0f));
+}
+
+TEST(HEXAtoIV4, handlesFullLengthHexValuesWithSpecificAlphaValue) {
+    auto result = HEXAtoIV4("#ffffff", 0.2f);
+
+    EXPECT_THAT(result.value().x, FloatEq(1.0f));
+    EXPECT_THAT(result.value().y, FloatEq(1.0f));
+    EXPECT_THAT(result.value().z, FloatEq(1.0f));
+    EXPECT_THAT(result.value().w, FloatEq(0.2f));
+}
+
+TEST(HEXAtoIV4, handlesShortHexValuesWithDefaultAlphaValue) {
+    auto result = HEXAtoIV4("#fff");
+
+    EXPECT_THAT(result.value().x, FloatEq(1.0f));
+    EXPECT_THAT(result.value().y, FloatEq(1.0f));
+    EXPECT_THAT(result.value().z, FloatEq(1.0f));
+    EXPECT_THAT(result.value().w, FloatEq(1.0f));
+}
+
+TEST(IV4toJson, returnsJsonInstanceWithExpectedProperties) {
+    auto result = IV4toJson(ImVec4(0, 0, 0, 0.0f));
+
+    EXPECT_THAT(result.is_object(), IsTrue());
 }
