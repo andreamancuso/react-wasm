@@ -28,6 +28,7 @@ std::optional<ImVec4> HEXAtoIV4(const std::string& hex, float a) {
 
     return std::nullopt;
 }
+
 std::optional<ImVec4> HEXAtoIV4(const std::string& hex) {
     return HEXAtoIV4(hex, 1.0f);
 }

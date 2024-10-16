@@ -92,6 +92,9 @@ Open an x64 Developer Command Prompt then run the following commands:
 - `cmake --build ./build --target Google_tests_run`
 - `build\Debug\Google_Tests_run.exe`
 
+For convenience, you can run the `build_and_run_tests.bat` batch script to run all the above.
+Also, `run_tests.bat` runs just the last two commands (this is useful when making changes to existing files only).
+
 #### Linux
 
 Coming soon
