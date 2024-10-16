@@ -4,8 +4,6 @@
 
 #pragma once
 
-
-
 std::optional<float> charPercentageToFloat(const char* input) {
     std::optional<float> value;
     float parsedValue;

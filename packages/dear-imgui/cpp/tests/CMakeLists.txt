@@ -15,6 +15,8 @@ set(VCPKG_TARGET_ARCHITECTURE "x64")
 
 project(Google_tests)
 
+set(DEPS ${CMAKE_CURRENT_SOURCE_DIR}/../deps)
+
 find_package(imgui CONFIG REQUIRED)
 find_package(implot REQUIRED)
 find_package(nlohmann_json REQUIRED)
@@ -34,8 +36,14 @@ include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 # 'Google_Tests_run' is the target name
 # 'test1.cpp test2.cpp' are source files with tests
 add_executable(Google_Tests_run
+        ${DEPS}/css-color-parser-cpp/csscolorparser.hpp
+        ${DEPS}/css-color-parser-cpp/csscolorparser.cpp
+
         ../src/shared.cpp
-        hello_test.cpp
+        ../src/color_helpers.cpp
+
+        shared_functions_test.cpp
+        color_helpers_test.cpp
 )
 
 target_include_directories(
@@ -47,7 +55,7 @@ target_include_directories(
 
 #        ${Stb_INCLUDE_DIR}
 #        ${DEPS}/yoga
-#        ${DEPS}/css-color-parser-cpp
+        ${DEPS}/css-color-parser-cpp
 
 #        ${DEPS}/osm-static-map-generator/cpp
 #        ${DEPS}/osm-static-map-generator/cpp/deps/leptonica/src
@@ -55,4 +63,4 @@ target_include_directories(
 #        ${DEPS}/osm-static-map-generator/cpp/deps/libtiff/port
 )
 
-target_link_libraries(Google_Tests_run gtest gtest_main imgui::imgui implot::implot nlohmann_json::nlohmann_json ada::ada)
+target_link_libraries(Google_Tests_run gtest gmock gmock_main gtest_main imgui::imgui implot::implot nlohmann_json::nlohmann_json ada::ada)

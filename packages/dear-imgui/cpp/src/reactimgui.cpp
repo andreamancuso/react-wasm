@@ -377,9 +377,11 @@ void ReactImgui::RenderElementTree(const int id) {
                 std::string border;
 
                 if (style->borderAll.has_value()) {
-                    auto [borderColorHex, _] = IV4toHEXATuple(style->borderAll.value().color);
-
-                    border += borderColorHex;
+                    auto maybeResult = IV4toHEXATuple(style->borderAll.value().color);
+                    if (maybeResult.has_value()) {
+                        auto [borderColorHex, _] = maybeResult.value();
+                        border += borderColorHex;
+                    }
                 }
 
                 ImGui::Text("%s, t: %f, r: %f, b: %f, l: %f",
