@@ -9,7 +9,6 @@ using ::testing::Optional;
 using ::testing::IsTrue;
 using ::testing::StrEq;
 
-// Demonstrate some basic assertions.
 TEST(RGBAtoIV4, handlesZeroValues) {
     auto maybeResult = RGBAtoIV4(0, 0, 0, 0.0f);
 
@@ -49,6 +48,13 @@ TEST(RGBAtoIV4, handlesDefaultAlphaValue) {
     EXPECT_THAT(result.w, FloatEq(1.0f));
 }
 
+TEST(RGBAtoIV4, handlesInvalidValues) {
+    auto result = RGBAtoIV4(256, 0, 0, 1.0f);
+    EXPECT_THAT(result, Eq(std::nullopt));
+}
+
+// --
+
 TEST(HEXAtoIV4, returnsNulloptWhenItFailsToParseValue) {
     auto result = HEXAtoIV4("");
 
@@ -82,6 +88,8 @@ TEST(HEXAtoIV4, handlesShortHexValuesWithDefaultAlphaValue) {
     EXPECT_THAT(result.w, FloatEq(1.0f));
 }
 
+// --
+
 TEST(IV4toJson, returnsJsonObject) {
     auto maybeResult = IV4toJson(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 
@@ -100,6 +108,8 @@ TEST(IV4toJson, handlesInvalidValues) {
     auto result = IV4toJson(ImVec4(10.0f, 10.0f, 10.0f, 1.0f));
     EXPECT_THAT(result, Eq(std::nullopt));
 }
+
+// --
 
 TEST(IV4toJsonTuple, returnsJsonArray) {
     auto maybeResult = IV4toJsonTuple(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -120,6 +130,8 @@ TEST(IV4toJsonTuple, handlesInvalidValues) {
     EXPECT_THAT(result, Eq(std::nullopt));
 }
 
+// --
+
 TEST(IV4toCSSColor, returnsColorInstance) {
     auto maybeResult = IV4toCSSColor(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 
@@ -137,6 +149,8 @@ TEST(IV4toCSSColor, handlesInvalidValues) {
     auto result = IV4toCSSColor(ImVec4(10.0f, 10.0f, 10.0f, 1.0f));
     EXPECT_THAT(result, Eq(std::nullopt));
 }
+
+// --
 
 TEST(IV4toJsonRGBATuple, returnsJsonArray) {
     auto maybeResult = IV4toJsonRGBATuple(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -156,6 +170,8 @@ TEST(IV4toJsonRGBATuple, handlesInvalidValues) {
     auto result = IV4toJsonRGBATuple(ImVec4(10.0f, 10.0f, 10.0f, 1.0f));
     EXPECT_THAT(result, Eq(std::nullopt));
 }
+
+// --
 
 TEST(IV4toHEXATuple, returnsHEXATuple) {
     auto result = IV4toHEXATuple(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));

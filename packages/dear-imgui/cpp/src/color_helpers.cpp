@@ -6,6 +6,46 @@
 
 #include "color_helpers.h"
 
+bool areRGBAValuesValidForImVec4Conversion(const int& r, const int& g, const int& b, const float& a) {
+    if (r < 0 || r > 255) {
+        return false;
+    }
+
+    if (g < 0 || g > 255) {
+        return false;
+    }
+
+    if (b < 0 || b > 255) {
+        return false;
+    }
+
+    if (a < 0.0f || a > 1.0f) {
+        return false;
+    }
+
+    return true;
+};
+
+bool isImVec4ValidForRGBAConversion(const ImVec4& imVec4) {
+    if (imVec4.x < 0.0f || imVec4.x > 1.0f) {
+        return false;
+    }
+
+    if (imVec4.y < 0.0f || imVec4.y > 1.0f) {
+        return false;
+    }
+
+    if (imVec4.z < 0.0f || imVec4.z > 1.0f) {
+        return false;
+    }
+
+    if (imVec4.w < 0.0f || imVec4.w > 1.0f) {
+        return false;
+    }
+
+    return true;
+};
+
 std::optional<ImVec4> RGBAtoIV4(int r, int g, int b, float a) {
     if (!areRGBAValuesValidForImVec4Conversion(r, g, b, a)) {
         return std::nullopt;
@@ -95,46 +135,6 @@ std::optional<json> IV4toJsonRGBATuple(const ImVec4& imVec4) {
     };
 
     return j;
-};
-
-bool areRGBAValuesValidForImVec4Conversion(const int& r, const int& g, const int& b, const float& a) {
-    if (r < 0 || r > 255) {
-        return false;
-    }
-
-    if (g < 0 || g > 255) {
-        return false;
-    }
-
-    if (b < 0 || b > 255) {
-        return false;
-    }
-
-    if (a < 0.0f || a > 1.0f) {
-        return false;
-    }
-
-    return true;
-};
-
-bool isImVec4ValidForRGBAConversion(const ImVec4& imVec4) {
-    if (imVec4.x < 0.0f || imVec4.x > 1.0f) {
-        return false;
-    }
-
-    if (imVec4.y < 0.0f || imVec4.y > 1.0f) {
-        return false;
-    }
-
-    if (imVec4.z < 0.0f || imVec4.z > 1.0f) {
-        return false;
-    }
-
-    if (imVec4.w < 0.0f || imVec4.w > 1.0f) {
-        return false;
-    }
-
-    return true;
 };
 
 std::optional<HEXA> IV4toHEXATuple(const ImVec4& imVec4) {

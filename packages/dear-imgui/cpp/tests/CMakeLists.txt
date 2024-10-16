@@ -33,17 +33,25 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory(../deps/googletest tests-binary)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
+file(GLOB YOGA_SRC CONFIGURE_DEPENDS
+        ${DEPS}/yoga/yoga/*.cpp
+        ${DEPS}/yoga/yoga/**/*.cpp)
+
 # 'Google_Tests_run' is the target name
 # 'test1.cpp test2.cpp' are source files with tests
 add_executable(Google_Tests_run
         ${DEPS}/css-color-parser-cpp/csscolorparser.hpp
         ${DEPS}/css-color-parser-cpp/csscolorparser.cpp
 
+        ${YOGA_SRC}
+
         ../src/shared.cpp
         ../src/color_helpers.cpp
+        ../src/yoga_helpers.cpp
 
         shared_functions_test.cpp
         color_helpers_test.cpp
+        yoga_helpers_test.cpp
 )
 
 target_include_directories(
@@ -54,7 +62,7 @@ target_include_directories(
 #        ${DEPS}/ReactivePlusPlus/src/rpp
 
 #        ${Stb_INCLUDE_DIR}
-#        ${DEPS}/yoga
+        ${DEPS}/yoga
         ${DEPS}/css-color-parser-cpp
 
 #        ${DEPS}/osm-static-map-generator/cpp
