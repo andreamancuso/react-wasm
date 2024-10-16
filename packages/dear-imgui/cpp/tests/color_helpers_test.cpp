@@ -5,6 +5,7 @@
 
 using ::testing::FloatEq;
 using ::testing::Eq;
+using ::testing::Optional;
 using ::testing::IsTrue;
 
 // Demonstrate some basic assertions.
@@ -42,30 +43,30 @@ TEST(HEXAtoIV4, returnsNulloptWhenItFailsToParseValue) {
 }
 
 TEST(HEXAtoIV4, handlesFullLengthHexValuesWithDefaultAlphaValue) {
-    auto result = HEXAtoIV4("#ffffff");
+    auto result = HEXAtoIV4("#ffffff").value();
 
-    EXPECT_THAT(result.value().x, FloatEq(1.0f));
-    EXPECT_THAT(result.value().y, FloatEq(1.0f));
-    EXPECT_THAT(result.value().z, FloatEq(1.0f));
-    EXPECT_THAT(result.value().w, FloatEq(1.0f));
+    EXPECT_THAT(result.x, FloatEq(1.0f));
+    EXPECT_THAT(result.y, FloatEq(1.0f));
+    EXPECT_THAT(result.z, FloatEq(1.0f));
+    EXPECT_THAT(result.w, FloatEq(1.0f));
 }
 
 TEST(HEXAtoIV4, handlesFullLengthHexValuesWithSpecificAlphaValue) {
-    auto result = HEXAtoIV4("#ffffff", 0.2f);
+    auto result = HEXAtoIV4("#ffffff", 0.2f).value();
 
-    EXPECT_THAT(result.value().x, FloatEq(1.0f));
-    EXPECT_THAT(result.value().y, FloatEq(1.0f));
-    EXPECT_THAT(result.value().z, FloatEq(1.0f));
-    EXPECT_THAT(result.value().w, FloatEq(0.2f));
+    EXPECT_THAT(result.x, FloatEq(1.0f));
+    EXPECT_THAT(result.y, FloatEq(1.0f));
+    EXPECT_THAT(result.z, FloatEq(1.0f));
+    EXPECT_THAT(result.w, FloatEq(0.2f));
 }
 
 TEST(HEXAtoIV4, handlesShortHexValuesWithDefaultAlphaValue) {
-    auto result = HEXAtoIV4("#fff");
+    auto result = HEXAtoIV4("#fff").value();
 
-    EXPECT_THAT(result.value().x, FloatEq(1.0f));
-    EXPECT_THAT(result.value().y, FloatEq(1.0f));
-    EXPECT_THAT(result.value().z, FloatEq(1.0f));
-    EXPECT_THAT(result.value().w, FloatEq(1.0f));
+    EXPECT_THAT(result.x, FloatEq(1.0f));
+    EXPECT_THAT(result.y, FloatEq(1.0f));
+    EXPECT_THAT(result.z, FloatEq(1.0f));
+    EXPECT_THAT(result.w, FloatEq(1.0f));
 }
 
 TEST(IV4toJson, returnsJsonInstanceWithExpectedProperties) {
