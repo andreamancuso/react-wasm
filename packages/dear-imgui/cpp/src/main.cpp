@@ -257,7 +257,11 @@ class WasmRunner {
             style["colors"] = json::array();
 
             for (int i = 0; i < ImGuiCol_COUNT; i++) {
-                style["colors"].push_back(IV4toJsonHEXATuple(m_view->m_appStyle.Colors[i]));
+                auto maybeValue = IV4toJsonHEXATuple(m_view->m_appStyle.Colors[i]);
+
+                if (maybeValue.has_value()) {
+                    style["colors"].push_back(maybeValue.value());
+                }
             }
 
             return style.dump();
