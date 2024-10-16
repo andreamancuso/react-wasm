@@ -48,10 +48,12 @@ add_executable(Google_Tests_run
         ../src/shared.cpp
         ../src/color_helpers.cpp
         ../src/yoga_helpers.cpp
+        ../src/imgui_helpers.cpp
 
         shared_functions_test.cpp
         color_helpers_test.cpp
         yoga_helpers_test.cpp
+        imgui_helpers_test.cpp
 )
 
 target_include_directories(

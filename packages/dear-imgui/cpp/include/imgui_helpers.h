@@ -1,5 +1,7 @@
 #include <unordered_map>
+#include <optional>
 #include <variant>
+#include <string>
 #include "imgui.h"
 
 #ifndef IMGUI_HELPERS_H

@@ -4,11 +4,7 @@
 
 #include "yoga_helpers.h"
 
-using ::testing::FloatEq;
 using ::testing::Eq;
-using ::testing::Optional;
-using ::testing::IsTrue;
-using ::testing::StrEq;
 
 TEST(ResolveAlignItems, handlesAuto) {
     EXPECT_THAT(ResolveAlignItems("auto").value(), Eq(YGAlignAuto));
