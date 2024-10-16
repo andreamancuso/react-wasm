@@ -1,6 +1,8 @@
 #include <yoga/Yoga.h>
 #include <yoga/YGNodeStyle.h>
 #include <nlohmann/json.hpp>
+#include <yoga/node/Node.h>
+#include <yoga/style/Style.h>
 
 #include "shared.h"
 
@@ -204,6 +206,10 @@ class LayoutNode {
 
         void SetMaxHeightPercent(const float percent) const {
             YGNodeStyleSetMaxHeightPercent(m_node, percent);
+        }
+
+        facebook::yoga::Style& GetStyle() const {
+            return facebook::yoga::resolveRef(m_node)->style();
         }
 
         template <typename T, typename PropertyValueResolver>

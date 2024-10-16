@@ -5,13 +5,11 @@ set(CMAKE_GENERATOR "Ninja")
 set(CMAKE_TOOLCHAIN_FILE ../deps/vcpkg/scripts/buildsystems/vcpkg.cmake)
 set(VCPKG_TARGET_ARCHITECTURE "x64")
 
-#if (WIN32)
+if (WIN32)
     set(VCPKG_TARGET_TRIPLET "x64-windows")
-#    add_compile_options(/bigobj)
-#else()
-#    set(VCPKG_TARGET_TRIPLET "x64-linux")
-    # TODO: What about other platforms?
-#endif()
+else()
+    set(VCPKG_TARGET_TRIPLET "x64-linux")
+endif()
 
 project(Google_tests)
 
@@ -49,11 +47,13 @@ add_executable(Google_Tests_run
         ../src/color_helpers.cpp
         ../src/yoga_helpers.cpp
         ../src/imgui_helpers.cpp
+        ../src/element/layout_node.cpp
 
         shared_functions_test.cpp
         color_helpers_test.cpp
         yoga_helpers_test.cpp
         imgui_helpers_test.cpp
+        element/layout_node_test.cpp
 )
 
 target_include_directories(
