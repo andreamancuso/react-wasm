@@ -1,5 +1,6 @@
 app/Debug
 tests/build
+tests/cmake-build-release-visual-studio
 .cmake
 .cproject
 .project
