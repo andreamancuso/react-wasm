@@ -43,11 +43,11 @@ add_executable(Google_Tests_run
 
         ${YOGA_SRC}
 
-        ../src/shared.cpp
-        ../src/color_helpers.cpp
-        ../src/yoga_helpers.cpp
-        ../src/imgui_helpers.cpp
-        ../src/element/layout_node.cpp
+        ../app/src/shared.cpp
+        ../app/src/color_helpers.cpp
+        ../app/src/yoga_helpers.cpp
+        ../app/src/imgui_helpers.cpp
+        ../app/src/element/layout_node.cpp
 
         shared_functions_test.cpp
         color_helpers_test.cpp
@@ -58,7 +58,7 @@ add_executable(Google_Tests_run
 
 target_include_directories(
         Google_Tests_run PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/../include
+        ${CMAKE_CURRENT_SOURCE_DIR}/../app/include
 #        ${DEPS}/wasm-glfw3-boilerplate
 #        ${DEPS}/IconFontCppHeaders
 #        ${DEPS}/ReactivePlusPlus/src/rpp
