@@ -97,6 +97,12 @@ Also, `run_tests.bat` runs just the last two commands (this is useful when makin
 
 #### Linux
 
-Coming soon
+Run the following commands from a terminal:
 
+- `cmake -S . -B build`
+- `cd build`
+- `make`
+- `./Google_Tests_run`
+
+For convenience, you can run the `build_and_run_tests.sh` shell script to run all the above.
 
