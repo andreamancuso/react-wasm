@@ -8,7 +8,7 @@
 #include <nlohmann/json.hpp>
 
 #include "./shared.h"
-#include "view.cpp"
+#include "view.h"
 
 #pragma once
 
@@ -32,8 +32,8 @@ class ImGuiView : public View {
     public:
 
         ImGuiView(
-            const char* newWindowId, 
-            const char* newGlWindowTitle, 
+            const char* newWindowId,
+            const char* newGlWindowTitle,
             std::string& rawFontDefs) : View(newWindowId, newGlWindowTitle) {
             m_shouldLoadDefaultStyle = true;
 
@@ -64,19 +64,19 @@ class ImGuiView : public View {
 
                             m_loadedFonts.push_back(
                                 io.Fonts->AddFontFromFileTTF(
-                                    pathToFont.c_str(), 
+                                    pathToFont.c_str(),
                                     fontSize
                                 )
                             );
 
                             float iconFontSize = fontSize * 2.0f / 3.0f; // FontAwesome fonts need to have their sizes reduced by 2.0f/3.0f in order to align correctly
-                            ImFontConfig icons_config; 
-                            icons_config.MergeMode = true; 
-                            icons_config.PixelSnapH = true; 
+                            ImFontConfig icons_config;
+                            icons_config.MergeMode = true;
+                            icons_config.PixelSnapH = true;
                             icons_config.GlyphMinAdvanceX = iconFontSize;
                             auto pathToFaFontFile = std::format("assets/fonts/{}", FONT_ICON_FILE_NAME_FAS);
                             // auto pathToMdiFontFile = std::format("assets/fonts/{}", FONT_ICON_FILE_NAME_MDI);
-                            
+
                             io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges);
                             // io.Fonts->AddFontFromFileTTF(pathToMdiFontFile.c_str(), fontSize, &icons_config, icons_ranges);
                         }
@@ -85,8 +85,8 @@ class ImGuiView : public View {
 
                 io.Fonts->Build();
 
-                if (fontDefs.contains("defaultFont") 
-                    && fontDefs["defaultFont"].is_object() 
+                if (fontDefs.contains("defaultFont")
+                    && fontDefs["defaultFont"].is_object()
                     && fontDefs["defaultFont"]["name"].is_string()
                     && fontDefs["defaultFont"]["size"].is_number_unsigned()) {
 
@@ -107,12 +107,12 @@ class ImGuiView : public View {
                 float baseFontSize = 13.0f; // 13.0f is the size of the default font.
                 float iconFontSize = baseFontSize * 2.0f / 3.0f; // FontAwesome fonts need to have their sizes reduced by 2.0f/3.0f in order to align correctly
 
-                ImFontConfig icons_config; 
-                icons_config.MergeMode = true; 
-                icons_config.PixelSnapH = true; 
+                ImFontConfig icons_config;
+                icons_config.MergeMode = true;
+                icons_config.PixelSnapH = true;
                 icons_config.GlyphMinAdvanceX = iconFontSize;
                 auto pathToFaFontFile = std::format("assets/fonts/{}", FONT_ICON_FILE_NAME_FAS);
-                
+
                 m_loadedFonts.push_back(
                     io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges)
                 );
@@ -170,15 +170,18 @@ class ImGuiView : public View {
 
             m_device = device;
 
+        #ifdef __EMSCRIPTEN__
             ImGui_ImplWGPU_InitInfo init_info;
             init_info.Device = device;
             init_info.NumFramesInFlight = 3;
             init_info.RenderTargetFormat = wgpu_preferred_fmt;
             init_info.DepthStencilFormat = WGPUTextureFormat_Undefined;
             ImGui_ImplWGPU_Init(&init_info);
+        #endif
 
             // Setup Platform/Renderer backends
             ImGui_ImplGlfw_InitForOther(glfwWindow, true);
+
         #ifdef __EMSCRIPTEN__
             ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback(pCanvasSelector);
         #endif

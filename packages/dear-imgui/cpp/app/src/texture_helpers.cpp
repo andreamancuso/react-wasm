@@ -1,8 +1,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <webgpu/webgpu.h>
-#include "webgpu_helpers.h"
+#include "texture_helpers.h"
 
+#ifdef __EMSCRIPTEN__
 // borrowed from https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
 bool LoadTexture(WGPUDevice device, const void* data, const int numBytes, Texture* texture)
 {
@@ -68,3 +69,4 @@ bool LoadTexture(WGPUDevice device, const void* data, const int numBytes, Textur
 
     return true;
 }
+#endif

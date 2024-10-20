@@ -8,7 +8,7 @@
 #include <nlohmann/json.hpp>
 
 #include "color_helpers.h"
-#include "glwasm.cpp"
+#include "glwasm.h"
 #include "reactimgui.h"
 
 using json = nlohmann::json;
@@ -21,7 +21,7 @@ EMSCRIPTEN_DECLARE_VAL_TYPE(OnMultiValueChangeType);
 EMSCRIPTEN_DECLARE_VAL_TYPE(OnBooleanValueChangeType);
 EMSCRIPTEN_DECLARE_VAL_TYPE(OnClickType);
 
-template <typename T> 
+template <typename T>
 std::vector<T> JsonToVector(std::string& data) {
     auto parsedData = json::parse(data);
     std::vector<T> vec;
@@ -31,7 +31,7 @@ std::vector<T> JsonToVector(std::string& data) {
     return vec;
 }
 
-template <typename T> 
+template <typename T>
 std::set<T> JsonToSet(std::string& data) {
     auto parsedData = json::parse(data);
     std::set<T> set;
@@ -107,7 +107,7 @@ class WasmRunner {
         static void OnMultipleNumericValuesChanged(const int id, const float* values, const int numValues) {
             if (numValues == 2) {
                 EM_ASM_ARGS(
-                    { 
+                    {
                         Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float')]);
                     },
                     id,
@@ -115,7 +115,7 @@ class WasmRunner {
                 );
             } else if (numValues == 3) {
                 EM_ASM_ARGS(
-                    { 
+                    {
                         Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float')]);
                     },
                     id,
@@ -123,7 +123,7 @@ class WasmRunner {
                 );
             } else if (numValues == 4) {
                 EM_ASM_ARGS(
-                    { 
+                    {
                         Module.eventHandlers.onMultiValueChange($0, [getValue($1+0, 'float'), getValue($1+4, 'float'), getValue($1+8, 'float'), getValue($1+12, 'float')]);
                     },
                     id,
@@ -141,7 +141,7 @@ class WasmRunner {
 
         void run(std::string& canvasSelector, std::string& rawFontDefs, std::optional<std::string>& rawStyleOverridesDefs) {
             m_view = new ReactImgui(
-                "ReactImgui", 
+                "ReactImgui",
                 "ReactImgui",
                 rawFontDefs,
                 rawStyleOverridesDefs
@@ -246,7 +246,7 @@ class WasmRunner {
             style["antiAliasedFill"] = m_view->m_appStyle.AntiAliasedFill;
             style["curveTessellationTol"] = m_view->m_appStyle.CurveTessellationTol;
             style["circleTessellationMaxError"] = m_view->m_appStyle.CircleTessellationMaxError;
-            
+
             style["hoverStationaryDelay"] = m_view->m_appStyle.HoverStationaryDelay;
             style["hoverDelayShort"] = m_view->m_appStyle.HoverDelayShort;
             style["hoverDelayNormal"] = m_view->m_appStyle.HoverDelayNormal;

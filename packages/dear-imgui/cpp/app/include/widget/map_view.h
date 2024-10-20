@@ -1,6 +1,6 @@
 #include "mapgenerator.h"
 #include "styled_widget.h"
-#include "webgpu_helpers.h"
+#include "texture_helpers.h"
 
 class MapView final : public StyledWidget {
 private:

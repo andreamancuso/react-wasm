@@ -87,7 +87,7 @@ set(LIBTIFF_SRC
 )
 
 if (DEFINED EMSCRIPTEN)
-    # Copied from yoga's CMakeLists.txt 
+    # Copied from yoga's CMakeLists.txt
     file(GLOB YOGA_SRC CONFIGURE_DEPENDS
         ${DEPS}/yoga/yoga/*.cpp
         ${DEPS}/yoga/yoga/**/*.cpp)
@@ -97,7 +97,7 @@ if (DEFINED EMSCRIPTEN)
         src/shared.cpp
         src/color_helpers.cpp
         src/imgui_helpers.cpp
-        src/webgpu_helpers.cpp
+        src/texture_helpers.cpp
         src/yoga_helpers.cpp
         src/element/layout_node.cpp
         src/element/element.cpp
@@ -130,8 +130,9 @@ if (DEFINED EMSCRIPTEN)
         src/imguiview.cpp
         src/implotview.cpp
 
-        ${DEPS}/wasm-glfw3-boilerplate/view.cpp
-        ${DEPS}/wasm-glfw3-boilerplate/glwasm.cpp
+        ${DEPS}/wasm-glfw3-boilerplate/src/view.cpp
+        ${DEPS}/wasm-glfw3-boilerplate/src/glfw3renderer.cpp
+        ${DEPS}/wasm-glfw3-boilerplate/src/glwasm.cpp
         ${OSM_STATIC_MAP_GENERATOR_SRC}
         ${LEPTONICA_SRC}
         ${LIBTIFF_SRC}
@@ -141,10 +142,10 @@ if (DEFINED EMSCRIPTEN)
     )
 
     target_include_directories(
-        reactDearImgui PRIVATE 
+        reactDearImgui PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${DEPS}/wasm-glfw3-boilerplate 
-        ${DEPS}/IconFontCppHeaders 
+        ${DEPS}/wasm-glfw3-boilerplate/include
+        ${DEPS}/IconFontCppHeaders
         ${DEPS}/ReactivePlusPlus/src/rpp
 
         ${Stb_INCLUDE_DIR}
