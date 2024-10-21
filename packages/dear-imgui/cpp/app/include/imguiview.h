@@ -10,20 +10,28 @@
 #ifdef __EMSCRIPTEN__
 #include "imgui_impl_wgpu.h"
 #include <webgpu/webgpu.h>
+#include <webgpu/webgpu_cpp.h>
 #endif
 
 #include <texture_helpers.h>
 #include <GLFW/glfw3.h>
 #include <nlohmann/json.hpp>
+
+
 #include "./shared.h"
-#include "view.h"
+
+class ReactImgui;
 
 using json = nlohmann::json;
 
 class ImGuiView {
     protected:
+        std::string m_rawFontDefs;
+
+        ReactImgui* m_reactImgui;
+
         GLFWwindow* m_glfwWindow;
-        const char* m_windowId;
+
         const char* m_glWindowTitle;
 
         int m_initial_window_width = 400;
@@ -31,19 +39,13 @@ class ImGuiView {
         int m_window_width = m_initial_window_width;
         int m_window_height = m_initial_window_height;
 
-        bool m_shouldLoadDefaultStyle;
-
         ImGuiContext* m_imGuiCtx;
-
-        ImGuiWindowFlags m_window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove;
-
-        std::vector<ImFont*> m_loadedFonts;
 
         std::unordered_map<std::string, std::unordered_map<int, int>, StringHash, std::equal_to<>> m_fontDefMap;
 
         // static constexpr ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
 
-        void LoadFontsFromDefs(const json& rawFontDefs);
+        void LoadFontsFromDefs();
 
     #ifdef __EMSCRIPTEN__
         std::unique_ptr<char[]> m_canvasSelector;
@@ -61,12 +63,18 @@ class ImGuiView {
     #endif
 
     public:
-        ImGuiView(const char* newWindowId, const char* newGlWindowTitle, std::string& rawFontDefs);
+        ImGuiView(ReactImgui* reactImgui, const char* newWindowId, const char* newGlWindowTitle, std::string rawFontDefs);
+
+        bool m_shouldLoadDefaultStyle;
+
+        std::vector<ImFont*> m_loadedFonts;
+
+        const char* m_windowId;
 
         bool LoadTexture(const void* data, int numBytes, Texture* texture);
 
-        virtual void PrepareForRender() = 0;
-        virtual void Render(int window_width, int window_height) = 0;
+        // virtual void PrepareForRender() = 0;
+        // virtual void Render(int window_width, int window_height) = 0;
 
         void BeginRenderLoop();
 
@@ -109,6 +117,8 @@ class ImGuiView {
         void CleanUp();
 
         void SetWindowSize(int width, int height);
+
+        json GetAvailableFonts();
 };
 
 #endif

@@ -3,6 +3,7 @@
 
 #include "widget/image.h"
 #include "reactimgui.h"
+#include "imguiview.h"
 
 bool Image::HasCustomWidth() {
     return false;
@@ -63,7 +64,7 @@ void Image::HandleInternalOp(const json& opDef) {
 };
 
 void Image::HandleFetchImageSuccess(emscripten_fetch_t *fetch) {
-    m_view->LoadTexture(fetch->data, fetch->numBytes, &m_texture);
+    m_view->m_renderer->LoadTexture(fetch->data, fetch->numBytes, &m_texture);
 
     printf("Fetched image using url %s\n", m_url.c_str());
 

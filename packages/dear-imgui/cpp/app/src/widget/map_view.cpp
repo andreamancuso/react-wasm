@@ -4,6 +4,7 @@
 #include "mapgenerator.h"
 #include "widget/map_view.h"
 #include "reactimgui.h"
+#include "imguiview.h"
 
 bool MapView::HasCustomWidth() {
     return false;
@@ -102,7 +103,7 @@ void MapView::HandleInternalOp(const json& opDef) {
             m_mapGeneratorJobs[m_mapGeneratorJobCounter] = std::make_unique<MapGenerator>(options, [this] (const void* data, const size_t numBytes) {
                 Texture texture{};
 
-                const bool ret = m_view->LoadTexture(data, static_cast<int>(numBytes), &texture);
+                const bool ret = m_view->m_renderer->LoadTexture(data, static_cast<int>(numBytes), &texture);
                 IM_ASSERT(ret);
 
                 // TODO: add proper texture management

@@ -3,9 +3,12 @@
 
 #include "./implotview.h"
 
-ImPlotView::ImPlotView(const char* newWindowId,
-            const char* newGlWindowTitle,
-            std::string& rawFontDefs) : ImGuiView(newWindowId, newGlWindowTitle, rawFontDefs) {
+ImPlotView::ImPlotView(
+    ReactImgui* reactImgui,
+    const char* newWindowId,
+    const char* newGlWindowTitle,
+    std::string& rawFontDefs) : ImGuiView(reactImgui, newWindowId, newGlWindowTitle, rawFontDefs) {
+
     m_imPlotCtx = ImPlot::CreateContext();
 }
 

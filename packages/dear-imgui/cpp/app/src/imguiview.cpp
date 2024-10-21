@@ -18,6 +18,7 @@ static void MainLoopForEmscripten()     { MainLoopForEmscriptenP(); }
 #define EMSCRIPTEN_MAINLOOP_END
 #endif
 
+#include "./reactimgui.h"
 #include "./imguiview.h"
 
 void glfw_error_callback(int error, const char* description)
@@ -42,9 +43,12 @@ void wgpu_error_callback(WGPUErrorType error_type, const char* message, void*)
 #endif
 
 ImGuiView::ImGuiView(
+    ReactImgui* reactImgui,
     const char* windowId,
     const char* glWindowTitle,
-    std::string& rawFontDefs) {
+    std::string rawFontDefs) {
+
+    m_reactImgui = reactImgui;
 
     m_windowId = windowId;
     m_glWindowTitle = glWindowTitle;
@@ -55,11 +59,11 @@ ImGuiView::ImGuiView(
 
     m_imGuiCtx = ImGui::CreateContext();
 
-    auto fontDefs = json::parse(rawFontDefs);
-    LoadFontsFromDefs(rawFontDefs);
+    m_rawFontDefs = rawFontDefs;
 }
 
-void ImGuiView::LoadFontsFromDefs(const json& fontDefs) {
+void ImGuiView::LoadFontsFromDefs() {
+    auto fontDefs = json::parse(m_rawFontDefs);
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
     static constexpr ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
@@ -240,8 +244,7 @@ void ImGuiView::SetUp() {
 
     ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback(m_canvasSelector.get());
 
-    PrepareForRender();
-
+    SetCurrentContext();
 }
 #else
 void ImGuiView::SetUp(GLFWwindow* glfwWindow) {
@@ -332,6 +335,10 @@ void ImGuiView::PerformRendering() {}
 
 
 void ImGuiView::BeginRenderLoop() {
+    LoadFontsFromDefs();
+
+    m_reactImgui->Init(this);
+
     SetUp();
     // Main loop
 #ifdef __EMSCRIPTEN__
@@ -344,7 +351,9 @@ void ImGuiView::BeginRenderLoop() {
 
         HandleScreenSizeChanged();
 
-        Render(m_window_width, m_window_height);
+        SetCurrentContext();
+
+        m_reactImgui->Render(m_window_width, m_window_height);
 
         PerformRendering();
     }
@@ -361,10 +370,7 @@ void ImGuiView::SetWindowSize(int width, int height) {
     m_window_width = width;
     m_window_height = height;
 
-    printf("%d,%d\n", width, height);
-
     if (m_glfwWindow) {
-
         glfwSetWindowSize(m_glfwWindow, width, height);
     }
 }
@@ -483,3 +489,15 @@ bool LoadTexture(const void* data, const int numBytes, Texture* texture) {
 
 }
 #endif
+
+json ImGuiView::GetAvailableFonts() {
+    SetCurrentContext();
+    ImGuiIO& io = ImGui::GetIO();
+    json fonts = json::array();
+
+    for (ImFont* font : io.Fonts->Fonts) {
+        fonts.push_back(font->GetDebugName());
+    }
+
+    return fonts;
+};

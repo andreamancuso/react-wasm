@@ -129,9 +129,9 @@ if (DEFINED EMSCRIPTEN)
         src/imguiview.cpp
         src/implotview.cpp
 
-        ${DEPS}/wasm-glfw3-boilerplate/src/view.cpp
-        ${DEPS}/wasm-glfw3-boilerplate/src/glfw3renderer.cpp
-        ${DEPS}/wasm-glfw3-boilerplate/src/glwasm.cpp
+#        ${DEPS}/wasm-glfw3-boilerplate/src/view.cpp
+#        ${DEPS}/wasm-glfw3-boilerplate/src/glfw3renderer.cpp
+#        ${DEPS}/wasm-glfw3-boilerplate/src/glwasm.cpp
         ${OSM_STATIC_MAP_GENERATOR_SRC}
         ${LEPTONICA_SRC}
         ${LIBTIFF_SRC}
@@ -143,7 +143,7 @@ if (DEFINED EMSCRIPTEN)
     target_include_directories(
         reactDearImgui PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${DEPS}/wasm-glfw3-boilerplate/include
+#        ${DEPS}/wasm-glfw3-boilerplate/include
         ${DEPS}/IconFontCppHeaders
         ${DEPS}/ReactivePlusPlus/src/rpp
 

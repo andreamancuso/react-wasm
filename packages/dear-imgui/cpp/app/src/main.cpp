@@ -9,6 +9,7 @@
 
 #include "color_helpers.h"
 #include "reactimgui.h"
+#include "implotview.h"
 
 using json = nlohmann::json;
 
@@ -58,7 +59,8 @@ json IntSetToJson(const std::set<int>& data) {
 
 class WasmRunner {
     protected:
-        ReactImgui* m_view{};
+        ReactImgui* m_reactImgui{};
+        ImGuiView* m_view{};
 
     public:
     WasmRunner() = default;
@@ -138,13 +140,14 @@ class WasmRunner {
         }
 
         void run(std::string& canvasSelector, std::string& rawFontDefs, std::optional<std::string>& rawStyleOverridesDefs) {
-            m_view = new ReactImgui(
+            m_reactImgui = new ReactImgui("ReactImgui", rawStyleOverridesDefs);
+            m_view = new ImPlotView(
+                m_reactImgui,
                 "ReactImgui",
                 "ReactImgui",
-                rawFontDefs,
-                rawStyleOverridesDefs
+                rawFontDefs
             );
-            m_view->SetEventHandlers(
+            m_reactImgui->SetEventHandlers(
                 OnInit,
                 OnTextChanged,
                 OnComboChanged,
@@ -165,27 +168,27 @@ class WasmRunner {
         }
 
         void setElement(std::string& elementJsonAsString) const {
-            m_view->QueueCreateElement(elementJsonAsString);
+            m_reactImgui->QueueCreateElement(elementJsonAsString);
         }
 
         void patchElement(const int id, std::string& elementJsonAsString) const {
-            m_view->QueuePatchElement(id, elementJsonAsString);
+            m_reactImgui->QueuePatchElement(id, elementJsonAsString);
         }
 
         void elementInternalOp(const int id, std::string& elementJsonAsString) const {
-            m_view->QueueElementInternalOp(id, elementJsonAsString);
+            m_reactImgui->QueueElementInternalOp(id, elementJsonAsString);
         }
 
         void setChildren(const int id, const std::vector<int>& childrenIds) const {
-            m_view->QueueSetChildren(id, childrenIds);
+            m_reactImgui->QueueSetChildren(id, childrenIds);
         }
 
         void appendChild(const int parentId, const int childId) const {
-            m_view->QueueAppendChild(parentId, childId);
+            m_reactImgui->QueueAppendChild(parentId, childId);
         }
 
         [[nodiscard]] std::vector<int> getChildren(const int id) const {
-            return m_view->GetChildren(id);
+            return m_reactImgui->GetChildren(id);
         }
 
         [[nodiscard]] std::string getAvailableFonts() const {
@@ -193,68 +196,68 @@ class WasmRunner {
         }
 
         void appendTextToClippedMultiLineTextRenderer(const int id, const std::string& data) const {
-            m_view->AppendTextToClippedMultiLineTextRenderer(id, data);
+            m_reactImgui->AppendTextToClippedMultiLineTextRenderer(id, data);
         }
 
         [[nodiscard]] std::string getStyle() const {
             json style;
 
-            style["alpha"] = m_view->m_appStyle.Alpha;
-            style["disabledAlpha"] = m_view->m_appStyle.DisabledAlpha;
-            style["windowPadding"] = { m_view->m_appStyle.WindowPadding.x, m_view->m_appStyle.WindowPadding.y };
-            style["windowRounding"] = m_view->m_appStyle.WindowRounding;
-            style["windowBorderSize"] = m_view->m_appStyle.WindowBorderSize;
-            style["windowMinSize"] = { m_view->m_appStyle.WindowMinSize.x, m_view->m_appStyle.WindowMinSize.y };
-            style["windowTitleAlign"] = { m_view->m_appStyle.WindowTitleAlign.x, m_view->m_appStyle.WindowTitleAlign.y };
-            style["windowMenuButtonPosition"] = m_view->m_appStyle.WindowMenuButtonPosition;
-            style["childRounding"] = m_view->m_appStyle.ChildRounding;
-            style["childBorderSize"] = m_view->m_appStyle.ChildBorderSize;
-            style["popupRounding"] = m_view->m_appStyle.PopupRounding;
-            style["popupBorderSize"] = m_view->m_appStyle.PopupBorderSize;
-            style["framePadding"] = { m_view->m_appStyle.FramePadding.x, m_view->m_appStyle.FramePadding.y };
-            style["frameRounding"] = m_view->m_appStyle.FrameRounding;
-            style["frameBorderSize"] = m_view->m_appStyle.FrameBorderSize;
-            style["itemSpacing"] = { m_view->m_appStyle.ItemSpacing.x, m_view->m_appStyle.ItemSpacing.y };
-            style["itemInnerSpacing"] = { m_view->m_appStyle.ItemInnerSpacing.x, m_view->m_appStyle.ItemInnerSpacing.y };
-            style["cellPadding"] = { m_view->m_appStyle.CellPadding.x, m_view->m_appStyle.CellPadding.y };
-            style["touchExtraPadding"] = { m_view->m_appStyle.TouchExtraPadding.x, m_view->m_appStyle.TouchExtraPadding.y };
-            style["indentSpacing"] = m_view->m_appStyle.IndentSpacing;
-            style["columnsMinSpacing"] = m_view->m_appStyle.ColumnsMinSpacing;
-            style["scrollbarSize"] = m_view->m_appStyle.ScrollbarSize;
-            style["scrollbarRounding"] = m_view->m_appStyle.ScrollbarRounding;
-            style["grabMinSize"] = m_view->m_appStyle.GrabMinSize;
-            style["grabRounding"] = m_view->m_appStyle.GrabRounding;
-            style["logSliderDeadzone"] = m_view->m_appStyle.LogSliderDeadzone;
-            style["tabRounding"] = m_view->m_appStyle.TabRounding;
-            style["tabBorderSize"] = m_view->m_appStyle.TabBorderSize;
-            style["tabMinWidthForCloseButton"] = m_view->m_appStyle.TabMinWidthForCloseButton;
-            style["tabBarBorderSize"] = m_view->m_appStyle.TabBarBorderSize;
-            style["tableAngledHeadersAngle"] = m_view->m_appStyle.TableAngledHeadersAngle;
-            style["tableAngledHeadersTextAlign"] = { m_view->m_appStyle.TableAngledHeadersTextAlign.x, m_view->m_appStyle.TableAngledHeadersTextAlign.y };
-            style["colorButtonPosition"] = m_view->m_appStyle.ColorButtonPosition;
-            style["buttonTextAlign"] = { m_view->m_appStyle.ButtonTextAlign.x, m_view->m_appStyle.ButtonTextAlign.y };
-            style["selectableTextAlign"] = { m_view->m_appStyle.SelectableTextAlign.x, m_view->m_appStyle.SelectableTextAlign.y };
-            style["separatorTextPadding"] = { m_view->m_appStyle.SeparatorTextPadding.x, m_view->m_appStyle.SeparatorTextPadding.y };
-            style["displayWindowPadding"] = { m_view->m_appStyle.DisplayWindowPadding.x, m_view->m_appStyle.DisplayWindowPadding.y };
-            style["displaySafeAreaPadding"] = { m_view->m_appStyle.DisplaySafeAreaPadding.x, m_view->m_appStyle.DisplaySafeAreaPadding.y };
-            style["mouseCursorScale"] = m_view->m_appStyle.MouseCursorScale;
-            style["antiAliasedLines"] = m_view->m_appStyle.AntiAliasedLines;
-            style["antiAliasedLinesUseTex"] = m_view->m_appStyle.AntiAliasedLinesUseTex;
-            style["antiAliasedFill"] = m_view->m_appStyle.AntiAliasedFill;
-            style["curveTessellationTol"] = m_view->m_appStyle.CurveTessellationTol;
-            style["circleTessellationMaxError"] = m_view->m_appStyle.CircleTessellationMaxError;
+            style["alpha"] = m_reactImgui->m_appStyle.Alpha;
+            style["disabledAlpha"] = m_reactImgui->m_appStyle.DisabledAlpha;
+            style["windowPadding"] = { m_reactImgui->m_appStyle.WindowPadding.x, m_reactImgui->m_appStyle.WindowPadding.y };
+            style["windowRounding"] = m_reactImgui->m_appStyle.WindowRounding;
+            style["windowBorderSize"] = m_reactImgui->m_appStyle.WindowBorderSize;
+            style["windowMinSize"] = { m_reactImgui->m_appStyle.WindowMinSize.x, m_reactImgui->m_appStyle.WindowMinSize.y };
+            style["windowTitleAlign"] = { m_reactImgui->m_appStyle.WindowTitleAlign.x, m_reactImgui->m_appStyle.WindowTitleAlign.y };
+            style["windowMenuButtonPosition"] = m_reactImgui->m_appStyle.WindowMenuButtonPosition;
+            style["childRounding"] = m_reactImgui->m_appStyle.ChildRounding;
+            style["childBorderSize"] = m_reactImgui->m_appStyle.ChildBorderSize;
+            style["popupRounding"] = m_reactImgui->m_appStyle.PopupRounding;
+            style["popupBorderSize"] = m_reactImgui->m_appStyle.PopupBorderSize;
+            style["framePadding"] = { m_reactImgui->m_appStyle.FramePadding.x, m_reactImgui->m_appStyle.FramePadding.y };
+            style["frameRounding"] = m_reactImgui->m_appStyle.FrameRounding;
+            style["frameBorderSize"] = m_reactImgui->m_appStyle.FrameBorderSize;
+            style["itemSpacing"] = { m_reactImgui->m_appStyle.ItemSpacing.x, m_reactImgui->m_appStyle.ItemSpacing.y };
+            style["itemInnerSpacing"] = { m_reactImgui->m_appStyle.ItemInnerSpacing.x, m_reactImgui->m_appStyle.ItemInnerSpacing.y };
+            style["cellPadding"] = { m_reactImgui->m_appStyle.CellPadding.x, m_reactImgui->m_appStyle.CellPadding.y };
+            style["touchExtraPadding"] = { m_reactImgui->m_appStyle.TouchExtraPadding.x, m_reactImgui->m_appStyle.TouchExtraPadding.y };
+            style["indentSpacing"] = m_reactImgui->m_appStyle.IndentSpacing;
+            style["columnsMinSpacing"] = m_reactImgui->m_appStyle.ColumnsMinSpacing;
+            style["scrollbarSize"] = m_reactImgui->m_appStyle.ScrollbarSize;
+            style["scrollbarRounding"] = m_reactImgui->m_appStyle.ScrollbarRounding;
+            style["grabMinSize"] = m_reactImgui->m_appStyle.GrabMinSize;
+            style["grabRounding"] = m_reactImgui->m_appStyle.GrabRounding;
+            style["logSliderDeadzone"] = m_reactImgui->m_appStyle.LogSliderDeadzone;
+            style["tabRounding"] = m_reactImgui->m_appStyle.TabRounding;
+            style["tabBorderSize"] = m_reactImgui->m_appStyle.TabBorderSize;
+            style["tabMinWidthForCloseButton"] = m_reactImgui->m_appStyle.TabMinWidthForCloseButton;
+            style["tabBarBorderSize"] = m_reactImgui->m_appStyle.TabBarBorderSize;
+            style["tableAngledHeadersAngle"] = m_reactImgui->m_appStyle.TableAngledHeadersAngle;
+            style["tableAngledHeadersTextAlign"] = { m_reactImgui->m_appStyle.TableAngledHeadersTextAlign.x, m_reactImgui->m_appStyle.TableAngledHeadersTextAlign.y };
+            style["colorButtonPosition"] = m_reactImgui->m_appStyle.ColorButtonPosition;
+            style["buttonTextAlign"] = { m_reactImgui->m_appStyle.ButtonTextAlign.x, m_reactImgui->m_appStyle.ButtonTextAlign.y };
+            style["selectableTextAlign"] = { m_reactImgui->m_appStyle.SelectableTextAlign.x, m_reactImgui->m_appStyle.SelectableTextAlign.y };
+            style["separatorTextPadding"] = { m_reactImgui->m_appStyle.SeparatorTextPadding.x, m_reactImgui->m_appStyle.SeparatorTextPadding.y };
+            style["displayWindowPadding"] = { m_reactImgui->m_appStyle.DisplayWindowPadding.x, m_reactImgui->m_appStyle.DisplayWindowPadding.y };
+            style["displaySafeAreaPadding"] = { m_reactImgui->m_appStyle.DisplaySafeAreaPadding.x, m_reactImgui->m_appStyle.DisplaySafeAreaPadding.y };
+            style["mouseCursorScale"] = m_reactImgui->m_appStyle.MouseCursorScale;
+            style["antiAliasedLines"] = m_reactImgui->m_appStyle.AntiAliasedLines;
+            style["antiAliasedLinesUseTex"] = m_reactImgui->m_appStyle.AntiAliasedLinesUseTex;
+            style["antiAliasedFill"] = m_reactImgui->m_appStyle.AntiAliasedFill;
+            style["curveTessellationTol"] = m_reactImgui->m_appStyle.CurveTessellationTol;
+            style["circleTessellationMaxError"] = m_reactImgui->m_appStyle.CircleTessellationMaxError;
 
-            style["hoverStationaryDelay"] = m_view->m_appStyle.HoverStationaryDelay;
-            style["hoverDelayShort"] = m_view->m_appStyle.HoverDelayShort;
-            style["hoverDelayNormal"] = m_view->m_appStyle.HoverDelayNormal;
+            style["hoverStationaryDelay"] = m_reactImgui->m_appStyle.HoverStationaryDelay;
+            style["hoverDelayShort"] = m_reactImgui->m_appStyle.HoverDelayShort;
+            style["hoverDelayNormal"] = m_reactImgui->m_appStyle.HoverDelayNormal;
 
-            style["hoverFlagsForTooltipMouse"] = m_view->m_appStyle.HoverFlagsForTooltipMouse;
-            style["hoverFlagsForTooltipNav"] = m_view->m_appStyle.HoverFlagsForTooltipNav;
+            style["hoverFlagsForTooltipMouse"] = m_reactImgui->m_appStyle.HoverFlagsForTooltipMouse;
+            style["hoverFlagsForTooltipNav"] = m_reactImgui->m_appStyle.HoverFlagsForTooltipNav;
 
             style["colors"] = json::array();
 
             for (int i = 0; i < ImGuiCol_COUNT; i++) {
-                auto maybeValue = IV4toJsonHEXATuple(m_view->m_appStyle.Colors[i]);
+                auto maybeValue = IV4toJsonHEXATuple(m_reactImgui->m_appStyle.Colors[i]);
 
                 if (maybeValue.has_value()) {
                     style["colors"].push_back(maybeValue.value());
@@ -265,15 +268,15 @@ class WasmRunner {
         }
 
         void patchStyle(std::string& styleDef) const {
-            m_view->PatchStyle(json::parse(styleDef));
+            m_reactImgui->PatchStyle(json::parse(styleDef));
         }
 
         void setDebug(const bool debug) const {
-            m_view->SetDebug(debug);
+            m_reactImgui->SetDebug(debug);
         }
 
         void showDebugWindow() const {
-            m_view->ShowDebugWindow();
+            m_reactImgui->ShowDebugWindow();
         }
 };
 

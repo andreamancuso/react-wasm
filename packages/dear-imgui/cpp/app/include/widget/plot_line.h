@@ -1,3 +1,4 @@
+#include <implot.h>
 #include "styled_widget.h"
 
 class PlotLine final : public StyledWidget {
