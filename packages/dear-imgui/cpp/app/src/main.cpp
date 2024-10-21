@@ -8,7 +8,6 @@
 #include <nlohmann/json.hpp>
 
 #include "color_helpers.h"
-#include "glwasm.h"
 #include "reactimgui.h"
 
 using json = nlohmann::json;
@@ -59,7 +58,6 @@ json IntSetToJson(const std::set<int>& data) {
 
 class WasmRunner {
     protected:
-        GLWasm* m_glWasm{};
         ReactImgui* m_view{};
 
     public:
@@ -154,8 +152,7 @@ class WasmRunner {
                 OnMultipleNumericValuesChanged,
                 OnBooleanValueChanged,
                 OnClick);
-            m_glWasm = &GLWasm::GetInstance(m_view);
-            m_glWasm->Init(canvasSelector);
+            m_view->Init(canvasSelector);
         }
 
         void exit() const {
@@ -164,7 +161,7 @@ class WasmRunner {
         }
 
         void resizeWindow(const int width, const int height) const {
-            m_glWasm->SetWindowSize(width, height);
+            m_view->SetWindowSize(width, height);
         }
 
         void setElement(std::string& elementJsonAsString) const {

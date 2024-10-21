@@ -63,7 +63,7 @@ void Image::HandleInternalOp(const json& opDef) {
 };
 
 void Image::HandleFetchImageSuccess(emscripten_fetch_t *fetch) {
-    LoadTexture(m_view->GetDevice(), fetch->data, fetch->numBytes, &m_texture);
+    m_view->LoadTexture(fetch->data, fetch->numBytes, &m_texture);
 
     printf("Fetched image using url %s\n", m_url.c_str());
 

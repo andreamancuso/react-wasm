@@ -1,24 +1,37 @@
+#ifndef IMGUI_VIEW
+#define IMGUI_VIEW
+
+#include <format>
+
 #include "IconsFontAwesome6.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
-#include "imgui_impl_wgpu.h"
-#include <format>
-#include <GLFW/glfw3.h>
-#include <webgpu/webgpu.h>
-#include <nlohmann/json.hpp>
 
+#ifdef __EMSCRIPTEN__
+#include "imgui_impl_wgpu.h"
+#include <webgpu/webgpu.h>
+#endif
+
+#include <texture_helpers.h>
+#include <GLFW/glfw3.h>
+#include <nlohmann/json.hpp>
 #include "./shared.h"
 #include "view.h"
 
-#pragma once
-
 using json = nlohmann::json;
 
-class ImGuiView : public View {
+class ImGuiView {
     protected:
-        bool m_shouldLoadDefaultStyle;
+        GLFWwindow* m_glfwWindow;
+        const char* m_windowId;
+        const char* m_glWindowTitle;
 
-        WGPUColor m_clearColor;
+        int m_initial_window_width = 400;
+        int m_initial_window_height = 300;
+        int m_window_width = m_initial_window_width;
+        int m_window_height = m_initial_window_height;
+
+        bool m_shouldLoadDefaultStyle;
 
         ImGuiContext* m_imGuiCtx;
 
@@ -29,178 +42,73 @@ class ImGuiView : public View {
         std::unordered_map<std::string, std::unordered_map<int, int>, StringHash, std::equal_to<>> m_fontDefMap;
 
         // static constexpr ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
+
+        void LoadFontsFromDefs(const json& rawFontDefs);
+
+    #ifdef __EMSCRIPTEN__
+        std::unique_ptr<char[]> m_canvasSelector;
+        wgpu::Instance m_instance;
+        WGPUColor m_clearColor;
+        WGPUDevice m_device;
+        WGPUQueue m_queue;
+        WGPUSurface m_wgpu_surface;
+        WGPUTextureFormat m_wgpu_preferred_fmt = WGPUTextureFormat_RGBA8Unorm;
+        WGPUSwapChain m_wgpu_swap_chain;
+        int m_wgpu_swap_chain_width = 0;
+        int m_wgpu_swap_chain_height = 0;
+    #else
+
+    #endif
+
     public:
+        ImGuiView(const char* newWindowId, const char* newGlWindowTitle, std::string& rawFontDefs);
 
-        ImGuiView(
-            const char* newWindowId,
-            const char* newGlWindowTitle,
-            std::string& rawFontDefs) : View(newWindowId, newGlWindowTitle) {
-            m_shouldLoadDefaultStyle = true;
+        bool LoadTexture(const void* data, int numBytes, Texture* texture);
 
-            m_imGuiCtx = ImGui::CreateContext();
+        virtual void PrepareForRender() = 0;
+        virtual void Render(int window_width, int window_height) = 0;
 
-            ImGuiIO& io = ImGui::GetIO(); (void)io;
+        void BeginRenderLoop();
 
-            auto fontDefs = json::parse(rawFontDefs);
+        int GetFontIndex(const std::string& fontName, int fontSize);
 
-            static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
-            // static const ImWchar icons_ranges[] = { ICON_MIN_MDI, ICON_MAX_16_MDI, 0 };
+        [[nodiscard]] bool IsFontIndexValid(int fontIndex) const;
 
-            if (fontDefs.is_object() && fontDefs.contains("defs") && fontDefs["defs"].is_array()) {
-                for (auto& [key, item] : fontDefs["defs"].items()) {
-                    if (item.is_object()) {
-                        if (item.contains("name") && item.contains("size") && item["name"].is_string() && item["size"].is_number_unsigned()) {
-                            auto fontName = item["name"].template get<std::string>();
-                            auto pathToFont = std::format("assets/fonts/{}.ttf", fontName.c_str());
-                            auto fontSize = item["size"].template get<int>();
-
-                            if (!m_fontDefMap.contains(fontName)) {
-                                m_fontDefMap[fontName] = std::unordered_map<int, int>();
-                            }
-
-                            if (!m_fontDefMap[fontName].contains(fontSize)) {
-                                m_fontDefMap[fontName][fontSize] = (int)m_loadedFonts.size();
-                            }
-
-                            m_loadedFonts.push_back(
-                                io.Fonts->AddFontFromFileTTF(
-                                    pathToFont.c_str(),
-                                    fontSize
-                                )
-                            );
-
-                            float iconFontSize = fontSize * 2.0f / 3.0f; // FontAwesome fonts need to have their sizes reduced by 2.0f/3.0f in order to align correctly
-                            ImFontConfig icons_config;
-                            icons_config.MergeMode = true;
-                            icons_config.PixelSnapH = true;
-                            icons_config.GlyphMinAdvanceX = iconFontSize;
-                            auto pathToFaFontFile = std::format("assets/fonts/{}", FONT_ICON_FILE_NAME_FAS);
-                            // auto pathToMdiFontFile = std::format("assets/fonts/{}", FONT_ICON_FILE_NAME_MDI);
-
-                            io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges);
-                            // io.Fonts->AddFontFromFileTTF(pathToMdiFontFile.c_str(), fontSize, &icons_config, icons_ranges);
-                        }
-                    }
-                }
-
-                io.Fonts->Build();
-
-                if (fontDefs.contains("defaultFont")
-                    && fontDefs["defaultFont"].is_object()
-                    && fontDefs["defaultFont"]["name"].is_string()
-                    && fontDefs["defaultFont"]["size"].is_number_unsigned()) {
-
-                    auto defaultFontName = fontDefs["defaultFont"]["name"].template get<std::string>();
-                    auto defaultFontSize = fontDefs["defaultFont"]["size"].template get<int>();
-
-                    if (m_fontDefMap.contains(defaultFontName) && m_fontDefMap[defaultFontName].contains(defaultFontSize)) {
-                        auto fontIndex = m_fontDefMap[defaultFontName][defaultFontSize];
-
-                        SetFontDefault(fontIndex);
-                    }
-                }
-            }
-
-            // If not custom fonts defined, ensure font-awesome are still available
-            if (m_loadedFonts.size() == 0) {
-                io.Fonts->AddFontDefault();
-                float baseFontSize = 13.0f; // 13.0f is the size of the default font.
-                float iconFontSize = baseFontSize * 2.0f / 3.0f; // FontAwesome fonts need to have their sizes reduced by 2.0f/3.0f in order to align correctly
-
-                ImFontConfig icons_config;
-                icons_config.MergeMode = true;
-                icons_config.PixelSnapH = true;
-                icons_config.GlyphMinAdvanceX = iconFontSize;
-                auto pathToFaFontFile = std::format("assets/fonts/{}", FONT_ICON_FILE_NAME_FAS);
-
-                m_loadedFonts.push_back(
-                    io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges)
-                );
-
-                io.Fonts->Build();
-
-                SetFontDefault(0);
-            }
-
-            ImVec4 v4 = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-            m_clearColor = { v4.x * v4.w, v4.y * v4.w, v4.z * v4.w, v4.w };
-        }
-
-        int GetFontIndex(std::string fontName, int fontSize) {
-            if (m_fontDefMap.contains(fontName) && m_fontDefMap[fontName].contains(fontSize)) {
-                return m_fontDefMap[fontName][fontSize];
-            }
-
-            return -1;
-        }
-
-        bool IsFontIndexValid(int& fontIndex) {
-            return fontIndex >= 0 && fontIndex < m_loadedFonts.size();
-        }
-
-        void SetFontDefault(int fontIndex) {
-            ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-            if (IsFontIndexValid(fontIndex)) {
-                io.FontDefault = m_loadedFonts[fontIndex];
-            }
-        }
+        void SetFontDefault(int fontIndex) const;
 
         // Only call this after having verified that fontIndex is valid (use IsFontIndexValid())
-        void PushFont(int fontIndex) {
-            ImGui::PushFont(m_loadedFonts[fontIndex]);
-        }
+        void PushFont(int fontIndex) const;
 
-        void PopFont() {
-            ImGui::PopFont();
-        }
+        void PopFont();
 
-        ImGuiStyle& GetStyle() {
-            return ImGui::GetStyle();
-        }
-
-        WGPUColor GetClearColor();
+        ImGuiStyle& GetStyle();
 
         void SetCurrentContext() {
             ImGui::SetCurrentContext(m_imGuiCtx);
         }
 
-        void SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) {
-            IMGUI_CHECKVERSION();
+        virtual void SetUp();
 
-            m_device = device;
+        void InitGlfw();
 
-        #ifdef __EMSCRIPTEN__
-            ImGui_ImplWGPU_InitInfo init_info;
-            init_info.Device = device;
-            init_info.NumFramesInFlight = 3;
-            init_info.RenderTargetFormat = wgpu_preferred_fmt;
-            init_info.DepthStencilFormat = WGPUTextureFormat_Undefined;
-            ImGui_ImplWGPU_Init(&init_info);
-        #endif
+    #ifdef __EMSCRIPTEN__
+        bool InitWGPU();
+        void RenderDrawData(WGPURenderPassEncoder pass);
+        void CreateSwapChain(int width, int height);
+        void SetDeviceAndStart(WGPUDevice& cDevice);
+        void RequestDevice(wgpu::Instance wgpuInstance, ImGuiView* glWasmInstance);
+        virtual void Init(std::string& cs);
+    #else
+        void RenderDrawData();
+        virtual void Init();
+    #endif
+        void HandleScreenSizeChanged();
 
-            // Setup Platform/Renderer backends
-            ImGui_ImplGlfw_InitForOther(glfwWindow, true);
+        void PerformRendering();
 
-        #ifdef __EMSCRIPTEN__
-            ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback(pCanvasSelector);
-        #endif
-        }
+        void CleanUp();
 
-        void HandleScreenSizeChanged() {
-            ImGui_ImplWGPU_InvalidateDeviceObjects();
-            ImGui_ImplWGPU_CreateDeviceObjects();
-        }
-
-        void RenderDrawData(WGPURenderPassEncoder pass) {
-            ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), pass);
-        }
-
-        void CleanUp() {
-            ImGui::DestroyContext(m_imGuiCtx);
-
-            ImGui_ImplWGPU_Shutdown();
-            ImGui_ImplGlfw_Shutdown();
-        }
+        void SetWindowSize(int width, int height);
 };
 
+#endif

@@ -97,7 +97,6 @@ if (DEFINED EMSCRIPTEN)
         src/shared.cpp
         src/color_helpers.cpp
         src/imgui_helpers.cpp
-        src/texture_helpers.cpp
         src/yoga_helpers.cpp
         src/element/layout_node.cpp
         src/element/element.cpp

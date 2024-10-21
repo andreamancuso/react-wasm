@@ -87,9 +87,7 @@ void ReactImgui::ShowDebugWindow() {
     ImGui::SetWindowFocus("debug");
 };
 
-void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) {
-    ImGuiView::SetUp(pCanvasSelector, device, glfwWindow, wgpu_preferred_fmt);
-
+void ReactImgui::SetUpSubjects() {
     auto handler = [this](const ElementOpDef& elementOpDef) {
         switch(elementOpDef.op) {
             case OpCreateElement: {
@@ -115,8 +113,6 @@ void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glf
 
     m_elementOpSubject = rpp::subjects::serialized_replay_subject<ElementOpDef>{100};
     m_elementOpSubject.get_observable() | rpp::ops::subscribe(handler);
-
-    m_onInit();
 };
 
 void ReactImgui::SetUpElementCreatorFunctions() {
@@ -293,6 +289,31 @@ void ReactImgui::SetUpFloatFormatChars() {
     strcpy(m_floatFormatChars[8].get(), "%.8f");
     strcpy(m_floatFormatChars[9].get(), "%.9f");
 };
+
+#ifdef __EMSCRIPTEN__
+void ReactImgui::Init(std::string& cs) {
+    printf("a\n");
+    ImGuiView::Init(cs);
+    printf("b\n");
+
+    PrepareForRender();
+    printf("c\n");
+    SetUpSubjects();
+    printf("d\n");
+
+    m_onInit();
+    printf("e\n");
+}
+#else
+void ReactImgui::Init() {
+    ImGuiView::Init();
+
+    PrepareForRender();
+    SetUpSubjects();
+
+    m_onInit();
+}
+#endif
 
 void ReactImgui::PrepareForRender() {
     SetCurrentContext();

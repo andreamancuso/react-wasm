@@ -58,7 +58,7 @@ class ReactImgui : public ImPlotView {
         void SetUpFloatFormatChars();
 
         void SetUpElementCreatorFunctions();
-        
+
     public:
         std::unordered_map<int, std::vector<int>> m_hierarchy;
         std::mutex m_hierarchy_mutex;
@@ -88,7 +88,13 @@ class ReactImgui : public ImPlotView {
 
         void RenderElementById(int id, const std::optional<ImRect>& viewport = std::nullopt);
 
-        void SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) override;
+        void SetUpSubjects();
+
+    #ifdef __EMSCRIPTEN__
+        void Init(std::string& cs) override;
+    #else
+        void Init();
+    #endif
 
         void SetEventHandlers(
             OnInitCallback onInitFn,
