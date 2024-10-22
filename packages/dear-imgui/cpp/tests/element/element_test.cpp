@@ -10,6 +10,12 @@ using ::testing::Eq;
 
 TEST(Element, ctor) {
     Element element(nullptr, 1, true, false, false);
+
+    EXPECT_TRUE(element.m_isRoot);
+    EXPECT_EQ(element.m_id, 1);
+    EXPECT_FALSE(element.m_isHovered);
+    EXPECT_FALSE(element.m_isActive);
+    EXPECT_FALSE(element.m_isFocused);
 }
 
 TEST(Element, initSetsStyleCorrectly) {
