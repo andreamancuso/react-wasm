@@ -5,14 +5,15 @@
 #include "imgui_internal.h"
 #include <nlohmann/json.hpp>
 #include "yoga/YGEnums.h"
-#include "implotview.h"
 
+#include "shared.h"
 #include "imgui_helpers.h"
 
 using json = nlohmann::json;
 
 #pragma once
 
+class ImGuiRenderer;
 class Widget;
 class MapGenerator;
 class Element;
@@ -32,8 +33,14 @@ struct ElementOpDef {
     json data;
 };
 
-class ReactImgui : public ImPlotView {
+class ReactImgui {
     private:
+        std::optional<std::string> m_rawStyleOverridesDefs;
+
+        const char* m_windowId;
+
+        ImGuiWindowFlags m_window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove;
+
         std::unordered_map<int, rpp::subjects::serialized_replay_subject<json>> m_elementInternalOpsSubject;
 
         rpp::subjects::serialized_replay_subject<ElementOpDef> m_elementOpSubject;
@@ -58,8 +65,9 @@ class ReactImgui : public ImPlotView {
         void SetUpFloatFormatChars();
 
         void SetUpElementCreatorFunctions();
-        
+
     public:
+        ImGuiRenderer* m_renderer;
         std::unordered_map<int, std::vector<int>> m_hierarchy;
         std::mutex m_hierarchy_mutex;
 
@@ -75,12 +83,9 @@ class ReactImgui : public ImPlotView {
         OnBooleanValueChangedCallback m_onBooleanValueChange;
         OnClickCallback m_onClick;
 
-        ReactImgui(
-            const char* newWindowId, 
-            const char* newGlWindowTitle, 
-            std::string& rawFontDefs,
-            std::optional<std::string>& rawStyleOverridesDefs
-        );
+        ReactImgui(const char* newWindowId, std::optional<std::string> rawStyleOverridesDefs);
+
+        void Init(ImGuiRenderer* renderer);
 
         void SetDebug(bool debug);
 
@@ -88,7 +93,7 @@ class ReactImgui : public ImPlotView {
 
         void RenderElementById(int id, const std::optional<ImRect>& viewport = std::nullopt);
 
-        void SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) override;
+        void SetUpSubjects();
 
         void SetEventHandlers(
             OnInitCallback onInitFn,
@@ -100,11 +105,11 @@ class ReactImgui : public ImPlotView {
             OnClickCallback onClickFn
         );
 
-        void PrepareForRender() override;
+        void PrepareForRender();
 
         void RenderDebugWindow();
 
-        void Render(int window_width, int window_height) override;
+        void Render(int window_width, int window_height);
 
         void SetChildrenDisplay(int id, YGDisplay display);
 

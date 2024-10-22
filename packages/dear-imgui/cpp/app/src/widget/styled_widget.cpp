@@ -2,23 +2,25 @@
 
 #include "widget/styled_widget.h"
 #include "color_helpers.h"
+#include "reactimgui.h"
+#include "imgui_renderer.h"
 
 bool WidgetStyle::HasCustomFont(const std::optional<ElementState> widgetState, ReactImgui* view) {
-    const auto hasBaseValue = maybeBase.has_value() && maybeBase.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeBase.value().maybeFontIndex.value());
+    const auto hasBaseValue = maybeBase.has_value() && maybeBase.value().maybeFontIndex.has_value() && view->m_renderer->IsFontIndexValid(maybeBase.value().maybeFontIndex.value());
 
     switch(widgetState.value_or(ElementState_Base)) {
         case ElementState_Disabled: {
-            const auto hasDisabledValue = maybeDisabled.has_value() && maybeDisabled.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeDisabled.value().maybeFontIndex.value());
+            const auto hasDisabledValue = maybeDisabled.has_value() && maybeDisabled.value().maybeFontIndex.has_value() && view->m_renderer->IsFontIndexValid(maybeDisabled.value().maybeFontIndex.value());
             return hasDisabledValue || hasBaseValue;
         }
 
         case ElementState_Hover: {
-            const auto hasOverValue = maybeHover.has_value() && maybeHover.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeHover.value().maybeFontIndex.value());
+            const auto hasOverValue = maybeHover.has_value() && maybeHover.value().maybeFontIndex.has_value() && view->m_renderer->IsFontIndexValid(maybeHover.value().maybeFontIndex.value());
             return hasOverValue || hasBaseValue;
         }
 
         case ElementState_Active: {
-            const auto hasActiveValue = maybeActive.has_value() && maybeActive.value().maybeFontIndex.has_value() && view->IsFontIndexValid(maybeActive.value().maybeFontIndex.value());
+            const auto hasActiveValue = maybeActive.has_value() && maybeActive.value().maybeFontIndex.has_value() && view->m_renderer->IsFontIndexValid(maybeActive.value().maybeFontIndex.value());
             return hasActiveValue || hasBaseValue;
         }
 
@@ -210,7 +212,7 @@ WidgetStyleParts extractStyleParts(const json& styleDef, ReactImgui* view) {
         && styleDef["font"]["name"].is_string()
         && styleDef["font"]["size"].is_number_unsigned()) {
 
-        widgetStyleParts.maybeFontIndex.emplace(view->GetFontIndex(
+        widgetStyleParts.maybeFontIndex.emplace(view->m_renderer->GetFontIndex(
             styleDef["font"]["name"].template get<std::string>(),
             styleDef["font"]["size"].template get<int>()
         ));
@@ -358,7 +360,7 @@ void StyledWidget::PreRender(ReactImgui* view) {
 
     if (HasCustomStyles()) {
         if (HasCustomFont(view)) {
-            view->PushFont(m_style.value()->GetCustomFontId(GetState(), view));
+            view->m_renderer->PushFont(m_style.value()->GetCustomFontId(GetState(), view));
         }
 
         if (HasCustomColors()) {
@@ -388,7 +390,7 @@ void StyledWidget::PostRender(ReactImgui* view) {
 
     if (HasCustomStyles()) {
         if (HasCustomFont(view)) {
-            view->PopFont();
+            view->m_renderer->PopFont();
         }
 
         if (HasCustomColors()) {

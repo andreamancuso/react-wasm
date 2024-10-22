@@ -2,22 +2,37 @@
 #include <string>
 #include <functional>
 #include <sstream>
-#include <emscripten/bind.h>
-#include <rpp/rpp.hpp>
+#include <utility>
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
-#include "imgui_impl_wgpu.h"
 #include "implot.h"
 #include "implot_internal.h"
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten/bind.h>
+#include "imgui_impl_wgpu.h"
+#else
+#include "imgui_impl_opengl3.h"
+#endif
+
+#include <rpp/rpp.hpp>
 #include <nlohmann/json.hpp>
 
 #include "element/layout_node.h"
 
 #include "shared.h"
+#include "implot_renderer.h"
 #include "reactimgui.h"
 
 #include "color_helpers.h"
-#include "implotview.h"
+#include "implot_renderer.h"
+
+#ifdef __EMSCRIPTEN__
+#include "widget/image.h"
+#include "widget/map_view.h"
+#endif
+
 #include "widget/button.h"
 #include "widget/checkbox.h"
 #include "widget/child.h"
@@ -25,10 +40,8 @@
 #include "widget/collapsing_header.h"
 #include "widget/combo.h"
 #include "widget/group.h"
-#include "widget/image.h"
 #include "widget/input_text.h"
 #include "widget/item_tooltip.h"
-#include "widget/map_view.h"
 #include "widget/multi_slider.h"
 #include "widget/plot_candlestick.h"
 #include "widget/plot_line.h"
@@ -44,7 +57,6 @@
 #include "widget/tree_node.h"
 #include "widget/window.h"
 
-
 using json = nlohmann::json;
 
 template <typename T, typename std::enable_if<std::is_base_of<Widget, T>::value, int>::type>
@@ -57,22 +69,15 @@ std::unique_ptr<Element> makeElement(const json& val, ReactImgui* view) {
 }
 
 ReactImgui::ReactImgui(
-    const char* newWindowId, 
-    const char* newGlWindowTitle, 
-    std::string& rawFontDefs,
-    std::optional<std::string>& rawStyleOverridesDefs
-) : ImPlotView(newWindowId, newGlWindowTitle, rawFontDefs) {
+    const char* windowId,
+    std::optional<std::string> rawStyleOverridesDefs
+) {
+    m_windowId = windowId;
     m_debug = false;
+    m_rawStyleOverridesDefs = std::move(rawStyleOverridesDefs);
 
     SetUpElementCreatorFunctions();
     SetUpFloatFormatChars();
-
-    if (rawStyleOverridesDefs.has_value()) {
-        m_shouldLoadDefaultStyle = false;
-        PatchStyle(json::parse(rawStyleOverridesDefs.value()));
-    }
-
-    TakeStyleSnapshot();
 }
 
 void ReactImgui::SetDebug(bool debug) {
@@ -87,9 +92,7 @@ void ReactImgui::ShowDebugWindow() {
     ImGui::SetWindowFocus("debug");
 };
 
-void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glfwWindow, WGPUTextureFormat wgpu_preferred_fmt) {
-    ImGuiView::SetUp(pCanvasSelector, device, glfwWindow, wgpu_preferred_fmt);
-
+void ReactImgui::SetUpSubjects() {
     auto handler = [this](const ElementOpDef& elementOpDef) {
         switch(elementOpDef.op) {
             case OpCreateElement: {
@@ -115,8 +118,6 @@ void ReactImgui::SetUp(char* pCanvasSelector, WGPUDevice device, GLFWwindow* glf
 
     m_elementOpSubject = rpp::subjects::serialized_replay_subject<ElementOpDef>{100};
     m_elementOpSubject.get_observable() | rpp::ops::subscribe(handler);
-
-    m_onInit();
 };
 
 void ReactImgui::SetUpElementCreatorFunctions() {
@@ -132,8 +133,12 @@ void ReactImgui::SetUpElementCreatorFunctions() {
 
     m_element_init_fn["di-table"] = &makeWidget<Table>;
     m_element_init_fn["clipped-multi-line-text-renderer"] = &makeWidget<ClippedMultiLineTextRenderer>;
+
+#ifdef __EMSCRIPTEN__
     m_element_init_fn["di-image"] = &makeWidget<Image>;
     m_element_init_fn["map-view"] = &makeWidget<MapView>;
+#endif
+
     m_element_init_fn["plot-line"] = &makeWidget<PlotLine>;
     m_element_init_fn["plot-candlestick"] = &makeWidget<PlotCandlestick>;
 
@@ -294,9 +299,23 @@ void ReactImgui::SetUpFloatFormatChars() {
     strcpy(m_floatFormatChars[9].get(), "%.9f");
 };
 
-void ReactImgui::PrepareForRender() {
-    SetCurrentContext();
+void ReactImgui::Init(ImGuiRenderer* renderer) {
+    m_renderer = renderer;
 
+    if (m_rawStyleOverridesDefs.has_value()) {
+        m_renderer->m_shouldLoadDefaultStyle = false;
+        PatchStyle(json::parse(m_rawStyleOverridesDefs.value()));
+    }
+
+    TakeStyleSnapshot();
+
+    PrepareForRender();
+    SetUpSubjects();
+
+    m_onInit();
+}
+
+void ReactImgui::PrepareForRender() {
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -305,7 +324,7 @@ void ReactImgui::PrepareForRender() {
     // You may manually call LoadIniSettingsFromMemory() to load settings from your own storage.
     io.IniFilename = nullptr;
 
-    if (m_shouldLoadDefaultStyle) {
+    if (m_renderer->m_shouldLoadDefaultStyle) {
         ImGui::StyleColorsLight();
     }
 };
@@ -403,9 +422,11 @@ void ReactImgui::RenderElementTree(const int id) {
 };
 
 void ReactImgui::Render(const int window_width, const int window_height) {
-    SetCurrentContext();
-
+#ifdef __EMSCRIPTEN__
     ImGui_ImplWGPU_NewFrame();
+#else
+    ImGui_ImplOpenGL3_NewFrame();
+#endif
     ImGui_ImplGlfw_NewFrame();
 
     const std::lock_guard<std::mutex> elementsLock(m_elements_mutex);
@@ -477,7 +498,7 @@ void ReactImgui::ExtractImVec2FromStyleDef(const json& styleDef, const std::stri
 
 void ReactImgui::PatchStyle(const json& styleDef) {
     if (styleDef.is_object()) {
-        ImGuiStyle* style = &GetStyle();
+        ImGuiStyle* style = &ImGui::GetStyle();
 
         ExtractNumberFromStyleDef<float>(styleDef, "alpha", style->Alpha);
         ExtractNumberFromStyleDef<float>(styleDef, "disabledAlpha", style->DisabledAlpha);
@@ -550,7 +571,7 @@ void ReactImgui::PatchStyle(const json& styleDef) {
 };
 
 void ReactImgui::TakeStyleSnapshot() {
-    const auto style = GetStyle();
+    const auto style = ImGui::GetStyle();
 
     // This is necessary as the style is repeatedly modified during render via push and pop calls
     memcpy(&m_appStyle, &style, sizeof(style));
@@ -709,20 +730,6 @@ std::vector<int> ReactImgui::GetChildren(int id) {
     return m_hierarchy[id];
 };
 
-json ReactImgui::GetAvailableFonts() {
-    SetCurrentContext();
-    ImGuiIO& io = ImGui::GetIO();
-    json fonts = json::array();
-
-    for (ImFont* font : io.Fonts->Fonts) {
-        fonts.push_back(font->GetDebugName());
-
-        printf("%s\n", font->GetDebugName());
-    }
-
-    return fonts;
-};
-
 // todo: switch to ReactivePlusPlus's BehaviorSubject
 void ReactImgui::AppendTextToClippedMultiLineTextRenderer(const int id, const std::string& data) {
     const std::lock_guard<std::mutex> lock(m_elements_mutex);
@@ -782,7 +789,7 @@ ImFont* ReactImgui::GetWidgetFont(const StyledWidget* widget) {
         // auto result = widget->m_style.value()->GetCustomFontId(widget->GetState(), this);
 
         // if (result.has_value()) {
-            return m_loadedFonts[widget->m_style.value()->GetCustomFontId(widget->GetState(), this)];
+            return m_renderer->m_loadedFonts[widget->m_style.value()->GetCustomFontId(widget->GetState(), this)];
         // }
     }
 
@@ -798,7 +805,7 @@ float ReactImgui::GetWidgetFontSize(const StyledWidget* widget) {
         // auto result = widget->m_style.value()->GetCustomFontId(widget->GetState(), this);
 
         // if (result.has_value()) {
-            return m_loadedFonts[widget->m_style.value()->GetCustomFontId(widget->GetState(), this)]->FontSize;
+            return m_renderer->m_loadedFonts[widget->m_style.value()->GetCustomFontId(widget->GetState(), this)]->FontSize;
         // }
     }
 

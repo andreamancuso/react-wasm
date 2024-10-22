@@ -2,7 +2,7 @@
 #include "ada.h"
 #include "mapgenerator.h"
 #include "styled_widget.h"
-#include "webgpu_helpers.h"
+#include "texture_helpers.h"
 
 using fetchImageCallback = std::function<void(void*, size_t)>;
 
