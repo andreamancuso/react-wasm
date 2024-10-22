@@ -3,6 +3,8 @@
 
 #ifdef __EMSCRIPTEN__
 #include <webgpu/webgpu.h>
+#else
+#include <GLES3/gl3.h>
 #endif
 
 struct Texture {

@@ -2,15 +2,22 @@
 #include <string>
 #include <functional>
 #include <sstream>
-#include <emscripten/bind.h>
-#include <rpp/rpp.hpp>
+#include <utility>
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
-#include "imgui_impl_wgpu.h"
 #include "implot.h"
 #include "implot_internal.h"
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten/bind.h>
+#include "imgui_impl_wgpu.h"
+#else
+#include "imgui_impl_opengl3.h"
+#endif
+
+#include <rpp/rpp.hpp>
 #include <nlohmann/json.hpp>
-#include <utility>
 
 #include "element/layout_node.h"
 
@@ -20,6 +27,12 @@
 
 #include "color_helpers.h"
 #include "implotview.h"
+
+#ifdef __EMSCRIPTEN__
+#include "widget/image.h"
+#include "widget/map_view.h"
+#endif
+
 #include "widget/button.h"
 #include "widget/checkbox.h"
 #include "widget/child.h"
@@ -27,10 +40,8 @@
 #include "widget/collapsing_header.h"
 #include "widget/combo.h"
 #include "widget/group.h"
-#include "widget/image.h"
 #include "widget/input_text.h"
 #include "widget/item_tooltip.h"
-#include "widget/map_view.h"
 #include "widget/multi_slider.h"
 #include "widget/plot_candlestick.h"
 #include "widget/plot_line.h"
@@ -122,8 +133,12 @@ void ReactImgui::SetUpElementCreatorFunctions() {
 
     m_element_init_fn["di-table"] = &makeWidget<Table>;
     m_element_init_fn["clipped-multi-line-text-renderer"] = &makeWidget<ClippedMultiLineTextRenderer>;
+
+#ifdef __EMSCRIPTEN__
     m_element_init_fn["di-image"] = &makeWidget<Image>;
     m_element_init_fn["map-view"] = &makeWidget<MapView>;
+#endif
+
     m_element_init_fn["plot-line"] = &makeWidget<PlotLine>;
     m_element_init_fn["plot-candlestick"] = &makeWidget<PlotCandlestick>;
 
@@ -407,7 +422,11 @@ void ReactImgui::RenderElementTree(const int id) {
 };
 
 void ReactImgui::Render(const int window_width, const int window_height) {
+#ifdef __EMSCRIPTEN__
     ImGui_ImplWGPU_NewFrame();
+#else
+    ImGui_ImplOpenGL3_NewFrame();
+#endif
     ImGui_ImplGlfw_NewFrame();
 
     const std::lock_guard<std::mutex> elementsLock(m_elements_mutex);

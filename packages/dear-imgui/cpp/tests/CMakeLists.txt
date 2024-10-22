@@ -47,15 +47,45 @@ add_executable(Google_Tests_run
         ../app/src/color_helpers.cpp
         ../app/src/yoga_helpers.cpp
         ../app/src/imgui_helpers.cpp
+
         ../app/src/element/layout_node.cpp
-#        ../app/src/element/element.cpp
+        ../app/src/element/element.cpp
+
+        ../app/src/widget/widget.cpp
+        ../app/src/widget/styled_widget.cpp
+
+        ../app/src/widget/button.cpp
+        ../app/src/widget/checkbox.cpp
+        ../app/src/widget/child.cpp
+        ../app/src/widget/clipped_multi_line_text_renderer.cpp
+        ../app/src/widget/collapsing_header.cpp
+        ../app/src/widget/combo.cpp
+        ../app/src/widget/group.cpp
+        ../app/src/widget/input_text.cpp
+        ../app/src/widget/item_tooltip.cpp
+        ../app/src/widget/multi_slider.cpp
+        ../app/src/widget/plot_candlestick.cpp
+        ../app/src/widget/plot_line.cpp
+        ../app/src/widget/separator.cpp
+        ../app/src/widget/separator_text.cpp
+        ../app/src/widget/slider.cpp
+        ../app/src/widget/table.cpp
+        ../app/src/widget/tabs.cpp
+        ../app/src/widget/text.cpp
+        ../app/src/widget/text_wrap.cpp
+        ../app/src/widget/tree_node.cpp
+        ../app/src/widget/window.cpp
+
+        ../app/src/reactimgui.cpp
+        ../app/src/imguiview.cpp
+        ../app/src/implotview.cpp
 
         shared_functions_test.cpp
         color_helpers_test.cpp
         yoga_helpers_test.cpp
         imgui_helpers_test.cpp
         element/layout_node_test.cpp
-#        element/element_test.cpp
+        element/element_test.cpp
 )
 
 target_include_directories(

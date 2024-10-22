@@ -5,6 +5,8 @@
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include <webgpu/webgpu.h>
+#else
+#include "imgui_impl_opengl3.h"
 #endif
 
 #ifdef __EMSCRIPTEN__
@@ -55,7 +57,9 @@ ImGuiView::ImGuiView(
 
     m_shouldLoadDefaultStyle = true;
 
+#ifdef __EMSCRIPTEN__
     m_instance = wgpu::CreateInstance();
+#endif
 
     m_imGuiCtx = ImGui::CreateContext();
 
@@ -182,11 +186,19 @@ void ImGuiView::InitGlfw() {
     glfwSetErrorCallback(glfw_error_callback);
     glfwInit();
 
+#ifdef __EMSCRIPTEN__
     // Make sure GLFW does not initialize any graphics context.
     // This needs to be done explicitly later.
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+#else
+    const char* glsl_version = "#version 130";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+#endif
+
     m_glfwWindow = glfwCreateWindow(m_window_width, m_window_height, m_glWindowTitle, nullptr, nullptr);
 
+#ifdef __EMSCRIPTEN__
     // Initialize the WebGPU environment
     if (!InitWGPU())
     {
@@ -196,6 +208,13 @@ void ImGuiView::InitGlfw() {
         return;
     }
     glfwShowWindow(m_glfwWindow);
+#else
+    glfwMakeContextCurrent(m_glfwWindow);
+    glfwSwapInterval(1); // Enable vsync
+
+    ImGui_ImplGlfw_InitForOpenGL(m_glfwWindow, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+#endif
 }
 
 #ifdef __EMSCRIPTEN__
@@ -247,7 +266,7 @@ void ImGuiView::SetUp() {
     SetCurrentContext();
 }
 #else
-void ImGuiView::SetUp(GLFWwindow* glfwWindow) {
+void ImGuiView::SetUp() {
 
 }
 #endif
@@ -486,7 +505,7 @@ bool ImGuiView::LoadTexture(const void* data, const int numBytes, Texture* textu
 }
 #else
 bool LoadTexture(const void* data, const int numBytes, Texture* texture) {
-
+    return true;
 }
 #endif
 
