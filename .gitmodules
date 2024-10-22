@@ -22,3 +22,24 @@
 [submodule "packages/dear-imgui/cpp/deps/googletest"]
 	path = packages/dear-imgui/cpp/deps/googletest
 	url = https://github.com/google/googletest.git
+[submodule "packages/dear-imgui/cpp/deps/implot"]
+	path = packages/dear-imgui/cpp/deps/implot
+	url = https://github.com/epezent/implot.git
+[submodule "packages/dear-imgui/cpp/deps/json"]
+	path = packages/dear-imgui/cpp/deps/json
+	url = https://github.com/nlohmann/json
+[submodule "packages/dear-imgui/cpp/deps/OpenGL-Registry"]
+	path = packages/dear-imgui/cpp/deps/OpenGL-Registry
+	url = https://github.com/KhronosGroup/OpenGL-Registry.git
+[submodule "packages/dear-imgui/cpp/deps/stb"]
+	path = packages/dear-imgui/cpp/deps/stb
+	url = https://github.com/nothings/stb.git
+[submodule "packages/dear-imgui/cpp/deps/EGL-Registry"]
+	path = packages/dear-imgui/cpp/deps/EGL-Registry
+	url = https://github.com/KhronosGroup/EGL-Registry.git
+[submodule "packages/dear-imgui/cpp/deps/imgui"]
+	path = packages/dear-imgui/cpp/deps/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "packages/dear-imgui/cpp/deps/glfw"]
+	path = packages/dear-imgui/cpp/deps/glfw
+	url = https://github.com/glfw/glfw.git
