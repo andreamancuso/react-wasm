@@ -13,7 +13,7 @@ using json = nlohmann::json;
 
 #pragma once
 
-class ImGuiView;
+class ImGuiRenderer;
 class Widget;
 class MapGenerator;
 class Element;
@@ -67,7 +67,7 @@ class ReactImgui {
         void SetUpElementCreatorFunctions();
 
     public:
-        ImGuiView* m_renderer;
+        ImGuiRenderer* m_renderer;
         std::unordered_map<int, std::vector<int>> m_hierarchy;
         std::mutex m_hierarchy_mutex;
 
@@ -85,7 +85,7 @@ class ReactImgui {
 
         ReactImgui(const char* newWindowId, std::optional<std::string> rawStyleOverridesDefs);
 
-        void Init(ImGuiView* view);
+        void Init(ImGuiRenderer* view);
 
         void SetDebug(bool debug);
 

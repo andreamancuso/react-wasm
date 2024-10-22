@@ -22,11 +22,11 @@
 #include "element/layout_node.h"
 
 #include "shared.h"
-#include "implotview.h"
+#include "implot_renderer.h"
 #include "reactimgui.h"
 
 #include "color_helpers.h"
-#include "implotview.h"
+#include "implot_renderer.h"
 
 #ifdef __EMSCRIPTEN__
 #include "widget/image.h"
@@ -299,7 +299,7 @@ void ReactImgui::SetUpFloatFormatChars() {
     strcpy(m_floatFormatChars[9].get(), "%.9f");
 };
 
-void ReactImgui::Init(ImGuiView* view) {
+void ReactImgui::Init(ImGuiRenderer* view) {
     m_renderer = view;
 
     if (m_rawStyleOverridesDefs.has_value()) {

@@ -24,7 +24,7 @@ class ReactImgui;
 
 using json = nlohmann::json;
 
-class ImGuiView {
+class ImGuiRenderer {
     protected:
         std::string m_rawFontDefs;
 
@@ -63,7 +63,7 @@ class ImGuiView {
     #endif
 
     public:
-        ImGuiView(ReactImgui* reactImgui, const char* newWindowId, const char* newGlWindowTitle, std::string rawFontDefs);
+        ImGuiRenderer(ReactImgui* reactImgui, const char* newWindowId, const char* newGlWindowTitle, std::string rawFontDefs);
 
         bool m_shouldLoadDefaultStyle;
 
@@ -104,7 +104,7 @@ class ImGuiView {
         void RenderDrawData(WGPURenderPassEncoder pass);
         void CreateSwapChain(int width, int height);
         void SetDeviceAndStart(WGPUDevice& cDevice);
-        void RequestDevice(wgpu::Instance wgpuInstance, ImGuiView* glWasmInstance);
+        void RequestDevice(wgpu::Instance wgpuInstance, ImGuiRenderer* glWasmInstance);
         virtual void Init(std::string& cs);
     #else
         void RenderDrawData();

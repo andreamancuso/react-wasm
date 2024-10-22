@@ -4,7 +4,7 @@
 #include "mapgenerator.h"
 #include "widget/map_view.h"
 #include "reactimgui.h"
-#include "imguiview.h"
+#include "imgui_renderer.h"
 
 bool MapView::HasCustomWidth() {
     return false;

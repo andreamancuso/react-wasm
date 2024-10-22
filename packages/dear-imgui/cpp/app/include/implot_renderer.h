@@ -3,16 +3,16 @@
 
 #include "implot.h"
 
-#include "./imguiview.h"
+#include "imgui_renderer.h"
 
 class ReactImgui;
 
-class ImPlotView : public ImGuiView {
+class ImPlotRenderer : public ImGuiRenderer {
     protected:
         ImPlotContext* m_imPlotCtx;
 
     public:
-        ImPlotView(ReactImgui* reactImgui, const char* newWindowId, const char* newGlWindowTitle, std::string& rawFontDefs);
+        ImPlotRenderer(ReactImgui* reactImgui, const char* newWindowId, const char* newGlWindowTitle, std::string& rawFontDefs);
 
         void SetCurrentContext();
 

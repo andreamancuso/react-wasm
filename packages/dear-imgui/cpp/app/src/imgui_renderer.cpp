@@ -21,7 +21,7 @@ static void MainLoopForEmscripten()     { MainLoopForEmscriptenP(); }
 #endif
 
 #include "./reactimgui.h"
-#include "./imguiview.h"
+#include "imgui_renderer.h"
 
 void glfw_error_callback(int error, const char* description)
 {
@@ -44,7 +44,7 @@ void wgpu_error_callback(WGPUErrorType error_type, const char* message, void*)
 }
 #endif
 
-ImGuiView::ImGuiView(
+ImGuiRenderer::ImGuiRenderer(
     ReactImgui* reactImgui,
     const char* windowId,
     const char* glWindowTitle,
@@ -66,7 +66,7 @@ ImGuiView::ImGuiView(
     m_rawFontDefs = rawFontDefs;
 }
 
-void ImGuiView::LoadFontsFromDefs() {
+void ImGuiRenderer::LoadFontsFromDefs() {
     auto fontDefs = json::parse(m_rawFontDefs);
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
@@ -150,7 +150,7 @@ void ImGuiView::LoadFontsFromDefs() {
     }
 }
 
-int ImGuiView::GetFontIndex(const std::string& fontName, const int fontSize) {
+int ImGuiRenderer::GetFontIndex(const std::string& fontName, const int fontSize) {
     if (m_fontDefMap.contains(fontName) && m_fontDefMap[fontName].contains(fontSize)) {
         return m_fontDefMap[fontName][fontSize];
     }
@@ -158,11 +158,11 @@ int ImGuiView::GetFontIndex(const std::string& fontName, const int fontSize) {
     return -1;
 }
 
-bool ImGuiView::IsFontIndexValid(const int fontIndex) const {
+bool ImGuiRenderer::IsFontIndexValid(const int fontIndex) const {
     return fontIndex >= 0 && fontIndex < m_loadedFonts.size();
 }
 
-void ImGuiView::SetFontDefault(const int fontIndex) const {
+void ImGuiRenderer::SetFontDefault(const int fontIndex) const {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
     if (IsFontIndexValid(fontIndex)) {
@@ -170,19 +170,19 @@ void ImGuiView::SetFontDefault(const int fontIndex) const {
     }
 }
 
-void ImGuiView::PushFont(const int fontIndex) const {
+void ImGuiRenderer::PushFont(const int fontIndex) const {
     ImGui::PushFont(m_loadedFonts[fontIndex]);
 }
 
-void ImGuiView::PopFont() {
+void ImGuiRenderer::PopFont() {
     ImGui::PopFont();
 }
 
-ImGuiStyle& ImGuiView::GetStyle() {
+ImGuiStyle& ImGuiRenderer::GetStyle() {
     return ImGui::GetStyle();
 }
 
-void ImGuiView::InitGlfw() {
+void ImGuiRenderer::InitGlfw() {
     glfwSetErrorCallback(glfw_error_callback);
     glfwInit();
 
@@ -218,7 +218,7 @@ void ImGuiView::InitGlfw() {
 }
 
 #ifdef __EMSCRIPTEN__
-bool ImGuiView::InitWGPU() {
+bool ImGuiRenderer::InitWGPU() {
     if (!m_device) {
         printf("device not set\n");
         return false;
@@ -246,7 +246,7 @@ bool ImGuiView::InitWGPU() {
 #endif
 
 #ifdef __EMSCRIPTEN__
-void ImGuiView::SetUp() {
+void ImGuiRenderer::SetUp() {
     InitGlfw();
 
     IMGUI_CHECKVERSION();
@@ -266,13 +266,13 @@ void ImGuiView::SetUp() {
     SetCurrentContext();
 }
 #else
-void ImGuiView::SetUp() {
+void ImGuiRenderer::SetUp() {
 
 }
 #endif
 
 #ifdef __EMSCRIPTEN__
-void ImGuiView::CreateSwapChain(int width, int height) {
+void ImGuiRenderer::CreateSwapChain(int width, int height) {
     if (m_wgpu_swap_chain)
         wgpuSwapChainRelease(m_wgpu_swap_chain);
     m_wgpu_swap_chain_width = width;
@@ -287,7 +287,7 @@ void ImGuiView::CreateSwapChain(int width, int height) {
 }
 #endif
 
-void ImGuiView::HandleScreenSizeChanged() {
+void ImGuiRenderer::HandleScreenSizeChanged() {
 #ifdef __EMSCRIPTEN__
     int width, height;
     glfwGetFramebufferSize((GLFWwindow*)m_glfwWindow, &width, &height);
@@ -302,16 +302,16 @@ void ImGuiView::HandleScreenSizeChanged() {
 }
 
 #ifdef __EMSCRIPTEN__
-void ImGuiView::RenderDrawData(WGPURenderPassEncoder pass) {
+void ImGuiRenderer::RenderDrawData(WGPURenderPassEncoder pass) {
     ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), pass);
 }
 #else
-void ImGuiView::RenderDrawData() {
+void ImGuiRenderer::RenderDrawData() {
 
 }
 #endif
 
-void ImGuiView::CleanUp() {
+void ImGuiRenderer::CleanUp() {
     ImGui::DestroyContext(m_imGuiCtx);
 
 #ifdef __EMSCRIPTEN__
@@ -321,7 +321,7 @@ void ImGuiView::CleanUp() {
 }
 
 #ifdef __EMSCRIPTEN__
-void ImGuiView::PerformRendering() {
+void ImGuiRenderer::PerformRendering() {
     WGPURenderPassColorAttachment color_attachments = {};
     color_attachments.depthSlice = WGPU_DEPTH_SLICE_UNDEFINED;
     color_attachments.loadOp = WGPULoadOp_Clear;
@@ -349,11 +349,11 @@ void ImGuiView::PerformRendering() {
     wgpuQueueSubmit(m_queue, 1, &cmd_buffer);
 }
 #else
-void ImGuiView::PerformRendering() {}
+void ImGuiRenderer::PerformRendering() {}
 #endif
 
 
-void ImGuiView::BeginRenderLoop() {
+void ImGuiRenderer::BeginRenderLoop() {
     LoadFontsFromDefs();
 
     m_reactImgui->Init(this);
@@ -385,7 +385,7 @@ void ImGuiView::BeginRenderLoop() {
     // GLFW3Renderer::CleanUp();
 }
 
-void ImGuiView::SetWindowSize(int width, int height) {
+void ImGuiRenderer::SetWindowSize(int width, int height) {
     m_window_width = width;
     m_window_height = height;
 
@@ -395,7 +395,7 @@ void ImGuiView::SetWindowSize(int width, int height) {
 }
 
 #ifdef __EMSCRIPTEN__
-void ImGuiView::SetDeviceAndStart(WGPUDevice& cDevice) {
+void ImGuiRenderer::SetDeviceAndStart(WGPUDevice& cDevice) {
     m_device = cDevice;
 
     BeginRenderLoop();
@@ -403,7 +403,7 @@ void ImGuiView::SetDeviceAndStart(WGPUDevice& cDevice) {
 #endif
 
 #ifdef __EMSCRIPTEN__
-void ImGuiView::RequestDevice(wgpu::Instance wgpuInstance, ImGuiView* glWasmInstance) {
+void ImGuiRenderer::RequestDevice(wgpu::Instance wgpuInstance, ImGuiRenderer* glWasmInstance) {
     wgpuInstance.RequestAdapter(
         nullptr,
         [](WGPURequestAdapterStatus status, WGPUAdapter cAdapter,
@@ -419,7 +419,7 @@ void ImGuiView::RequestDevice(wgpu::Instance wgpuInstance, ImGuiView* glWasmInst
                 nullptr,
                 [](WGPURequestDeviceStatus status, WGPUDevice cDevice,
                 const char* message, void* userdata) {
-                    reinterpret_cast<ImGuiView*>(userdata)->SetDeviceAndStart(cDevice);
+                    reinterpret_cast<ImGuiRenderer*>(userdata)->SetDeviceAndStart(cDevice);
                 },
                 userdata);
         }, reinterpret_cast<void*>(glWasmInstance));
@@ -427,20 +427,20 @@ void ImGuiView::RequestDevice(wgpu::Instance wgpuInstance, ImGuiView* glWasmInst
 #endif
 
 #ifdef __EMSCRIPTEN__
-void ImGuiView::Init(std::string& cs) {
+void ImGuiRenderer::Init(std::string& cs) {
     m_canvasSelector = std::make_unique<char[]>(cs.length() + 1);
     strcpy(m_canvasSelector.get(), cs.c_str());
 
     RequestDevice(m_instance, this);
 }
 #else
-void ImGuiView::Init() {
+void ImGuiRenderer::Init() {
     BeginRenderLoop();
 }
 #endif
 
 #ifdef __EMSCRIPTEN__
-bool ImGuiView::LoadTexture(const void* data, const int numBytes, Texture* texture) {
+bool ImGuiRenderer::LoadTexture(const void* data, const int numBytes, Texture* texture) {
     if (data == nullptr)
         return false;
 
@@ -509,7 +509,7 @@ bool LoadTexture(const void* data, const int numBytes, Texture* texture) {
 }
 #endif
 
-json ImGuiView::GetAvailableFonts() {
+json ImGuiRenderer::GetAvailableFonts() {
     SetCurrentContext();
     ImGuiIO& io = ImGui::GetIO();
     json fonts = json::array();

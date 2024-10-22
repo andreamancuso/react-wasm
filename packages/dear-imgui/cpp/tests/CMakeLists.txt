@@ -77,8 +77,8 @@ add_executable(Google_Tests_run
         ../app/src/widget/window.cpp
 
         ../app/src/reactimgui.cpp
-        ../app/src/imguiview.cpp
-        ../app/src/implotview.cpp
+        ../app/src/imgui_renderer.cpp
+        ../app/src/implot_renderer.cpp
 
         shared_functions_test.cpp
         color_helpers_test.cpp
@@ -91,7 +91,6 @@ add_executable(Google_Tests_run
 target_include_directories(
         Google_Tests_run PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/../app/include
-        ${DEPS}/wasm-glfw3-boilerplate
         ${DEPS}/IconFontCppHeaders
         ${DEPS}/ReactivePlusPlus/src/rpp
 

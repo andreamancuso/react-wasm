@@ -1,24 +1,24 @@
 #include "implot.h"
 #include "implot_internal.h"
 
-#include "./implotview.h"
+#include "implot_renderer.h"
 
-ImPlotView::ImPlotView(
+ImPlotRenderer::ImPlotRenderer(
     ReactImgui* reactImgui,
     const char* newWindowId,
     const char* newGlWindowTitle,
-    std::string& rawFontDefs) : ImGuiView(reactImgui, newWindowId, newGlWindowTitle, rawFontDefs) {
+    std::string& rawFontDefs) : ImGuiRenderer(reactImgui, newWindowId, newGlWindowTitle, rawFontDefs) {
 
     m_imPlotCtx = ImPlot::CreateContext();
 }
 
-void ImPlotView::SetCurrentContext() {
+void ImPlotRenderer::SetCurrentContext() {
     ImGui::SetCurrentContext(m_imGuiCtx);
     ImPlot::SetCurrentContext(m_imPlotCtx);
 };
 
-void ImPlotView::CleanUp() {
-    ImGuiView::CleanUp();
+void ImPlotRenderer::CleanUp() {
+    ImGuiRenderer::CleanUp();
 
     ImPlot::DestroyContext(m_imPlotCtx);
 };

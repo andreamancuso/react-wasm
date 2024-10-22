@@ -3,7 +3,7 @@
 
 #include "widget/image.h"
 #include "reactimgui.h"
-#include "imguiview.h"
+#include "imgui_renderer.h"
 
 bool Image::HasCustomWidth() {
     return false;

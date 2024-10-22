@@ -9,7 +9,7 @@
 
 #include "color_helpers.h"
 #include "reactimgui.h"
-#include "implotview.h"
+#include "implot_renderer.h"
 
 using json = nlohmann::json;
 
@@ -60,7 +60,7 @@ json IntSetToJson(const std::set<int>& data) {
 class WasmRunner {
     protected:
         ReactImgui* m_reactImgui{};
-        ImGuiView* m_view{};
+        ImGuiRenderer* m_view{};
 
     public:
     WasmRunner() = default;
@@ -141,7 +141,7 @@ class WasmRunner {
 
         void run(std::string& canvasSelector, std::string& rawFontDefs, std::optional<std::string>& rawStyleOverridesDefs) {
             m_reactImgui = new ReactImgui("ReactImgui", rawStyleOverridesDefs);
-            m_view = new ImPlotView(
+            m_view = new ImPlotRenderer(
                 m_reactImgui,
                 "ReactImgui",
                 "ReactImgui",

@@ -126,8 +126,8 @@ if (DEFINED EMSCRIPTEN)
         src/widget/tree_node.cpp
         src/widget/window.cpp
         src/reactimgui.cpp
-        src/imguiview.cpp
-        src/implotview.cpp
+        src/imgui_renderer.cpp
+        src/implot_renderer.cpp
 
 #        ${DEPS}/wasm-glfw3-boilerplate/src/view.cpp
 #        ${DEPS}/wasm-glfw3-boilerplate/src/glfw3renderer.cpp
