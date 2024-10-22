@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(SET CMP0091 NEW)
 cmake_policy(SET CMP0042 NEW)
 
 project (node-imgui LANGUAGES C CXX)
@@ -18,6 +19,16 @@ file(GLOB YOGA_SRC CONFIGURE_DEPENDS
 add_library(${PROJECT_NAME} SHARED
         ../deps/css-color-parser-cpp/csscolorparser.hpp
         ../deps/css-color-parser-cpp/csscolorparser.cpp
+
+        ../deps/imgui/imgui.cpp
+        ../deps/imgui/imgui_draw.cpp
+        ../deps/imgui/imgui_widgets.cpp
+        ../deps/imgui/imgui_tables.cpp
+        ../deps/imgui/backends/imgui_impl_opengl3.cpp
+        ../deps/imgui/backends/imgui_impl_glfw.cpp
+
+        ../deps/implot/implot.cpp
+        ../deps/implot/implot_items.cpp
 
         ${YOGA_SRC}
 
@@ -64,8 +75,10 @@ add_library(${PROJECT_NAME} SHARED
         ${CMAKE_JS_SRC}
 )
 
+# /p:FooLibDir=..\lib
+
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
-target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB})
+target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${CMAKE_CURRENT_SOURCE_DIR}/glfw3dll.lib ${CMAKE_CURRENT_SOURCE_DIR}/opengl32.lib)
 
 # Include Node-API wrappers
 execute_process(COMMAND node -p "require('node-addon-api').include"
@@ -97,3 +110,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 # define NAPI_VERSION
 add_definitions(-DNAPI_VERSION=9)
+
+if(MSVC AND CMAKE_JS_NODELIB_DEF AND CMAKE_JS_NODELIB_TARGET)
+    # Generate node.lib
+    execute_process(COMMAND ${CMAKE_AR} /def:${CMAKE_JS_NODELIB_DEF} /out:${CMAKE_JS_NODELIB_TARGET} ${CMAKE_STATIC_LINKER_FLAGS})
+endif()
