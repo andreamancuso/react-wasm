@@ -299,8 +299,8 @@ void ReactImgui::SetUpFloatFormatChars() {
     strcpy(m_floatFormatChars[9].get(), "%.9f");
 };
 
-void ReactImgui::Init(ImGuiRenderer* view) {
-    m_renderer = view;
+void ReactImgui::Init(ImGuiRenderer* renderer) {
+    m_renderer = renderer;
 
     if (m_rawStyleOverridesDefs.has_value()) {
         m_renderer->m_shouldLoadDefaultStyle = false;

@@ -60,7 +60,7 @@ json IntSetToJson(const std::set<int>& data) {
 class WasmRunner {
     protected:
         ReactImgui* m_reactImgui{};
-        ImGuiRenderer* m_view{};
+        ImGuiRenderer* m_renderer{};
 
     public:
     WasmRunner() = default;
@@ -141,7 +141,7 @@ class WasmRunner {
 
         void run(std::string& canvasSelector, std::string& rawFontDefs, std::optional<std::string>& rawStyleOverridesDefs) {
             m_reactImgui = new ReactImgui("ReactImgui", rawStyleOverridesDefs);
-            m_view = new ImPlotRenderer(
+            m_renderer = new ImPlotRenderer(
                 m_reactImgui,
                 "ReactImgui",
                 "ReactImgui",
@@ -155,7 +155,7 @@ class WasmRunner {
                 OnMultipleNumericValuesChanged,
                 OnBooleanValueChanged,
                 OnClick);
-            m_view->Init(canvasSelector);
+            m_renderer->Init(canvasSelector);
         }
 
         void exit() const {
@@ -164,7 +164,7 @@ class WasmRunner {
         }
 
         void resizeWindow(const int width, const int height) const {
-            m_view->SetWindowSize(width, height);
+            m_renderer->SetWindowSize(width, height);
         }
 
         void setElement(std::string& elementJsonAsString) const {
@@ -192,7 +192,7 @@ class WasmRunner {
         }
 
         [[nodiscard]] std::string getAvailableFonts() const {
-            return m_view->GetAvailableFonts().dump();
+            return m_renderer->GetAvailableFonts().dump();
         }
 
         void appendTextToClippedMultiLineTextRenderer(const int id, const std::string& data) const {

@@ -85,7 +85,7 @@ class ReactImgui {
 
         ReactImgui(const char* newWindowId, std::optional<std::string> rawStyleOverridesDefs);
 
-        void Init(ImGuiRenderer* view);
+        void Init(ImGuiRenderer* renderer);
 
         void SetDebug(bool debug);
 
