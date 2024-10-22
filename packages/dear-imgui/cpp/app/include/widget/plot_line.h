@@ -1,3 +1,5 @@
+#include <cstdint>
+
 #include <implot.h>
 #include "styled_widget.h"
 
@@ -59,7 +61,7 @@ public:
             return snprintf(buff, size,"0");
         }
 
-        return snprintf(buff, size, "%.*f", reinterpret_cast<int>(decimalPlaces), value);
+        return snprintf(buff, size, "%.*f", reinterpret_cast<intptr_t>(decimalPlaces), value);
     };
 
     bool HasCustomWidth() override;
