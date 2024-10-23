@@ -1,16 +1,16 @@
 import { v4 as uuidv4 } from "uuid";
-import { MainModule } from "./wasm/wasm-app-types";
+// import { MainModule } from "./wasm/wasm-app-types";
 import { ImGuiStyle } from "./stylesheet/imgui-style";
 import { PlotCandlestickDataItem } from "./components/ReactImgui/types";
 
 export class WidgetRegistrationService {
-    private wasmModule: MainModule;
+    private wasmModule: any;
     private tables: Set<string>;
     private maps: Set<string>;
     private fabricWidgetsMapping: Map<string, number>;
     private fonts: string[];
 
-    constructor(wasmModule: MainModule) {
+    constructor(wasmModule: any) {
         this.wasmModule = wasmModule;
         this.tables = new Set();
         this.maps = new Set();

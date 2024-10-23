@@ -1,6 +1,5 @@
 import { FunctionComponent, JSXElementConstructor, ReactElement, SyntheticEvent } from "react";
-import { ReactImgui } from "./components";
-import { MainComponentProps } from "../ReactImgui";
+import { MainComponentProps, ReactImgui } from "../ReactImgui";
 import { StyleRules } from "src/lib/stylesheet/stylesheet";
 import { ImPlotMarker, ImPlotScale, ImVec2 } from "src/lib/wasm/wasm-app-types";
 import { YogaStyle } from "src/lib/stylesheet/yoga-style";

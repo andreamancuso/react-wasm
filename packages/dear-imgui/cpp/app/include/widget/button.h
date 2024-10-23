@@ -23,15 +23,20 @@ class Button final : public StyledWidget {
             YGSize size{};
             const auto context = YGNodeGetContext(node);
             if (context) {
+                printf("Measure a\n");
                 const auto widget = static_cast<Button*>(context);
-
+                printf("Measure b\n");
                 size.width = (widget->m_view->m_appStyle.FramePadding.x * 2.0f) + widget->m_view->CalcTextSize(widget, widget->m_label.c_str()).x;
+                printf("Measure c\n");
                 size.height = widget->m_view->GetFrameHeight(widget);
+                printf("Measure d\n");
 
                 if (widget->HasCustomStyles() && widget->HasCustomStyleVar(ImGuiStyleVar_FramePadding)) {
+                    printf("Measure e\n");
                     auto styleVar = widget->GetCustomStyleVar(ImGuiStyleVar_FramePadding);
-
+                    printf("Measure f\n");
                     if (std::holds_alternative<ImVec2>(styleVar)) {
+                        printf("Measure g\n");
                         size.width = (std::get<ImVec2>(styleVar).x * 2.0f) + widget->m_view->CalcTextSize(widget, widget->m_label.c_str()).x;
                     }
                 }

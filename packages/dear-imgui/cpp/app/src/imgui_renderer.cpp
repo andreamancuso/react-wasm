@@ -386,6 +386,12 @@ void ImGuiRenderer::BeginRenderLoop() {
     LoadFontsFromDefs();
 #else
     // LoadFontsFromDefs();
+    printf("Adding default font\n");
+    m_imGuiCtx->IO.Fonts->AddFontDefault();
+
+    m_imGuiCtx->IO.FontDefault = m_imGuiCtx->IO.Fonts->Fonts[0];
+
+    printf("Default font added\n");
 #endif
 
     m_reactImgui->Init(this);

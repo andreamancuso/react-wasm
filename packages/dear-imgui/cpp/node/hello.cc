@@ -346,7 +346,10 @@ void setChildren(const Napi::CallbackInfo& info) {
     pRunner->setChildren((int)id, JsonToVector<int>(childrenIds));
 }
 
-void appendChild(const int parentId, const int childId) {
+void appendChild(const Napi::CallbackInfo& info) {
+    auto parentId = info[0].As<Napi::Number>().Int32Value();
+    auto childId = info[1].As<Napi::Number>().Int32Value();
+
     pRunner->appendChild(parentId, childId);
 }
 
@@ -400,8 +403,8 @@ static Napi::Object Init(Napi::Env env, Napi::Object exports) {
     exports["init"] = Napi::Function::New(env, init);
     exports["setElement"] = Napi::Function::New(env, setElement);
     exports["setChildren"] = Napi::Function::New(env, setChildren);
+    exports["appendChild"] = Napi::Function::New(env, appendChild);
     exports["showDebugWindow"] = Napi::Function::New(env, showDebugWindow);
-
 
     return exports;
 }
