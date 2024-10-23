@@ -304,8 +304,17 @@ void resizeWindow(const int width, const int height) {
     pRunner->resizeWindow(width, height);
 }
 
-// emscripten::bind cannot receive `elementJson` by reference
-void setElement(std::string elementJson) {
+void setElement(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    if (info.Length() < 1) {
+        throw Napi::TypeError::New(env, "Expected one argument");
+    } else if (!info[0].IsString()) {
+        throw Napi::TypeError::New(env, "Expected first arg to be string");
+    }
+
+    auto elementJson = info[0].As<Napi::String>().Utf8Value();
+
     pRunner->setElement(elementJson);
 }
 
@@ -313,14 +322,25 @@ void patchElement(const int id, std::string elementJson) {
     pRunner->patchElement(id, elementJson);
 }
 
-// emscripten::bind cannot receive `elementJson` by reference
 void elementInternalOp(const int id, std::string elementJson) {
     pRunner->elementInternalOp(id, elementJson);
 }
 
-// emscripten::bind cannot receive `childrenIds` by reference
-void setChildren(const int id, std::string childrenIds) {
-    pRunner->setChildren(id, JsonToVector<int>(childrenIds));
+void setChildren(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    if (info.Length() < 2) {
+        throw Napi::TypeError::New(env, "Expected one argument");
+    } else if (!info[0].IsNumber()) {
+        throw Napi::TypeError::New(env, "Expected first arg to be number");
+    } else if (!info[1].IsString()) {
+        throw Napi::TypeError::New(env, "Expected first arg to be string");
+    }
+
+    auto id = info[0].As<Napi::Number>().Int32Value();
+    auto childrenIds = info[1].As<Napi::String>().Utf8Value();
+
+    pRunner->setChildren((int)id, JsonToVector<int>(childrenIds));
 }
 
 void appendChild(const int parentId, const int childId) {
@@ -331,7 +351,6 @@ std::string getChildren(const int id) {
     return IntVectorToJson(pRunner->getChildren(id)).dump();
 }
 
-// emscripten::bind cannot receive `data` by reference
 void appendTextToClippedMultiLineTextRenderer(const int id, std::string data) {
     pRunner->appendTextToClippedMultiLineTextRenderer(id, data);
 }
@@ -340,7 +359,6 @@ std::string getStyle() {
     return pRunner->getStyle();
 }
 
-// emscripten::bind cannot receive `styleDef` by reference
 void patchStyle(std::string styleDef) {
     return pRunner->patchStyle(styleDef);
 }
@@ -349,11 +367,9 @@ void setDebug(const bool debug) {
     return pRunner->setDebug(debug);
 }
 
-void showDebugWindow() {
+void showDebugWindow(const Napi::CallbackInfo& info) {
     pRunner->showDebugWindow();
 }
-
-
 
 int run()
 {
@@ -365,10 +381,12 @@ int run()
 
 std::thread uiThread(run);
 
-static Napi::Value Test(const Napi::CallbackInfo& info) {
+static Napi::Value init(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
 
     printf("Starting UI thread\n");
+
+    // pRunner->run();
 
 //    uiThread.join();
 
@@ -376,9 +394,13 @@ static Napi::Value Test(const Napi::CallbackInfo& info) {
 }
 
 static Napi::Object Init(Napi::Env env, Napi::Object exports) {
-  exports["Test"] = Napi::Function::New(env, Test);
+    exports["init"] = Napi::Function::New(env, init);
+    exports["setElement"] = Napi::Function::New(env, setElement);
+    exports["setChildren"] = Napi::Function::New(env, setChildren);
+    exports["showDebugWindow"] = Napi::Function::New(env, showDebugWindow);
 
-  return exports;
+
+    return exports;
 }
 
 NODE_API_MODULE(hello, Init)

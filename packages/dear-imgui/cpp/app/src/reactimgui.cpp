@@ -422,13 +422,6 @@ void ReactImgui::RenderElementTree(const int id) {
 };
 
 void ReactImgui::Render(const int window_width, const int window_height) {
-#ifdef __EMSCRIPTEN__
-    ImGui_ImplWGPU_NewFrame();
-#else
-    ImGui_ImplOpenGL3_NewFrame();
-#endif
-    ImGui_ImplGlfw_NewFrame();
-
     const std::lock_guard<std::mutex> elementsLock(m_elements_mutex);
     const std::lock_guard<std::mutex> hierarchyLock(m_hierarchy_mutex);
 

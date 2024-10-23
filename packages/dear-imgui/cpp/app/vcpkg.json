@@ -1,0 +1,21 @@
+{
+  "name": "reactdearimgui",
+  "version-string": "1.0.0",
+  "dependencies": [
+    {
+      "name": "imgui",
+      "features": [
+        "glfw-binding",
+        "opengl3-binding"
+      ]
+    },
+    "implot",
+    "nlohmann-json",
+    "opengl-registry",
+    "stb",
+    "ada-url",
+    "libjpeg-turbo",
+    "libpng",
+    "tiff"
+  ]
+}

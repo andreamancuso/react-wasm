@@ -64,6 +64,8 @@ ImGuiRenderer::ImGuiRenderer(
     m_imGuiCtx = ImGui::CreateContext();
 
     m_rawFontDefs = rawFontDefs;
+
+    m_clearColor = { 0.45f, 0.55f, 0.60f, 1.00f };
 }
 
 void ImGuiRenderer::LoadFontsFromDefs() {
@@ -267,7 +269,11 @@ void ImGuiRenderer::SetUp() {
 }
 #else
 void ImGuiRenderer::SetUp() {
+    InitGlfw();
 
+    IMGUI_CHECKVERSION();
+
+    SetCurrentContext();
 }
 #endif
 
@@ -287,6 +293,7 @@ void ImGuiRenderer::CreateSwapChain(int width, int height) {
 }
 #endif
 
+// todo: is this necessary for opengl rendering?
 void ImGuiRenderer::HandleScreenSizeChanged() {
 #ifdef __EMSCRIPTEN__
     int width, height;
@@ -307,7 +314,7 @@ void ImGuiRenderer::RenderDrawData(WGPURenderPassEncoder pass) {
 }
 #else
 void ImGuiRenderer::RenderDrawData() {
-
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 #endif
 
@@ -317,6 +324,9 @@ void ImGuiRenderer::CleanUp() {
 #ifdef __EMSCRIPTEN__
     ImGui_ImplWGPU_Shutdown();
     ImGui_ImplGlfw_Shutdown();
+#else
+    glfwDestroyWindow(m_glfwWindow);
+    glfwTerminate();
 #endif
 }
 
@@ -349,16 +359,27 @@ void ImGuiRenderer::PerformRendering() {
     wgpuQueueSubmit(m_queue, 1, &cmd_buffer);
 }
 #else
-void ImGuiRenderer::PerformRendering() {}
+void ImGuiRenderer::PerformRendering() {
+    int display_w, display_h;
+    glfwGetFramebufferSize(m_glfwWindow, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(m_clearColor.x * m_clearColor.w, m_clearColor.y * m_clearColor.w, m_clearColor.z * m_clearColor.w, m_clearColor.w);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    RenderDrawData();
+}
 #endif
 
 
 void ImGuiRenderer::BeginRenderLoop() {
+#ifdef __EMSCRIPTEN__
     LoadFontsFromDefs();
+#endif
 
     m_reactImgui->Init(this);
 
     SetUp();
+
     // Main loop
 #ifdef __EMSCRIPTEN__
     EMSCRIPTEN_MAINLOOP_BEGIN
@@ -372,17 +393,28 @@ void ImGuiRenderer::BeginRenderLoop() {
 
         SetCurrentContext();
 
+    #ifdef __EMSCRIPTEN__
+        ImGui_ImplWGPU_NewFrame();
+    #else
+        ImGui_ImplOpenGL3_NewFrame();
+    #endif
+
+        ImGui_ImplGlfw_NewFrame();
+
         m_reactImgui->Render(m_window_width, m_window_height);
 
         PerformRendering();
+
+
+    #ifndef __EMSCRIPTEN__
+        glfwSwapBuffers(m_glfwWindow);
+    #endif
     }
 #ifdef __EMSCRIPTEN__
     EMSCRIPTEN_MAINLOOP_END;
 #endif
-    // Clean up
-    CleanUp();
 
-    // GLFW3Renderer::CleanUp();
+    CleanUp();
 }
 
 void ImGuiRenderer::SetWindowSize(int width, int height) {
