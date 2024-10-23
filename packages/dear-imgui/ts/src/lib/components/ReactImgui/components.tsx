@@ -1,5 +1,3 @@
-import { MainComponent } from "../ReactImgui";
-import { attachSubComponents } from "../../attachSubComponents";
 import { BulletText } from "./BulletText";
 import { Button } from "./Button";
 import { Checkbox } from "./Checkbox";
@@ -59,5 +57,3 @@ export const components = {
     TreeView,
     UnformattedText,
 } as const;
-
-export const ReactImgui = attachSubComponents("ReactImgui", MainComponent, components);

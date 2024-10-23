@@ -5,3 +5,7 @@ tests/cmake-build-release-visual-studio
 .cproject
 .project
 .ninja_lock
+
+reactDearImgui.lib
+glfw3.dll
+glfw3dll.lib

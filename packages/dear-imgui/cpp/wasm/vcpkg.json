@@ -4,7 +4,7 @@
             "./vcpkg-overlay-ports/imgui"
         ]
     },
-    "name": "reactdearimgui",
+    "name": "reactdearimguiwasm",
     "version-string": "1.0.0",
     "dependencies": [
         {

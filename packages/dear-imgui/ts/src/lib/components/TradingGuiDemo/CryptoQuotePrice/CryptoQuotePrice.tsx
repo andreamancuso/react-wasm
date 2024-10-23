@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import RWStyleSheet from "src/lib/stylesheet/stylesheet";
 import { useDataService } from "../dataServiceContext";
 import { filter } from "rxjs";
@@ -7,6 +6,7 @@ import { interval, intervalToDuration, formatDuration, differenceInMilliseconds 
 import { CryptoQuoteWithSymbol } from "../dataService";
 import { ImGuiCol } from "src/lib/wasm/wasm-app-types";
 import { theme2Colors } from "src/lib/stylesheet/themes";
+import { ReactImgui } from "../../ReactImgui";
 
 type Props = { symbol: string };
 

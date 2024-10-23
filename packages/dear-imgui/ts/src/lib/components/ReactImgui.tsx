@@ -9,6 +9,8 @@ import { ReactNativeWrapper } from "../components/ReactNativeWrapper";
 import { useDearImguiFonts, useDearImguiWasm } from "../hooks";
 import { FontDef } from "./ReactImgui/types";
 import { ImGuiStyleForPatching } from "../stylesheet/imgui-style";
+import { attachSubComponents } from "../attachSubComponents";
+import { components } from "./ReactImgui/components";
 
 export type MainComponentProps = PropsWithChildren & {
     containerRef?: React.RefObject<HTMLElement>;
@@ -146,3 +148,5 @@ export const MainComponent: React.ComponentType<MainComponentProps> = ({
         </>
     );
 };
+
+export const ReactImgui = attachSubComponents("ReactImgui", MainComponent, components);

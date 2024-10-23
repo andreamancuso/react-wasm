@@ -34,12 +34,12 @@ class ImGuiRenderer {
 
         const char* m_glWindowTitle;
 
-        int m_initial_window_width = 400;
-        int m_initial_window_height = 300;
+        int m_initial_window_width = 900;
+        int m_initial_window_height = 700;
         int m_window_width = m_initial_window_width;
         int m_window_height = m_initial_window_height;
 
-        ImGuiContext* m_imGuiCtx;
+
 
         std::unordered_map<std::string, std::unordered_map<int, int>, StringHash, std::equal_to<>> m_fontDefMap;
 
@@ -59,11 +59,13 @@ class ImGuiRenderer {
         int m_wgpu_swap_chain_width = 0;
         int m_wgpu_swap_chain_height = 0;
     #else
-
+        ImVec4 m_clearColor;
     #endif
 
     public:
         ImGuiRenderer(ReactImgui* reactImgui, const char* newWindowId, const char* newGlWindowTitle, std::string rawFontDefs);
+
+        ImGuiContext* m_imGuiCtx;
 
         bool m_shouldLoadDefaultStyle;
 
@@ -91,9 +93,7 @@ class ImGuiRenderer {
 
         ImGuiStyle& GetStyle();
 
-        void SetCurrentContext() {
-            ImGui::SetCurrentContext(m_imGuiCtx);
-        }
+        virtual void SetCurrentContext();
 
         virtual void SetUp();
 

@@ -59,9 +59,11 @@ public:
 
     void FetchImage();
 
+#ifdef __EMSCRIPTEN__
     void HandleFetchImageSuccess(emscripten_fetch_t *fetch);
 
     void HandleFetchImageFailure(emscripten_fetch_t *fetch);
+#endif
 
     void Init(const json& elementDef) override {
         Element::Init(elementDef);

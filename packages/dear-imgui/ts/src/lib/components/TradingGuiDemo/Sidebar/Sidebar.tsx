@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 import faIconMap from "../../../fa-icons";
 import RWStyleSheet from "../../../stylesheet/stylesheet";
+import { ReactImgui } from "../../ReactImgui";
 
 export const Sidebar = () => {
     const styleSheet = useMemo(

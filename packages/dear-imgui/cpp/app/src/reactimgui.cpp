@@ -312,11 +312,13 @@ void ReactImgui::Init(ImGuiRenderer* renderer) {
     PrepareForRender();
     SetUpSubjects();
 
+    m_renderer->SetCurrentContext();
+
     m_onInit();
 }
 
 void ReactImgui::PrepareForRender() {
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO& io = m_renderer->m_imGuiCtx->IO;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
@@ -422,13 +424,6 @@ void ReactImgui::RenderElementTree(const int id) {
 };
 
 void ReactImgui::Render(const int window_width, const int window_height) {
-#ifdef __EMSCRIPTEN__
-    ImGui_ImplWGPU_NewFrame();
-#else
-    ImGui_ImplOpenGL3_NewFrame();
-#endif
-    ImGui_ImplGlfw_NewFrame();
-
     const std::lock_guard<std::mutex> elementsLock(m_elements_mutex);
     const std::lock_guard<std::mutex> hierarchyLock(m_hierarchy_mutex);
 
@@ -793,7 +788,7 @@ ImFont* ReactImgui::GetWidgetFont(const StyledWidget* widget) {
         // }
     }
 
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = m_renderer->m_imGuiCtx->IO;
 
     // Return default font size as we might be in the middle of rendering a widget with a custom font
     return io.FontDefault;
@@ -801,6 +796,8 @@ ImFont* ReactImgui::GetWidgetFont(const StyledWidget* widget) {
 
 // todo: ensure this returns the font size based on current state of the widget, i.e. 'base', 'hover', 'active'
 float ReactImgui::GetWidgetFontSize(const StyledWidget* widget) {
+    ImGui::CreateContext();
+
     if (widget->HasCustomStyles() && widget->HasCustomFont(this)) {
         // auto result = widget->m_style.value()->GetCustomFontId(widget->GetState(), this);
 
@@ -809,7 +806,13 @@ float ReactImgui::GetWidgetFontSize(const StyledWidget* widget) {
         // }
     }
 
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    // return 16.0f;
+
+    ImGuiIO& io = m_renderer->m_imGuiCtx->IO;
+
+    if (!io.FontDefault || !io.FontDefault->FontSize) {
+        return 16.0f;
+    }
 
     // Return default font size as we might be in the middle of rendering a widget with a custom font
     return io.FontDefault->FontSize;
@@ -876,13 +879,18 @@ float ReactImgui::GetFrameHeightWithSpacing(const StyledWidget* widget) {
 
 ImVec2 ReactImgui::CalcTextSize(const StyledWidget* widget, const char* text, const char* text_end, bool hide_text_after_double_hash, float wrap_width)
 {
+    printf("CalcTextSize a\n");
     auto font = GetWidgetFont(widget);
-
+    printf("CalcTextSize b\n");
     const char* text_display_end;
-    if (hide_text_after_double_hash)
+
+    if (hide_text_after_double_hash) {
+        printf("CalcTextSize c\n");
         text_display_end = ImGui::FindRenderedTextEnd(text, text_end);      // Hide anything after a '##' string
-    else
+    } else {
+        printf("CalcTextSize d\n");
         text_display_end = text_end;
+    }
 
     const float font_size = font->FontSize;
     if (text == text_display_end)

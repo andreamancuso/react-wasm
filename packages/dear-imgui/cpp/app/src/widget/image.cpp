@@ -1,5 +1,8 @@
 #include <imgui.h>
+
+#ifdef __EMSCRIPTEN__
 #include <emscripten/fetch.h>
+#endif
 
 #include "widget/image.h"
 #include "reactimgui.h"
@@ -14,7 +17,7 @@ bool Image::HasCustomHeight() {
 }
 
 void Image::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
-    if (m_texture.textureView != nullptr) {
+    if (m_texture.textureView) {
         auto imageSize = m_size.has_value() ? m_size.value() : ImVec2(YGNodeLayoutGetWidth(m_layoutNode->m_node), YGNodeLayoutGetHeight(m_layoutNode->m_node));
 
         if (imageSize.x != 0 && imageSize.y != 0) {
@@ -63,6 +66,7 @@ void Image::HandleInternalOp(const json& opDef) {
     }
 };
 
+#ifdef __EMSCRIPTEN__
 void Image::HandleFetchImageSuccess(emscripten_fetch_t *fetch) {
     m_view->m_renderer->LoadTexture(fetch->data, fetch->numBytes, &m_texture);
 
@@ -74,7 +78,9 @@ void Image::HandleFetchImageSuccess(emscripten_fetch_t *fetch) {
 void Image::HandleFetchImageFailure(emscripten_fetch_t *fetch) {
     printf("Unable to fetch image using url %s\n", m_url.c_str());
 };
+#endif
 
+#ifdef __EMSCRIPTEN__
 void Image::FetchImage() {
     emscripten_fetch_attr_t attr;
     emscripten_fetch_attr_init(&attr);
@@ -107,6 +113,9 @@ void Image::FetchImage() {
 
     emscripten_fetch(&attr, m_url.c_str());
 };
+#else
+void Image::FetchImage() {}
+#endif
 
 YGSize Image::Measure(const YGNodeConstRef node, const float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
     YGSize size{};

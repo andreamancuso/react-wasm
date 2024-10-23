@@ -1,5 +1,5 @@
 import { ReplaySubject, Subscription } from "rxjs";
-import { MainModule } from "../wasm/wasm-app-types";
+// import { MainModule } from "../wasm/wasm-app-types";
 import { WidgetRegistrationService } from "../widgetRegistrationService";
 
 type CloningNode = { id: number; childrenIds: number[] } | null;
@@ -7,7 +7,7 @@ type DispatchEventFn = (id: number, topLevelType: string, nativeEventParam: any)
 type Event = [number, string, any];
 
 export default class {
-    wasmModule?: MainModule;
+    wasmModule?: any;
     dispatchEventFn?: DispatchEventFn;
     cloningNode?: CloningNode;
     fiberNodesMap: Map<number, any>;
@@ -55,7 +55,7 @@ export default class {
         this.eventSubjectSubscription.unsubscribe();
     }
 
-    init(wasmModule: MainModule, widgetRegistrationService: WidgetRegistrationService) {
+    init(wasmModule: any, widgetRegistrationService: WidgetRegistrationService) {
         this.wasmModule = wasmModule;
         this.widgetRegistrationService = widgetRegistrationService;
     }

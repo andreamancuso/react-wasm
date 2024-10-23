@@ -5,7 +5,6 @@ import {
     GetCryptoBarsParams,
     GetQuotesParams,
 } from "@alpacahq/alpaca-trade-api/dist/resources/datav2/rest_v2";
-import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import { useWidgetRegistrationService } from "src/lib/hooks";
 import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 // import { HelpMarker } from "./HelpMarker/HelpMarker";
@@ -24,6 +23,7 @@ import { Sidebar } from "./Sidebar/Sidebar";
 import { CryptoSymbolPair } from "./CryptoSymbolPairs/CryptoSymbolPair";
 import { CryptoSymbolBlock } from "./CryptoSymbolBlock/CryptoSymbolBlock";
 import { Tabs } from "./Tabs/Tabs";
+import { ReactImgui } from "../ReactImgui";
 
 const componentMap = {
     cryptoAssetPanels: CryptoAssetPanels,

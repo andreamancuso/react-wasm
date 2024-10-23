@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
-import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import RWStyleSheet from "../../../stylesheet/stylesheet";
+import { ReactImgui } from "../../ReactImgui";
 
 type Props = {
     symbol: string;

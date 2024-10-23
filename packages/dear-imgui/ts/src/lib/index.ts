@@ -1,4 +1,3 @@
-import { ReactImgui } from "./components/ReactImgui/components";
 import { ReactNativeWrapper } from "./components/ReactNativeWrapper";
 import { useWidgetEventManagement, useWidgetRegistrationService, useDearImguiWasm } from "./hooks";
 import { WidgetRegistrationServiceContext } from "./contexts";
@@ -37,6 +36,7 @@ import {
 import RWStyleSheet from "./stylesheet/stylesheet";
 import { PlotLineImperativeHandle } from "./components/ReactImgui/PlotLine";
 import { PlotCandlestickImperativeHandle } from "./components/ReactImgui/PlotCandlestick";
+import { ReactImgui } from "./components/ReactImgui";
 
 export {
     ReactImgui,

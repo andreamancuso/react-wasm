@@ -40,6 +40,7 @@ class InputText final : public StyledWidget {
         static YGSize Measure(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
             YGSize size{};
             const auto context = YGNodeGetContext(node);
+
             if (context) {
                 const auto widget = static_cast<InputText*>(context);
 

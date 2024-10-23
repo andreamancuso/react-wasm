@@ -1,8 +1,8 @@
 import React, { useMemo } from "react";
-import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import RWStyleSheet from "src/lib/stylesheet/stylesheet";
 import { useStore } from "../store";
 import { CryptoQuotePrice } from "../CryptoQuotePrice/CryptoQuotePrice";
+import { ReactImgui } from "../../ReactImgui";
 
 type Props = {};
 
@@ -34,8 +34,10 @@ export const CryptoAssetPanels = ({}: Props) => {
                     maxWidth: 240,
                     flex: 1,
                     height: "auto",
-                    borderColor: "#000",
-                    borderThickness: 1,
+                    border: {
+                        color: "#000",
+                        thickness: 1,
+                    },
                     alignItems: "center",
                     padding: { vertical: 5 },
                     gap: { row: 5 },

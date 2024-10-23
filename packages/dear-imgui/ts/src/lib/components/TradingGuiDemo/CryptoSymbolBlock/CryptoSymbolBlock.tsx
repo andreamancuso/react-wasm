@@ -1,8 +1,8 @@
 import React, { useMemo } from "react";
-import { ReactImgui } from "src/lib/components/ReactImgui/components";
 import RWStyleSheet from "../../../stylesheet/stylesheet";
 import { CryptoSymbolPair } from "../CryptoSymbolPairs/CryptoSymbolPair";
 import { ImGuiCol } from "src/lib/wasm/wasm-app-types";
+import { ReactImgui } from "../../ReactImgui";
 
 type Props = {
     symbol: string;

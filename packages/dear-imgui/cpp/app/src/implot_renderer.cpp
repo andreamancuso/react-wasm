@@ -13,7 +13,8 @@ ImPlotRenderer::ImPlotRenderer(
 }
 
 void ImPlotRenderer::SetCurrentContext() {
-    ImGui::SetCurrentContext(m_imGuiCtx);
+    ImGuiRenderer::SetCurrentContext();
+
     ImPlot::SetCurrentContext(m_imPlotCtx);
 };
 

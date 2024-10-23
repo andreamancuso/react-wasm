@@ -63,12 +63,19 @@ ImGuiRenderer::ImGuiRenderer(
 
     m_imGuiCtx = ImGui::CreateContext();
 
+    if (m_imGuiCtx) {
+        printf("imgui context created\n");
+    }
+
     m_rawFontDefs = rawFontDefs;
+
+    m_clearColor = { 0.45f, 0.55f, 0.60f, 1.00f };
 }
 
 void ImGuiRenderer::LoadFontsFromDefs() {
+    ImGuiIO& io = m_imGuiCtx->IO;
+
     auto fontDefs = json::parse(m_rawFontDefs);
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
 
     static constexpr ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
     // static const ImWchar icons_ranges[] = { ICON_MIN_MDI, ICON_MAX_16_MDI, 0 };
@@ -163,7 +170,7 @@ bool ImGuiRenderer::IsFontIndexValid(const int fontIndex) const {
 }
 
 void ImGuiRenderer::SetFontDefault(const int fontIndex) const {
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = m_imGuiCtx->IO;
 
     if (IsFontIndexValid(fontIndex)) {
         io.FontDefault = m_loadedFonts[fontIndex];
@@ -263,11 +270,15 @@ void ImGuiRenderer::SetUp() {
 
     ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback(m_canvasSelector.get());
 
-    SetCurrentContext();
+    // SetCurrentContext();
 }
 #else
 void ImGuiRenderer::SetUp() {
+    InitGlfw();
 
+    IMGUI_CHECKVERSION();
+
+    // SetCurrentContext();
 }
 #endif
 
@@ -287,6 +298,7 @@ void ImGuiRenderer::CreateSwapChain(int width, int height) {
 }
 #endif
 
+// todo: is this necessary for opengl rendering?
 void ImGuiRenderer::HandleScreenSizeChanged() {
 #ifdef __EMSCRIPTEN__
     int width, height;
@@ -307,7 +319,7 @@ void ImGuiRenderer::RenderDrawData(WGPURenderPassEncoder pass) {
 }
 #else
 void ImGuiRenderer::RenderDrawData() {
-
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 #endif
 
@@ -317,6 +329,9 @@ void ImGuiRenderer::CleanUp() {
 #ifdef __EMSCRIPTEN__
     ImGui_ImplWGPU_Shutdown();
     ImGui_ImplGlfw_Shutdown();
+#else
+    glfwDestroyWindow(m_glfwWindow);
+    glfwTerminate();
 #endif
 }
 
@@ -349,16 +364,40 @@ void ImGuiRenderer::PerformRendering() {
     wgpuQueueSubmit(m_queue, 1, &cmd_buffer);
 }
 #else
-void ImGuiRenderer::PerformRendering() {}
+void ImGuiRenderer::PerformRendering() {
+    int display_w, display_h;
+    glfwGetFramebufferSize(m_glfwWindow, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(m_clearColor.x * m_clearColor.w, m_clearColor.y * m_clearColor.w, m_clearColor.z * m_clearColor.w, m_clearColor.w);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    RenderDrawData();
+}
 #endif
 
+void ImGuiRenderer::SetCurrentContext() {
+    ImGui::SetCurrentContext(m_imGuiCtx);
+}
 
 void ImGuiRenderer::BeginRenderLoop() {
+    // SetCurrentContext();
+
+#ifdef __EMSCRIPTEN__
     LoadFontsFromDefs();
+#else
+    // LoadFontsFromDefs();
+    printf("Adding default font\n");
+    m_imGuiCtx->IO.Fonts->AddFontDefault();
+
+    m_imGuiCtx->IO.FontDefault = m_imGuiCtx->IO.Fonts->Fonts[0];
+
+    printf("Default font added\n");
+#endif
 
     m_reactImgui->Init(this);
 
     SetUp();
+
     // Main loop
 #ifdef __EMSCRIPTEN__
     EMSCRIPTEN_MAINLOOP_BEGIN
@@ -370,19 +409,30 @@ void ImGuiRenderer::BeginRenderLoop() {
 
         HandleScreenSizeChanged();
 
-        SetCurrentContext();
+        // SetCurrentContext();
+
+    #ifdef __EMSCRIPTEN__
+        ImGui_ImplWGPU_NewFrame();
+    #else
+        ImGui_ImplOpenGL3_NewFrame();
+    #endif
+
+        ImGui_ImplGlfw_NewFrame();
 
         m_reactImgui->Render(m_window_width, m_window_height);
 
         PerformRendering();
+
+
+    #ifndef __EMSCRIPTEN__
+        glfwSwapBuffers(m_glfwWindow);
+    #endif
     }
 #ifdef __EMSCRIPTEN__
     EMSCRIPTEN_MAINLOOP_END;
 #endif
-    // Clean up
-    CleanUp();
 
-    // GLFW3Renderer::CleanUp();
+    CleanUp();
 }
 
 void ImGuiRenderer::SetWindowSize(int width, int height) {
@@ -510,8 +560,8 @@ bool LoadTexture(const void* data, const int numBytes, Texture* texture) {
 #endif
 
 json ImGuiRenderer::GetAvailableFonts() {
-    SetCurrentContext();
-    ImGuiIO& io = ImGui::GetIO();
+    // SetCurrentContext();
+    ImGuiIO& io = m_imGuiCtx->IO;
     json fonts = json::array();
 
     for (ImFont* font : io.Fonts->Fonts) {

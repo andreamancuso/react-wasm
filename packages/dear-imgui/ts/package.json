@@ -20,7 +20,8 @@
         "tsc": "tsc --project ./tsconfig-build.json",
         "tsup": "tsup --format cjs --external react,react-dom",
         "copy-wasm-to-build-folder": "cpy --flat ./src/lib/wasm/reactDearImgui.* dist/",
-        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+        "node-imgui": "tsx ./node-imgui/index.tsx"
     },
     "tsup": {
         "entry": [
@@ -46,7 +47,6 @@
         "promise": "^8.3.0",
         "rxjs": "^7.8.1",
         "stacktrace-parser": "^0.1.10",
-        "tsx": "^4.9.5",
         "uuid": "^9.0.1",
         "whatwg-fetch": "^3.6.20"
     },
@@ -98,6 +98,7 @@
         "ts-loader": "^9.5.1",
         "ts-node": "^10.9.2",
         "tsup": "^8.0.2",
+        "tsx": "^4.19.1",
         "typescript": "^5.4.5",
         "url-loader": "^4.1.1",
         "webpack": "^5.91.0",
