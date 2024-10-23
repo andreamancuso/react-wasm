@@ -235,8 +235,11 @@ float Element::GetLayoutTopFromParentNode(YGNodeRef node, float top) {
 void Element::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     ImVec2 contentRegionAvail = ImGui::GetContentRegionAvail();
 
-    YGNodeRef owner = YGNodeGetOwner(m_layoutNode->m_node);
+    if (!m_layoutNode->m_node) {
+        printf("m_node not set\n");
+    }
 
+    YGNodeRef owner = YGNodeGetOwner(m_layoutNode->m_node);
     if (owner == nullptr) { // root
         YGNodeCalculateLayout(m_layoutNode->m_node, contentRegionAvail.x, contentRegionAvail.y, YGDirectionLTR);
     }
@@ -247,7 +250,6 @@ void Element::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     const float height = YGNodeLayoutGetHeight(m_layoutNode->m_node);
 
     ImGui::SetCursorPos(ImVec2(left, top));
-
     ImGui::PushID(m_id);
 
     const auto size = ImVec2(width, height);
@@ -280,7 +282,6 @@ void Element::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
     HandleChildren(view, viewport);
 
     ImGui::EndChild();
-
     ImGui::PopID();
 };
 

@@ -312,11 +312,13 @@ void ReactImgui::Init(ImGuiRenderer* renderer) {
     PrepareForRender();
     SetUpSubjects();
 
+    m_renderer->SetCurrentContext();
+
     m_onInit();
 }
 
 void ReactImgui::PrepareForRender() {
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO& io = m_renderer->m_imGuiCtx->IO;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
@@ -786,7 +788,7 @@ ImFont* ReactImgui::GetWidgetFont(const StyledWidget* widget) {
         // }
     }
 
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = m_renderer->m_imGuiCtx->IO;
 
     // Return default font size as we might be in the middle of rendering a widget with a custom font
     return io.FontDefault;
@@ -794,6 +796,8 @@ ImFont* ReactImgui::GetWidgetFont(const StyledWidget* widget) {
 
 // todo: ensure this returns the font size based on current state of the widget, i.e. 'base', 'hover', 'active'
 float ReactImgui::GetWidgetFontSize(const StyledWidget* widget) {
+    ImGui::CreateContext();
+
     if (widget->HasCustomStyles() && widget->HasCustomFont(this)) {
         // auto result = widget->m_style.value()->GetCustomFontId(widget->GetState(), this);
 
@@ -802,7 +806,13 @@ float ReactImgui::GetWidgetFontSize(const StyledWidget* widget) {
         // }
     }
 
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    // return 16.0f;
+
+    ImGuiIO& io = m_renderer->m_imGuiCtx->IO;
+
+    if (!io.FontDefault || !io.FontDefault->FontSize) {
+        return 16.0f;
+    }
 
     // Return default font size as we might be in the middle of rendering a widget with a custom font
     return io.FontDefault->FontSize;

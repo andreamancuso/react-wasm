@@ -7,7 +7,6 @@ const rootNode = {
     type: "node",
     root: true,
     style: {
-        width: "100%",
         height: "100%"
     }
 };
@@ -26,12 +25,16 @@ const inputText = {
     type: "input-text"
 };
 
-nodeImgui.setElement(JSON.stringify(rootNode));
-nodeImgui.setElement(JSON.stringify(contentNode));
-nodeImgui.setElement(JSON.stringify(inputText));
-nodeImgui.setChildren(1, "[2]");
-nodeImgui.setChildren(0, "[1]");
-nodeImgui.showDebugWindow();
+setTimeout(() => {
+
+
+    nodeImgui.setElement(JSON.stringify(rootNode));
+    nodeImgui.setElement(JSON.stringify(contentNode));
+    nodeImgui.setElement(JSON.stringify(inputText));
+    nodeImgui.setChildren(1, "[2]");
+    nodeImgui.setChildren(0, "[1]");
+// nodeImgui.showDebugWindow();
+}, 500);
 
 let flag = true;
 (function keepProcessRunning() {

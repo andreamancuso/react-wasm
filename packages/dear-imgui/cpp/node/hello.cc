@@ -145,6 +145,9 @@ class WasmRunner {
                 "ReactImgui",
                 rawFontDefs
             );
+            // todo: do we need this?
+            m_renderer->SetCurrentContext();
+
             m_reactImgui->SetEventHandlers(
                 OnInit,
                 OnTextChanged,

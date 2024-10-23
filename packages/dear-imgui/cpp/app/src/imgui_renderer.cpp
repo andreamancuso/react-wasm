@@ -63,14 +63,19 @@ ImGuiRenderer::ImGuiRenderer(
 
     m_imGuiCtx = ImGui::CreateContext();
 
+    if (m_imGuiCtx) {
+        printf("imgui context created\n");
+    }
+
     m_rawFontDefs = rawFontDefs;
 
     m_clearColor = { 0.45f, 0.55f, 0.60f, 1.00f };
 }
 
 void ImGuiRenderer::LoadFontsFromDefs() {
+    ImGuiIO& io = m_imGuiCtx->IO;
+
     auto fontDefs = json::parse(m_rawFontDefs);
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
 
     static constexpr ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
     // static const ImWchar icons_ranges[] = { ICON_MIN_MDI, ICON_MAX_16_MDI, 0 };
@@ -165,7 +170,7 @@ bool ImGuiRenderer::IsFontIndexValid(const int fontIndex) const {
 }
 
 void ImGuiRenderer::SetFontDefault(const int fontIndex) const {
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = m_imGuiCtx->IO;
 
     if (IsFontIndexValid(fontIndex)) {
         io.FontDefault = m_loadedFonts[fontIndex];
@@ -265,7 +270,7 @@ void ImGuiRenderer::SetUp() {
 
     ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback(m_canvasSelector.get());
 
-    SetCurrentContext();
+    // SetCurrentContext();
 }
 #else
 void ImGuiRenderer::SetUp() {
@@ -273,7 +278,7 @@ void ImGuiRenderer::SetUp() {
 
     IMGUI_CHECKVERSION();
 
-    SetCurrentContext();
+    // SetCurrentContext();
 }
 #endif
 
@@ -370,10 +375,17 @@ void ImGuiRenderer::PerformRendering() {
 }
 #endif
 
+void ImGuiRenderer::SetCurrentContext() {
+    ImGui::SetCurrentContext(m_imGuiCtx);
+}
 
 void ImGuiRenderer::BeginRenderLoop() {
+    // SetCurrentContext();
+
 #ifdef __EMSCRIPTEN__
     LoadFontsFromDefs();
+#else
+    // LoadFontsFromDefs();
 #endif
 
     m_reactImgui->Init(this);
@@ -391,7 +403,7 @@ void ImGuiRenderer::BeginRenderLoop() {
 
         HandleScreenSizeChanged();
 
-        SetCurrentContext();
+        // SetCurrentContext();
 
     #ifdef __EMSCRIPTEN__
         ImGui_ImplWGPU_NewFrame();
@@ -542,8 +554,8 @@ bool LoadTexture(const void* data, const int numBytes, Texture* texture) {
 #endif
 
 json ImGuiRenderer::GetAvailableFonts() {
-    SetCurrentContext();
-    ImGuiIO& io = ImGui::GetIO();
+    // SetCurrentContext();
+    ImGuiIO& io = m_imGuiCtx->IO;
     json fonts = json::array();
 
     for (ImFont* font : io.Fonts->Fonts) {

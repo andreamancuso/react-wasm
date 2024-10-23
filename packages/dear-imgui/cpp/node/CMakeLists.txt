@@ -75,6 +75,8 @@ add_library(${PROJECT_NAME} SHARED
         ${CMAKE_JS_SRC}
 )
 
+add_compile_options(-fno-finite-math-only -O3)
+add_link_options(-fno-finite-math-only -O3)
 # /p:FooLibDir=..\lib
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
@@ -115,3 +117,9 @@ if(MSVC AND CMAKE_JS_NODELIB_DEF AND CMAKE_JS_NODELIB_TARGET)
     # Generate node.lib
     execute_process(COMMAND ${CMAKE_AR} /def:${CMAKE_JS_NODELIB_DEF} /out:${CMAKE_JS_NODELIB_TARGET} ${CMAKE_STATIC_LINKER_FLAGS})
 endif()
+
+#if (MSVC)
+
+#else()
+
+#endif()
