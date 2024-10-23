@@ -5,11 +5,7 @@ import {
     GetCryptoBarsParams,
     GetQuotesParams,
 } from "@alpacahq/alpaca-trade-api/dist/resources/datav2/rest_v2";
-import { useWidgetRegistrationService } from "src/lib/hooks";
-import { ImGuiCol, ImGuiStyleVar } from "src/lib/wasm/wasm-app-types";
 // import { HelpMarker } from "./HelpMarker/HelpMarker";
-import faIconMap from "../../fa-icons";
-import RWStyleSheet from "../../stylesheet/stylesheet";
 import { CryptoLinePlots } from "./CryptoPlots/CryptoLinePlots";
 import { useStore } from "./store";
 import { CryptoAssetsList } from "./CryptoAssetsList/CryptoAssetsList";
@@ -17,13 +13,17 @@ import { DataService } from "./dataService";
 import { DataServiceContext } from "./dataServiceContext";
 import { cryptoSymbols } from "./cryptoSymbols";
 import { CryptoAssetPanels } from "./CryptoAssetPanels/CryptoAssetPanels";
-import { theme2Colors } from "src/lib/stylesheet/themes";
 import { CryptoCandlestickPlots } from "./CryptoPlots/CryptoCandlestickPlots";
 import { Sidebar } from "./Sidebar/Sidebar";
 import { CryptoSymbolPair } from "./CryptoSymbolPairs/CryptoSymbolPair";
 import { CryptoSymbolBlock } from "./CryptoSymbolBlock/CryptoSymbolBlock";
 import { Tabs } from "./Tabs/Tabs";
 import { ReactImgui } from "../ReactImgui";
+import { useWidgetRegistrationService } from "../../src/lib/hooks/useWidgetRegistrationService";
+import RWStyleSheet from "../../src/lib/stylesheet/stylesheet";
+import { ImGuiCol, ImGuiStyleVar } from "../../src/lib/wasm/wasm-app-types";
+import { theme2Colors } from "../../src/lib/stylesheet/themes";
+import faIconMap from "../../src/lib/fa-icons";
 
 const componentMap = {
     cryptoAssetPanels: CryptoAssetPanels,
@@ -42,7 +42,7 @@ export const TradingGuiDemo = () => {
     const setSelectedTabIndex = useStore((state) => state.setSelectedTabIndex);
     const setCryptoAssets = useStore((state) => state.setCryptoAssets);
 
-    const socketRef = useRef<WebSocket>();
+    // const socketRef = useRef<WebSocket>();
     const widgetRegistratonService = useWidgetRegistrationService();
 
     const [selectedItemIds, setSelectedItemIds] = useState<ComponentKeys[]>(["cryptoAssetPanels"]);
@@ -167,147 +167,147 @@ export const TradingGuiDemo = () => {
     );
 
     // todo: move to dataService.ts ?
-    const connect = useCallback(() => {
-        socketRef.current = new WebSocket("ws://localhost:4000");
+    // const connect = useCallback(() => {
+    //     socketRef.current = new WebSocket("ws://localhost:4000");
 
-        socketRef.current.addEventListener("error", () => {
-            console.log("Connected to server");
-        });
+    //     socketRef.current.addEventListener("error", () => {
+    //         console.log("Connected to server");
+    //     });
 
-        socketRef.current.addEventListener("open", () => {
-            console.log("Connected to server");
-        });
+    //     socketRef.current.addEventListener("open", () => {
+    //         console.log("Connected to server");
+    //     });
 
-        socketRef.current.addEventListener("close", (ev) => {
-            try {
-                const reason = JSON.parse(ev.reason);
+    //     socketRef.current.addEventListener("close", (ev) => {
+    //         try {
+    //             const reason = JSON.parse(ev.reason);
 
-                console.log(`Disconnected from server: ${reason.message}`);
-            } catch (error) {
-                console.log("Disconnected from server");
-            }
-        });
+    //             console.log(`Disconnected from server: ${reason.message}`);
+    //         } catch (error) {
+    //             console.log("Disconnected from server");
+    //         }
+    //     });
 
-        socketRef.current.addEventListener("message", (event) => {
-            const data = JSON.parse(event.data);
+    //     socketRef.current.addEventListener("message", (event) => {
+    //         const data = JSON.parse(event.data);
 
-            if (data.cryptoAssets) {
-                // todo: remove filtering
-                setCryptoAssets(
-                    data.cryptoAssets.filter((asset: any) => cryptoSymbols.includes(asset.symbol)),
-                );
-            } else if (data.cryptoQuote) {
-                dataService.addCryptoQuote(data.cryptoQuote);
-            } else if (data.latestCryptoQuotes) {
-                // console.log(data.latestCryptoQuotes);
+    //         if (data.cryptoAssets) {
+    //             // todo: remove filtering
+    //             setCryptoAssets(
+    //                 data.cryptoAssets.filter((asset: any) => cryptoSymbols.includes(asset.symbol)),
+    //             );
+    //         } else if (data.cryptoQuote) {
+    //             dataService.addCryptoQuote(data.cryptoQuote);
+    //         } else if (data.latestCryptoQuotes) {
+    //             // console.log(data.latestCryptoQuotes);
 
-                Object.entries(data.latestCryptoQuotes).forEach(([symbol, cryptoQuote]) =>
-                    dataService.addCryptoQuote({ ...(cryptoQuote as any), S: symbol }),
-                );
-            } else if (data.cryptoSnapshots) {
-                dataService.addCryptoSnapshots(data.cryptoSnapshots);
-                // console.log(data.cryptoSnapshots);
-            } else if (data.latestCryptoBars) {
-                console.log(data.latestCryptoBars);
-            } else if (data.cryptoBars) {
-                dataService.addCryptoBars(data.cryptoBars);
-                // console.log(data.cryptoBars);
-            }
-        });
-    }, [setCryptoAssets]);
+    //             Object.entries(data.latestCryptoQuotes).forEach(([symbol, cryptoQuote]) =>
+    //                 dataService.addCryptoQuote({ ...(cryptoQuote as any), S: symbol }),
+    //             );
+    //         } else if (data.cryptoSnapshots) {
+    //             dataService.addCryptoSnapshots(data.cryptoSnapshots);
+    //             // console.log(data.cryptoSnapshots);
+    //         } else if (data.latestCryptoBars) {
+    //             console.log(data.latestCryptoBars);
+    //         } else if (data.cryptoBars) {
+    //             dataService.addCryptoBars(data.cryptoBars);
+    //             // console.log(data.cryptoBars);
+    //         }
+    //     });
+    // }, [setCryptoAssets]);
 
-    const sendMessage = useCallback((message: any) => {
-        if (socketRef.current) {
-            socketRef.current.send(JSON.stringify(message));
-        }
-    }, []);
+    // const sendMessage = useCallback((message: any) => {
+    //     if (socketRef.current) {
+    //         socketRef.current.send(JSON.stringify(message));
+    //     }
+    // }, []);
 
-    const subscribeToLiveData = useCallback(
-        () =>
-            sendMessage({
-                passkey: "",
-                action: "subscribeForCryptoQuotes",
-                symbols,
-            }),
-        [sendMessage, symbols],
-    );
+    // const subscribeToLiveData = useCallback(
+    //     () =>
+    //         sendMessage({
+    //             passkey: "",
+    //             action: "subscribeForCryptoQuotes",
+    //             symbols,
+    //         }),
+    //     [sendMessage, symbols],
+    // );
 
-    const getLatestQuotes = useCallback(() => {
-        const currentDate = new Date();
-        const end = currentDate.toISOString();
-        const start = subMinutes(currentDate, 1);
+    // const getLatestQuotes = useCallback(() => {
+    //     const currentDate = new Date();
+    //     const end = currentDate.toISOString();
+    //     const start = subMinutes(currentDate, 1);
 
-        sendMessage({
-            action: "getQuotes",
-            symbols,
-            options: { start, end },
-        });
-    }, [symbols]);
+    //     sendMessage({
+    //         action: "getQuotes",
+    //         symbols,
+    //         options: { start, end },
+    //     });
+    // }, [symbols]);
 
-    const getCryptoQuotes = useCallback(() => {
-        const currentDate = new Date();
-        const end = currentDate.toISOString();
-        const start = subMinutes(currentDate, 1).toISOString();
-        const options: GetQuotesParams = {
-            start,
-            end,
-        };
+    // const getCryptoQuotes = useCallback(() => {
+    //     const currentDate = new Date();
+    //     const end = currentDate.toISOString();
+    //     const start = subMinutes(currentDate, 1).toISOString();
+    //     const options: GetQuotesParams = {
+    //         start,
+    //         end,
+    //     };
 
-        sendMessage({
-            action: "getCryptoQuotes",
-            symbols,
-            options,
-        });
-    }, [symbols]);
+    //     sendMessage({
+    //         action: "getCryptoQuotes",
+    //         symbols,
+    //         options,
+    //     });
+    // }, [symbols]);
 
-    const getCryptoBars = useCallback(() => {
-        const currentDate = new Date();
-        const end = currentDate.toISOString();
-        const start = subDays(currentDate, 30).toISOString();
-        const options: GetCryptoBarsParams = { start, end, timeframe: "1D" };
+    // const getCryptoBars = useCallback(() => {
+    //     const currentDate = new Date();
+    //     const end = currentDate.toISOString();
+    //     const start = subDays(currentDate, 30).toISOString();
+    //     const options: GetCryptoBarsParams = { start, end, timeframe: "1D" };
 
-        sendMessage({
-            action: "getCryptoBars",
-            symbols,
-            options,
-        });
-    }, [symbols]);
+    //     sendMessage({
+    //         action: "getCryptoBars",
+    //         symbols,
+    //         options,
+    //     });
+    // }, [symbols]);
 
-    const getCryptoSnapshots = useCallback(
-        () =>
-            sendMessage({
-                action: "getCryptoSnapshots",
-                symbols,
-            }),
-        [symbols],
-    );
+    // const getCryptoSnapshots = useCallback(
+    //     () =>
+    //         sendMessage({
+    //             action: "getCryptoSnapshots",
+    //             symbols,
+    //         }),
+    //     [symbols],
+    // );
 
-    const getLatestCryptoQuotes = useCallback(
-        () =>
-            sendMessage({
-                action: "getLatestCryptoQuotes",
-                symbols,
-            }),
-        [symbols],
-    );
+    // const getLatestCryptoQuotes = useCallback(
+    //     () =>
+    //         sendMessage({
+    //             action: "getLatestCryptoQuotes",
+    //             symbols,
+    //         }),
+    //     [symbols],
+    // );
 
-    const getLatestCryptoBars = useCallback(
-        () =>
-            sendMessage({
-                action: "getLatestCryptoBars",
-                symbols,
-            }),
-        [symbols],
-    );
+    // const getLatestCryptoBars = useCallback(
+    //     () =>
+    //         sendMessage({
+    //             action: "getLatestCryptoBars",
+    //             symbols,
+    //         }),
+    //     [symbols],
+    // );
 
-    const getCryptoAssets = useCallback(
-        () =>
-            sendMessage({
-                action: "getCryptoAssets",
-                symbols,
-            }),
-        [symbols],
-    );
+    // const getCryptoAssets = useCallback(
+    //     () =>
+    //         sendMessage({
+    //             action: "getCryptoAssets",
+    //             symbols,
+    //         }),
+    //     [symbols],
+    // );
 
     const debugModeBtnClicked = useCallback(() => {
         widgetRegistratonService.setDebug(true);
@@ -323,12 +323,12 @@ export const TradingGuiDemo = () => {
         });
     }, []);
 
-    useEffect(() => {
-        // connect();
-        // setTimeout(() => {
-        //     getCryptoAssets();
-        // }, 1000);
-    }, [connect, getCryptoAssets]);
+    // useEffect(() => {
+    // connect();
+    // setTimeout(() => {
+    //     getCryptoAssets();
+    // }, 1000);
+    // }, [connect, getCryptoAssets]);
 
     const tabs = useMemo(() => ["Markets", "History"], []);
 

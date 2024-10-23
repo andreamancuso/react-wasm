@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import RWStyleSheet from "../../../stylesheet/stylesheet";
-import { theme2Colors } from "src/lib/stylesheet/themes";
 import { ReactImgui } from "../../ReactImgui";
+import RWStyleSheet from "../../../src/lib/stylesheet/stylesheet";
+import { theme2Colors } from "../../../src/lib/stylesheet/themes";
 
 type Props = {
     tabs: string[];

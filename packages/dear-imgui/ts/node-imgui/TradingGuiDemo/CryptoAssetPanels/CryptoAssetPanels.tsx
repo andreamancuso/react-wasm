@@ -1,8 +1,8 @@
 import React, { useMemo } from "react";
-import RWStyleSheet from "src/lib/stylesheet/stylesheet";
 import { useStore } from "../store";
 import { CryptoQuotePrice } from "../CryptoQuotePrice/CryptoQuotePrice";
 import { ReactImgui } from "../../ReactImgui";
+import RWStyleSheet from "../../../src/lib/stylesheet/stylesheet";
 
 type Props = {};
 

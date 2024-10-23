@@ -1,9 +1,9 @@
 import React, { RefObject, useCallback, useEffect, useRef, useState } from "react";
-import { PlotLineImperativeHandle } from "../../ReactImgui/PlotLine";
-import { ImPlotScale } from "src/lib/wasm/wasm-app-types";
 import { useDataService } from "../dataServiceContext";
 import { filter } from "rxjs";
 import { ReactImgui } from "../../ReactImgui";
+import { PlotLineImperativeHandle } from "../../../src/lib/components/ReactImgui/PlotLine";
+import { ImPlotScale } from "../../../src/lib/wasm/wasm-app-types";
 
 type Props = { symbol: string };
 

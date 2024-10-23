@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import { map } from "rxjs";
 import { useDataService } from "../dataServiceContext";
-import { PlotCandlestickImperativeHandle } from "../../ReactImgui/PlotCandlestick";
-import { PlotCandlestickDataItem } from "../../ReactImgui/types";
 import { ReactImgui } from "../../ReactImgui";
+import { PlotCandlestickImperativeHandle } from "../../../src/lib/components/ReactImgui/PlotCandlestick";
+import { PlotCandlestickDataItem } from "../../../src/lib/components/ReactImgui/types";
 
 type Props = { symbol: string };
 
