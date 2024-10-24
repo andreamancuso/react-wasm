@@ -145,7 +145,8 @@ class WasmRunner {
                 m_reactImgui,
                 "ReactImgui",
                 "ReactImgui",
-                rawFontDefs
+                rawFontDefs,
+                std::nullopt
             );
             m_reactImgui->SetEventHandlers(
                 OnInit,

@@ -2,6 +2,7 @@
 #include <thread>
 #include <cstdio>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <set>
@@ -53,13 +54,16 @@ json IntSetToJson(const std::set<int>& data) {
     return jsonArray;
 }
 
-class WasmRunner {
+class Runner {
     protected:
         ReactImgui* m_reactImgui{};
         ImGuiRenderer* m_renderer{};
 
+        std::string m_rawFontDefs;
+        std::string m_assetsBasePath;
+        std::optional<std::string> m_rawStyleOverridesDefs;
     public:
-    WasmRunner() = default;
+    Runner() = default;
 
         static void OnInit() {
             // EM_ASM(
@@ -135,15 +139,26 @@ class WasmRunner {
             // );
         }
 
-    // void run(std::string& canvasSelector, std::string& rawFontDefs, std::optional<std::string>& rawStyleOverridesDefs) {
+        void SetRawFontDefs(std::string rawFontDefs) {
+            m_rawFontDefs = std::move(rawFontDefs);
+        }
+
+        void SetAssetsBasePath(std::string basePath) {
+            m_assetsBasePath = std::move(basePath);
+        }
+
+        void SetRawStyleOverridesDefs(const std::string& rawStyleOverridesDefs) {
+            m_rawStyleOverridesDefs.emplace(rawStyleOverridesDefs);
+        }
+
         void run() {
-            std::string rawFontDefs;
-            m_reactImgui = new ReactImgui("ReactImgui", std::nullopt);
+            m_reactImgui = new ReactImgui("ReactImgui", m_rawStyleOverridesDefs);
             m_renderer = new ImPlotRenderer(
                 m_reactImgui,
                 "ReactImgui",
                 "ReactImgui",
-                rawFontDefs
+                m_rawFontDefs,
+                m_assetsBasePath
             );
             // todo: do we need this?
             m_renderer->SetCurrentContext();
@@ -281,27 +296,7 @@ class WasmRunner {
         }
 };
 
-static std::unique_ptr<WasmRunner> pRunner = std::make_unique<WasmRunner>();
-
-// todo: add validation of arguments
-// int main(int argc, char* argv[]) {
-//     std::string canvasSelector = argv[1];
-//     std::string rawFontDefs = argv[2];
-//     std::optional<std::string> rawStyleOverridesDefs;
-//
-//     if (argc > 2) {
-//         // third argument is style overrides
-//         rawStyleOverridesDefs.emplace(std::string(argv[3]));
-//     }
-//
-//     pRunner->run();
-//
-//     return 0;
-// }
-
-// void _exit() {
-//     pRunner->exit();
-// }
+static std::unique_ptr<Runner> pRunner = std::make_unique<Runner>();
 
 void resizeWindow(const int width, const int height) {
     pRunner->resizeWindow(width, height);
@@ -343,10 +338,21 @@ void setChildren(const Napi::CallbackInfo& info) {
     auto id = info[0].As<Napi::Number>().Int32Value();
     auto childrenIds = info[1].As<Napi::String>().Utf8Value();
 
+    // todo: use array of numbers instead of parsing JSON
     pRunner->setChildren((int)id, JsonToVector<int>(childrenIds));
 }
 
 void appendChild(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    if (info.Length() < 2) {
+        throw Napi::TypeError::New(env, "Expected one argument");
+    } else if (!info[0].IsNumber()) {
+        throw Napi::TypeError::New(env, "Expected first arg to be number");
+    } else if (!info[1].IsNumber()) {
+        throw Napi::TypeError::New(env, "Expected first arg to be number");
+    }
+
     auto parentId = info[0].As<Napi::Number>().Int32Value();
     auto childId = info[1].As<Napi::Number>().Int32Value();
 
@@ -365,7 +371,16 @@ std::string getStyle() {
     return pRunner->getStyle();
 }
 
-void patchStyle(std::string styleDef) {
+void patchStyle(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+
+    if (info.Length() < 1) {
+        throw Napi::TypeError::New(env, "Expected one argument");
+    } else if (!info[0].IsString()) {
+        throw Napi::TypeError::New(env, "Expected first arg to be string");
+    }
+
+    auto styleDef = info[0].As<Napi::String>().Utf8Value();
     return pRunner->patchStyle(styleDef);
 }
 
@@ -381,20 +396,32 @@ int run()
 {
     pRunner->run();
 
-
     return 0;
 }
 
-std::thread uiThread(run);
+std::thread uiThread;
 
 static Napi::Value init(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
 
+    if (info.Length() < 3) {
+        throw Napi::TypeError::New(env, "Expected one argument");
+    } else if (!info[0].IsString()) {
+        throw Napi::TypeError::New(env, "Expected first arg to be string");
+    } else if (!info[1].IsString()) {
+        throw Napi::TypeError::New(env, "Expected second arg to be string");
+    } else if (!info[2].IsString()) {
+        throw Napi::TypeError::New(env, "Expected third arg to be string");
+    }
+
+    pRunner->SetAssetsBasePath(info[0].As<Napi::String>().Utf8Value());
+    pRunner->SetRawFontDefs(info[1].As<Napi::String>().Utf8Value());
+    pRunner->SetRawStyleOverridesDefs(info[2].As<Napi::String>().Utf8Value());
+
     printf("Starting UI thread\n");
 
-    // pRunner->run();
-
-//    uiThread.join();
+    uiThread = std::thread(run);
+    uiThread.detach();
 
     return env.Null();
 }
@@ -405,6 +432,7 @@ static Napi::Object Init(Napi::Env env, Napi::Object exports) {
     exports["setChildren"] = Napi::Function::New(env, setChildren);
     exports["appendChild"] = Napi::Function::New(env, appendChild);
     exports["showDebugWindow"] = Napi::Function::New(env, showDebugWindow);
+    exports["patchStyle"] = Napi::Function::New(env, patchStyle);
 
     return exports;
 }

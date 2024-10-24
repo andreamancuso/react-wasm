@@ -5,10 +5,24 @@ import { WidgetRegistrationServiceContext } from "../src/lib/contexts/widgetRegi
 import { WidgetRegistrationService } from "../src/lib/widgetRegistrationService";
 import ReactNativePrivateInterface from "../src/lib/react-native/ReactNativePrivateInterface";
 import { App } from "./App";
+import { theme2 } from "../src/lib/stylesheet/themes";
 
 const nodeImgui = require("../../cpp/node/build/Release/node-imgui.node");
 
-nodeImgui.init();
+const fontDefs: any = {
+    defs: [
+        { name: "roboto-regular", sizes: [16, 18, 20, 24, 28, 32, 36, 48] },
+        { name: "roboto-bold", sizes: [16, 18, 20, 24, 28, 32, 36, 48] },
+        // { name: "roboto-light", sizes: [12, 14, 16, 18, 20, 24, 28, 32, 36, 48] },
+        { name: "roboto-mono-regular", sizes: [14, 16] },
+    ]
+        .map(({ name, sizes }) => sizes.map((size) => ({ name, size })))
+        .flat(),
+};
+
+const assetsBasePath = "C:\\u-blox\\gallery\\ubx\\ulogr\\react-imgui\\packages\\dear-imgui\\assets";
+
+nodeImgui.init(assetsBasePath, JSON.stringify(fontDefs), JSON.stringify(theme2));
 
 const widgetRegistrationService = new WidgetRegistrationService(nodeImgui);
 

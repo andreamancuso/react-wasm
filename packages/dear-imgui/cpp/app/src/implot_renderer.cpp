@@ -3,11 +3,14 @@
 
 #include "implot_renderer.h"
 
+#include <utility>
+
 ImPlotRenderer::ImPlotRenderer(
     ReactImgui* reactImgui,
     const char* newWindowId,
     const char* newGlWindowTitle,
-    std::string& rawFontDefs) : ImGuiRenderer(reactImgui, newWindowId, newGlWindowTitle, rawFontDefs) {
+    std::string& rawFontDefs,
+    std::optional<std::string> basePath) : ImGuiRenderer(reactImgui, newWindowId, newGlWindowTitle, rawFontDefs, std::move(basePath)) {
 
     m_imPlotCtx = ImPlot::CreateContext();
 }
