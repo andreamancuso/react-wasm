@@ -18,6 +18,7 @@ find_package(ada CONFIG REQUIRED)
 find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 find_package(TIFF REQUIRED)
+find_package(CURL REQUIRED)
 # find_package(RPP REQUIRED)
 
 set(DEPS ${CMAKE_CURRENT_SOURCE_DIR}/../deps)
@@ -53,7 +54,7 @@ set(REACT_IMGUI_SRC
         ${REACT_IMGUI_BASE_PATH}/src/widget/collapsing_header.cpp
         ${REACT_IMGUI_BASE_PATH}/src/widget/combo.cpp
         ${REACT_IMGUI_BASE_PATH}/src/widget/group.cpp
-#        ${REACT_IMGUI_BASE_PATH}/src/widget/image.cpp
+        ${REACT_IMGUI_BASE_PATH}/src/widget/image.cpp
         ${REACT_IMGUI_BASE_PATH}/src/widget/input_text.cpp
         ${REACT_IMGUI_BASE_PATH}/src/widget/item_tooltip.cpp
 #        ${REACT_IMGUI_BASE_PATH}/src/widget/map_view.cpp
@@ -97,4 +98,15 @@ target_include_directories(
         ${DEPS}/osm-static-map-generator/cpp/deps/leptonica/src
 )
 
-target_link_libraries(reactDearImgui PRIVATE imgui::imgui implot::implot nlohmann_json::nlohmann_json ada::ada JPEG::JPEG PNG::PNG TIFF::TIFF  ${CMAKE_CURRENT_SOURCE_DIR}/../glfw3dll.lib ${CMAKE_CURRENT_SOURCE_DIR}/../opengl32.lib)
+target_link_libraries(reactDearImgui PRIVATE
+        imgui::imgui
+        implot::implot
+        nlohmann_json::nlohmann_json
+        ada::ada
+        JPEG::JPEG
+        PNG::PNG
+        TIFF::TIFF
+        CURL::libcurl
+        ${CMAKE_CURRENT_SOURCE_DIR}/../glfw3dll.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/../opengl32.lib
+)

@@ -28,6 +28,7 @@ const widgetRegistrationService = new WidgetRegistrationService(nodeImgui);
 
 ReactNativePrivateInterface.nativeFabricUIManager.init(nodeImgui, widgetRegistrationService);
 
+// todo start rendering when init() is completed, i.e. wait for onInit() to be invoked (add support for events)
 setTimeout(() => {
     ReactFabricProd.render(
         <WidgetRegistrationServiceContext.Provider value={widgetRegistrationService}>

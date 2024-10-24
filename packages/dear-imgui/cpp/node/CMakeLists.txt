@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0091 NEW)
 cmake_policy(SET CMP0042 NEW)
 
+set(CMAKE_TOOLCHAIN_FILE ../deps/vcpkg/scripts/buildsystems/vcpkg.cmake)
+
 project (node-imgui LANGUAGES C CXX)
 
 set (CMAKE_CXX_STANDARD 23)

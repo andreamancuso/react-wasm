@@ -1,8 +1,14 @@
 #include <optional>
 #include "ada.h"
-#include "mapgenerator.h"
+// #include "mapgenerator.h"
 #include "styled_widget.h"
 #include "texture_helpers.h"
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten/fetch.h>
+#else
+#include <curl/curl.h>
+#endif
 
 using fetchImageCallback = std::function<void(void*, size_t)>;
 
@@ -63,6 +69,11 @@ public:
     void HandleFetchImageSuccess(emscripten_fetch_t *fetch);
 
     void HandleFetchImageFailure(emscripten_fetch_t *fetch);
+
+#else
+    void HandleFetchImageSuccess(void *buffer, size_t sz, size_t n);
+
+    void HandleFetchImageFailure();
 #endif
 
     void Init(const json& elementDef) override {

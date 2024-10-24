@@ -1,9 +1,5 @@
 #include <imgui.h>
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten/fetch.h>
-#endif
-
 #include "widget/image.h"
 #include "reactimgui.h"
 #include "imgui_renderer.h"
@@ -78,6 +74,18 @@ void Image::HandleFetchImageSuccess(emscripten_fetch_t *fetch) {
 void Image::HandleFetchImageFailure(emscripten_fetch_t *fetch) {
     printf("Unable to fetch image using url %s\n", m_url.c_str());
 };
+#else
+void Image::HandleFetchImageSuccess(void *buffer, size_t sz, size_t n) {
+    m_view->m_renderer->LoadTexture(buffer, sz, &m_texture);
+
+    printf("Fetched image using url %s\n", m_url.c_str());
+
+    YGNodeMarkDirty(m_layoutNode->m_node);
+};
+
+void Image::HandleFetchImageFailure() {
+    printf("Unable to fetch image using url %s\n", m_url.c_str());
+};
 #endif
 
 #ifdef __EMSCRIPTEN__
@@ -114,7 +122,21 @@ void Image::FetchImage() {
     emscripten_fetch(&attr, m_url.c_str());
 };
 #else
-void Image::FetchImage() {}
+void Image::FetchImage() {
+    CURL *curl = curl_easy_init();
+
+    if (curl) {
+        CURLcode res;
+        curl_easy_setopt(curl, CURLOPT_URL, m_url.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, [](void *buffer, size_t sz, size_t n, void *pThis) {
+            auto widget = static_cast<Image*>(pThis);
+            widget->HandleFetchImageSuccess(buffer, sz, n);
+        });
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+        res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+    }
+}
 #endif
 
 YGSize Image::Measure(const YGNodeConstRef node, const float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode) {
