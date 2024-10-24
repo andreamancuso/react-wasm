@@ -421,6 +421,7 @@ static Napi::Value init(const Napi::CallbackInfo& info) {
     printf("Starting UI thread\n");
 
     uiThread = std::thread(run);
+    uiThread.detach();
 
     return env.Null();
 }
