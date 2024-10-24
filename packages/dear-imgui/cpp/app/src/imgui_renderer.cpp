@@ -1,5 +1,9 @@
+#define _CRT_SECURE_NO_WARNINGS
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+#include "imgui_impl_glfw.h"
+#include <GLFW/glfw3.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -8,6 +12,8 @@
 #else
 #include "imgui_impl_opengl3.h"
 #endif
+
+
 
 #ifdef __EMSCRIPTEN__
 #include <functional>
@@ -221,6 +227,13 @@ void ImGuiRenderer::InitGlfw() {
 #else
     glfwMakeContextCurrent(m_glfwWindow);
     glfwSwapInterval(1); // Enable vsync
+
+    // bool err = glewInit() != GLEW_OK;
+    // if (err)
+    // {
+    //     fprintf(stderr, "Failed to initialize OpenGL loader!\n");
+    //     return;
+    // }
 
     ImGui_ImplGlfw_InitForOpenGL(m_glfwWindow, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
@@ -557,7 +570,42 @@ bool ImGuiRenderer::LoadTexture(const void* data, const int numBytes, Texture* t
     return true;
 }
 #else
-bool LoadTexture(const void* data, const int numBytes, Texture* texture) {
+bool ImGuiRenderer::LoadTexture(const void* data, const int numBytes, GLuint* texture) {
+    // Load from file
+    int image_width = 0;
+    int image_height = 0;
+    unsigned char* image_data = stbi_load_from_memory((const unsigned char*)data, (int)numBytes, &image_width, &image_height, NULL, 4);
+    if (image_data == NULL)
+        return false;
+
+    // int comp;
+
+    // unsigned char* image_data = stbi_load("C:\\u-blox\\gallery\\ubx\\ulogr\\react-imgui\\packages\\dear-imgui\\assets\\sample-raster-map.png", &image_width, &image_height, &comp, STBI_rgb_alpha);
+
+    printf("comp %d %d\n", image_width, image_height);
+
+    GLuint textureId;
+
+    // Create a OpenGL texture identifier
+    // GLuint image_texture;
+    glGenTextures(1, &textureId);
+    // glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*) &texture->textureView);
+    glBindTexture(GL_TEXTURE_2D, textureId);
+
+    // Setup filtering parameters for display
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Upload pixels into texture
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+
+    stbi_image_free(image_data);
+
+    // printf("%d\n", (void*)(intptr_t)suga);
+
+    *texture = textureId;
+
     return true;
 }
 #endif

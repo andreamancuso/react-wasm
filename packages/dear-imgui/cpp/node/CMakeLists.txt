@@ -10,6 +10,18 @@ set (CMAKE_CXX_STANDARD 23)
 
 set(DEPS ${CMAKE_CURRENT_SOURCE_DIR}/../deps)
 
+find_package(nlohmann_json REQUIRED)
+find_package(imgui REQUIRED)
+find_package(implot REQUIRED)
+find_package(Stb REQUIRED)
+find_package(ada CONFIG REQUIRED)
+find_package(JPEG REQUIRED)
+find_package(PNG REQUIRED)
+find_package(TIFF REQUIRED)
+find_package(CURL REQUIRED)
+find_package(httplib CONFIG REQUIRED)
+find_package(OpenSSL REQUIRED)
+
 include_directories(${CMAKE_JS_INC})
 
 file(GLOB YOGA_SRC CONFIGURE_DEPENDS
@@ -52,6 +64,7 @@ add_library(${PROJECT_NAME} SHARED
         ../app/src/widget/collapsing_header.cpp
         ../app/src/widget/combo.cpp
         ../app/src/widget/group.cpp
+        ../app/src/widget/image.cpp
         ../app/src/widget/input_text.cpp
         ../app/src/widget/item_tooltip.cpp
         ../app/src/widget/multi_slider.cpp
@@ -82,7 +95,22 @@ add_link_options(-fno-finite-math-only -O3)
 # /p:FooLibDir=..\lib
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
-target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${CMAKE_CURRENT_SOURCE_DIR}/glfw3dll.lib ${CMAKE_CURRENT_SOURCE_DIR}/opengl32.lib)
+target_link_libraries(${PROJECT_NAME}
+    ${CMAKE_JS_LIB}
+    imgui::imgui
+    implot::implot
+    nlohmann_json::nlohmann_json
+    ada::ada
+    JPEG::JPEG
+    PNG::PNG
+    TIFF::TIFF
+    CURL::libcurl
+    httplib::httplib
+    OpenSSL::SSL
+    OpenSSL::Crypto
+    ${CMAKE_CURRENT_SOURCE_DIR}/glfw3dll.lib
+    ${CMAKE_CURRENT_SOURCE_DIR}/opengl32.lib
+)
 
 # Include Node-API wrappers
 execute_process(COMMAND node -p "require('node-addon-api').include"
@@ -97,19 +125,16 @@ target_include_directories(${PROJECT_NAME} PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/../app/include
         ${CMAKE_CURRENT_SOURCE_DIR}/node_modules/node-addon-api
 
+        ${Stb_INCLUDE_DIR}
+
         ../deps/OpenGL-Registry/api
         ../deps/EGL-Registry/api
-        ../deps/stb
 
         ../deps/node-addon-api
         ../deps/node-api-headers/include
         ../deps/IconFontCppHeaders
         ../deps/ReactivePlusPlus/src/rpp
         ../deps/css-color-parser-cpp
-        ../deps/imgui
-        ../deps/imgui/backends
-        ../deps/implot
-        ../deps/json/include
         ../deps/yoga
         ../deps/glfw/include
 )

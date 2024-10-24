@@ -17,6 +17,8 @@
     "libjpeg-turbo",
     "libpng",
     "tiff",
-    "curl"
+    "curl",
+    "cpp-httplib",
+    "openssl"
   ]
 }

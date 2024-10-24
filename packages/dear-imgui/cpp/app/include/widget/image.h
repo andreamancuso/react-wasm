@@ -10,13 +10,25 @@
 #include <curl/curl.h>
 #endif
 
-using fetchImageCallback = std::function<void(void*, size_t)>;
+#ifndef __EMSCRIPTEN__
+size_t curlCallback(void *data, size_t size, size_t nmemb, void *userp);
+
+struct memory {
+    char *response;
+    size_t size;
+};
+#endif
 
 class Image final : public StyledWidget {
 private:
     std::string m_url;
+    ada::url m_parsedUrl;
     std::optional<ImVec2> m_size;
     Texture m_texture;
+
+#ifndef __EMSCRIPTEN__
+    GLuint m_textureId;
+#endif
 
 public:
     static std::unique_ptr<Image> makeWidget(const json& widgetDef, std::optional<WidgetStyle> maybeStyle, ReactImgui* view) {
@@ -26,11 +38,6 @@ public:
 
         auto id = widgetDef["id"].template get<int>();
         auto url = widgetDef["url"].template get<std::string>();
-        auto parsedUrl = ada::parse<ada::url>(url);
-
-        if (!parsedUrl) {
-            throw std::invalid_argument("Invalid url supplied");
-        }
 
         std::optional<ImVec2> size;
 
@@ -52,6 +59,14 @@ public:
         m_type = "di-image";
         m_url = url;
 
+        auto urlParseResult = ada::parse<ada::url>(url);
+
+        if (!urlParseResult) {
+            throw std::invalid_argument("Invalid url supplied");
+        }
+
+        m_parsedUrl = urlParseResult.value<ada::url>();
+
         m_size = size;
     }
 
@@ -71,7 +86,7 @@ public:
     void HandleFetchImageFailure(emscripten_fetch_t *fetch);
 
 #else
-    void HandleFetchImageSuccess(void *buffer, size_t sz, size_t n);
+    void HandleFetchImageSuccess(void *buffer, size_t realSize);
 
     void HandleFetchImageFailure();
 #endif

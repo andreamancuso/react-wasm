@@ -381,7 +381,7 @@ void patchStyle(const Napi::CallbackInfo& info) {
     }
 
     auto styleDef = info[0].As<Napi::String>().Utf8Value();
-    return pRunner->patchStyle(styleDef);
+    pRunner->patchStyle(styleDef);
 }
 
 void setDebug(const bool debug) {

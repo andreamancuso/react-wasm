@@ -1,8 +1,51 @@
 #include <imgui.h>
 
+#define CPPHTTPLIB_OPENSSL_SUPPORT
+#include "httplib.h"
+
 #include "widget/image.h"
 #include "reactimgui.h"
 #include "imgui_renderer.h"
+
+#ifndef __EMSCRIPTEN__
+size_t curlCallback(void *data, size_t size, size_t nmemb, void *userp) {
+    printf("curlCallback a\n");
+
+    size_t realsize = size * nmemb;
+
+    printf("curlCallback b\n");
+    struct memory *mem = (struct memory *)userp;
+
+    printf("curlCallback c\n");
+
+    char *ptr = (char*)realloc(mem->response, mem->size + realsize + 1);
+
+    printf("curlCallback d\n");
+
+    if(!ptr)
+        return 0;  /* out of memory */
+
+    printf("curlCallback d\n");
+
+    mem->response = ptr;
+
+    printf("curlCallback e\n");
+
+    memcpy(&(mem->response[mem->size]), data, realsize);
+
+    printf("curlCallback f\n");
+
+    mem->size += realsize;
+
+    printf("curlCallback g\n");
+
+    mem->response[mem->size] = 0;
+
+    printf("curlCallback h\n");
+
+    return realsize;
+}
+#endif
 
 bool Image::HasCustomWidth() {
     return false;
@@ -13,27 +56,37 @@ bool Image::HasCustomHeight() {
 }
 
 void Image::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
-    if (m_texture.textureView) {
+    // if (m_texture.textureView) {
         auto imageSize = m_size.has_value() ? m_size.value() : ImVec2(YGNodeLayoutGetWidth(m_layoutNode->m_node), YGNodeLayoutGetHeight(m_layoutNode->m_node));
 
-        if (imageSize.x != 0 && imageSize.y != 0) {
+
+
+        // if (imageSize.x != 0 && imageSize.y != 0) {
             ImGui::PushID(m_id);
             ImGui::BeginGroup();
 
-            ImGui::InvisibleButton("##image", imageSize);
-            ImDrawList* drawList = ImGui::GetWindowDrawList();
+            // ImGui::Text("%x", m_texture.textureView);
 
-            if (!ImGui::IsItemVisible()) {
-                // Skip rendering as ImDrawList elements are not clipped.
-                ImGui::EndGroup();
-                ImGui::PopID();
-                return;
-            }
+            // ImGui::InvisibleButton("##image", imageSize);
+            // ImDrawList* drawList = ImGui::GetWindowDrawList();
+            //
+            // if (!ImGui::IsItemVisible()) {
+            //     // Skip rendering as ImDrawList elements are not clipped.
+            //     ImGui::EndGroup();
+            //     ImGui::PopID();
+            //     return;
+            // }
 
             const ImVec2 p0 = ImGui::GetItemRectMin();
             const ImVec2 p1 = ImGui::GetItemRectMax();
 
+        #ifdef __EMSCRIPTEN__
             drawList->AddImage((void*)m_texture.textureView, p0, p1, ImVec2(0, 0), ImVec2(1, 1));
+        #else
+            // drawList->AddImage((ImTextureID)(intptr_t)view->m_renderer->m_imGuiCtx->IO.Fonts->TexID, p0, p1, ImVec2(0, 0), ImVec2(1, 1));
+
+            ImGui::Image((ImTextureID)(intptr_t)m_textureId, ImVec2(24, 24));
+        #endif
 
             // ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
             // ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
@@ -43,8 +96,8 @@ void Image::Render(ReactImgui* view, const std::optional<ImRect>& viewport) {
 
             ImGui::EndGroup();
             ImGui::PopID();
-        }
-    }
+        // }
+    // }
 };
 
 bool Image::HasInternalOps() {
@@ -75,12 +128,14 @@ void Image::HandleFetchImageFailure(emscripten_fetch_t *fetch) {
     printf("Unable to fetch image using url %s\n", m_url.c_str());
 };
 #else
-void Image::HandleFetchImageSuccess(void *buffer, size_t sz, size_t n) {
-    m_view->m_renderer->LoadTexture(buffer, sz, &m_texture);
+void Image::HandleFetchImageSuccess(void *buffer, size_t realSize) {
+    if (m_view->m_renderer->LoadTexture(buffer, (int)realSize, &m_textureId)) {
+        printf("Fetched image using url %s and loaded as texture\n", m_url.c_str());
 
-    printf("Fetched image using url %s\n", m_url.c_str());
-
-    YGNodeMarkDirty(m_layoutNode->m_node);
+        YGNodeMarkDirty(m_layoutNode->m_node);
+    } else {
+        printf("Fetched image using url %s but unable to load as texture\n", m_url.c_str());
+    }
 };
 
 void Image::HandleFetchImageFailure() {
@@ -123,19 +178,13 @@ void Image::FetchImage() {
 };
 #else
 void Image::FetchImage() {
-    CURL *curl = curl_easy_init();
+    httplib::Client cli(m_parsedUrl.get_host());
 
-    if (curl) {
-        CURLcode res;
-        curl_easy_setopt(curl, CURLOPT_URL, m_url.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, [](void *buffer, size_t sz, size_t n, void *pThis) {
-            auto widget = static_cast<Image*>(pThis);
-            widget->HandleFetchImageSuccess(buffer, sz, n);
-        });
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
-        res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
-    }
+    auto res = cli.Get(std::string(m_parsedUrl.get_pathname()));
+
+    printf("%d\n", res->status);
+
+    HandleFetchImageSuccess((void*)res->body.c_str(), res->body.size());
 }
 #endif
 

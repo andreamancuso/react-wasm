@@ -5,7 +5,7 @@
 
 #include "IconsFontAwesome6.h"
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
+
 
 #ifdef __EMSCRIPTEN__
 #include "imgui_impl_wgpu.h"
@@ -16,7 +16,6 @@
 #include <texture_helpers.h>
 #include <GLFW/glfw3.h>
 #include <nlohmann/json.hpp>
-
 
 #include "./shared.h"
 
@@ -79,7 +78,7 @@ class ImGuiRenderer {
 
         const char* m_windowId;
 
-        bool LoadTexture(const void* data, int numBytes, Texture* texture);
+        bool LoadTexture(const void* data, int numBytes, GLuint* texture);
 
         // virtual void PrepareForRender() = 0;
         // virtual void Render(int window_width, int window_height) = 0;

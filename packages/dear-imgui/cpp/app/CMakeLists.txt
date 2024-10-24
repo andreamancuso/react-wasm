@@ -19,6 +19,9 @@ find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 find_package(TIFF REQUIRED)
 find_package(CURL REQUIRED)
+find_package(httplib CONFIG REQUIRED)
+find_package(OpenSSL REQUIRED)
+
 # find_package(RPP REQUIRED)
 
 set(DEPS ${CMAKE_CURRENT_SOURCE_DIR}/../deps)
@@ -107,6 +110,9 @@ target_link_libraries(reactDearImgui PRIVATE
         PNG::PNG
         TIFF::TIFF
         CURL::libcurl
+        httplib::httplib
+        OpenSSL::SSL
+        OpenSSL::Crypto
         ${CMAKE_CURRENT_SOURCE_DIR}/../glfw3dll.lib
         ${CMAKE_CURRENT_SOURCE_DIR}/../opengl32.lib
 )
