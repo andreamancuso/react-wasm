@@ -1,5 +1,4 @@
 import { useMemo, useRef } from "react";
-import { ReactImgui } from "./lib/components/ReactImgui/components";
 // @ts-ignore
 import getWasmModule from "./lib/wasm/reactDearImgui.mjs";
 // @ts-ignore
@@ -7,10 +6,11 @@ import wasmDataPackage from "./lib/wasm/reactDearImgui.data";
 // import { ImGuiDemo } from "./lib";
 import { GetWasmModule, ImGuiCol } from "./lib/wasm/wasm-app-types";
 import { ImGuiStyleForPatching } from "./lib/stylesheet/imgui-style";
-
-import "./App.css";
 import { TradingGuiDemo } from "./lib/components/TradingGuiDemo/TradingGuiDemo";
 import { theme1, theme2 } from "./lib/stylesheet/themes";
+import { ReactImgui } from "./lib/components/ReactImgui";
+
+import "./App.css";
 
 function App() {
     const containerRef = useRef<HTMLDivElement>(null);

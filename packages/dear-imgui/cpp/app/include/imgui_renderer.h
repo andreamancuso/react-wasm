@@ -39,7 +39,7 @@ class ImGuiRenderer {
         int m_window_width = m_initial_window_width;
         int m_window_height = m_initial_window_height;
 
-
+        std::string m_assetsBasePath;
 
         std::unordered_map<std::string, std::unordered_map<int, int>, StringHash, std::equal_to<>> m_fontDefMap;
 
@@ -63,7 +63,13 @@ class ImGuiRenderer {
     #endif
 
     public:
-        ImGuiRenderer(ReactImgui* reactImgui, const char* newWindowId, const char* newGlWindowTitle, std::string rawFontDefs);
+        ImGuiRenderer(
+            ReactImgui* reactImgui,
+            const char* newWindowId,
+            const char* newGlWindowTitle,
+            std::string rawFontDefs,
+            const std::optional<std::string>& basePath
+        );
 
         ImGuiContext* m_imGuiCtx;
 

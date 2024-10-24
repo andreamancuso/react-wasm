@@ -493,6 +493,9 @@ void ReactImgui::ExtractImVec2FromStyleDef(const json& styleDef, const std::stri
 
 void ReactImgui::PatchStyle(const json& styleDef) {
     if (styleDef.is_object()) {
+        const std::lock_guard<std::mutex> elementsLock(m_hierarchy_mutex);
+        const std::lock_guard<std::mutex> hierarchyLock(m_elements_mutex);
+
         ImGuiStyle* style = &ImGui::GetStyle();
 
         ExtractNumberFromStyleDef<float>(styleDef, "alpha", style->Alpha);
@@ -879,16 +882,12 @@ float ReactImgui::GetFrameHeightWithSpacing(const StyledWidget* widget) {
 
 ImVec2 ReactImgui::CalcTextSize(const StyledWidget* widget, const char* text, const char* text_end, bool hide_text_after_double_hash, float wrap_width)
 {
-    printf("CalcTextSize a\n");
     auto font = GetWidgetFont(widget);
-    printf("CalcTextSize b\n");
     const char* text_display_end;
 
     if (hide_text_after_double_hash) {
-        printf("CalcTextSize c\n");
         text_display_end = ImGui::FindRenderedTextEnd(text, text_end);      // Hide anything after a '##' string
     } else {
-        printf("CalcTextSize d\n");
         text_display_end = text_end;
     }
 

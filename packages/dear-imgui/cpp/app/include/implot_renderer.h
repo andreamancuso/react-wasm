@@ -12,7 +12,13 @@ class ImPlotRenderer : public ImGuiRenderer {
         ImPlotContext* m_imPlotCtx;
 
     public:
-        ImPlotRenderer(ReactImgui* reactImgui, const char* newWindowId, const char* newGlWindowTitle, std::string& rawFontDefs);
+        ImPlotRenderer(
+            ReactImgui* reactImgui,
+            const char* newWindowId,
+            const char* newGlWindowTitle,
+            std::string& rawFontDefs,
+            std::optional<std::string> basePath
+        );
 
         void SetCurrentContext();
 

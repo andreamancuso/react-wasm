@@ -99,6 +99,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
         ../deps/EGL-Registry/api
         ../deps/stb
 
+        ../deps/node-addon-api
+        ../deps/node-api-headers/include
         ../deps/IconFontCppHeaders
         ../deps/ReactivePlusPlus/src/rpp
         ../deps/css-color-parser-cpp

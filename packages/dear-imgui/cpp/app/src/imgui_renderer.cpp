@@ -23,6 +23,8 @@ static void MainLoopForEmscripten()     { MainLoopForEmscriptenP(); }
 #include "./reactimgui.h"
 #include "imgui_renderer.h"
 
+#include <utility>
+
 void glfw_error_callback(int error, const char* description)
 {
     printf("GLFW Error %d: %s\n", error, description);
@@ -48,7 +50,8 @@ ImGuiRenderer::ImGuiRenderer(
     ReactImgui* reactImgui,
     const char* windowId,
     const char* glWindowTitle,
-    std::string rawFontDefs) {
+    std::string rawFontDefs,
+    const std::optional<std::string>& basePath) {
 
     m_reactImgui = reactImgui;
 
@@ -63,13 +66,11 @@ ImGuiRenderer::ImGuiRenderer(
 
     m_imGuiCtx = ImGui::CreateContext();
 
-    if (m_imGuiCtx) {
-        printf("imgui context created\n");
-    }
-
-    m_rawFontDefs = rawFontDefs;
+    m_rawFontDefs = std::move(rawFontDefs);
 
     m_clearColor = { 0.45f, 0.55f, 0.60f, 1.00f };
+
+    m_assetsBasePath = basePath.value_or("assets");
 }
 
 void ImGuiRenderer::LoadFontsFromDefs() {
@@ -83,9 +84,9 @@ void ImGuiRenderer::LoadFontsFromDefs() {
     if (fontDefs.is_object() && fontDefs.contains("defs") && fontDefs["defs"].is_array()) {
         for (auto& [key, item] : fontDefs["defs"].items()) {
             if (item.is_object()) {
-                if (item.contains("name") && item.contains("size") && item["name"].is_string() && item["size"].is_number_unsigned()) {
+                if (item.contains("name") && item.contains("size") && item["name"].is_string() && item["size"].is_number()) {
                     auto fontName = item["name"].template get<std::string>();
-                    auto pathToFont = std::format("assets/fonts/{}.ttf", fontName.c_str());
+                    auto pathToFont = std::format("{}/fonts/{}.ttf", m_assetsBasePath, fontName);
                     auto fontSize = item["size"].template get<int>();
 
                     if (!m_fontDefMap.contains(fontName)) {
@@ -108,7 +109,7 @@ void ImGuiRenderer::LoadFontsFromDefs() {
                     icons_config.MergeMode = true;
                     icons_config.PixelSnapH = true;
                     icons_config.GlyphMinAdvanceX = iconFontSize;
-                    auto pathToFaFontFile = std::format("assets/fonts/{}", FONT_ICON_FILE_NAME_FAS);
+                    auto pathToFaFontFile = std::format("{}/fonts/{}", m_assetsBasePath, FONT_ICON_FILE_NAME_FAS);
                     // auto pathToMdiFontFile = std::format("assets/fonts/{}", FONT_ICON_FILE_NAME_MDI);
 
                     io.Fonts->AddFontFromFileTTF(pathToFaFontFile.c_str(), iconFontSize, &icons_config, icons_ranges);
@@ -132,6 +133,8 @@ void ImGuiRenderer::LoadFontsFromDefs() {
 
                 SetFontDefault(fontIndex);
             }
+        } else {
+            SetFontDefault(0);
         }
     }
 
@@ -385,13 +388,13 @@ void ImGuiRenderer::BeginRenderLoop() {
 #ifdef __EMSCRIPTEN__
     LoadFontsFromDefs();
 #else
-    // LoadFontsFromDefs();
-    printf("Adding default font\n");
-    m_imGuiCtx->IO.Fonts->AddFontDefault();
+    LoadFontsFromDefs();
+    // printf("Adding default font\n");
+    // m_imGuiCtx->IO.Fonts->AddFontDefault();
 
-    m_imGuiCtx->IO.FontDefault = m_imGuiCtx->IO.Fonts->Fonts[0];
+    // m_imGuiCtx->IO.FontDefault = m_imGuiCtx->IO.Fonts->Fonts[0];
 
-    printf("Default font added\n");
+    // printf("Default font added\n");
 #endif
 
     m_reactImgui->Init(this);
